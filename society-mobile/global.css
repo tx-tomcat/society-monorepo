@@ -1,0 +1,47 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Set Urbanist as default font for the entire app */
+@layer base {
+  * {
+    font-family: 'Urbanist_400Regular', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  }
+
+  /* Font weight classes */
+  .font-thin {
+    font-family: 'Urbanist_100Thin', sans-serif;
+  }
+
+  .font-extralight {
+    font-family: 'Urbanist_200ExtraLight', sans-serif;
+  }
+
+  .font-light {
+    font-family: 'Urbanist_300Light', sans-serif;
+  }
+
+  .font-normal {
+    font-family: 'Urbanist_400Regular', sans-serif;
+  }
+
+  .font-medium {
+    font-family: 'Urbanist_500Medium', sans-serif;
+  }
+
+  .font-semibold {
+    font-family: 'Urbanist_600SemiBold', sans-serif;
+  }
+
+  .font-bold {
+    font-family: 'Urbanist_700Bold', sans-serif;
+  }
+
+  .font-extrabold {
+    font-family: 'Urbanist_800ExtraBold', sans-serif;
+  }
+
+  .font-black {
+    font-family: 'Urbanist_900Black', sans-serif;
+  }
+}

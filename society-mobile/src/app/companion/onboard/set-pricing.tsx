@@ -1,0 +1,246 @@
+/* eslint-disable max-lines-per-function */
+import type { Href } from 'expo-router';
+import { useRouter } from 'expo-router';
+import { MotiView } from 'moti';
+import React from 'react';
+import { Pressable, ScrollView, StyleSheet, TextInput } from 'react-native';
+import { useTranslation } from 'react-i18next';
+
+import {
+  Button,
+  colors,
+  FocusAwareStatusBar,
+  SafeAreaView,
+  Text,
+  View,
+} from '@/components/ui';
+import {
+  ArrowLeft,
+  Info,
+  PriceTag,
+} from '@/components/ui/icons';
+import { formatVND } from '@/lib/utils';
+
+const SUGGESTED_RATES = [300000, 400000, 500000, 600000, 800000];
+
+export default function SetPricing() {
+  const router = useRouter();
+  const { t } = useTranslation();
+  const [hourlyRate, setHourlyRate] = React.useState('500000');
+  const [minimumHours, setMinimumHours] = React.useState('2');
+
+  const handleBack = React.useCallback(() => {
+    router.back();
+  }, [router]);
+
+  const handleSelectRate = React.useCallback((rate: number) => {
+    setHourlyRate(rate.toString());
+  }, []);
+
+  const handleContinue = React.useCallback(() => {
+    router.push('/companion/onboard/set-availability' as Href);
+  }, [router]);
+
+  const hourlyRateNum = parseInt(hourlyRate, 10) || 0;
+  const minHoursNum = parseInt(minimumHours, 10) || 2;
+  const platformFee = hourlyRateNum * 0.18;
+  const yourEarnings = hourlyRateNum - platformFee;
+
+  const estimatedMonthly = yourEarnings * minHoursNum * 20; // 20 bookings per month estimate
+
+  const isValid = hourlyRateNum >= 200000 && minHoursNum >= 1;
+
+  return (
+    <View className="flex-1 bg-warmwhite">
+      <FocusAwareStatusBar />
+
+      <SafeAreaView edges={['top']}>
+        <View className="flex-row items-center gap-4 border-b border-border-light px-4 py-3">
+          <Pressable onPress={handleBack}>
+            <ArrowLeft color={colors.midnight.DEFAULT} width={24} height={24} />
+          </Pressable>
+          <Text style={styles.headerTitle} className="flex-1 text-xl text-midnight">
+            {t('companion.onboard.set_pricing.header')}
+          </Text>
+          <Text className="text-sm text-text-tertiary">{t('companion.onboard.step', { current: 3, total: 4 })}</Text>
+        </View>
+      </SafeAreaView>
+
+      <ScrollView
+        className="flex-1"
+        contentContainerStyle={{ paddingHorizontal: 24, paddingVertical: 24 }}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
+        {/* Hourly Rate */}
+        <MotiView
+          from={{ opacity: 0, translateY: 20 }}
+          animate={{ opacity: 1, translateY: 0 }}
+          transition={{ type: 'timing', duration: 500 }}
+          className="mb-6"
+        >
+          <Text className="mb-2 text-lg font-semibold text-midnight">
+            {t('companion.onboard.set_pricing.hourly_rate')}
+          </Text>
+          <View className="flex-row items-center gap-2 rounded-xl border border-border-light bg-white px-4">
+            <PriceTag color={colors.lavender[400]} width={24} height={24} />
+            <TextInput
+              value={formatVND(parseInt(hourlyRate, 10) || 0, { showSymbol: false })}
+              onChangeText={(text) => setHourlyRate(text.replace(/\D/g, ''))}
+              keyboardType="number-pad"
+              className="flex-1 py-4 text-2xl font-bold text-midnight"
+              style={{ fontFamily: 'Urbanist_700Bold' }}
+            />
+            <Text className="text-lg text-text-secondary">{t('companion.onboard.set_pricing.per_hour')}</Text>
+          </View>
+
+          {/* Suggested Rates */}
+          <View className="mt-3 flex-row flex-wrap gap-2">
+            {SUGGESTED_RATES.map((rate) => (
+              <Pressable
+                key={rate}
+                onPress={() => handleSelectRate(rate)}
+                className={`rounded-full px-4 py-2 ${
+                  hourlyRateNum === rate
+                    ? 'bg-lavender-400'
+                    : 'border border-border-light bg-white'
+                }`}
+              >
+                <Text
+                  className={`text-sm font-medium ${
+                    hourlyRateNum === rate ? 'text-white' : 'text-midnight'
+                  }`}
+                >
+                  {formatVND(rate)}
+                </Text>
+              </Pressable>
+            ))}
+          </View>
+        </MotiView>
+
+        {/* Minimum Hours */}
+        <MotiView
+          from={{ opacity: 0, translateY: 20 }}
+          animate={{ opacity: 1, translateY: 0 }}
+          transition={{ type: 'timing', duration: 500, delay: 100 }}
+          className="mb-6"
+        >
+          <Text className="mb-2 text-lg font-semibold text-midnight">
+            {t('companion.onboard.set_pricing.minimum_hours')}
+          </Text>
+          <View className="flex-row items-center gap-3">
+            {[2, 3, 4, 5, 6].map((hours) => (
+              <Pressable
+                key={hours}
+                onPress={() => setMinimumHours(hours.toString())}
+                className={`flex-1 items-center rounded-xl border py-3 ${
+                  minHoursNum === hours
+                    ? 'border-lavender-400 bg-lavender-400/10'
+                    : 'border-border-light bg-white'
+                }`}
+              >
+                <Text
+                  className={`text-lg font-semibold ${
+                    minHoursNum === hours ? 'text-lavender-400' : 'text-midnight'
+                  }`}
+                >
+                  {hours}h
+                </Text>
+              </Pressable>
+            ))}
+          </View>
+        </MotiView>
+
+        {/* Earnings Breakdown */}
+        <MotiView
+          from={{ opacity: 0, translateY: 20 }}
+          animate={{ opacity: 1, translateY: 0 }}
+          transition={{ type: 'timing', duration: 500, delay: 200 }}
+          className="mb-6 rounded-2xl bg-white p-4"
+        >
+          <Text className="mb-4 text-lg font-semibold text-midnight">
+            {t('companion.onboard.set_pricing.earnings_breakdown')}
+          </Text>
+          <View className="gap-3">
+            <View className="flex-row justify-between">
+              <Text className="text-text-secondary">{t('companion.onboard.set_pricing.your_hourly_rate')}</Text>
+              <Text className="font-medium text-midnight">
+                {formatVND(parseInt(hourlyRate, 10) || 0)}
+              </Text>
+            </View>
+            <View className="flex-row justify-between">
+              <Text className="text-text-secondary">{t('companion.onboard.set_pricing.platform_fee')}</Text>
+              <Text className="font-medium text-rose-400">
+                -{formatVND(platformFee)}
+              </Text>
+            </View>
+            <View className="h-px bg-border-light" />
+            <View className="flex-row justify-between">
+              <Text className="font-semibold text-midnight">{t('companion.onboard.set_pricing.you_earn')}</Text>
+              <Text className="text-xl font-bold text-teal-400">
+                {formatVND(yourEarnings)}
+              </Text>
+            </View>
+          </View>
+        </MotiView>
+
+        {/* Monthly Estimate */}
+        <MotiView
+          from={{ opacity: 0, translateY: 20 }}
+          animate={{ opacity: 1, translateY: 0 }}
+          transition={{ type: 'timing', duration: 500, delay: 300 }}
+          className="mb-6 rounded-2xl bg-lavender-400/10 p-4"
+        >
+          <View className="flex-row items-center gap-2">
+            <Info color={colors.lavender[400]} width={20} height={20} />
+            <Text className="text-sm font-semibold text-lavender-400">
+              {t('companion.onboard.set_pricing.estimated_monthly')}
+            </Text>
+          </View>
+          <Text style={styles.estimate} className="mt-2 text-3xl text-midnight">
+            {formatVND(estimatedMonthly)}
+          </Text>
+          <Text className="mt-1 text-xs text-text-secondary">
+            {t('companion.onboard.set_pricing.estimate_basis', { bookings: 20, hours: minHoursNum })}
+          </Text>
+        </MotiView>
+
+        {/* Tip */}
+        <MotiView
+          from={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ type: 'timing', duration: 500, delay: 400 }}
+          className="rounded-xl bg-teal-400/10 p-4"
+        >
+          <Text className="text-sm text-text-secondary">
+            <Text className="font-semibold text-teal-700">{t('companion.onboard.set_pricing.pro_tip_label')}</Text>
+            {t('companion.onboard.set_pricing.pro_tip_text')}
+          </Text>
+        </MotiView>
+      </ScrollView>
+
+      {/* Bottom CTA */}
+      <SafeAreaView edges={['bottom']} className="border-t border-border-light bg-white">
+        <View className="px-6 py-4">
+          <Button
+            label={t('common.continue')}
+            onPress={handleContinue}
+            disabled={!isValid}
+            variant="default"
+            size="lg"
+            className="w-full bg-lavender-400"
+          />
+        </View>
+      </SafeAreaView>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  headerTitle: {
+    fontFamily: 'Urbanist_700Bold',
+  },
+  estimate: {
+    fontFamily: 'Urbanist_700Bold',
+  },
+});

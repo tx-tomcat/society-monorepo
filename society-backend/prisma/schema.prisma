@@ -1,0 +1,1109 @@
+// Prisma Schema for Society - Companion Booking Platform
+// Based on Technical Documentation v2.0 - January 2026
+// https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ============================================
+// ENUMS
+// ============================================
+
+enum UserRole {
+  HIRER
+  COMPANION
+  ADMIN
+}
+
+enum UserStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+  DELETED
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum VerificationStatus {
+  PENDING
+  UNDER_REVIEW
+  VERIFIED
+  FAILED
+  EXPIRED
+}
+
+enum ServiceType {
+  FAMILY_INTRODUCTION
+  WEDDING_ATTENDANCE
+  TET_COMPANIONSHIP
+  BUSINESS_EVENT
+  CASUAL_OUTING
+  CLASS_REUNION
+  OTHER
+}
+
+enum BookingStatus {
+  PENDING      // Request submitted by hirer
+  CONFIRMED    // Companion accepted
+  ACTIVE       // Booking in progress
+  COMPLETED    // Successfully completed
+  CANCELLED    // Either party cancelled
+  DISPUTED     // Under dispute resolution
+  EXPIRED      // Request timed out (24h no response)
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  HELD         // In escrow
+  RELEASED     // Released to companion
+  REFUNDED
+  PARTIAL_REFUND
+  FAILED
+}
+
+enum PaymentProvider {
+  VNPAY
+  MOMO
+  STRIPE
+  BANK_TRANSFER
+}
+
+enum EarningsStatus {
+  PENDING
+  AVAILABLE
+  WITHDRAWN
+  CANCELLED
+}
+
+enum WithdrawalStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum NotificationType {
+  BOOKING_REQUEST
+  BOOKING_CONFIRMED
+  BOOKING_DECLINED
+  BOOKING_CANCELLED
+  BOOKING_REMINDER
+  BOOKING_COMPLETED
+  NEW_MESSAGE
+  NEW_REVIEW
+  PAYMENT_RECEIVED
+  WITHDRAWAL_COMPLETED
+  ACCOUNT_VERIFIED
+  SYSTEM
+}
+
+enum ReportType {
+  HARASSMENT
+  INAPPROPRIATE_BEHAVIOR
+  NO_SHOW
+  FRAUD
+  FAKE_PROFILE
+  SPAM
+  SAFETY_CONCERN
+  PAYMENT_ISSUE
+  OTHER
+}
+
+enum ReportStatus {
+  PENDING
+  UNDER_REVIEW
+  RESOLVED
+  DISMISSED
+}
+
+enum StrikeType {
+  LATE_CANCELLATION
+  NO_SHOW
+  POLICY_VIOLATION
+  INAPPROPRIATE_BEHAVIOR
+  FRAUD_ATTEMPT
+  FAKE_REVIEW
+  SPAM
+}
+
+enum MessageType {
+  TEXT
+  IMAGE
+  LOCATION
+  SYSTEM
+}
+
+enum ModerationStatus {
+  PENDING
+  IN_REVIEW
+  APPROVED
+  REJECTED
+}
+
+enum ModerationContentType {
+  PROFILE
+  PHOTO
+  MESSAGE
+  REPORT
+}
+
+enum ModerationActionType {
+  APPROVE
+  REJECT
+  WARN
+  SUSPEND
+  BAN
+}
+
+enum AppealStatus {
+  PENDING
+  REVIEWING
+  APPROVED
+  REJECTED
+}
+
+// ============================================
+// USER & AUTHENTICATION
+// ============================================
+
+model User {
+  id            String     @id @default(uuid()) @db.Uuid
+  clerkId       String?    @unique @map("clerk_id")
+  phone         String?    @unique
+  email         String?    @unique
+  fullName      String     @map("full_name")
+  avatarUrl     String?    @map("avatar_url")
+  gender        Gender?
+  dateOfBirth   DateTime?  @map("date_of_birth") @db.Date
+  role          UserRole   @default(HIRER)
+  status        UserStatus @default(PENDING)
+  isVerified    Boolean    @default(false) @map("is_verified")
+  trustScore    Int        @default(100) @map("trust_score")
+  createdAt     DateTime   @default(now()) @map("created_at")
+  updatedAt     DateTime   @updatedAt @map("updated_at")
+
+  // Relations
+  settings              UserSettings?
+  devices               UserDevice[]
+  sessions              UserSession[]
+
+  // Role-specific profiles
+  companionProfile      CompanionProfile?
+  hirerProfile          HirerProfile?
+
+  // Bookings
+  hirerBookings         Booking[]          @relation("HirerBookings")
+  companionBookings     Booking[]          @relation("CompanionBookings")
+
+  // Messaging (stored in Supabase for realtime)
+  conversationsAsHirer     Conversation[] @relation("HirerConversations")
+  conversationsAsCompanion Conversation[] @relation("CompanionConversations")
+  messagesSent             Message[]
+
+  // Reviews
+  reviewsGiven          Review[]           @relation("ReviewsGiven")
+  reviewsReceived       Review[]           @relation("ReviewsReceived")
+
+  // Trust & Safety
+  blockedUsers          UserBlock[]        @relation("Blocker")
+  blockedByUsers        UserBlock[]        @relation("Blocked")
+  reportsMade           Report[]           @relation("Reporter")
+  reportsReceived       Report[]           @relation("Reported")
+  strikes               UserStrike[]
+
+  // Verifications
+  verifications         Verification[]
+  photoVerifications    PhotoVerification[]
+
+  // Notifications
+  notifications         Notification[]
+  pushTokens            PushToken[]
+
+  // Earnings & Payments
+  payments              Payment[]
+
+  // Moderation
+  moderationQueue       ModerationQueue[]
+  moderationActions     ModerationAction[] @relation("Moderator")
+  suspensions           UserSuspension[]   @relation("SuspendedUser")
+  suspendedBy           UserSuspension[]   @relation("SuspendedBy")
+  liftedSuspensions     UserSuspension[]   @relation("LiftedBy")
+  appeals               Appeal[]
+  appealReviews         Appeal[]           @relation("AppealReviewer")
+
+  // Files
+  files                 File[]
+
+  // Security
+  securityEvents        SecurityEvent[]
+
+  // Admin
+  adminAuditLogs        AdminAuditLog[]
+  supportTickets        SupportTicket[]    @relation("TicketUser")
+  assignedTickets       SupportTicket[]    @relation("TicketAssignee")
+  ticketMessages        SupportTicketMessage[]
+
+  // Referrals
+  referral              Referral?
+  referredBy            Referral?          @relation("ReferredUsers", fields: [referredById], references: [id])
+  referredById          String?            @map("referred_by_id") @db.Uuid
+
+  // Favorites
+  favoriteCompanions    FavoriteCompanion[] @relation("HirerFavorites")
+  favoritedBy           FavoriteCompanion[] @relation("FavoritedBy")
+
+  // Emergency & Safety
+  emergencyContacts     EmergencyContact[]
+  emergencyEvents       EmergencyEvent[]    @relation("UserEmergencies")
+  resolvedEmergencies   EmergencyEvent[]    @relation("ResolvedEmergencies")
+
+  @@index([phone])
+  @@index([email])
+  @@index([role])
+  @@index([status])
+  @@map("users")
+}
+
+model UserSettings {
+  id                 String   @id @default(uuid()) @db.Uuid
+  userId             String   @unique @map("user_id") @db.Uuid
+  language           String   @default("vi")
+  timezone           String   @default("Asia/Ho_Chi_Minh")
+  pushNotifications  Boolean  @default(true) @map("push_notifications")
+  emailNotifications Boolean  @default(true) @map("email_notifications")
+  smsNotifications   Boolean  @default(false) @map("sms_notifications")
+  showOnlineStatus   Boolean  @default(true) @map("show_online_status")
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_settings")
+}
+
+model UserDevice {
+  id           String    @id @default(uuid()) @db.Uuid
+  userId       String    @map("user_id") @db.Uuid
+  deviceId     String    @map("device_id")
+  deviceName   String?   @map("device_name")
+  deviceType   String?   @map("device_type")
+  isTrusted    Boolean   @default(false) @map("is_trusted")
+  lastActiveAt DateTime? @map("last_active_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+
+  user       User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sessions   UserSession[]
+  pushTokens PushToken[]
+
+  @@map("user_devices")
+}
+
+model UserSession {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  deviceId  String?   @map("device_id") @db.Uuid
+  ipAddress String?   @map("ip_address")
+  userAgent String?   @map("user_agent")
+  expiresAt DateTime? @map("expires_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  user   User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  device UserDevice? @relation(fields: [deviceId], references: [id])
+
+  @@map("user_sessions")
+}
+
+// ============================================
+// COMPANION PROFILE
+// ============================================
+
+model CompanionProfile {
+  id                  String   @id @default(uuid()) @db.Uuid
+  userId              String   @unique @map("user_id") @db.Uuid
+  bio                 String?
+  heightCm            Int?     @map("height_cm")
+  languages           String[] @default(["vi"])
+  hourlyRate          Int      @map("hourly_rate")        // in VND
+  halfDayRate         Int?     @map("half_day_rate")
+  fullDayRate         Int?     @map("full_day_rate")
+  ratingAvg           Decimal  @default(0.0) @map("rating_avg") @db.Decimal(2, 1)
+  ratingCount         Int      @default(0) @map("rating_count")
+  totalBookings       Int      @default(0) @map("total_bookings")
+  completedBookings   Int      @default(0) @map("completed_bookings")
+  verificationStatus  VerificationStatus @default(PENDING) @map("verification_status")
+  isFeatured          Boolean  @default(false) @map("is_featured")
+  isActive            Boolean  @default(true) @map("is_active")
+  isHidden            Boolean  @default(false) @map("is_hidden")
+  responseRate        Int      @default(100) @map("response_rate")
+  acceptanceRate      Int      @default(100) @map("acceptance_rate")
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+
+  user          User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  photos        CompanionPhoto[]
+  services      CompanionService[]
+  availability  CompanionAvailability[]
+  bankAccounts  BankAccount[]
+  earnings      Earning[]
+  boosts        ProfileBoost[]
+
+  @@index([ratingAvg(sort: Desc)])
+  @@index([hourlyRate])
+  @@index([isActive, isHidden, verificationStatus])
+  @@map("companions")
+}
+
+model CompanionPhoto {
+  id          String   @id @default(uuid()) @db.Uuid
+  companionId String   @map("companion_id") @db.Uuid
+  url         String
+  position    Int      @default(0)
+  isVerified  Boolean  @default(false) @map("is_verified")
+  isPrimary   Boolean  @default(false) @map("is_primary")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  companion CompanionProfile @relation(fields: [companionId], references: [id], onDelete: Cascade)
+
+  @@map("companion_photos")
+}
+
+model CompanionService {
+  id          String      @id @default(uuid()) @db.Uuid
+  companionId String      @map("companion_id") @db.Uuid
+  serviceType ServiceType @map("service_type")
+  description String?
+  priceAdjustment Int     @default(0) @map("price_adjustment") // +/- from base rate
+  isEnabled   Boolean     @default(true) @map("is_enabled")
+  createdAt   DateTime    @default(now()) @map("created_at")
+
+  companion CompanionProfile @relation(fields: [companionId], references: [id], onDelete: Cascade)
+
+  @@unique([companionId, serviceType])
+  @@map("companion_services")
+}
+
+model CompanionAvailability {
+  id           String    @id @default(uuid()) @db.Uuid
+  companionId  String    @map("companion_id") @db.Uuid
+  dayOfWeek    Int?      @map("day_of_week")    // 0-6 (Sunday-Saturday) for recurring
+  startTime    String    @map("start_time")     // "09:00"
+  endTime      String    @map("end_time")       // "18:00"
+  isRecurring  Boolean   @default(true) @map("is_recurring")
+  specificDate DateTime? @map("specific_date") @db.Date
+  isAvailable  Boolean   @default(true) @map("is_available")
+  createdAt    DateTime  @default(now()) @map("created_at")
+
+  companion CompanionProfile @relation(fields: [companionId], references: [id], onDelete: Cascade)
+
+  @@index([companionId, dayOfWeek])
+  @@map("companion_availability")
+}
+
+// ============================================
+// HIRER PROFILE
+// ============================================
+
+model HirerProfile {
+  id             String   @id @default(uuid()) @db.Uuid
+  userId         String   @unique @map("user_id") @db.Uuid
+  totalBookings  Int      @default(0) @map("total_bookings")
+  totalSpent     Int      @default(0) @map("total_spent")       // in VND
+  ratingAvg      Decimal  @default(5.0) @map("rating_avg") @db.Decimal(2, 1)
+  ratingCount    Int      @default(0) @map("rating_count")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("hirer_profiles")
+}
+
+// ============================================
+// VERIFICATION
+// ============================================
+
+model Verification {
+  id            String             @id @default(uuid()) @db.Uuid
+  userId        String             @map("user_id") @db.Uuid
+  type          String                                         // 'identity', 'phone', 'email'
+  status        VerificationStatus @default(PENDING)
+  provider      String?                                        // 'vneid', 'twilio', etc.
+  verifiedAt    DateTime?          @map("verified_at")
+  expiresAt     DateTime?          @map("expires_at")
+  metadata      Json               @default("{}")
+  createdAt     DateTime           @default(now()) @map("created_at")
+  updatedAt     DateTime           @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("verifications")
+}
+
+model PhotoVerification {
+  id             String   @id @default(uuid()) @db.Uuid
+  userId         String   @map("user_id") @db.Uuid
+  photoUrl       String   @map("photo_url")
+  selfieUrl      String   @map("selfie_url")
+  livenessScore  Decimal? @map("liveness_score") @db.Decimal(5, 2)
+  faceMatchScore Decimal? @map("face_match_score") @db.Decimal(5, 2)
+  status         String   @default("pending")
+  failureReason  String?  @map("failure_reason")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("photo_verifications")
+}
+
+// ============================================
+// BOOKINGS
+// ============================================
+
+model Booking {
+  id               String        @id @default(uuid()) @db.Uuid
+  bookingNumber    String        @unique @map("booking_number")  // SOC-2025-XXXX
+  hirerId          String        @map("hirer_id") @db.Uuid
+  companionId      String        @map("companion_id") @db.Uuid
+  status           BookingStatus @default(PENDING)
+
+  // Booking Details
+  occasionType     ServiceType   @map("occasion_type")
+  startDatetime    DateTime      @map("start_datetime")
+  endDatetime      DateTime      @map("end_datetime")
+  durationHours    Decimal       @map("duration_hours") @db.Decimal(4, 2)
+  locationAddress  String        @map("location_address")
+  locationLat      Decimal?      @map("location_lat") @db.Decimal(10, 8)
+  locationLng      Decimal?      @map("location_lng") @db.Decimal(11, 8)
+  specialRequests  String?       @map("special_requests")
+
+  // Pricing
+  basePrice        Int           @map("base_price")              // in VND
+  platformFee      Int           @map("platform_fee")            // 18%
+  surgeFee         Int           @default(0) @map("surge_fee")
+  totalPrice       Int           @map("total_price")
+
+  // Payment
+  paymentStatus    PaymentStatus @default(PENDING) @map("payment_status")
+
+  // Cancellation
+  cancelledBy      String?       @map("cancelled_by") @db.Uuid
+  cancelReason     String?       @map("cancel_reason")
+  cancelledAt      DateTime?     @map("cancelled_at")
+
+  // Timeline
+  requestExpiresAt DateTime?     @map("request_expires_at")      // 24h from creation
+  confirmedAt      DateTime?     @map("confirmed_at")
+  startedAt        DateTime?     @map("started_at")
+  completedAt      DateTime?     @map("completed_at")
+
+  createdAt        DateTime      @default(now()) @map("created_at")
+  updatedAt        DateTime      @updatedAt @map("updated_at")
+
+  hirer        User          @relation("HirerBookings", fields: [hirerId], references: [id])
+  companion    User          @relation("CompanionBookings", fields: [companionId], references: [id])
+  payment      Payment?
+  reviews      Review[]
+  conversation Conversation?
+  earning      Earning?
+
+  @@index([hirerId])
+  @@index([companionId])
+  @@index([status])
+  @@index([startDatetime])
+  @@index([bookingNumber])
+  @@map("bookings")
+}
+
+// ============================================
+// PAYMENTS & EARNINGS
+// ============================================
+
+model Payment {
+  id                String          @id @default(uuid()) @db.Uuid
+  bookingId         String          @unique @map("booking_id") @db.Uuid
+  userId            String          @map("user_id") @db.Uuid
+  amount            Int                                             // in VND
+  currency          String          @default("VND")
+  provider          PaymentProvider
+  providerTxnId     String?         @map("provider_txn_id")
+  status            PaymentStatus   @default(PENDING)
+  providerResponse  Json?           @map("provider_response")
+  paidAt            DateTime?       @map("paid_at")
+  releasedAt        DateTime?       @map("released_at")
+  refundedAt        DateTime?       @map("refunded_at")
+  createdAt         DateTime        @default(now()) @map("created_at")
+
+  booking Booking @relation(fields: [bookingId], references: [id])
+  user    User    @relation(fields: [userId], references: [id])
+
+  @@index([providerTxnId])
+  @@map("payments")
+}
+
+model Earning {
+  id           String         @id @default(uuid()) @db.Uuid
+  companionId  String         @map("companion_id") @db.Uuid
+  bookingId    String         @unique @map("booking_id") @db.Uuid
+  grossAmount  Int            @map("gross_amount")               // Total before fees
+  platformFee  Int            @map("platform_fee")               // 18%
+  netAmount    Int            @map("net_amount")                 // What companion receives
+  status       EarningsStatus @default(PENDING)
+  releasedAt   DateTime?      @map("released_at")
+  createdAt    DateTime       @default(now()) @map("created_at")
+
+  companion CompanionProfile @relation(fields: [companionId], references: [id])
+  booking   Booking          @relation(fields: [bookingId], references: [id])
+
+  @@index([companionId])
+  @@index([status])
+  @@map("earnings")
+}
+
+model BankAccount {
+  id            String   @id @default(uuid()) @db.Uuid
+  companionId   String   @map("companion_id") @db.Uuid
+  bankName      String   @map("bank_name")
+  accountNumber String   @map("account_number")
+  accountHolder String   @map("account_holder")
+  isPrimary     Boolean  @default(false) @map("is_primary")
+  isVerified    Boolean  @default(false) @map("is_verified")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  companion   CompanionProfile @relation(fields: [companionId], references: [id], onDelete: Cascade)
+  withdrawals Withdrawal[]
+
+  @@map("bank_accounts")
+}
+
+model Withdrawal {
+  id            String           @id @default(uuid()) @db.Uuid
+  companionId   String           @map("companion_id") @db.Uuid
+  bankAccountId String           @map("bank_account_id") @db.Uuid
+  amount        Int                                                // in VND
+  status        WithdrawalStatus @default(PENDING)
+  requestedAt   DateTime         @default(now()) @map("requested_at")
+  completedAt   DateTime?        @map("completed_at")
+
+  bankAccount BankAccount @relation(fields: [bankAccountId], references: [id])
+
+  @@map("withdrawals")
+}
+
+// ============================================
+// REVIEWS
+// ============================================
+
+model Review {
+  id          String   @id @default(uuid()) @db.Uuid
+  bookingId   String   @map("booking_id") @db.Uuid
+  reviewerId  String   @map("reviewer_id") @db.Uuid
+  revieweeId  String   @map("reviewee_id") @db.Uuid
+  rating      Int                                      // 1-5
+  comment     String?
+  tags        String[] @default([])
+  isVisible   Boolean  @default(true) @map("is_visible")
+  isDisputed  Boolean  @default(false) @map("is_disputed")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  booking  Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  reviewer User    @relation("ReviewsGiven", fields: [reviewerId], references: [id])
+  reviewee User    @relation("ReviewsReceived", fields: [revieweeId], references: [id])
+
+  @@unique([bookingId, reviewerId])
+  @@index([revieweeId])
+  @@map("reviews")
+}
+
+// ============================================
+// MESSAGING (References to Supabase realtime)
+// ============================================
+
+model Conversation {
+  id            String    @id @default(uuid()) @db.Uuid
+  bookingId     String?   @unique @map("booking_id") @db.Uuid
+  hirerId       String    @map("hirer_id") @db.Uuid
+  companionId   String    @map("companion_id") @db.Uuid
+  lastMessageAt DateTime? @map("last_message_at")
+  isActive      Boolean   @default(true) @map("is_active")
+  createdAt     DateTime  @default(now()) @map("created_at")
+
+  booking   Booking?  @relation(fields: [bookingId], references: [id])
+  hirer     User      @relation("HirerConversations", fields: [hirerId], references: [id])
+  companion User      @relation("CompanionConversations", fields: [companionId], references: [id])
+  messages  Message[]
+
+  @@map("conversations")
+}
+
+model Message {
+  id             String      @id @default(uuid()) @db.Uuid
+  conversationId String      @map("conversation_id") @db.Uuid
+  senderId       String      @map("sender_id") @db.Uuid
+  content        String
+  messageType    MessageType @default(TEXT) @map("message_type")
+  isRead         Boolean     @default(false) @map("is_read")
+  createdAt      DateTime    @default(now()) @map("created_at")
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender       User         @relation(fields: [senderId], references: [id])
+
+  @@index([conversationId])
+  @@index([conversationId, createdAt(sort: Desc)])
+  @@map("messages")
+}
+
+// ============================================
+// TRUST & SAFETY
+// ============================================
+
+model UserBlock {
+  id        String   @id @default(uuid()) @db.Uuid
+  blockerId String   @map("blocker_id") @db.Uuid
+  blockedId String   @map("blocked_id") @db.Uuid
+  reason    String?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  blocker User @relation("Blocker", fields: [blockerId], references: [id], onDelete: Cascade)
+  blocked User @relation("Blocked", fields: [blockedId], references: [id], onDelete: Cascade)
+
+  @@unique([blockerId, blockedId])
+  @@map("user_blocks")
+}
+
+model Report {
+  id           String       @id @default(uuid()) @db.Uuid
+  reporterId   String       @map("reporter_id") @db.Uuid
+  reportedId   String       @map("reported_id") @db.Uuid
+  bookingId    String?      @map("booking_id") @db.Uuid
+  type         ReportType
+  description  String
+  evidenceUrls String[]     @default([]) @map("evidence_urls")
+  status       ReportStatus @default(PENDING)
+  resolution   String?
+  createdAt    DateTime     @default(now()) @map("created_at")
+  resolvedAt   DateTime?    @map("resolved_at")
+
+  reporter User @relation("Reporter", fields: [reporterId], references: [id], onDelete: Cascade)
+  reported User @relation("Reported", fields: [reportedId], references: [id], onDelete: Cascade)
+
+  @@index([status])
+  @@index([status, createdAt])
+  @@map("reports")
+}
+
+model UserStrike {
+  id        String     @id @default(uuid()) @db.Uuid
+  userId    String     @map("user_id") @db.Uuid
+  type      StrikeType
+  reason    String
+  bookingId String?    @map("booking_id") @db.Uuid
+  expiresAt DateTime?  @map("expires_at")
+  isActive  Boolean    @default(true) @map("is_active")
+  createdAt DateTime   @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, isActive])
+  @@map("user_strikes")
+}
+
+// ============================================
+// NOTIFICATIONS
+// ============================================
+
+model Notification {
+  id        String           @id @default(uuid()) @db.Uuid
+  userId    String           @map("user_id") @db.Uuid
+  type      NotificationType
+  title     String
+  body      String
+  data      Json             @default("{}")
+  actionUrl String?          @map("action_url")
+  isRead    Boolean          @default(false) @map("is_read")
+  readAt    DateTime?        @map("read_at")
+  createdAt DateTime         @default(now()) @map("created_at")
+
+  user User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  logs NotificationLog[]
+
+  @@map("notifications")
+}
+
+model PushToken {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  deviceId  String?  @map("device_id") @db.Uuid
+  token     String
+  platform  String
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user   User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  device UserDevice? @relation(fields: [deviceId], references: [id])
+
+  @@map("push_tokens")
+}
+
+model NotificationLog {
+  id             String   @id @default(uuid()) @db.Uuid
+  notificationId String   @map("notification_id") @db.Uuid
+  channel        String
+  status         String
+  providerId     String?  @map("provider_id")
+  errorMessage   String?  @map("error_message")
+  sentAt         DateTime @default(now()) @map("sent_at")
+
+  notification Notification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
+
+  @@map("notification_logs")
+}
+
+// ============================================
+// MODERATION
+// ============================================
+
+model ModerationQueue {
+  id          String                @id @default(uuid()) @db.Uuid
+  contentType ModerationContentType @map("content_type")
+  contentId   String                @map("content_id") @db.Uuid
+  userId      String                @map("user_id") @db.Uuid
+  priority    Int                   @default(0)
+  flags       Json                  @default("[]")
+  status      ModerationStatus      @default(PENDING)
+  assignedTo  String?               @map("assigned_to") @db.Uuid
+  createdAt   DateTime              @default(now()) @map("created_at")
+  updatedAt   DateTime              @updatedAt @map("updated_at")
+
+  user    User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  actions ModerationAction[]
+
+  @@map("moderation_queue")
+}
+
+model ModerationAction {
+  id          String               @id @default(uuid()) @db.Uuid
+  queueId     String               @map("queue_id") @db.Uuid
+  moderatorId String               @map("moderator_id") @db.Uuid
+  action      ModerationActionType
+  reason      String?
+  notes       String?
+  createdAt   DateTime             @default(now()) @map("created_at")
+
+  queue     ModerationQueue @relation(fields: [queueId], references: [id], onDelete: Cascade)
+  moderator User            @relation("Moderator", fields: [moderatorId], references: [id])
+
+  @@map("moderation_actions")
+}
+
+model UserSuspension {
+  id             String    @id @default(uuid()) @db.Uuid
+  userId         String    @map("user_id") @db.Uuid
+  reason         String
+  suspendedById  String    @map("suspended_by") @db.Uuid
+  suspendedAt    DateTime  @default(now()) @map("suspended_at")
+  suspendedUntil DateTime? @map("suspended_until")
+  isPermanent    Boolean   @default(false) @map("is_permanent")
+  liftedAt       DateTime? @map("lifted_at")
+  liftedById     String?   @map("lifted_by") @db.Uuid
+
+  user        User     @relation("SuspendedUser", fields: [userId], references: [id], onDelete: Cascade)
+  suspendedBy User     @relation("SuspendedBy", fields: [suspendedById], references: [id])
+  liftedBy    User?    @relation("LiftedBy", fields: [liftedById], references: [id])
+  appeals     Appeal[]
+
+  @@map("user_suspensions")
+}
+
+model Appeal {
+  id           String       @id @default(uuid()) @db.Uuid
+  userId       String       @map("user_id") @db.Uuid
+  suspensionId String?      @map("suspension_id") @db.Uuid
+  appealText   String       @map("appeal_text")
+  status       AppealStatus @default(PENDING)
+  reviewedById String?      @map("reviewed_by") @db.Uuid
+  reviewNotes  String?      @map("review_notes")
+  createdAt    DateTime     @default(now()) @map("created_at")
+  reviewedAt   DateTime?    @map("reviewed_at")
+
+  user       User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  suspension UserSuspension? @relation(fields: [suspensionId], references: [id])
+  reviewedBy User?           @relation("AppealReviewer", fields: [reviewedById], references: [id])
+
+  @@map("appeals")
+}
+
+// ============================================
+// FILE MANAGEMENT
+// ============================================
+
+model File {
+  id               String   @id @default(uuid()) @db.Uuid
+  userId           String   @map("user_id") @db.Uuid
+  filename         String
+  originalFilename String?  @map("original_filename")
+  mimeType         String   @map("mime_type")
+  sizeBytes        Int      @map("size_bytes")
+  storageKey       String   @map("storage_key")
+  cdnUrl           String?  @map("cdn_url")
+  variants         Json     @default("{}")
+  metadata         Json     @default("{}")
+  isPublic         Boolean  @default(false) @map("is_public")
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("files")
+}
+
+// ============================================
+// SECURITY
+// ============================================
+
+model IpBlocklist {
+  id           String    @id @default(uuid()) @db.Uuid
+  ipAddress    String    @map("ip_address")
+  reason       String?
+  blockedBy    String?   @map("blocked_by") @db.Uuid
+  blockedUntil DateTime? @map("blocked_until")
+  createdAt    DateTime  @default(now()) @map("created_at")
+
+  @@map("ip_blocklist")
+}
+
+model SecurityEvent {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String?  @map("user_id") @db.Uuid
+  eventType String   @map("event_type")
+  ipAddress String?  @map("ip_address")
+  userAgent String?  @map("user_agent")
+  details   Json     @default("{}")
+  severity  String   @default("info")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@map("security_events")
+}
+
+// ============================================
+// ADMIN & SUPPORT
+// ============================================
+
+model FeatureFlag {
+  id                String   @id @default(uuid()) @db.Uuid
+  key               String   @unique
+  name              String
+  description       String?
+  isEnabled         Boolean  @default(false) @map("is_enabled")
+  rolloutPercentage Int      @default(0) @map("rollout_percentage")
+  userWhitelist     Json     @default("[]") @map("user_whitelist")
+  conditions        Json     @default("{}")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  @@map("feature_flags")
+}
+
+model AdminAuditLog {
+  id           String   @id @default(uuid()) @db.Uuid
+  adminId      String   @map("admin_id") @db.Uuid
+  action       String
+  resourceType String   @map("resource_type")
+  resourceId   String?  @map("resource_id") @db.Uuid
+  oldValue     Json?    @map("old_value")
+  newValue     Json?    @map("new_value")
+  ipAddress    String?  @map("ip_address")
+  userAgent    String?  @map("user_agent")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  admin User @relation(fields: [adminId], references: [id])
+
+  @@map("admin_audit_logs")
+}
+
+model SupportTicket {
+  id          String    @id @default(uuid()) @db.Uuid
+  userId      String    @map("user_id") @db.Uuid
+  subject     String
+  description String
+  category    String?
+  priority    String    @default("normal")
+  status      String    @default("open")
+  assignedTo  String?   @map("assigned_to") @db.Uuid
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  user     User                   @relation("TicketUser", fields: [userId], references: [id], onDelete: Cascade)
+  assignee User?                  @relation("TicketAssignee", fields: [assignedTo], references: [id])
+  messages SupportTicketMessage[]
+
+  @@map("support_tickets")
+}
+
+model SupportTicketMessage {
+  id          String   @id @default(uuid()) @db.Uuid
+  ticketId    String   @map("ticket_id") @db.Uuid
+  senderId    String   @map("sender_id") @db.Uuid
+  message     String
+  attachments Json     @default("[]")
+  isInternal  Boolean  @default(false) @map("is_internal")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  ticket SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  sender User          @relation(fields: [senderId], references: [id])
+
+  @@map("support_ticket_messages")
+}
+
+model SystemConfig {
+  id          String   @id @default(uuid()) @db.Uuid
+  key         String   @unique
+  value       Json
+  description String?
+  updatedBy   String?  @map("updated_by") @db.Uuid
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("system_config")
+}
+
+// ============================================
+// SAFETY & EMERGENCY
+// ============================================
+
+enum EmergencyEventStatus {
+  ACTIVE
+  CANCELLED
+  RESOLVED
+  ESCALATED
+}
+
+model EmergencyContact {
+  id           String   @id @default(uuid()) @db.Uuid
+  userId       String   @map("user_id") @db.Uuid
+  name         String
+  phone        String
+  relationship String?
+  isPrimary    Boolean  @default(false) @map("is_primary")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("emergency_contacts")
+}
+
+model EmergencyEvent {
+  id           String               @id @default(uuid()) @db.Uuid
+  userId       String               @map("user_id") @db.Uuid
+  bookingId    String?              @map("booking_id") @db.Uuid
+  alertType    String               @map("alert_type") // EMERGENCY, UNCOMFORTABLE, HARASSMENT, SAFETY_CONCERN
+  status       EmergencyEventStatus @default(ACTIVE)
+  locationLat  Decimal?             @map("location_lat") @db.Decimal(10, 8)
+  locationLng  Decimal?             @map("location_lng") @db.Decimal(11, 8)
+  message      String?
+  triggeredAt  DateTime             @default(now()) @map("triggered_at")
+  cancelledAt  DateTime?            @map("cancelled_at")
+  escalatedAt  DateTime?            @map("escalated_at")
+  resolvedAt   DateTime?            @map("resolved_at")
+  resolvedById String?              @map("resolved_by") @db.Uuid
+  notes        String?
+
+  user       User  @relation("UserEmergencies", fields: [userId], references: [id], onDelete: Cascade)
+  resolvedBy User? @relation("ResolvedEmergencies", fields: [resolvedById], references: [id])
+
+  @@index([userId])
+  @@index([status])
+  @@index([triggeredAt])
+  @@map("emergency_events")
+}
+
+// ============================================
+// FAVORITES
+// ============================================
+
+model FavoriteCompanion {
+  id          String   @id @default(uuid()) @db.Uuid
+  hirerId     String   @map("hirer_id") @db.Uuid
+  companionId String   @map("companion_id") @db.Uuid
+  notes       String?  // Private notes for the hirer
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  hirer     User @relation("HirerFavorites", fields: [hirerId], references: [id], onDelete: Cascade)
+  companion User @relation("FavoritedBy", fields: [companionId], references: [id], onDelete: Cascade)
+
+  @@unique([hirerId, companionId])
+  @@index([hirerId])
+  @@index([companionId])
+  @@map("favorite_companions")
+}
+
+// ============================================
+// PROFILE BOOSTS
+// ============================================
+
+enum BoostStatus {
+  PENDING    // Payment pending
+  ACTIVE     // Currently boosted
+  EXPIRED    // Boost period ended
+  CANCELLED  // Manually cancelled
+}
+
+enum BoostTier {
+  STANDARD   // 24 hours, moderate visibility
+  PREMIUM    // 48 hours, high visibility
+  SUPER      // 72 hours, maximum visibility
+}
+
+model ProfileBoost {
+  id           String      @id @default(uuid()) @db.Uuid
+  companionId  String      @map("companion_id") @db.Uuid
+  tier         BoostTier   @default(STANDARD)
+  status       BoostStatus @default(PENDING)
+  multiplier   Decimal     @default(1.5) @db.Decimal(3, 2)  // Ranking multiplier
+  price        Int                                           // Amount paid in VND
+  startedAt    DateTime?   @map("started_at")
+  expiresAt    DateTime?   @map("expires_at")
+  createdAt    DateTime    @default(now()) @map("created_at")
+  updatedAt    DateTime    @updatedAt @map("updated_at")
+
+  companion CompanionProfile @relation(fields: [companionId], references: [id], onDelete: Cascade)
+
+  @@index([companionId])
+  @@index([status])
+  @@index([expiresAt])
+  @@map("profile_boosts")
+}
+
+// ============================================
+// REFERRALS
+// ============================================
+
+model Referral {
+  id            String   @id @default(uuid()) @db.Uuid
+  userId        String   @unique @map("user_id") @db.Uuid
+  code          String   @unique
+  totalUses     Int      @default(0) @map("total_uses")
+  totalEarnings Int      @default(0) @map("total_earnings")
+  isActive      Boolean  @default(true) @map("is_active")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  user          User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  referredUsers User[] @relation("ReferredUsers")
+
+  @@map("referrals")
+}

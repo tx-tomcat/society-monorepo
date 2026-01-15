@@ -1,0 +1,14 @@
+import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+import { BookingsController } from './controllers/bookings.controller';
+import { BookingsService } from './services/bookings.service';
+import { BookingTasks } from './tasks/booking.tasks';
+import { ModerationModule } from '../moderation/moderation.module';
+
+@Module({
+  imports: [ConfigModule, ModerationModule],
+  controllers: [BookingsController],
+  providers: [BookingsService, BookingTasks],
+  exports: [BookingsService],
+})
+export class BookingsModule {}

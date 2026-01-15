@@ -1,0 +1,583 @@
+{
+  "auth": {
+    "login": {
+      "companion": {
+        "subtitle": "Đăng nhập để quản lý đặt chỗ và thu nhập",
+        "title": "Xin chào, Người Đồng hành"
+      },
+      "country_code": "+84",
+      "email": "Email",
+      "email_placeholder": "Địa chỉ email",
+      "hirer": {
+        "subtitle": "Đăng nhập để tiếp tục đặt người đồng hành",
+        "title": "Chào mừng Trở lại"
+      },
+      "no_account": "Chưa có tài khoản?",
+      "or_continue_with": "hoặc tiếp tục với",
+      "phone": "Điện thoại",
+      "phone_placeholder": "Số điện thoại",
+      "privacy_policy": "Chính sách Bảo mật",
+      "sign_up": "Đăng ký",
+      "terms_agreement": "Bằng việc tiếp tục, bạn đồng ý với",
+      "terms_of_service": "Điều khoản Dịch vụ"
+    },
+    "otp": {
+      "didnt_receive": "Không nhận được mã?",
+      "get_help": "Nhận trợ giúp",
+      "resend_code": "Gửi lại Mã",
+      "resend_in": "Gửi lại mã sau",
+      "subtitle": "Chúng tôi đã gửi mã 6 số đến",
+      "title": "Xác minh số điện thoại",
+      "verify": "Xác minh",
+      "verify_continue": "Xác minh & Tiếp tục"
+    },
+    "verify_identity": {
+      "benefits": {
+        "access_verified": "Chỉ tiếp cận người đồng hành đã xác minh",
+        "build_trust": "Xây dựng niềm tin trong cộng đồng",
+        "exclusive_benefits": "Quyền lợi thành viên độc quyền",
+        "higher_trust": "Độ tin cậy cao hơn từ khách hàng",
+        "priority_support": "Hỗ trợ đặt chỗ ưu tiên",
+        "priority_visibility": "Ưu tiên trong kết quả tìm kiếm",
+        "title": "Lợi ích Xác minh",
+        "verified_badge": "Huy hiệu xác minh trên hồ sơ"
+      },
+      "companion": {
+        "subtitle": "Hoàn thành xác minh để bắt đầu nhận đặt chỗ",
+        "title": "Trở thành Người Đồng hành Đã Xác minh"
+      },
+      "complete_all_steps": "Hoàn thành Tất cả Bước",
+      "complete_verification": "Hoàn thành Xác minh",
+      "completed": "Hoàn thành",
+      "header": "Xác minh Danh tính",
+      "hirer": {
+        "subtitle": "Giúp chúng tôi giữ Society an toàn cho mọi người",
+        "title": "Xác minh Danh tính"
+      },
+      "privacy_description": "Chúng tôi sử dụng công nghệ zkTLS để xác minh an toàn. Dữ liệu của bạn được mã hóa và không bao giờ chia sẻ mà không có sự đồng ý.",
+      "privacy_title": "Quyền riêng tư được bảo vệ",
+      "required": "Bắt buộc",
+      "skip_for_now": "Bỏ qua tạm thời",
+      "start": "Bắt đầu",
+      "steps": {
+        "background": {
+          "description": "Xác minh an toàn nhanh (1-2 ngày)",
+          "title": "Kiểm tra Lý lịch"
+        },
+        "selfie": {
+          "description_companion": "Đối chiếu khuôn mặt với ảnh CCCD",
+          "description_hirer": "Xác minh ảnh nhanh để đảm bảo an toàn",
+          "title": "Chụp Ảnh Selfie"
+        },
+        "vneid": {
+          "description_companion": "Xác minh danh tính với CCCD điện tử",
+          "description_hirer": "Xác minh danh tính với ứng dụng VNeID",
+          "title": "Kết nối VNeID"
+        }
+      },
+      "verification_time": "Xác minh thường mất 1-2 ngày làm việc",
+      "why_verify": "Tại sao Xác minh?"
+    },
+    "welcome": {
+      "become_companion": "Trở thành Người Đồng hành",
+      "brand_name": "Society",
+      "companion_login": "Người đồng hành?",
+      "earn_money": "Kiếm ₫₫₫",
+      "features": {
+        "premium_quality": "Chất lượng Cao",
+        "trusted_community": "Cộng đồng Uy tín",
+        "verified_safe": "Xác minh & An toàn"
+      },
+      "find_companion": "Tìm Người Đồng hành",
+      "hero_subtitle": "Đặt người đồng hành đã xác minh cho đám cưới, sự kiện gia đình,\nhội nghị doanh nghiệp, và nhiều hơn nữa.",
+      "hero_title": "Kết nối với\nSự Tin tưởng",
+      "hirer_login": "Khách hàng?",
+      "id_verified": "Đã xác minh",
+      "sign_in": "Đăng nhập",
+      "tagline": "Nền tảng Đồng hành Uy tín Việt Nam",
+      "users_count": "1000+ Người dùng"
+    }
+  },
+  "common": {
+    "and": "và",
+    "back": "Quay lại",
+    "cancel": "Hủy",
+    "confirm": "Xác nhận",
+    "continue": "Tiếp tục",
+    "done": "Xong",
+    "edit": "Sửa",
+    "hours": "giờ",
+    "or": "hoặc",
+    "save": "Lưu",
+    "save_changes": "Lưu thay đổi",
+    "see_all": "Xem tất cả",
+    "skip": "Bỏ qua",
+    "success": "Thành công",
+    "view_all": "Xem tất cả",
+    "ok": "OK",
+    "add": "Thêm",
+    "new": "Mới",
+    "default": "Mặc định",
+    "popular": "Phổ biến",
+    "verified": "Đã xác minh",
+    "reviews": "đánh giá",
+    "days": {
+      "sun_short": "CN",
+      "mon_short": "T2",
+      "tue_short": "T3",
+      "wed_short": "T4",
+      "thu_short": "T5",
+      "fri_short": "T6",
+      "sat_short": "T7",
+      "sunday": "Chủ Nhật",
+      "monday": "Thứ Hai",
+      "tuesday": "Thứ Ba",
+      "wednesday": "Thứ Tư",
+      "thursday": "Thứ Năm",
+      "friday": "Thứ Sáu",
+      "saturday": "Thứ Bảy"
+    },
+    "status": {
+      "confirmed": "Đã xác nhận",
+      "pending": "Đang chờ",
+      "upcoming": "Sắp tới",
+      "active": "Đang diễn ra",
+      "completed": "Hoàn thành",
+      "cancelled": "Đã hủy"
+    }
+  },
+  "hirer": {
+    "splash": {
+      "get_started": "Bắt đầu",
+      "already_have_account": "Đã có tài khoản?",
+      "hero_title": "Tìm Người Đồng hành Hoàn hảo",
+      "hero_subtitle": "Đặt người đồng hành đã xác minh cho đám cưới, sự kiện gia đình, hội nghị doanh nghiệp và nhiều hơn nữa.",
+      "tagline": "Nền tảng Đồng hành Uy tín Việt Nam",
+      "features": {
+        "verified": "Đã Xác minh",
+        "premium": "Trải nghiệm Cao cấp",
+        "trusted": "Cộng đồng Uy tín"
+      }
+    },
+    "orders": {
+      "header": "Đặt chỗ của tôi",
+      "tabs": {
+        "all": "Tất cả",
+        "upcoming": "Sắp tới",
+        "active": "Đang diễn ra",
+        "past": "Đã qua"
+      },
+      "status": {
+        "upcoming": "Sắp tới",
+        "in_progress": "Đang diễn ra",
+        "completed": "Hoàn thành",
+        "cancelled": "Đã hủy"
+      },
+      "empty": "Không có đặt chỗ nào"
+    },
+    "booking_detail": {
+      "header": "Chi tiết Đặt chỗ",
+      "call": "Gọi",
+      "message": "Nhắn tin",
+      "booking_info": "Thông tin Đặt chỗ",
+      "occasion": "Dịp",
+      "date_time": "Ngày & Giờ",
+      "location": "Địa điểm",
+      "special_requests": "Yêu cầu Đặc biệt",
+      "payment_summary": "Tóm tắt Thanh toán",
+      "service_fee": "Phí Dịch vụ",
+      "total": "Tổng",
+      "escrow_notice": "Thanh toán được giữ an toàn cho đến khi hoàn thành đặt chỗ",
+      "booking_code": "Mã Đặt chỗ",
+      "cancel_booking": "Hủy Đặt chỗ",
+      "get_directions": "Chỉ đường",
+      "booked_on": "Đặt vào",
+      "reviews": "đánh giá"
+    }
+  },
+  "companion": {
+    "splash": {
+      "badge": "NGƯỜI ĐỒNG HÀNH",
+      "hero_title": "Biến thời gian thành thu nhập",
+      "hero_subtitle": "Tham gia nền tảng đồng hành hàng đầu Việt Nam. Đặt giá của bạn, chọn đặt chỗ, tăng thu nhập.",
+      "stats": {
+        "earnings": "Thu nhập TB/Tháng",
+        "rating": "Đánh giá TB",
+        "companions": "Người Đồng hành"
+      },
+      "start_earning": "Bắt đầu Kiếm tiền",
+      "already_companion": "Đã là người đồng hành?",
+      "badges": {
+        "verified": "Đã Xác minh",
+        "top_rated": "Đánh giá Cao",
+        "premium": "Cao cấp"
+      }
+    },
+    "dashboard": {
+      "greeting": {
+        "morning": "Chào buổi sáng",
+        "afternoon": "Chào buổi chiều",
+        "evening": "Chào buổi tối"
+      },
+      "stats": {
+        "this_week": "Tuần này",
+        "rating": "Đánh giá",
+        "bookings": "Đặt chỗ",
+        "total_earnings": "Tổng Thu nhập"
+      },
+      "today_bookings": "Đặt chỗ Hôm nay",
+      "no_bookings_today": "Không có Đặt chỗ",
+      "enjoy_day_off": "Tận hưởng ngày nghỉ!",
+      "quick_actions": "Thao tác Nhanh",
+      "actions": {
+        "requests": "Yêu cầu",
+        "schedule": "Lịch trình",
+        "withdraw": "Rút tiền"
+      },
+      "new_badge": "{{count}} mới"
+    },
+    "onboard": {
+      "step_indicator": "Bước {{current}}/{{total}}",
+      "create_profile": {
+        "header": "Tạo Hồ sơ",
+        "photos_title": "Ảnh Hồ sơ",
+        "photos_instruction": "Thêm ít nhất 3 ảnh. Ảnh đầu tiên là ảnh đại diện chính.",
+        "main_badge": "Chính",
+        "add_main": "Thêm Ảnh chính",
+        "photos_count": "{{count}}/6 ảnh đã thêm (tối thiểu 3)",
+        "display_name": "Tên Hiển thị",
+        "display_name_placeholder": "Khách hàng nên gọi bạn là gì?",
+        "about_you": "Giới thiệu Bản thân",
+        "about_placeholder": "Kể cho khách hàng về bản thân bạn, tính cách và điều gì khiến bạn trở thành người đồng hành tuyệt vời...",
+        "char_count": "{{count}}/{{max}}",
+        "char_count_min": "{{count}}/{{max}} (tối thiểu {{min}})",
+        "tips_title": "Mẹo cho Hồ sơ Ấn tượng",
+        "tips": {
+          "smile": "Sử dụng ảnh rõ nét, thân thiện với nụ cười tự nhiên",
+          "variety": "Đa dạng: toàn thân, cận cảnh, trong nhiều bối cảnh khác nhau",
+          "authentic": "Hãy chân thật - khách hàng đánh giá cao hồ sơ thật",
+          "highlights": "Nêu bật sở thích và chủ đề trò chuyện của bạn",
+          "professional": "Giữ chuyên nghiệp và phù hợp"
+        }
+      },
+      "set_services": {
+        "header": "Dịch vụ của Bạn",
+        "title": "Bạn nhận những dịp nào?",
+        "instruction": "Chọn tất cả các loại sự kiện bạn thoải mái tham dự. Bạn có thể thay đổi bất cứ lúc nào.",
+        "occasions": {
+          "wedding": {
+            "title": "Đám cưới & Đính hôn",
+            "description": "Đồng hành khách đến đám cưới, tiệc đính hôn"
+          },
+          "tet": {
+            "title": "Lễ Tết",
+            "description": "Tham gia các buổi họp mặt Tết Nguyên đán"
+          },
+          "family": {
+            "title": "Sự kiện Gia đình",
+            "description": "Tiệc sinh nhật, kỷ niệm, họp mặt"
+          },
+          "corporate": {
+            "title": "Sự kiện Doanh nghiệp",
+            "description": "Tiệc tối công ty, hội nghị, networking"
+          },
+          "coffee": {
+            "title": "Cà phê & Thoải mái",
+            "description": "Gặp gỡ thoải mái, hẹn cà phê, bữa ăn"
+          },
+          "social": {
+            "title": "Sự kiện Xã hội",
+            "description": "Tiệc tùng, vui chơi đêm, họp mặt xã hội"
+          }
+        },
+        "popular": "Phổ biến",
+        "selected_count": "Đã chọn {{count}} dịp"
+      },
+      "set_pricing": {
+        "header": "Đặt Giá của Bạn",
+        "hourly_rate": "Giá theo Giờ",
+        "rate_unit": "₫/giờ",
+        "min_hours": "Số Giờ Đặt Tối thiểu",
+        "earnings_breakdown": "Chi tiết Thu nhập",
+        "your_rate": "Giá của bạn",
+        "platform_fee": "Phí nền tảng (18%)",
+        "you_earn": "Bạn nhận mỗi giờ",
+        "estimated_monthly": "Thu nhập Ước tính/Tháng",
+        "estimation_note": "Dựa trên 20 đặt chỗ/tháng với {{hours}} giờ mỗi lần",
+        "pro_tip": "Mẹo: Bắt đầu với mức giá cạnh tranh để xây dựng uy tín. Bạn có thể tăng giá khi có nhiều đánh giá tích cực."
+      },
+      "set_availability": {
+        "header": "Đặt Lịch Rảnh",
+        "days_title": "Ngày Có thể Nhận",
+        "days_instruction": "Chọn những ngày bạn thường có thể nhận đặt chỗ",
+        "days": {
+          "monday": "Thứ Hai",
+          "tuesday": "Thứ Ba",
+          "wednesday": "Thứ Tư",
+          "thursday": "Thứ Năm",
+          "friday": "Thứ Sáu",
+          "saturday": "Thứ Bảy",
+          "sunday": "Chủ Nhật"
+        },
+        "time_slots_title": "Khung Giờ Ưa thích",
+        "time_slots_instruction": "Bạn rảnh nhất vào thời điểm nào trong ngày?",
+        "time_slots": {
+          "morning": "Sáng",
+          "afternoon": "Chiều",
+          "evening": "Tối"
+        },
+        "time_ranges": {
+          "morning": "8:00 - 12:00",
+          "afternoon": "12:00 - 17:00",
+          "evening": "17:00 - 22:00"
+        },
+        "notice_title": "Thời gian Báo trước",
+        "notice_instruction": "Bạn cần báo trước bao lâu trước khi đặt chỗ?",
+        "summary_title": "Tóm tắt Lịch Rảnh",
+        "summary_days": "Có thể {{days}} ngày/tuần, {{slots}} khung giờ/ngày.",
+        "summary_notice": "Cần báo trước tối thiểu {{hours}} giờ.",
+        "complete_setup": "Hoàn thành Thiết lập",
+        "review_notice": "Hồ sơ của bạn sẽ được xét duyệt trong 24-48 giờ",
+        "footer_note": "Bạn có thể điều chỉnh lịch rảnh bất cứ lúc nào từ cài đặt hồ sơ"
+      }
+    },
+    "bookings": {
+      "schedule": {
+        "header": "Lịch của Tôi",
+        "days_short": {
+          "sun": "CN",
+          "mon": "T2",
+          "tue": "T3",
+          "wed": "T4",
+          "thu": "T5",
+          "fri": "T6",
+          "sat": "T7"
+        },
+        "no_bookings": "Không có Đặt chỗ",
+        "no_bookings_message": "Bạn không có đặt chỗ nào vào ngày này"
+      },
+      "requests": {
+        "header": "Yêu cầu Đặt chỗ",
+        "new_badge": "Mới",
+        "your_earnings": "Thu nhập của Bạn",
+        "decline": "Từ chối",
+        "accept": "Chấp nhận",
+        "empty_title": "Không có Yêu cầu Mới",
+        "empty_message": "Bạn sẽ được thông báo khi khách hàng gửi yêu cầu đặt chỗ",
+        "accept_title": "Chấp nhận Đặt chỗ",
+        "accept_message": "Bạn có chắc muốn chấp nhận yêu cầu đặt chỗ này?",
+        "decline_title": "Từ chối Đặt chỗ",
+        "decline_message": "Bạn có chắc muốn từ chối yêu cầu này?",
+        "accept_success": "Đã chấp nhận đặt chỗ! Kiểm tra lịch trình của bạn."
+      },
+      "detail": {
+        "header": "Chi tiết Đặt chỗ",
+        "status": {
+          "confirmed": "Đã xác nhận",
+          "pending": "Đang chờ",
+          "completed": "Hoàn thành",
+          "cancelled": "Đã hủy"
+        },
+        "call": "Gọi",
+        "message": "Nhắn tin",
+        "booking_info": "Thông tin Đặt chỗ",
+        "occasion": "Dịp",
+        "date_time": "Ngày & Giờ",
+        "location": "Địa điểm",
+        "get_directions": "Chỉ đường",
+        "special_requests": "Yêu cầu Đặc biệt",
+        "your_earnings": "Thu nhập của Bạn",
+        "booking_amount": "Giá Đặt chỗ",
+        "platform_fee": "Phí Nền tảng (18%)",
+        "you_will_earn": "Bạn Sẽ Nhận",
+        "payment_notice": "Thanh toán sẽ được chuyển trong 24 giờ sau khi hoàn thành đặt chỗ",
+        "booking_code": "Mã Đặt chỗ",
+        "booked_on": "Đặt vào",
+        "safety_title": "Nhắc nhở An toàn",
+        "safety_message": "Sử dụng nút SOS nếu bạn cảm thấy không an toàn. Theo dõi GPS hoạt động trong đặt chỗ.",
+        "cancel_booking": "Hủy Đặt chỗ",
+        "arrived": "Tôi Đã Đến",
+        "member_since": "Thành viên từ"
+      }
+    },
+    "earnings": {
+      "header": "Thu nhập",
+      "available_balance": "Số dư Khả dụng",
+      "withdraw_funds": "Rút Tiền",
+      "periods": {
+        "week": "tuần",
+        "month": "tháng",
+        "year": "năm"
+      },
+      "period_labels": {
+        "this_week": "Tuần này",
+        "this_month": "Tháng này",
+        "this_year": "Năm nay"
+      },
+      "from_bookings": "từ {{count}} đặt chỗ",
+      "recent_transactions": "Giao dịch Gần đây"
+    },
+    "withdraw": {
+      "header": "Rút Tiền",
+      "available_balance": "Số dư Khả dụng",
+      "amount_label": "Số tiền Rút",
+      "withdraw_all": "Rút Tất cả",
+      "withdraw_to": "Rút Về",
+      "default_badge": "Mặc định",
+      "add_bank": "+ Thêm Tài khoản Ngân hàng",
+      "add_bank_account": "Thêm Tài khoản Ngân hàng",
+      "processing_title": "Thời gian Xử lý",
+      "processing_time": "Thời gian Xử lý",
+      "processing_info": "Rút tiền được xử lý trong 1-2 ngày làm việc. Số tiền rút tối thiểu là 100.000₫.",
+      "you_receive": "Bạn sẽ nhận",
+      "you_will_receive": "Bạn sẽ nhận",
+      "submit_button": "Rút Tiền",
+      "errors": {
+        "insufficient": "Số dư không đủ",
+        "minimum": "Rút tối thiểu 100.000₫"
+      },
+      "success_message": "Yêu cầu rút tiền đã gửi! Tiền sẽ về trong 1-2 ngày làm việc."
+    },
+    "profile": {
+      "header": "Hồ sơ của Tôi",
+      "edit_profile": "Sửa Hồ sơ",
+      "stats": {
+        "bookings": "Đặt chỗ",
+        "earned": "Đã kiếm",
+        "response": "Phản hồi"
+      },
+      "about_me": "Giới thiệu",
+      "specialties": "Chuyên môn",
+      "photos": "Ảnh",
+      "fully_verified": "Đã Xác minh Đầy đủ",
+      "verification_description": "CCCD, Kiểm tra Lý lịch & Ảnh Đã Xác minh",
+      "top_rated": "Đánh giá Cao",
+      "verification": {
+        "fully_verified": "Đã Xác minh Đầy đủ",
+        "verified_description": "CCCD, Kiểm tra Lý lịch & Ảnh Đã Xác minh"
+      },
+      "badges": {
+        "top_rated": "Đánh giá Cao",
+        "verified": "Đã Xác minh"
+      }
+    },
+    "edit_profile": {
+      "header": "Sửa Hồ sơ",
+      "profile_photos": "Ảnh Hồ sơ",
+      "photos_title": "Ảnh Hồ sơ",
+      "photos_instruction": "Nhấn giữ để xóa. Ảnh đầu tiên là ảnh đại diện chính.",
+      "photo_hint": "Nhấn giữ để xóa. Ảnh đầu tiên là ảnh đại diện chính.",
+      "main_badge": "Chính",
+      "main": "Chính",
+      "display_name": "Tên Hiển thị",
+      "display_name_placeholder": "Tên hiển thị của bạn",
+      "about_me": "Giới thiệu",
+      "about_placeholder": "Kể cho khách hàng về bản thân bạn...",
+      "hourly_rate": "Giá theo Giờ",
+      "rate_unit": "/giờ",
+      "per_hour": "/giờ",
+      "occasions_title": "Dịp Tôi Nhận",
+      "occasions_i_accept": "Dịp Tôi Nhận",
+      "update_availability": "Cập nhật Lịch Rảnh",
+      "availability_description": "Quản lý ngày và giờ làm việc của bạn",
+      "save_changes": "Lưu Thay đổi",
+      "success_message": "Hồ sơ của bạn đã được cập nhật thành công!"
+    },
+    "booking_detail": {
+      "header": "Chi tiết Đặt chỗ",
+      "call": "Gọi",
+      "calling": "Đang gọi",
+      "message": "Nhắn tin",
+      "navigation": "Điều hướng",
+      "opening_maps": "Đang mở ứng dụng bản đồ...",
+      "booking_info": "Thông tin Đặt chỗ",
+      "occasion": "Dịp",
+      "date_time": "Ngày & Giờ",
+      "location": "Địa điểm",
+      "get_directions": "Chỉ đường",
+      "special_requests": "Yêu cầu Đặc biệt",
+      "your_earnings": "Thu nhập của Bạn",
+      "booking_amount": "Giá Đặt chỗ",
+      "platform_fee": "Phí Nền tảng (18%)",
+      "you_will_earn": "Bạn Sẽ Nhận",
+      "payment_release_notice": "Thanh toán sẽ được chuyển trong 24 giờ sau khi hoàn thành đặt chỗ",
+      "booking_code": "Mã Đặt chỗ",
+      "booked_on": "Đặt vào",
+      "safety_reminder": "Nhắc nhở An toàn",
+      "safety_reminder_text": "Sử dụng nút SOS nếu bạn cảm thấy không an toàn. Theo dõi GPS hoạt động trong đặt chỗ.",
+      "cancel_booking": "Hủy Đặt chỗ",
+      "cancel_warning": "Bạn có chắc muốn hủy đặt chỗ này? Hành động này không thể hoàn tác.",
+      "no_keep_it": "Không, Giữ lại",
+      "yes_cancel": "Có, Hủy",
+      "ive_arrived": "Tôi Đã Đến",
+      "check_in": "Điểm danh",
+      "checked_in": "Bạn đã điểm danh thành công!",
+      "bookings_count": "{{count}} đặt chỗ",
+      "member_since": "Thành viên từ"
+    },
+    "requests": {
+      "header": "Yêu cầu Đặt chỗ",
+      "your_earnings": "Thu nhập của Bạn",
+      "decline": "Từ chối",
+      "accept": "Chấp nhận",
+      "accept_booking": "Chấp nhận Đặt chỗ",
+      "accept_confirmation": "Bạn có chắc muốn chấp nhận yêu cầu đặt chỗ này?",
+      "decline_booking": "Từ chối Đặt chỗ",
+      "decline_confirmation": "Bạn có chắc muốn từ chối yêu cầu này?",
+      "accept_success": "Đã chấp nhận đặt chỗ! Kiểm tra lịch trình của bạn.",
+      "no_requests": "Không có Yêu cầu Mới",
+      "no_requests_description": "Bạn sẽ được thông báo khi khách hàng gửi yêu cầu đặt chỗ"
+    },
+    "companion_profile": {
+      "starting_from": "Bắt đầu từ",
+      "rate_unit": "/giờ",
+      "book_now": "Đặt Ngay",
+      "reviews": "đánh giá",
+      "stats": {
+        "bookings": "Đặt chỗ",
+        "rating": "Đánh giá",
+        "experience": "Năm KN"
+      },
+      "sections": {
+        "specialties": "Chuyên môn",
+        "about": "Giới thiệu",
+        "languages": "Ngôn ngữ",
+        "reviews": "Đánh giá"
+      },
+      "available_today": "Có thể hôm nay",
+      "response_time": "Thường phản hồi trong 1 giờ"
+    }
+  },
+  "onboarding": {
+    "message": "Chào mừng đến với ứng dụng obytes"
+  },
+  "settings": {
+    "about": "Giới thiệu",
+    "app_name": "Tên ứng dụng",
+    "arabic": "Tiếng Ả Rập",
+    "english": "Tiếng Anh",
+    "generale": "Chung",
+    "github": "Github",
+    "language": "Ngôn ngữ",
+    "links": "Liên kết",
+    "logout": "Đăng xuất",
+    "more": "Thêm",
+    "privacy": "Chính sách bảo mật",
+    "rate": "Đánh giá",
+    "share": "Chia sẻ",
+    "support": "Hỗ trợ",
+    "support_us": "Ủng hộ chúng tôi",
+    "terms": "Điều khoản dịch vụ",
+    "theme": {
+      "dark": "Tối",
+      "light": "Sáng",
+      "system": "Hệ thống",
+      "title": "Giao diện"
+    },
+    "title": "Cài đặt",
+    "version": "Phiên bản",
+    "vietnamese": "Tiếng Việt",
+    "website": "Website"
+  },
+  "welcome": "Chào mừng đến với ứng dụng obytes"
+}
