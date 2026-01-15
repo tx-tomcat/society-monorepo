@@ -1,1 +1,1 @@
-export * from './hyper-express.adapter';
+export * from './ultimate-express.adapter';

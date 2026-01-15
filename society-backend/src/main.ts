@@ -1,41 +1,72 @@
 import {
-  HyperExpressAdapter,
-  NestHyperExpressApplication,
+  NestUltimateExpressApplication,
+  UltimateExpressAdapter,
 } from '@/adapters';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+import helmet from 'helmet';
 import { AppModule } from './app.module';
 import { GlobalExceptionFilter } from './middleware/error.middleware';
 import './path-register';
 
 const logger = new Logger('Bootstrap');
-let app: NestHyperExpressApplication;
+let app: NestUltimateExpressApplication;
 
 // Optimize bootstrap for faster cold starts
 async function bootstrap() {
   try {
     if (!app) {
-      const hyperExpressAdapter = new HyperExpressAdapter({
-        // Request body size limits - prevent DoS attacks
-        max_body_length: 10 * 1024 * 1024, // 10MB max body size
-        trust_proxy: process.env.NODE_ENV === 'production',
-      });
-
-      app = await NestFactory.create<NestHyperExpressApplication>(
+      app = await NestFactory.create<NestUltimateExpressApplication>(
         AppModule,
-        hyperExpressAdapter,
+        new UltimateExpressAdapter({
+          bodyMethods: ['POST', 'PUT', 'PATCH'],
+          catchAsyncErrors: true,
+        }),
         {
-          logger:
-            process.env.NODE_ENV === 'production'
-              ? ['error', 'warn']
-              : ['error', 'warn', 'log', 'debug'],
-          bufferLogs: true,
+          logger: ['error', 'warn'],
         },
       );
 
-      // Note: HyperExpress doesn't support Helmet directly
-      // Security headers are handled via middleware or reverse proxy (nginx/cloudflare)
-      logger.log('HyperExpress adapter initialized');
+      // ============================================
+      // Security: Helmet - HTTP Security Headers
+      // ============================================
+      // Ultimate Express is Express-compatible, so we can use helmet middleware directly
+      app.use(
+        helmet({
+          // Content Security Policy
+          contentSecurityPolicy: {
+            directives: {
+              defaultSrc: ["'self'"],
+              styleSrc: ["'self'", "'unsafe-inline'"],
+              imgSrc: ["'self'", 'data:', 'https:'],
+              scriptSrc: ["'self'"],
+              objectSrc: ["'none'"],
+              upgradeInsecureRequests: [],
+            },
+          },
+          // Cross-Origin settings
+          crossOriginEmbedderPolicy: false, // Disable for API compatibility
+          crossOriginResourcePolicy: { policy: 'cross-origin' }, // Allow cross-origin for API
+          // X-Frame-Options - prevent clickjacking
+          frameguard: { action: 'deny' },
+          // HSTS - enforce HTTPS in production
+          hsts:
+            process.env.NODE_ENV === 'production'
+              ? { maxAge: 31536000, includeSubDomains: true, preload: true }
+              : false,
+          // Prevent MIME type sniffing
+          noSniff: true,
+          // X-XSS-Protection (legacy but still useful)
+          xssFilter: true,
+          // Referrer Policy
+          referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
+          // DNS Prefetch Control
+          dnsPrefetchControl: { allow: false },
+        }),
+      );
+      logger.log('Helmet security headers configured');
+
+      logger.log('Ultimate Express adapter initialized (6-12x faster than standard Express)');
 
       // ============================================
       // Security: CORS Configuration
@@ -83,18 +114,20 @@ async function bootstrap() {
       // ============================================
       // Security: Global Validation Pipe
       // ============================================
-      app.useGlobalPipes(new ValidationPipe({
-        transform: true, // Auto-transform payloads to DTO instances
-        whitelist: true, // Strip properties not in DTO
-        forbidNonWhitelisted: true, // Throw error if non-whitelisted properties sent
-        forbidUnknownValues: true, // Throw error on unknown values in nested objects
-        disableErrorMessages: process.env.NODE_ENV === 'production', // Hide validation details in production
-        validationError: {
-          target: false, // Don't expose target object
-          value: false, // Don't expose invalid values
-        },
-        stopAtFirstError: false, // Return all validation errors
-      }));
+      app.useGlobalPipes(
+        new ValidationPipe({
+          transform: true, // Auto-transform payloads to DTO instances
+          whitelist: true, // Strip properties not in DTO
+          forbidNonWhitelisted: true, // Throw error if non-whitelisted properties sent
+          forbidUnknownValues: true, // Throw error on unknown values in nested objects
+          disableErrorMessages: process.env.NODE_ENV === 'production', // Hide validation details in production
+          validationError: {
+            target: false, // Don't expose target object
+            value: false, // Don't expose invalid values
+          },
+          stopAtFirstError: false, // Return all validation errors
+        }),
+      );
       logger.log('Global ValidationPipe enabled');
 
       // ============================================
@@ -103,7 +136,9 @@ async function bootstrap() {
       app.useGlobalFilters(new GlobalExceptionFilter());
       logger.log('Global exception filter enabled');
 
-      logger.log('NestJS application initialized with HyperExpress and security layers');
+      logger.log(
+        'NestJS application initialized with Ultimate Express and security layers',
+      );
 
       // Update port listening logic
       if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
@@ -120,8 +155,7 @@ async function bootstrap() {
 }
 
 // Vercel serverless handler
-// Note: HyperExpress is designed for long-running servers, not serverless
-// For serverless deployments, consider using Fastify adapter instead
+// Note: Ultimate Express uses uWebSockets.js which may have limitations in serverless
 export default async function handler(
   req: unknown,
   res: { status: (code: number) => { json: (body: unknown) => void } },
@@ -132,10 +166,9 @@ export default async function handler(
     }
 
     await app.init();
-    const hyperExpressInstance = app.getHttpAdapter().getInstance();
-    // HyperExpress handles requests differently than Fastify
-    // This may require additional adaptation for serverless environments
-    (hyperExpressInstance as { server?: { emit: (event: string, req: unknown, res: unknown) => void } }).server?.emit('request', req, res);
+    const expressInstance = app.getHttpAdapter().getInstance();
+    // Ultimate Express is Express-compatible, so we can use the standard handler pattern
+    (expressInstance as (req: unknown, res: unknown) => void)(req, res);
   } catch (error) {
     logger.error('Error in serverless handler:', error);
     res.status(500).json({
@@ -148,7 +181,7 @@ export default async function handler(
 
 // For local development
 if (require.main === module) {
-  bootstrap().catch(error => {
+  bootstrap().catch((error) => {
     logger.error('Failed to start server:', error);
     process.exit(1);
   });
