@@ -22,9 +22,9 @@ const inputTv = tv({
   slots: {
     container: 'mb-2 gap-2',
     label:
-      'text-lg font-semibold leading-[1.6] tracking-[0.2px] text-midnight dark:text-white',
+      'text-lg font-semibold leading-[1.6] tracking-[0.2px] text-midnight',
     input:
-      'min-h-[65px] rounded-[10px] border border-border-light bg-warmwhite px-5 py-[18px] text-lg font-semibold leading-[1.6] tracking-[0.2px] text-midnight dark:border-charcoal-700 dark:bg-charcoal-800 dark:text-white',
+      'min-h-[65px] rounded-[10px] border border-border-light bg-warmwhite px-5 py-[18px] text-lg font-semibold leading-[1.6] tracking-[0.2px]',
     errorContainer:
       'mt-2 flex-row items-center gap-2 rounded-md bg-danger-50 px-3 py-2',
     errorText: 'flex-1 text-sm leading-[1.6] tracking-[0.2px] text-danger-500',
@@ -33,23 +33,23 @@ const inputTv = tv({
   variants: {
     focused: {
       true: {
-        input: 'border-rose-400 dark:border-rose-400',
+        input: 'border-rose-400',
       },
     },
     error: {
       true: {
-        input: 'border-2 border-danger-500 dark:border-danger-500',
-        label: 'text-midnight dark:text-white',
+        input: 'border-2 border-danger-500',
+        label: 'text-midnight',
       },
     },
     success: {
       true: {
-        input: 'border-2 border-teal-400 dark:border-teal-400',
+        input: 'border-2 border-teal-400',
       },
     },
     disabled: {
       true: {
-        input: 'bg-neutral-200 dark:bg-neutral-700',
+        input: 'bg-neutral-200',
       },
     },
   },
@@ -129,6 +129,7 @@ export const Input = React.forwardRef<NTextInput, NInputProps>((props, ref) => {
             fontSize: 18,
             fontFamily: 'Urbanist_600SemiBold',
             paddingVertical: 0,
+            color: colors.midnight.DEFAULT,
           },
           inputProps.style,
         ])}

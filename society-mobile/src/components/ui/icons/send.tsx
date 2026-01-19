@@ -6,11 +6,20 @@ import colors from '@/components/ui/colors';
 type Props = {
   color?: string;
   size?: number;
+  width?: number;
+  height?: number;
 };
 
-export const Send = ({ color = colors.white, size = 28 }: Props) => {
+export const Send = ({
+  color = colors.white,
+  size = 28,
+  width,
+  height,
+}: Props) => {
+  const w = width || size;
+  const h = height || size;
   return (
-    <Svg width={size} height={size} viewBox="0 0 28 28" fill="none">
+    <Svg width={w} height={h} viewBox="0 0 28 28" fill="none">
       <Path
         d="M24.0284 3.97167L11.6951 16.305"
         stroke={color}

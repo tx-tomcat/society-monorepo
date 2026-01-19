@@ -1,49 +1,87 @@
-import { useAuth as useClerkAuth, useUser } from '@clerk/clerk-expo';
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
+
+import { zaloAuthService, type ZaloAuthResponse } from '@/lib/api/services/zalo.service';
+import { useAuthStore } from '@/lib/stores/auth';
+import { clearUser } from '@/lib/stores/user';
 
 /**
- * Custom auth hook that wraps Clerk's useAuth
- * Provides a consistent interface for authentication throughout the app
+ * Custom useAuth hook that provides Zalo-based authentication.
+ * Uses shared Zustand store so auth state is consistent across all components.
+ * Only handles authentication state - use useCurrentUser for user data.
  */
 export function useAuth() {
-  const { isLoaded, isSignedIn, userId, getToken, signOut } = useClerkAuth();
-  const { user } = useUser();
+  const isLoaded = useAuthStore.use.isLoaded();
+  const isSignedIn = useAuthStore.use.isSignedIn();
+  const setAuthState = useAuthStore.use.setAuthState();
 
-  const logout = useCallback(async () => {
-    try {
-      await signOut();
-    } catch (error) {
-      console.error('Logout error:', error);
-      throw error;
-    }
-  }, [signOut]);
+  // Check auth state on mount
+  useEffect(() => {
+    // Only check once when not yet loaded
+    if (isLoaded) return;
 
-  const getAuthToken = useCallback(async () => {
-    try {
-      return await getToken();
-    } catch (error) {
-      console.error('Get token error:', error);
-      return null;
-    }
-  }, [getToken]);
+    const checkAuth = async () => {
+      try {
+        const isAuthenticated = await zaloAuthService.isAuthenticated();
+        setAuthState({
+          isLoaded: true,
+          isSignedIn: isAuthenticated,
+        });
+      } catch (error) {
+        console.error('Auth check failed:', error);
+        setAuthState({
+          isLoaded: true,
+          isSignedIn: false,
+        });
+      }
+    };
+
+    checkAuth();
+  }, [isLoaded, setAuthState]);
+
+  /**
+   * Sign in with Zalo
+   */
+  const signInWithZalo = useCallback(async (): Promise<ZaloAuthResponse> => {
+    const response = await zaloAuthService.login();
+
+    setAuthState({
+      isLoaded: true,
+      isSignedIn: true,
+    });
+
+    return response;
+  }, [setAuthState]);
+
+  /**
+   * Sign out the current user
+   */
+  const signOut = useCallback(async (): Promise<void> => {
+    await zaloAuthService.logout();
+    // Clear user data from local store
+    clearUser();
+
+    setAuthState({
+      isLoaded: true,
+      isSignedIn: false,
+    });
+  }, [setAuthState]);
+
+  /**
+   * Refresh the auth state (re-check token validity)
+   */
+  const refreshAuth = useCallback(async (): Promise<void> => {
+    const isAuthenticated = await zaloAuthService.isAuthenticated();
+    setAuthState({
+      isLoaded: true,
+      isSignedIn: isAuthenticated,
+    });
+  }, [setAuthState]);
 
   return {
-    // Auth state
     isLoaded,
     isSignedIn,
-    userId,
-    user,
-
-    // Methods
-    getToken: getAuthToken,
-    logout,
-
-    // User data
-    phoneNumber: user?.primaryPhoneNumber?.phoneNumber,
-    email: user?.primaryEmailAddress?.emailAddress,
-    firstName: user?.firstName,
-    lastName: user?.lastName,
-    fullName: user?.fullName,
-    imageUrl: user?.imageUrl,
+    signInWithZalo,
+    signOut,
+    refreshAuth,
   };
 }

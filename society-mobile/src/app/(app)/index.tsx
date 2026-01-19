@@ -3,100 +3,118 @@ import { FlashList } from '@shopify/flash-list';
 import type { Href } from 'expo-router';
 import { useRouter } from 'expo-router';
 import React from 'react';
-import { Pressable } from 'react-native';
+import { useTranslation } from 'react-i18next';
+import { ActivityIndicator, Pressable, RefreshControl, ScrollView, TextInput, StyleSheet } from 'react-native';
 
 import { CompanionCard, type CompanionData } from '@/components/companion-card';
 import {
-  Badge,
   colors,
   FocusAwareStatusBar,
   SafeAreaView,
   Text,
   View,
 } from '@/components/ui';
-import { Bell, Filter, SocietyLogo } from '@/components/ui/icons';
+import { Bell, Search } from '@/components/ui/icons';
+import type {
+  Companion,
+  ServiceType,
+} from '@/lib/api/services/companions.service';
+import { useCompanions, useCurrentUser } from '@/lib/hooks';
 
-// Mock data for companions
-const mockCompanions: CompanionData[] = [
-  {
-    id: '1',
-    name: 'Minh Anh',
-    age: 24,
-    image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=800&q=80',
-    rating: 4.9,
-    reviewCount: 127,
-    location: 'District 1, HCMC',
-    pricePerHour: 500000,
-    isVerified: true,
-    isOnline: true,
-    isPremium: true,
-    specialties: ['Wedding', 'Corporate', 'Family'],
-  },
-  {
-    id: '2',
-    name: 'Thu Hương',
-    age: 26,
-    image: 'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=800&q=80',
-    rating: 4.8,
-    reviewCount: 98,
-    location: 'District 3, HCMC',
-    pricePerHour: 450000,
-    isVerified: true,
-    isOnline: false,
-    specialties: ['Tet Celebration', 'Family'],
-  },
-  {
-    id: '3',
-    name: 'Ngọc Trâm',
-    age: 23,
-    image: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=800&q=80',
-    rating: 4.7,
-    reviewCount: 64,
-    location: 'Binh Thanh, HCMC',
-    pricePerHour: 400000,
-    isVerified: true,
-    isOnline: true,
-    specialties: ['Coffee Date', 'Social Events'],
-  },
-  {
-    id: '4',
-    name: 'Hoàng Yến',
-    age: 25,
-    image: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=800&q=80',
-    rating: 4.9,
-    reviewCount: 156,
-    location: 'District 7, HCMC',
-    pricePerHour: 600000,
-    isVerified: true,
-    isOnline: true,
-    isPremium: true,
-    specialties: ['Wedding', 'Corporate', 'VIP Events'],
-  },
-];
+// Map ServiceType to i18n keys
+const serviceTypeI18nKeys: Record<ServiceType, string> = {
+  FAMILY_INTRODUCTION: 'hirer.home.occasions.family',
+  WEDDING_ATTENDANCE: 'hirer.home.occasions.wedding',
+  TET_COMPANIONSHIP: 'hirer.home.occasions.tet',
+  BUSINESS_EVENT: 'hirer.home.occasions.corporate',
+  CASUAL_OUTING: 'hirer.home.occasions.coffee',
+  CLASS_REUNION: 'hirer.home.occasions.reunion',
+  OTHER: 'hirer.home.occasions.other',
+};
 
-// Occasion filter chips
-const occasions = [
-  { id: 'all', label: 'All', icon: null },
-  { id: 'wedding', label: 'Wedding' },
-  { id: 'tet', label: 'Tết' },
-  { id: 'family', label: 'Family' },
-  { id: 'corporate', label: 'Corporate' },
-  { id: 'coffee', label: 'Coffee' },
+// Occasion filter chips with emoji icons matching wireframe
+const occasionIds: { id: string; i18nKey: string; serviceType?: ServiceType }[] = [
+  { id: 'dining', i18nKey: 'hirer.home.occasions.dining', serviceType: 'CASUAL_OUTING' },
+  { id: 'party', i18nKey: 'hirer.home.occasions.party', serviceType: 'CLASS_REUNION' },
+  { id: 'coffee', i18nKey: 'hirer.home.occasions.coffee', serviceType: 'CASUAL_OUTING' },
+  { id: 'event', i18nKey: 'hirer.home.occasions.event', serviceType: 'BUSINESS_EVENT' },
 ];
 
 export default function Home() {
   const router = useRouter();
-  const [selectedOccasion, setSelectedOccasion] = React.useState('all');
+  const { t } = useTranslation();
+  const [selectedOccasion, setSelectedOccasion] = React.useState('dining');
+  const [searchQuery, setSearchQuery] = React.useState('');
+
+  // Get current user for greeting
+  const { data: currentUser } = useCurrentUser();
+  const userName = currentUser?.user?.fullName?.split(' ')[0] || 'there';
+
+  // Map API Companion to CompanionData for the card
+  const mapCompanionToCardData = React.useCallback(
+    (companion: Companion): CompanionData => {
+      const primaryPhoto = companion.photos?.find((p) => p.isPrimary);
+      const photoUrl =
+        primaryPhoto?.url ||
+        companion.photos?.[0]?.url ||
+        companion.user?.avatarUrl ||
+        'https://via.placeholder.com/400';
+
+      return {
+        id: companion.id,
+        name: companion.user?.fullName || t('hirer.home.unknown_name'),
+        age: 0,
+        image: photoUrl,
+        rating: companion.ratingAvg || 0,
+        reviewCount: companion.ratingCount || 0,
+        location: t('hirer.home.default_location'),
+        pricePerHour: companion.hourlyRate || 0,
+        isVerified: companion.verificationStatus === 'verified',
+        isOnline: companion.isActive ?? false,
+        isPremium: companion.isFeatured ?? false,
+        specialties: (companion.services || [])
+          .filter((s) => s.isAvailable)
+          .map((s) => t(serviceTypeI18nKeys[s.type]))
+          .slice(0, 3),
+      };
+    },
+    [t]
+  );
+
+  // Get the service type filter based on selected occasion
+  const selectedServiceType = React.useMemo(() => {
+    const occasion = occasionIds.find((o) => o.id === selectedOccasion);
+    return occasion?.serviceType;
+  }, [selectedOccasion]);
+
+  // Fetch companions from API
+  const {
+    data: companionsData,
+    isLoading,
+    isError,
+    refetch,
+    isRefetching,
+  } = useCompanions({
+    serviceType: selectedServiceType,
+    verified: true,
+    sort: 'rating',
+  });
+
+  // Map API data to card format
+  const companions = React.useMemo(() => {
+    if (!companionsData?.companions) return [];
+    return companionsData.companions.map(mapCompanionToCardData);
+  }, [companionsData, mapCompanionToCardData]);
 
   const handleNotificationPress = React.useCallback(() => {
     // TODO: Navigate to notifications
     console.log('Notifications pressed');
   }, []);
 
-  const handleFilterPress = React.useCallback(() => {
-    // TODO: Show filter modal
-    console.log('Filter button pressed');
-  }, []);
+  const handleSeeAllPress = React.useCallback(() => {
+    // Navigate to browse screen
+    router.push('/hirer/browse' as Href);
+  }, [router]);
 
   const handleCompanionPress = React.useCallback(
     (companion: CompanionData) => {
@@ -116,9 +134,10 @@ export default function Home() {
 
   const renderCompanion = React.useCallback(
     ({ item }: { item: CompanionData }) => (
-      <View className="px-4 pb-4">
+      <View className="px-4 pb-3">
         <CompanionCard
           companion={item}
+          variant="compact"
           onPress={() => handleCompanionPress(item)}
           onBookPress={() => handleBookPress(item)}
           testID={`companion-card-${item.id}`}
@@ -132,67 +151,157 @@ export default function Home() {
     <View className="flex-1 bg-warmwhite">
       <FocusAwareStatusBar />
 
-      {/* Header */}
+      {/* Header - Greeting style matching wireframe */}
       <SafeAreaView edges={['top']}>
-        <View className="flex-row items-center gap-4 px-4 py-3">
-          {/* Logo */}
-          <View className="w-8">
-            <SocietyLogo color={colors.rose[400]} width={32} height={32} />
+        <View className="flex-row items-center justify-between px-4 py-3">
+          {/* Greeting */}
+          <View>
+            <Text className="text-sm text-text-secondary">
+              {t('hirer.home.welcome_back')}
+            </Text>
+            <Text style={styles.userName} className="text-lg text-midnight">
+              {userName} 👋
+            </Text>
           </View>
 
-          {/* Title */}
-          <Text className="flex-1 text-center text-2xl font-bold leading-[1.4] text-midnight">
-            Discover
-          </Text>
-
           {/* Notification Icon */}
-          <Pressable className="w-8 items-end" onPress={handleNotificationPress}>
-            <Bell color={colors.midnight.DEFAULT} width={24} height={24} />
+          <Pressable
+            className="size-10 items-center justify-center rounded-full bg-softpink"
+            onPress={handleNotificationPress}
+          >
+            <Bell color={colors.midnight.DEFAULT} width={20} height={20} />
           </Pressable>
         </View>
 
-        {/* Occasion Filter Chips */}
-        <View className="border-b border-border-light px-4 pb-3">
-          <View className="flex-row gap-2">
-            {occasions.map((occasion) => (
-              <Pressable
-                key={occasion.id}
-                onPress={() => setSelectedOccasion(occasion.id)}
-              >
-                <Badge
-                  label={occasion.label}
-                  variant={selectedOccasion === occasion.id ? 'default' : 'outline'}
-                  size="default"
-                />
-              </Pressable>
-            ))}
+        {/* Search Bar */}
+        <View className="px-4 pb-3">
+          <View className="flex-row items-center gap-2 rounded-xl border border-border-light bg-white px-3 py-2.5">
+            <Search color={colors.text.tertiary} width={20} height={20} />
+            <TextInput
+              className="flex-1 text-sm"
+              placeholder={t('hirer.home.search_placeholder')}
+              placeholderTextColor={colors.text.tertiary}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              style={{ color: colors.midnight.DEFAULT }}
+            />
           </View>
         </View>
 
-        {/* Search/Filter Row */}
-        <View className="flex-row items-center justify-between px-4 py-3">
-          <Text className="text-lg font-semibold text-midnight">
-            Available Now
+        {/* Popular Occasions */}
+        <View className="px-4 pb-3">
+          <Text style={styles.sectionTitle} className="mb-3 text-sm text-midnight">
+            {t('hirer.home.popular_occasions')}
           </Text>
-          <Pressable
-            className="flex-row items-center gap-1"
-            onPress={handleFilterPress}
-          >
-            <Filter color={colors.text.tertiary} width={20} height={20} />
-            <Text className="text-sm text-text-tertiary">Filters</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <View className="flex-row gap-2">
+              {occasionIds.map((occasion) => (
+                <Pressable
+                  key={occasion.id}
+                  onPress={() => setSelectedOccasion(occasion.id)}
+                  className={`rounded-full px-4 py-2 ${
+                    selectedOccasion === occasion.id
+                      ? 'bg-rose-400'
+                      : 'bg-softpink'
+                  }`}
+                >
+                  <Text
+                    className={`text-xs ${
+                      selectedOccasion === occasion.id
+                        ? 'font-semibold text-white'
+                        : 'text-midnight'
+                    }`}
+                  >
+                    {t(occasion.i18nKey)}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+          </ScrollView>
+        </View>
+
+        {/* Top Companions Section Header */}
+        <View className="flex-row items-center justify-between px-4 pb-3">
+          <Text style={styles.sectionTitle} className="text-sm text-midnight">
+            {t('hirer.home.top_companions')}
+          </Text>
+          <Pressable onPress={handleSeeAllPress}>
+            <Text className="text-sm font-medium text-teal-400">
+              {t('hirer.home.see_all')}
+            </Text>
           </Pressable>
         </View>
       </SafeAreaView>
 
-      {/* Companion List */}
-      <FlashList
-        data={mockCompanions}
-        renderItem={renderCompanion}
-        estimatedItemSize={450}
-        keyExtractor={(item) => item.id}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 20 }}
-      />
+      {/* Loading State */}
+      {isLoading && (
+        <View className="flex-1 items-center justify-center">
+          <ActivityIndicator size="large" color={colors.teal[400]} />
+          <Text className="mt-4 text-text-secondary">
+            {t('hirer.home.loading')}
+          </Text>
+        </View>
+      )}
+
+      {/* Error State */}
+      {isError && !isLoading && (
+        <View className="flex-1 items-center justify-center px-8">
+          <Text className="text-center text-lg font-semibold text-midnight">
+            {t('hirer.home.error.title')}
+          </Text>
+          <Text className="mt-2 text-center text-text-secondary">
+            {t('hirer.home.error.description')}
+          </Text>
+          <Pressable
+            onPress={() => refetch()}
+            className="mt-4 rounded-full bg-teal-400 px-6 py-3"
+          >
+            <Text className="font-semibold text-white">
+              {t('hirer.home.error.retry')}
+            </Text>
+          </Pressable>
+        </View>
+      )}
+
+      {/* Empty State */}
+      {!isLoading && !isError && companions.length === 0 && (
+        <View className="flex-1 items-center justify-center px-8">
+          <Text className="text-center text-lg font-semibold text-midnight">
+            {t('hirer.home.empty.title')}
+          </Text>
+          <Text className="mt-2 text-center text-text-secondary">
+            {t('hirer.home.empty.description')}
+          </Text>
+        </View>
+      )}
+
+      {/* Companion List - Compact cards */}
+      {!isLoading && !isError && companions.length > 0 && (
+        <FlashList
+          data={companions}
+          renderItem={renderCompanion}
+          estimatedItemSize={80}
+          keyExtractor={(item) => item.id}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: 20 }}
+          refreshControl={
+            <RefreshControl
+              refreshing={isRefetching}
+              onRefresh={refetch}
+              tintColor={colors.teal[400]}
+            />
+          }
+        />
+      )}
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  userName: {
+    fontFamily: 'Urbanist_600SemiBold',
+  },
+  sectionTitle: {
+    fontFamily: 'Urbanist_600SemiBold',
+  },
+});

@@ -35,7 +35,7 @@ export * from './users';
 export * from './video';
 export * from './x';
 
-// Society Brand
+// Hireme Brand
 export * from './society-logo';
 
 // Social Auth
@@ -44,40 +44,43 @@ export * from './facebook';
 export * from './github';
 export * from './google';
 export * from './x-logo';
+export * from './zalo';
 
 // Actions & Status
+export * from './check';
 export * from './check-circle';
-export * from './x-circle';
 export * from './double-check';
 export * from './heart';
 export * from './star';
 export * from './trash';
+export * from './trash-2';
+export * from './x-circle';
 
 // Safety & Trust
 export * from './gps';
+export * from './headset';
+export * from './help';
+export * from './info';
 export * from './shield-check';
 export * from './sos';
 export * from './warning';
-export * from './info';
-export * from './help';
-export * from './headset';
 
 // Occasions (Vietnamese Cultural)
-export * from './wedding-rings';
+export * from './briefcase';
+export * from './coffee';
+export * from './confetti';
 export * from './family';
 export * from './mai-flower';
 export * from './red-envelope';
-export * from './briefcase';
-export * from './confetti';
-export * from './coffee';
+export * from './wedding-rings';
 
 // Finance & Payment
-export * from './wallet';
-export * from './credit-card';
 export * from './bank';
+export * from './card';
+export * from './credit-card';
 export * from './money';
 export * from './receipt';
-export * from './card';
+export * from './wallet';
 
 // Profile & Account
 export * from './crown';
@@ -88,17 +91,18 @@ export * from './map-pin';
 export * from './online-dot';
 export * from './smiley';
 export * from './support';
+export * from './user';
 export * from './website';
 
 // Companion & Booking
-export * from './id-card';
 export * from './chart';
-export * from './withdraw';
-export * from './schedule';
-export * from './request';
-export * from './verified-badge';
-export * from './price-tag';
+export * from './id-card';
 export * from './occasions';
+export * from './price-tag';
+export * from './request';
+export * from './schedule';
+export * from './verified-badge';
+export * from './withdraw';
 
 // Legacy (keep for compatibility)
 export * from './lovify-logo';

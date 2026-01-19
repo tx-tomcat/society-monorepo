@@ -120,7 +120,7 @@ export const OTPVerificationForm = ({
                 Enter OTP Code 🔐
               </Text>
               <Text className="text-lg leading-[1.6] tracking-[0.2px] text-neutral-700">
-                Check your email inbox for a message from Society. Enter the
+                Check your email inbox for a message from Hireme. Enter the
                 one-time verification code below to proceed with resetting your
                 password.
               </Text>
@@ -147,8 +147,8 @@ export const OTPVerificationForm = ({
                     onKeyPress={(e) => handleKeyPress(e, index)}
                     keyboardType="number-pad"
                     maxLength={1}
-                    className="text-center text-2xl font-bold text-midnight"
-                    style={{ fontFamily: 'Urbanist_700Bold', letterSpacing: 0 }}
+                    className="text-center text-2xl font-bold"
+                    style={{ fontFamily: 'Urbanist_700Bold', letterSpacing: 0, color: '#1E1B4B' }}
                   />
                 </View>
               ))}

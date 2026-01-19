@@ -54,6 +54,10 @@ const badge = tv({
         container: 'bg-teal-400',
         label: 'text-white',
       },
+      rose: {
+        container: 'bg-rose-400',
+        label: 'text-white',
+      },
     },
     size: {
       sm: {
@@ -93,10 +97,7 @@ export function Badge({
   testID,
   ...props
 }: Props) {
-  const styles = React.useMemo(
-    () => badge({ variant, size }),
-    [variant, size]
-  );
+  const styles = React.useMemo(() => badge({ variant, size }), [variant, size]);
 
   return (
     <View
@@ -105,7 +106,10 @@ export function Badge({
       {...props}
     >
       {icon && <View className="mr-1">{icon}</View>}
-      <Text className={styles.label()} testID={testID ? `${testID}-label` : undefined}>
+      <Text
+        className={styles.label()}
+        testID={testID ? `${testID}-label` : undefined}
+      >
         {label}
       </Text>
     </View>

@@ -30,17 +30,17 @@ require('dotenv').config({
  * Such as: bundle id, package name, app name.
  *
  * You can add them to the .env file but we think it's better to keep them here as as we use prefix to generate this values based on the APP_ENV
- * for example: if the APP_ENV is staging, the bundle id will be com.society.staging
+ * for example: if the APP_ENV is staging, the bundle id will be vn.hireme.mobile.staging
  */
 
 // TODO: Replace these values with your own
 
-const BUNDLE_ID = 'com.society'; // ios bundle id
-const PACKAGE = 'com.society'; // android package name
-const NAME = 'Society'; // app name
+const BUNDLE_ID = 'vn.hireme.mobile'; // ios bundle id
+const PACKAGE = 'vn.hireme.mobile'; // android package name
+const NAME = 'Hireme'; // app name
 const EXPO_ACCOUNT_OWNER = 'expo-owner'; // expo account owner
 const EAS_PROJECT_ID = 'c3e1075b-6fe7-4686-aa49-35b46a229044'; // eas project id
-const SCHEME = 'Society'; // app scheme
+const SCHEME = 'Hireme'; // app scheme
 
 /**
  * We declare a function withEnvSuffix that will add a suffix to the variable name based on the APP_ENV
@@ -79,17 +79,17 @@ const client = z.object({
   PACKAGE: z.string(),
   VERSION: z.string(),
 
-  // ADD YOUR CLIENT ENV VARS HERE
+  // Client env vars
   API_URL: z.string(),
-  VAR_NUMBER: z.number(),
-  VAR_BOOL: z.boolean(),
+  ZALO_APP_ID: z.string(),
+  // Legacy Supabase (can be removed after full migration)
+  SUPABASE_URL: z.string().optional(),
+  SUPABASE_ANON_KEY: z.string().optional(),
 });
 
 const buildTime = z.object({
   EXPO_ACCOUNT_OWNER: z.string(),
   EAS_PROJECT_ID: z.string(),
-  // ADD YOUR BUILD TIME ENV VARS HERE
-  SECRET_KEY: z.string(),
 });
 
 /**
@@ -103,10 +103,12 @@ const _clientEnv = {
   PACKAGE: withEnvSuffix(PACKAGE),
   VERSION: packageJSON.version,
 
-  // ADD YOUR ENV VARS HERE TOO
-  API_URL: process.env.API_URL,
-  VAR_NUMBER: Number(process.env.VAR_NUMBER),
-  VAR_BOOL: process.env.VAR_BOOL === 'true',
+  // Client env vars
+  API_URL: process.env.EXPO_PUBLIC_API_URL,
+  ZALO_APP_ID: process.env.EXPO_PUBLIC_ZALO_APP_ID,
+  // Legacy Supabase (can be removed after full migration)
+  SUPABASE_URL: process.env.EXPO_PUBLIC_SUPABASE_URL,
+  SUPABASE_ANON_KEY: process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY,
 };
 
 /**
@@ -115,8 +117,6 @@ const _clientEnv = {
 const _buildTimeEnv = {
   EXPO_ACCOUNT_OWNER,
   EAS_PROJECT_ID,
-  // ADD YOUR ENV VARS HERE TOO
-  SECRET_KEY: process.env.SECRET_KEY,
 };
 
 /**

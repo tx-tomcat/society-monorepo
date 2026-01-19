@@ -2,7 +2,7 @@
 import type { Href } from 'expo-router';
 import { router } from 'expo-router';
 import React from 'react';
-import { Pressable, ScrollView, StyleSheet } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
 import {
@@ -31,6 +31,7 @@ import {
   Users,
   Wallet,
 } from '@/components/ui/icons';
+import { useAuth } from '@/lib/hooks';
 
 // Right arrow icon
 function ChevronRightIcon({ color = colors.neutral[400] }: { color?: string }) {
@@ -50,7 +51,11 @@ function ChevronRightIcon({ color = colors.neutral[400] }: { color?: string }) {
 type MenuItem = {
   id: string;
   title: string;
-  icon: React.ComponentType<{ color?: string; width?: number; height?: number }>;
+  icon: React.ComponentType<{
+    color?: string;
+    width?: number;
+    height?: number;
+  }>;
   onPress: () => void;
   danger?: boolean;
 };
@@ -71,7 +76,9 @@ function SettingsMenuItem({
       onPress={onPress}
       testID={`menu-item-${id}`}
     >
-      <View className={`size-10 items-center justify-center rounded-full ${danger ? 'bg-danger-500/10' : 'bg-softpink'}`}>
+      <View
+        className={`size-10 items-center justify-center rounded-full ${danger ? 'bg-danger-500/10' : 'bg-softpink'}`}
+      >
         <IconComponent color={iconColor} width={20} height={20} />
       </View>
       <Text
@@ -126,7 +133,9 @@ function UserProfileCard() {
       testID="profile-card"
     >
       <Image
-        source={{ uri: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&q=80' }}
+        source={{
+          uri: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&q=80',
+        }}
         className="size-16 rounded-full"
         contentFit="cover"
       />
@@ -172,6 +181,29 @@ function QuickStats() {
 }
 
 export default function Profile() {
+  const { signOut } = useAuth();
+
+  const handleLogout = React.useCallback(() => {
+    Alert.alert('Logout', 'Are you sure you want to logout?', [
+      {
+        text: 'Cancel',
+        style: 'cancel',
+      },
+      {
+        text: 'Logout',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await signOut();
+            // Navigation handled by _layout.tsx guard
+          } catch (error) {
+            console.error('Logout failed:', error);
+          }
+        },
+      },
+    ]);
+  }, [signOut]);
+
   const menuItems: MenuItem[] = [
     {
       id: 'safety',
@@ -237,7 +269,7 @@ export default function Profile() {
       id: 'logout',
       title: 'Logout',
       icon: Logout,
-      onPress: () => console.log('Logout'),
+      onPress: handleLogout,
       danger: true,
     },
   ];
@@ -267,7 +299,11 @@ export default function Profile() {
             className="w-8 items-center justify-center"
             testID="menu-button"
           >
-            <MoreVertical color={colors.midnight.DEFAULT} width={24} height={24} />
+            <MoreVertical
+              color={colors.midnight.DEFAULT}
+              width={24}
+              height={24}
+            />
           </Pressable>
         </View>
       </SafeAreaView>
@@ -302,7 +338,7 @@ export default function Profile() {
 
           {/* App Version */}
           <View className="items-center py-4">
-            <Text className="text-sm text-text-tertiary">Society v1.0.0</Text>
+            <Text className="text-sm text-text-tertiary">Hireme v1.0.0</Text>
           </View>
 
           {/* Bottom spacer for safe area */}

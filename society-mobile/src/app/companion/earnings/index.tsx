@@ -1,13 +1,18 @@
 /* eslint-disable max-lines-per-function */
 import type { Href } from 'expo-router';
-import { useRouter } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { MotiView } from 'moti';
 import React from 'react';
-import { Pressable, ScrollView, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import {
+  ActivityIndicator,
+  Pressable,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+} from 'react-native';
 
 import {
-  Badge,
   colors,
   FocusAwareStatusBar,
   SafeAreaView,
@@ -22,88 +27,54 @@ import {
   Wallet,
   Withdraw,
 } from '@/components/ui/icons';
+import {
+  type EarningsOverview as EarningsOverviewData,
+  earningsService,
+  type EarningsTransaction,
+} from '@/lib/api/services/earnings.service';
 import { formatVND } from '@/lib/utils';
 
 type Period = 'week' | 'month' | 'year';
-
-type EarningsData = {
-  period: string;
-  amount: number;
-  bookings: number;
-  change: number;
-};
-
-const MOCK_EARNINGS: Record<Period, EarningsData> = {
-  week: {
-    period: 'companion.earnings.periods.this_week',
-    amount: 2460000,
-    bookings: 3,
-    change: 15,
-  },
-  month: {
-    period: 'companion.earnings.periods.this_month',
-    amount: 8450000,
-    bookings: 12,
-    change: 23,
-  },
-  year: {
-    period: 'companion.earnings.periods.this_year',
-    amount: 42500000,
-    bookings: 68,
-    change: 35,
-  },
-};
-
-type Transaction = {
-  id: string;
-  type: 'earning' | 'withdrawal' | 'bonus';
-  description: string;
-  amount: number;
-  date: string;
-  status: 'completed' | 'pending';
-};
-
-const MOCK_TRANSACTIONS: Transaction[] = [
-  {
-    id: '1',
-    type: 'earning',
-    description: 'Wedding Reception - Nguyen Van Minh',
-    amount: 1640000,
-    date: 'Jan 15, 2025',
-    status: 'completed',
-  },
-  {
-    id: '2',
-    type: 'withdrawal',
-    description: 'Bank Transfer - Vietcombank',
-    amount: -5000000,
-    date: 'Jan 12, 2025',
-    status: 'completed',
-  },
-  {
-    id: '3',
-    type: 'earning',
-    description: 'Corporate Dinner - Tran Hoang Long',
-    amount: 820000,
-    date: 'Jan 10, 2025',
-    status: 'completed',
-  },
-  {
-    id: '4',
-    type: 'bonus',
-    description: '5-Star Rating Bonus',
-    amount: 100000,
-    date: 'Jan 8, 2025',
-    status: 'completed',
-  },
-];
 
 export default function EarningsOverview() {
   const router = useRouter();
   const { t } = useTranslation();
   const [selectedPeriod, setSelectedPeriod] = React.useState<Period>('month');
+  const [overview, setOverview] = React.useState<EarningsOverviewData | null>(
+    null
+  );
+  const [transactions, setTransactions] = React.useState<EarningsTransaction[]>(
+    []
+  );
+  const [isLoading, setIsLoading] = React.useState(true);
+  const [isRefreshing, setIsRefreshing] = React.useState(false);
 
-  const earnings = MOCK_EARNINGS[selectedPeriod];
+  const fetchData = React.useCallback(async () => {
+    try {
+      const [overviewData, transactionsData] = await Promise.all([
+        earningsService.getEarningsOverview(),
+        earningsService.getTransactionHistory(1, 10, selectedPeriod),
+      ]);
+      setOverview(overviewData);
+      setTransactions(transactionsData.transactions);
+    } catch (error) {
+      console.error('Failed to fetch earnings data:', error);
+    } finally {
+      setIsLoading(false);
+      setIsRefreshing(false);
+    }
+  }, [selectedPeriod]);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchData();
+    }, [fetchData])
+  );
+
+  const handleRefresh = React.useCallback(() => {
+    setIsRefreshing(true);
+    fetchData();
+  }, [fetchData]);
 
   const handleBack = React.useCallback(() => {
     router.back();
@@ -113,16 +84,59 @@ export default function EarningsOverview() {
     router.push('/companion/earnings/withdraw' as Href);
   }, [router]);
 
-  const getTransactionIcon = (type: Transaction['type']) => {
+  // Get earnings data based on selected period
+  const getPeriodEarnings = React.useCallback(() => {
+    if (!overview) return { amount: 0, change: 0 };
+    switch (selectedPeriod) {
+      case 'week':
+        return { amount: overview.thisWeek, change: overview.weeklyChange };
+      case 'month':
+        return { amount: overview.thisMonth, change: overview.monthlyChange };
+      case 'year':
+        return { amount: overview.thisYear, change: 0 };
+      default:
+        return { amount: 0, change: 0 };
+    }
+  }, [overview, selectedPeriod]);
+
+  const getTransactionIcon = (type: EarningsTransaction['type']) => {
     switch (type) {
       case 'earning':
-        return { icon: Calendar, color: colors.teal[400], bg: 'bg-teal-400/10' };
+        return {
+          icon: Calendar,
+          color: colors.teal[400],
+          bg: 'bg-teal-400/10',
+        };
       case 'withdrawal':
-        return { icon: Withdraw, color: colors.rose[400], bg: 'bg-rose-400/10' };
+        return {
+          icon: Withdraw,
+          color: colors.rose[400],
+          bg: 'bg-rose-400/10',
+        };
       case 'bonus':
-        return { icon: Chart, color: colors.yellow[400], bg: 'bg-yellow-400/10' };
+        return {
+          icon: Chart,
+          color: colors.yellow[400],
+          bg: 'bg-yellow-400/10',
+        };
+      case 'refund':
+        return {
+          icon: Withdraw,
+          color: colors.rose[400],
+          bg: 'bg-rose-400/10',
+        };
     }
   };
+
+  if (isLoading) {
+    return (
+      <View className="flex-1 items-center justify-center bg-warmwhite">
+        <ActivityIndicator size="large" color={colors.lavender[400]} />
+      </View>
+    );
+  }
+
+  const periodEarnings = getPeriodEarnings();
 
   return (
     <View className="flex-1 bg-warmwhite">
@@ -133,7 +147,10 @@ export default function EarningsOverview() {
           <Pressable onPress={handleBack} testID="back-button">
             <ArrowLeft color={colors.midnight.DEFAULT} width={24} height={24} />
           </Pressable>
-          <Text style={styles.headerTitle} className="flex-1 text-xl text-midnight">
+          <Text
+            style={styles.headerTitle}
+            className="flex-1 text-xl text-midnight"
+          >
             {t('companion.earnings.header')}
           </Text>
         </View>
@@ -142,6 +159,9 @@ export default function EarningsOverview() {
       <ScrollView
         className="flex-1"
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} />
+        }
       >
         {/* Earnings Card */}
         <MotiView
@@ -155,9 +175,13 @@ export default function EarningsOverview() {
               <Wallet color="#FFFFFF" width={24} height={24} />
             </View>
             <View className="flex-1">
-              <Text className="text-sm text-white/80">{t('companion.earnings.available_balance')}</Text>
+              <Text className="text-sm text-white/80">
+                {t('companion.earnings.available_balance')}
+              </Text>
               <Text style={styles.balance} className="text-3xl text-white">
-                ₫3,460,000
+                {formatVND(overview?.availableBalance || 0, {
+                  symbolPosition: 'suffix',
+                })}
               </Text>
             </View>
           </View>
@@ -168,7 +192,9 @@ export default function EarningsOverview() {
             className="mt-6 flex-row items-center justify-center gap-2 rounded-xl bg-white py-4"
           >
             <Withdraw color={colors.lavender[400]} width={20} height={20} />
-            <Text className="font-semibold text-lavender-400">{t('companion.earnings.withdraw_funds')}</Text>
+            <Text className="font-semibold text-lavender-400">
+              {t('companion.earnings.withdraw_funds')}
+            </Text>
           </Pressable>
         </MotiView>
 
@@ -209,27 +235,41 @@ export default function EarningsOverview() {
           className="m-4 rounded-2xl bg-white p-4"
         >
           <View className="flex-row items-center justify-between">
-            <Text className="text-sm text-text-tertiary">{t(earnings.period)}</Text>
-            <View className="flex-row items-center gap-1">
-              <Chart
-                color={earnings.change >= 0 ? colors.teal[400] : colors.rose[400]}
-                width={16}
-                height={16}
-              />
-              <Text
-                className={`text-sm font-semibold ${
-                  earnings.change >= 0 ? 'text-teal-400' : 'text-rose-400'
-                }`}
-              >
-                {earnings.change >= 0 ? '+' : ''}{earnings.change}%
-              </Text>
-            </View>
+            <Text className="text-sm text-text-tertiary">
+              {t(`companion.earnings.periods.this_${selectedPeriod}`)}
+            </Text>
+            {periodEarnings.change !== 0 && (
+              <View className="flex-row items-center gap-1">
+                <Chart
+                  color={
+                    periodEarnings.change >= 0
+                      ? colors.teal[400]
+                      : colors.rose[400]
+                  }
+                  width={16}
+                  height={16}
+                />
+                <Text
+                  className={`text-sm font-semibold ${
+                    periodEarnings.change >= 0
+                      ? 'text-teal-400'
+                      : 'text-rose-400'
+                  }`}
+                >
+                  {periodEarnings.change >= 0 ? '+' : ''}
+                  {periodEarnings.change}%
+                </Text>
+              </View>
+            )}
           </View>
           <Text style={styles.earnings} className="mt-2 text-3xl text-midnight">
-            {formatVND(earnings.amount, { symbolPosition: 'suffix' })}
+            {formatVND(periodEarnings.amount, { symbolPosition: 'suffix' })}
           </Text>
           <Text className="mt-1 text-sm text-text-secondary">
-            {t('companion.earnings.from_bookings', { count: earnings.bookings })}
+            {t('companion.earnings.total_earnings')}:{' '}
+            {formatVND(overview?.totalEarnings || 0, {
+              symbolPosition: 'suffix',
+            })}
           </Text>
         </MotiView>
 
@@ -244,46 +284,87 @@ export default function EarningsOverview() {
             <Text style={styles.sectionTitle} className="text-lg text-midnight">
               {t('companion.earnings.recent_transactions')}
             </Text>
-            <Pressable testID="see-all-transactions" className="flex-row items-center gap-1">
-              <Text className="text-sm font-medium text-lavender-400">{t('common.see_all')}</Text>
+            <Pressable
+              testID="see-all-transactions"
+              className="flex-row items-center gap-1"
+            >
+              <Text className="text-sm font-medium text-lavender-400">
+                {t('common.see_all')}
+              </Text>
               <ArrowRight color={colors.lavender[400]} width={16} height={16} />
             </Pressable>
           </View>
 
           <View className="gap-3">
-            {MOCK_TRANSACTIONS.map((transaction, index) => {
-              const iconData = getTransactionIcon(transaction.type);
-              return (
-                <MotiView
-                  key={transaction.id}
-                  from={{ opacity: 0, translateX: -20 }}
-                  animate={{ opacity: 1, translateX: 0 }}
-                  transition={{ type: 'timing', duration: 400, delay: 400 + index * 50 }}
-                >
-                  <View className="flex-row items-center gap-4 rounded-xl bg-white p-4">
-                    <View className={`size-12 items-center justify-center rounded-full ${iconData.bg}`}>
-                      <iconData.icon color={iconData.color} width={24} height={24} />
-                    </View>
-                    <View className="flex-1">
-                      <Text className="font-medium text-midnight" numberOfLines={1}>
-                        {transaction.description}
+            {transactions.length > 0 ? (
+              transactions.map((transaction, index) => {
+                const iconData = getTransactionIcon(transaction.type);
+                const dateStr = new Date(
+                  transaction.createdAt
+                ).toLocaleDateString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                  year: 'numeric',
+                });
+                const isPositive =
+                  transaction.type === 'earning' ||
+                  transaction.type === 'bonus';
+                const displayAmount = isPositive
+                  ? transaction.amount
+                  : -transaction.amount;
+                return (
+                  <MotiView
+                    key={transaction.id}
+                    from={{ opacity: 0, translateX: -20 }}
+                    animate={{ opacity: 1, translateX: 0 }}
+                    transition={{
+                      type: 'timing',
+                      duration: 400,
+                      delay: 400 + index * 50,
+                    }}
+                  >
+                    <View className="flex-row items-center gap-4 rounded-xl bg-white p-4">
+                      <View
+                        className={`size-12 items-center justify-center rounded-full ${iconData.bg}`}
+                      >
+                        <iconData.icon
+                          color={iconData.color}
+                          width={24}
+                          height={24}
+                        />
+                      </View>
+                      <View className="flex-1">
+                        <Text
+                          className="font-medium text-midnight"
+                          numberOfLines={1}
+                        >
+                          {transaction.description}
+                        </Text>
+                        <Text className="text-xs text-text-tertiary">
+                          {dateStr}
+                        </Text>
+                      </View>
+                      <Text
+                        className={`font-semibold ${
+                          isPositive ? 'text-teal-400' : 'text-rose-400'
+                        }`}
+                      >
+                        {isPositive ? '+' : '-'}
+                        {formatVND(Math.abs(displayAmount), {
+                          symbolPosition: 'suffix',
+                        })}
                       </Text>
-                      <Text className="text-xs text-text-tertiary">
-                        {transaction.date}
-                      </Text>
                     </View>
-                    <Text
-                      className={`font-semibold ${
-                        transaction.amount >= 0 ? 'text-teal-400' : 'text-rose-400'
-                      }`}
-                    >
-                      {transaction.amount >= 0 ? '+' : ''}
-                      {formatVND(transaction.amount, { symbolPosition: 'suffix' })}
-                    </Text>
-                  </View>
-                </MotiView>
-              );
-            })}
+                  </MotiView>
+                );
+              })
+            ) : (
+              <View className="items-center py-8">
+                <Text className="text-text-secondary">
+                  {t('companion.earnings.no_transactions')}
+                </Text>
+              </View>
+            )}
           </View>
         </MotiView>
 

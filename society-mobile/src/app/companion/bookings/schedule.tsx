@@ -1,10 +1,16 @@
 /* eslint-disable max-lines-per-function */
 import type { Href } from 'expo-router';
-import { useRouter } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { MotiView } from 'moti';
 import React from 'react';
-import { Pressable, ScrollView, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import {
+  ActivityIndicator,
+  Pressable,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+} from 'react-native';
 
 import {
   Badge,
@@ -22,54 +28,11 @@ import {
   Clock,
   MapPin,
 } from '@/components/ui/icons';
-
-type ScheduledBooking = {
-  id: string;
-  clientName: string;
-  clientImage: string;
-  occasion: string;
-  date: Date;
-  time: string;
-  duration: string;
-  location: string;
-  status: 'confirmed' | 'pending';
-};
-
-const MOCK_SCHEDULE: ScheduledBooking[] = [
-  {
-    id: '1',
-    clientName: 'Nguyen Van Minh',
-    clientImage: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120',
-    occasion: 'Wedding Reception',
-    date: new Date(2025, 0, 15),
-    time: '2:00 PM - 6:00 PM',
-    duration: '4 hours',
-    location: 'Rex Hotel, District 1',
-    status: 'confirmed',
-  },
-  {
-    id: '2',
-    clientName: 'Tran Hoang Long',
-    clientImage: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=120',
-    occasion: 'Corporate Dinner',
-    date: new Date(2025, 0, 15),
-    time: '7:00 PM - 10:00 PM',
-    duration: '3 hours',
-    location: 'Lotte Hotel, District 1',
-    status: 'confirmed',
-  },
-  {
-    id: '3',
-    clientName: 'Le Thi Hong',
-    clientImage: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=120',
-    occasion: 'Tết Family Gathering',
-    date: new Date(2025, 0, 28),
-    time: '10:00 AM - 4:00 PM',
-    duration: '6 hours',
-    location: 'Binh Thanh District',
-    status: 'pending',
-  },
-];
+import {
+  type Booking,
+  type BookingScheduleItem,
+  bookingsService,
+} from '@/lib/api/services/bookings.service';
 
 const DAYS_OF_WEEK_KEYS = [
   'common.days.sun_short',
@@ -81,10 +44,26 @@ const DAYS_OF_WEEK_KEYS = [
   'common.days.sat_short',
 ];
 
+// Helper to get start/end of week
+function getWeekRange(date: Date): { start: Date; end: Date } {
+  const start = new Date(date);
+  start.setDate(date.getDate() - date.getDay()); // Start from Sunday
+  start.setHours(0, 0, 0, 0);
+
+  const end = new Date(start);
+  end.setDate(start.getDate() + 6);
+  end.setHours(23, 59, 59, 999);
+
+  return { start, end };
+}
+
 export default function CompanionSchedule() {
   const router = useRouter();
   const { t } = useTranslation();
   const [selectedDate, setSelectedDate] = React.useState(new Date());
+  const [schedule, setSchedule] = React.useState<BookingScheduleItem[]>([]);
+  const [isLoading, setIsLoading] = React.useState(true);
+  const [isRefreshing, setIsRefreshing] = React.useState(false);
 
   // Generate calendar dates for current week
   const weekDates = React.useMemo(() => {
@@ -100,13 +79,42 @@ export default function CompanionSchedule() {
     return dates;
   }, [selectedDate]);
 
+  // Fetch schedule for the current week
+  const fetchSchedule = React.useCallback(async () => {
+    try {
+      const { start, end } = getWeekRange(selectedDate);
+      const data = await bookingsService.getCompanionSchedule(
+        start.toISOString(),
+        end.toISOString()
+      );
+      setSchedule(data);
+    } catch (error) {
+      console.error('Failed to fetch schedule:', error);
+    } finally {
+      setIsLoading(false);
+      setIsRefreshing(false);
+    }
+  }, [selectedDate]);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchSchedule();
+    }, [fetchSchedule])
+  );
+
+  // Get all bookings as a flat array for easier lookup
+  const allBookings = React.useMemo(() => {
+    return schedule.flatMap((item) => item.bookings);
+  }, [schedule]);
+
   // Filter bookings for selected date
   const dayBookings = React.useMemo(() => {
-    return MOCK_SCHEDULE.filter(
-      (booking) =>
-        booking.date.toDateString() === selectedDate.toDateString()
-    );
-  }, [selectedDate]);
+    const selectedDateStr = selectedDate.toDateString();
+    return allBookings.filter((booking) => {
+      const bookingDate = new Date(booking.startDatetime);
+      return bookingDate.toDateString() === selectedDateStr;
+    });
+  }, [allBookings, selectedDate]);
 
   const handleBack = React.useCallback(() => {
     router.back();
@@ -124,18 +132,36 @@ export default function CompanionSchedule() {
     setSelectedDate(newDate);
   }, [selectedDate]);
 
+  const handleRefresh = React.useCallback(() => {
+    setIsRefreshing(true);
+    fetchSchedule();
+  }, [fetchSchedule]);
+
   const handleBookingPress = React.useCallback(
-    (booking: ScheduledBooking) => {
+    (booking: Booking) => {
       router.push(`/companion/bookings/${booking.id}` as Href);
     },
     [router]
   );
 
-  const hasBookingsOnDate = (date: Date) => {
-    return MOCK_SCHEDULE.some(
-      (b) => b.date.toDateString() === date.toDateString()
+  const hasBookingsOnDate = React.useCallback(
+    (date: Date) => {
+      const dateStr = date.toDateString();
+      return allBookings.some((b) => {
+        const bookingDate = new Date(b.startDatetime);
+        return bookingDate.toDateString() === dateStr;
+      });
+    },
+    [allBookings]
+  );
+
+  if (isLoading) {
+    return (
+      <View className="flex-1 items-center justify-center bg-warmwhite">
+        <ActivityIndicator size="large" color={colors.lavender[400]} />
+      </View>
     );
-  };
+  }
 
   return (
     <View className="flex-1 bg-warmwhite">
@@ -146,7 +172,10 @@ export default function CompanionSchedule() {
           <Pressable onPress={handleBack}>
             <ArrowLeft color={colors.midnight.DEFAULT} width={24} height={24} />
           </Pressable>
-          <Text style={styles.headerTitle} className="flex-1 text-xl text-midnight">
+          <Text
+            style={styles.headerTitle}
+            className="flex-1 text-xl text-midnight"
+          >
             {t('companion.schedule.header')}
           </Text>
           <Pressable>
@@ -160,7 +189,7 @@ export default function CompanionSchedule() {
         from={{ opacity: 0, translateY: -20 }}
         animate={{ opacity: 1, translateY: 0 }}
         transition={{ type: 'timing', duration: 500 }}
-        className="bg-white px-4 py-4"
+        className="bg-white p-4"
       >
         {/* Month Header */}
         <View className="mb-4 flex-row items-center justify-between">
@@ -174,7 +203,11 @@ export default function CompanionSchedule() {
             })}
           </Text>
           <Pressable onPress={handleNextWeek} className="p-2">
-            <ArrowRight color={colors.midnight.DEFAULT} width={20} height={20} />
+            <ArrowRight
+              color={colors.midnight.DEFAULT}
+              width={20}
+              height={20}
+            />
           </Pressable>
         </View>
 
@@ -228,6 +261,9 @@ export default function CompanionSchedule() {
         className="flex-1"
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 16 }}
+        refreshControl={
+          <RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} />
+        }
       >
         {/* Selected Date Header */}
         <Text className="mb-4 text-sm font-medium text-text-tertiary">
@@ -241,75 +277,122 @@ export default function CompanionSchedule() {
         {/* Bookings */}
         {dayBookings.length > 0 ? (
           <View className="gap-3">
-            {dayBookings.map((booking, index) => (
-              <MotiView
-                key={booking.id}
-                from={{ opacity: 0, translateX: -20 }}
-                animate={{ opacity: 1, translateX: 0 }}
-                transition={{ type: 'timing', duration: 400, delay: index * 100 }}
-              >
-                <Pressable
-                  onPress={() => handleBookingPress(booking)}
-                  className="flex-row gap-4 rounded-2xl bg-white p-4"
-                >
-                  {/* Time Indicator */}
-                  <View className="items-center">
-                    <Text className="text-sm font-semibold text-lavender-400">
-                      {booking.time.split(' - ')[0]}
-                    </Text>
-                    <View className="my-2 h-12 w-0.5 bg-lavender-400/30" />
-                    <Text className="text-xs text-text-tertiary">
-                      {booking.time.split(' - ')[1]}
-                    </Text>
-                  </View>
+            {dayBookings.map((booking, index) => {
+              const startTime = new Date(booking.startDatetime);
+              const endTime = new Date(booking.endDatetime);
+              const startTimeStr = startTime.toLocaleTimeString('en-US', {
+                hour: 'numeric',
+                minute: '2-digit',
+              });
+              const endTimeStr = endTime.toLocaleTimeString('en-US', {
+                hour: 'numeric',
+                minute: '2-digit',
+              });
+              const statusVariant =
+                booking.status === 'confirmed'
+                  ? 'teal'
+                  : booking.status === 'active'
+                    ? 'lavender'
+                    : 'default';
+              const statusLabel =
+                booking.status === 'confirmed'
+                  ? t('common.status.confirmed')
+                  : booking.status === 'active'
+                    ? t('common.status.active')
+                    : t('common.status.pending');
 
-                  {/* Booking Card */}
-                  <View className="flex-1 rounded-xl bg-softpink p-3">
-                    <View className="flex-row items-center gap-3">
-                      <Image
-                        source={{ uri: booking.clientImage }}
-                        className="size-10 rounded-full"
-                        contentFit="cover"
-                      />
-                      <View className="flex-1">
-                        <Text className="font-semibold text-midnight">
-                          {booking.clientName}
-                        </Text>
-                        <Text className="text-sm text-rose-400">
-                          {booking.occasion}
-                        </Text>
-                      </View>
-                      <Badge
-                        label={booking.status === 'confirmed' ? t('common.status.confirmed') : t('common.status.pending')}
-                        variant={booking.status === 'confirmed' ? 'teal' : 'lavender'}
-                        size="sm"
-                      />
+              return (
+                <MotiView
+                  key={booking.id}
+                  from={{ opacity: 0, translateX: -20 }}
+                  animate={{ opacity: 1, translateX: 0 }}
+                  transition={{
+                    type: 'timing',
+                    duration: 400,
+                    delay: index * 100,
+                  }}
+                >
+                  <Pressable
+                    onPress={() => handleBookingPress(booking)}
+                    className="flex-row gap-4 rounded-2xl bg-white p-4"
+                  >
+                    {/* Time Indicator */}
+                    <View className="items-center">
+                      <Text className="text-sm font-semibold text-lavender-400">
+                        {startTimeStr}
+                      </Text>
+                      <View className="my-2 h-12 w-0.5 bg-lavender-400/30" />
+                      <Text className="text-xs text-text-tertiary">
+                        {endTimeStr}
+                      </Text>
                     </View>
-                    <View className="mt-3 flex-row items-center gap-4">
-                      <View className="flex-row items-center gap-1">
-                        <Clock color={colors.text.tertiary} width={12} height={12} />
-                        <Text className="text-xs text-text-tertiary">
-                          {booking.duration}
-                        </Text>
+
+                    {/* Booking Card */}
+                    <View className="flex-1 rounded-xl bg-softpink p-3">
+                      <View className="flex-row items-center gap-3">
+                        <Image
+                          source={{
+                            uri:
+                              booking.hirer.avatarUrl ||
+                              'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120',
+                          }}
+                          className="size-10 rounded-full"
+                          contentFit="cover"
+                        />
+                        <View className="flex-1">
+                          <Text className="font-semibold text-midnight">
+                            {booking.hirer.fullName}
+                          </Text>
+                          <Text className="text-sm text-rose-400">
+                            {t(`companion.services.${booking.occasionType}`)}
+                          </Text>
+                        </View>
+                        <Badge
+                          label={statusLabel}
+                          variant={statusVariant}
+                          size="sm"
+                        />
                       </View>
-                      <View className="flex-row items-center gap-1">
-                        <MapPin color={colors.text.tertiary} width={12} height={12} />
-                        <Text className="text-xs text-text-tertiary">
-                          {booking.location}
-                        </Text>
+                      <View className="mt-3 flex-row items-center gap-4">
+                        <View className="flex-row items-center gap-1">
+                          <Clock
+                            color={colors.text.tertiary}
+                            width={12}
+                            height={12}
+                          />
+                          <Text className="text-xs text-text-tertiary">
+                            {booking.durationHours} {t('common.hours')}
+                          </Text>
+                        </View>
+                        <View className="flex-row items-center gap-1">
+                          <MapPin
+                            color={colors.text.tertiary}
+                            width={12}
+                            height={12}
+                          />
+                          <Text
+                            className="flex-1 text-xs text-text-tertiary"
+                            numberOfLines={1}
+                          >
+                            {booking.locationAddress}
+                          </Text>
+                        </View>
                       </View>
                     </View>
-                  </View>
-                </Pressable>
-              </MotiView>
-            ))}
+                  </Pressable>
+                </MotiView>
+              );
+            })}
           </View>
         ) : (
           <View className="items-center py-16">
             <View className="size-16 items-center justify-center rounded-full bg-lavender-400/20">
               <Calendar color={colors.lavender[400]} width={32} height={32} />
             </View>
-            <Text style={styles.emptyTitle} className="mt-4 text-lg text-midnight">
+            <Text
+              style={styles.emptyTitle}
+              className="mt-4 text-lg text-midnight"
+            >
               {t('companion.schedule.no_bookings')}
             </Text>
             <Text className="mt-1 text-center text-sm text-text-secondary">

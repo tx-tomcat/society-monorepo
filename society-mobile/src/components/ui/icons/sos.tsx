@@ -5,7 +5,14 @@ import Svg, { Circle, Text as SvgText } from 'react-native-svg';
 export function Sos({ color = '#FF5757', ...props }: SvgProps) {
   return (
     <Svg width={48} height={48} viewBox="0 0 48 48" fill="none" {...props}>
-      <Circle cx={24} cy={24} r={22} fill={color} stroke={color} strokeWidth={4} />
+      <Circle
+        cx={24}
+        cy={24}
+        r={22}
+        fill={color}
+        stroke={color}
+        strokeWidth={4}
+      />
       <SvgText
         x={24}
         y={30}

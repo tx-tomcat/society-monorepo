@@ -23,7 +23,7 @@ async function bootstrap() {
           catchAsyncErrors: true,
         }),
         {
-          logger: ['error', 'warn'],
+          logger: ['error', 'warn', 'log', 'debug'],
         },
       );
 

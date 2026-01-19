@@ -1,76 +1,38 @@
 import {
   Body,
   Controller,
-  Post,
   Get,
-  UseGuards,
-  Request,
+  Headers,
   HttpCode,
   HttpStatus,
-  Headers,
-  Ip,
+  Post,
+  Request,
+  UseGuards
 } from '@nestjs/common';
-import { AuthService } from './auth.service';
-import {
-  SendMagicLinkDto,
-  VerifyOtpDto,
-  ExchangeCodeDto,
-  RefreshTokenDto,
-  CheckOtpStatusDto,
-} from './dto/auth.dto';
-import { JwtAuthGuard } from './guards/jwt.guard';
-import { RateLimitGuard } from '../modules/security/guards/rate-limit.guard';
 import { RateLimit } from '../modules/security/decorators/rate-limit.decorator';
 import { RateLimitType } from '../modules/security/dto/security.dto';
+import { RateLimitGuard } from '../modules/security/guards/rate-limit.guard';
+import { AuthService } from './auth.service';
+import {
+  CheckOtpStatusDto,
+  RefreshTokenDto,
+  SetUserRoleDto,
+  ZaloAuthDto
+} from './dto/auth.dto';
+import { JwtAuthGuard } from './guards/jwt.guard';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private jwtAuthGuard: JwtAuthGuard,
+  ) { }
 
-  /**
-   * Send magic link to email
-   * POST /auth/magic-link
-   * Rate limited: 5 requests per 5 minutes per IP
-   * CAPTCHA required after 3 failed attempts
-   */
-  @Post('magic-link')
-  @UseGuards(RateLimitGuard)
-  @RateLimit(RateLimitType.LOGIN, (ctx) => ctx.switchToHttp().getRequest().ip)
-  @HttpCode(HttpStatus.OK)
-  async sendMagicLink(@Body() dto: SendMagicLinkDto, @Ip() ip: string) {
-    return this.authService.sendMagicLink(dto.email, dto.userType, dto.captchaToken, ip);
-  }
-
-  /**
-   * Verify OTP code (for mobile apps)
-   * POST /auth/verify-otp
-   * Rate limited: 5 requests per 5 minutes per IP
-   * CAPTCHA required after 3 failed attempts
-   */
-  @Post('verify-otp')
-  @UseGuards(RateLimitGuard)
-  @RateLimit(RateLimitType.LOGIN, (ctx) => ctx.switchToHttp().getRequest().ip)
-  @HttpCode(HttpStatus.OK)
-  async verifyOtp(@Body() dto: VerifyOtpDto, @Ip() ip: string) {
-    return this.authService.verifyOtp(dto.email, dto.token, dto.captchaToken, ip);
-  }
-
-  /**
-   * Exchange auth code for session (callback from magic link)
-   * POST /auth/callback
-   * Rate limited: 5 requests per 5 minutes per IP
-   */
-  @Post('callback')
-  @UseGuards(RateLimitGuard)
-  @RateLimit(RateLimitType.LOGIN, (ctx) => ctx.switchToHttp().getRequest().ip)
-  @HttpCode(HttpStatus.OK)
-  async exchangeCode(@Body() dto: ExchangeCodeDto) {
-    return this.authService.exchangeCodeForSession(dto.code);
-  }
 
   /**
    * Refresh access token
    * POST /auth/refresh
+   * Tries Society JWT refresh first (Zalo auth), falls back to Supabase (legacy)
    * Rate limited: 5 requests per 5 minutes per IP
    */
   @Post('refresh')
@@ -78,21 +40,15 @@ export class AuthController {
   @RateLimit(RateLimitType.LOGIN, (ctx) => ctx.switchToHttp().getRequest().ip)
   @HttpCode(HttpStatus.OK)
   async refreshToken(@Body() dto: RefreshTokenDto) {
-    return this.authService.refreshSession(dto.refreshToken);
+    // Try Society JWT refresh first (Zalo auth)
+    try {
+      return await this.authService.refreshSocietyToken(dto.refreshToken);
+    } catch {
+      // Fall back to Supabase refresh for legacy users
+      return this.authService.refreshSession(dto.refreshToken);
+    }
   }
 
-  /**
-   * Resend magic link
-   * POST /auth/resend
-   * Rate limited: 5 requests per 5 minutes per IP
-   */
-  @Post('resend')
-  @UseGuards(RateLimitGuard)
-  @RateLimit(RateLimitType.LOGIN, (ctx) => ctx.switchToHttp().getRequest().ip)
-  @HttpCode(HttpStatus.OK)
-  async resendMagicLink(@Body() dto: SendMagicLinkDto) {
-    return this.authService.resendMagicLink(dto.email);
-  }
 
   /**
    * Sign out (invalidate session)
@@ -103,6 +59,8 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async signOut(@Headers('authorization') auth: string) {
     const token = auth?.replace('Bearer ', '');
+    // Invalidate cached session
+    await this.jwtAuthGuard.invalidateSession(token);
     return this.authService.signOut(token);
   }
 
@@ -152,5 +110,46 @@ export class AuthController {
   @Get('captcha-config')
   getCaptchaConfig() {
     return this.authService.getCaptchaConfig();
+  }
+
+  /**
+   * Authenticate with Zalo
+   * POST /auth/zalo
+   * Validates Zalo access token and issues Society JWT tokens
+   * Rate limited: 5 requests per 5 minutes per IP
+   */
+  @Post('zalo')
+  @UseGuards(RateLimitGuard)
+  @RateLimit(RateLimitType.LOGIN, (ctx) => ctx.switchToHttp().getRequest().ip)
+  @HttpCode(HttpStatus.OK)
+  async authenticateWithZalo(@Body() dto: ZaloAuthDto) {
+    console.log('Zalo auth request:', dto);
+    return this.authService.authenticateWithZalo(dto.accessToken, dto.refreshToken);
+  }
+
+  /**
+   * Refresh Society JWT token
+   * POST /auth/refresh-token
+   * Refreshes the Society-issued JWT token
+   */
+  @Post('refresh-token')
+  @UseGuards(RateLimitGuard)
+  @RateLimit(RateLimitType.LOGIN, (ctx) => ctx.switchToHttp().getRequest().ip)
+  @HttpCode(HttpStatus.OK)
+  async refreshSocietyToken(@Body() dto: RefreshTokenDto) {
+    return this.authService.refreshSocietyToken(dto.refreshToken);
+  }
+
+  /**
+   * Set user role after initial registration
+   * POST /auth/set-role
+   * Allows new users to choose hirer or companion role
+   */
+  @Post('set-role')
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  async setUserRole(@Request() req, @Body() dto: SetUserRoleDto) {
+    const userId = req.user.id;
+    return this.authService.setUserRole(userId, dto.role);
   }
 }

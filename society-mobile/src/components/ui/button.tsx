@@ -14,19 +14,19 @@ const button = tv({
   variants: {
     variant: {
       default: {
-        container: 'bg-rose-400 dark:bg-rose-400',
-        label: 'text-white dark:text-white',
-        indicator: 'text-white dark:text-white',
+        container: 'bg-rose-400',
+        label: 'text-white',
+        indicator: 'text-white',
       },
       secondary: {
-        container: 'bg-softpink dark:bg-charcoal-700',
-        label: 'text-rose-400 dark:text-offwhite',
-        indicator: 'text-rose-400 dark:text-offwhite',
+        container: 'bg-softpink',
+        label: 'text-rose-400',
+        indicator: 'text-rose-400',
       },
       outline: {
-        container: 'border border-rose-400 dark:border-rose-400',
-        label: 'text-rose-400 dark:text-rose-400',
-        indicator: 'text-rose-400 dark:text-rose-400',
+        container: 'border border-rose-400',
+        label: 'text-rose-400',
+        indicator: 'text-rose-400',
       },
       destructive: {
         container: 'bg-danger-500',
@@ -35,23 +35,23 @@ const button = tv({
       },
       ghost: {
         container: 'bg-transparent',
-        label: 'text-rose-400 underline dark:text-offwhite',
-        indicator: 'text-rose-400 dark:text-offwhite',
+        label: 'text-rose-400 underline',
+        indicator: 'text-rose-400',
       },
       link: {
         container: 'bg-transparent',
-        label: 'text-rose-400 dark:text-offwhite',
-        indicator: 'text-rose-400 dark:text-offwhite',
+        label: 'text-rose-400',
+        indicator: 'text-rose-400',
       },
       coral: {
-        container: 'bg-coral-400 dark:bg-coral-400',
-        label: 'text-white dark:text-white',
-        indicator: 'text-white dark:text-white',
+        container: 'bg-coral-400',
+        label: 'text-white',
+        indicator: 'text-white',
       },
       teal: {
-        container: 'bg-teal-400 dark:bg-teal-400',
-        label: 'text-white dark:text-white',
-        indicator: 'text-white dark:text-white',
+        container: 'bg-teal-400',
+        label: 'text-white',
+        indicator: 'text-white',
       },
     },
     size: {
@@ -75,9 +75,9 @@ const button = tv({
     },
     disabled: {
       true: {
-        container: 'bg-neutral-300 dark:bg-neutral-700',
-        label: 'text-neutral-600 dark:text-neutral-500',
-        indicator: 'text-neutral-400 dark:text-neutral-500',
+        container: 'bg-neutral-300',
+        label: 'text-neutral-600',
+        indicator: 'text-neutral-400',
       },
     },
     fullWidth: {

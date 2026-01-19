@@ -1,33 +1,33 @@
+import { Roles } from '@/common/decorators/roles.decorator';
+import { Role } from '@/common/enums/roles.enum';
 import {
+  Body,
   Controller,
   Get,
-  Post,
-  Put,
-  Body,
   Param,
+  Post,
   Query,
-  UseGuards,
   Request,
+  UseGuards
 } from '@nestjs/common';
-import { JwtAuthGuard } from '../../../auth/guards/jwt-auth.guard';
+import { JwtAuthGuard } from '../../../auth/guards/jwt.guard';
 import { RolesGuard } from '../../../auth/guards/roles.guard';
-import { Roles } from '../../../auth/decorators/roles.decorator';
-import { ModerationService } from '../services/moderation.service';
 import {
-  ReportUserDto,
-  ReportContentDto,
-  ModerationActionDto,
-  SuspendUserDto,
-  LiftSuspensionDto,
-  ReviewAppealDto,
-  ModerationQueueFilterDto,
   BulkModerationDto,
+  LiftSuspensionDto,
+  ModerationActionDto,
+  ModerationQueueFilterDto,
+  ReportContentDto,
+  ReportUserDto,
+  ReviewAppealDto,
+  SuspendUserDto,
 } from '../dto/moderation.dto';
+import { ModerationService } from '../services/moderation.service';
 
 @Controller('moderation')
 @UseGuards(JwtAuthGuard)
 export class ModerationController {
-  constructor(private readonly moderationService: ModerationService) {}
+  constructor(private readonly moderationService: ModerationService) { }
 
   // User reporting endpoints
   @Post('report/user')
@@ -43,9 +43,9 @@ export class ModerationController {
 
 @Controller('admin/moderation')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles('admin', 'moderator')
+@Roles(Role.ADMIN)
 export class ModerationAdminController {
-  constructor(private readonly moderationService: ModerationService) {}
+  constructor(private readonly moderationService: ModerationService) { }
 
   @Get('queue')
   async getQueue(@Query() filters: ModerationQueueFilterDto) {

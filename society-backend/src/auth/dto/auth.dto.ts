@@ -60,3 +60,23 @@ export class CheckOtpStatusDto {
   @IsEmail()
   email: string;
 }
+
+/**
+ * DTO for Zalo authentication
+ */
+export class ZaloAuthDto {
+  @IsString()
+  accessToken: string;
+
+  @IsOptional()
+  @IsString()
+  refreshToken?: string;
+}
+
+/**
+ * DTO for setting user role after registration
+ */
+export class SetUserRoleDto {
+  @IsEnum(UserType)
+  role: 'hirer' | 'companion';
+}

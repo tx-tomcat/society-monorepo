@@ -1,1 +1,1 @@
-export type UserType = 'companion' | 'hirer';
+export type UserType = 'companion' | 'hirer' | 'neutral';

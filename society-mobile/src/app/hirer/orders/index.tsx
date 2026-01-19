@@ -1,14 +1,18 @@
 /* eslint-disable max-lines-per-function */
 import { FlashList } from '@shopify/flash-list';
-import { MotiView } from 'moti';
 import type { Href } from 'expo-router';
 import { useRouter } from 'expo-router';
+import { MotiView } from 'moti';
 import React from 'react';
-import { Pressable, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import {
+  ActivityIndicator,
+  Pressable,
+  RefreshControl,
+  StyleSheet,
+} from 'react-native';
 
 import {
-  Badge,
   colors,
   FocusAwareStatusBar,
   Image,
@@ -16,9 +20,11 @@ import {
   Text,
   View,
 } from '@/components/ui';
-import { ArrowLeft, Calendar, Clock, MapPin } from '@/components/ui/icons';
+import { Calendar, Clock, MapPin } from '@/components/ui/icons';
+import type { BookingStatus as APIBookingStatus } from '@/lib/api/services/bookings.service';
+import { useBookings } from '@/lib/hooks';
 
-type BookingStatus = 'upcoming' | 'active' | 'completed' | 'cancelled';
+type BookingStatus = 'pending' | 'confirmed' | 'completed' | 'cancelled';
 
 type Booking = {
   id: string;
@@ -27,98 +33,69 @@ type Booking = {
     image: string;
   };
   occasion: string;
+  occasionEmoji: string;
   date: string;
   time: string;
   location: string;
   status: BookingStatus;
-  price: number;
 };
 
 const TABS = [
-  { id: 'all', labelKey: 'hirer.orders.tabs.all' },
   { id: 'upcoming', labelKey: 'hirer.orders.tabs.upcoming' },
-  { id: 'active', labelKey: 'hirer.orders.tabs.active' },
-  { id: 'completed', labelKey: 'hirer.orders.tabs.past' },
+  { id: 'past', labelKey: 'hirer.orders.tabs.past' },
 ];
 
-const MOCK_BOOKINGS: Booking[] = [
-  {
-    id: '1',
-    companion: {
-      name: 'Minh Anh',
-      image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400',
-    },
-    occasion: 'Wedding Reception',
-    date: 'Jan 15, 2025',
-    time: '2:00 PM - 6:00 PM',
-    location: 'Rex Hotel, District 1',
-    status: 'upcoming',
-    price: 2000000,
-  },
-  {
-    id: '2',
-    companion: {
-      name: 'Thu Hương',
-      image: 'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=400',
-    },
-    occasion: 'Coffee Date',
-    date: 'Today',
-    time: '3:00 PM - 5:00 PM',
-    location: 'The Coffee House, D3',
-    status: 'active',
-    price: 800000,
-  },
-  {
-    id: '3',
-    companion: {
-      name: 'Ngọc Trâm',
-      image: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=400',
-    },
-    occasion: 'Family Dinner',
-    date: 'Dec 28, 2024',
-    time: '6:00 PM - 9:00 PM',
-    location: 'Home - District 7',
-    status: 'completed',
-    price: 1500000,
-  },
-  {
-    id: '4',
-    companion: {
-      name: 'Hoàng Yến',
-      image: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400',
-    },
-    occasion: 'Corporate Event',
-    date: 'Dec 20, 2024',
-    time: '7:00 PM - 10:00 PM',
-    location: 'Sofitel Saigon',
-    status: 'cancelled',
-    price: 3000000,
-  },
-];
+const OCCASION_EMOJIS: Record<string, string> = {
+  dining: '🍽️',
+  coffee: '☕',
+  event: '🎉',
+  business: '💼',
+  travel: '✈️',
+  shopping: '🛍️',
+  casual: '👋',
+};
 
 const getStatusConfig = (status: BookingStatus) => {
   switch (status) {
-    case 'upcoming':
-      return { variant: 'lavender' as const, labelKey: 'hirer.orders.status.upcoming' };
-    case 'active':
-      return { variant: 'teal' as const, labelKey: 'hirer.orders.status.in_progress' };
+    case 'pending':
+      return {
+        label: 'Pending',
+        bgColor: '#FFFBEB',
+        textColor: '#E6C337',
+      };
+    case 'confirmed':
+      return {
+        label: 'Confirmed',
+        bgColor: '#EDFCFB',
+        textColor: '#46B9B1',
+      };
     case 'completed':
-      return { variant: 'secondary' as const, labelKey: 'hirer.orders.status.completed' };
+      return {
+        label: 'Completed',
+        bgColor: '#F0EEF2',
+        textColor: colors.text.secondary,
+      };
     case 'cancelled':
-      return { variant: 'secondary' as const, labelKey: 'hirer.orders.status.cancelled' };
+      return {
+        label: 'Cancelled',
+        bgColor: '#FEE2E2',
+        textColor: '#EF4444',
+      };
     default:
-      return { variant: 'secondary' as const, labelKey: status };
+      return {
+        label: status,
+        bgColor: '#F0EEF2',
+        textColor: colors.text.secondary,
+      };
   }
 };
 
 function BookingCard({
   booking,
   onPress,
-  t,
 }: {
   booking: Booking;
   onPress: () => void;
-  t: (key: string) => string;
 }) {
   const statusConfig = getStatusConfig(booking.status);
 
@@ -128,48 +105,55 @@ function BookingCard({
         from={{ opacity: 0, translateY: 10 }}
         animate={{ opacity: 1, translateY: 0 }}
         transition={{ type: 'timing', duration: 400 }}
-        className="mx-4 mb-4 overflow-hidden rounded-2xl border border-border-light bg-white"
+        className="mx-4 mb-3 overflow-hidden rounded-2xl bg-white"
+        style={styles.card}
       >
-        <View className="flex-row p-4">
-          {/* Companion Image */}
+        {/* Top row: Avatar, Name/Occasion, Badge */}
+        <View className="flex-row items-center p-4 pb-3">
           <Image
             source={{ uri: booking.companion.image }}
-            className="size-20 rounded-xl"
+            className="size-12 rounded-full"
             contentFit="cover"
           />
-
-          {/* Details */}
-          <View className="ml-4 flex-1">
-            <View className="flex-row items-center justify-between">
-              <Text className="text-lg font-bold text-midnight">
-                {booking.companion.name}
-              </Text>
-              <Badge label={t(statusConfig.labelKey)} variant={statusConfig.variant} size="sm" />
-            </View>
-
-            <Text className="mt-1 font-medium text-rose-400">{booking.occasion}</Text>
-
-            <View className="mt-2 flex-row items-center gap-1">
-              <Calendar color={colors.text.tertiary} width={14} height={14} />
-              <Text className="text-sm text-text-tertiary">{booking.date}</Text>
-            </View>
-
-            <View className="mt-1 flex-row items-center gap-1">
-              <Clock color={colors.text.tertiary} width={14} height={14} />
-              <Text className="text-sm text-text-tertiary">{booking.time}</Text>
-            </View>
+          <View className="ml-3 flex-1">
+            <Text style={styles.companionName} className="text-sm text-midnight">
+              {booking.companion.name}
+            </Text>
+            <Text className="mt-0.5 text-xs text-text-secondary">
+              {booking.occasionEmoji} {booking.occasion}
+            </Text>
+          </View>
+          <View
+            style={[
+              styles.badge,
+              { backgroundColor: statusConfig.bgColor },
+            ]}
+          >
+            <Text
+              style={[styles.badgeText, { color: statusConfig.textColor }]}
+            >
+              {statusConfig.label}
+            </Text>
           </View>
         </View>
 
-        {/* Location Bar */}
-        <View className="flex-row items-center gap-2 border-t border-border-light bg-softpink/50 px-4 py-3">
-          <MapPin color={colors.rose[400]} width={16} height={16} />
-          <Text className="flex-1 text-sm text-text-secondary" numberOfLines={1}>
-            {booking.location}
-          </Text>
-          <Text className="font-bold text-midnight">
-            {booking.price.toLocaleString('vi-VN')}đ
-          </Text>
+        {/* Divider */}
+        <View className="mx-4 h-px bg-border-light" />
+
+        {/* Bottom row: Date, Time, Location */}
+        <View className="flex-row items-center gap-3 px-4 py-3">
+          <View className="flex-row items-center gap-1">
+            <Calendar color={colors.text.secondary} size={12} width={12} height={12} />
+            <Text className="text-xs text-text-secondary">{booking.date}</Text>
+          </View>
+          <View className="flex-row items-center gap-1">
+            <Clock color={colors.text.secondary} width={12} height={12} />
+            <Text className="text-xs text-text-secondary">{booking.time}</Text>
+          </View>
+          <View className="flex-row items-center gap-1">
+            <MapPin color={colors.text.secondary} width={12} height={12} />
+            <Text className="text-xs text-text-secondary">{booking.location}</Text>
+          </View>
         </View>
       </MotiView>
     </Pressable>
@@ -179,11 +163,81 @@ function BookingCard({
 export default function MyBookings() {
   const router = useRouter();
   const { t } = useTranslation();
-  const [activeTab, setActiveTab] = React.useState('all');
+  const [activeTab, setActiveTab] = React.useState('upcoming');
 
-  const handleBack = React.useCallback(() => {
-    router.back();
-  }, [router]);
+  // Map local tab to API status
+  const getApiStatus = (tab: string): APIBookingStatus | undefined => {
+    if (tab === 'upcoming') return 'confirmed';
+    if (tab === 'past') return 'completed';
+    return undefined;
+  };
+
+  // API hook
+  const {
+    data: bookingsData,
+    isLoading,
+    refetch,
+    isRefetching,
+  } = useBookings(getApiStatus(activeTab));
+
+  // Map API status to local display status
+  const mapStatus = (apiStatus: string): BookingStatus => {
+    switch (apiStatus) {
+      case 'pending':
+        return 'pending';
+      case 'confirmed':
+        return 'confirmed';
+      case 'active':
+        return 'confirmed';
+      case 'completed':
+        return 'completed';
+      case 'cancelled':
+      case 'disputed':
+      case 'expired':
+        return 'cancelled';
+      default:
+        return 'pending';
+    }
+  };
+
+  // Get occasion emoji
+  const getOccasionEmoji = (occasion: string): string => {
+    const key = occasion.toLowerCase().replace(/_/g, ' ').split(' ')[0];
+    return OCCASION_EMOJIS[key] || '👋';
+  };
+
+  // Transform bookings data from API Booking type
+  const bookings = React.useMemo(() => {
+    if (!bookingsData?.bookings) return [];
+    return bookingsData.bookings.map((b) => {
+      const occasionText = b.occasionType?.replace(/_/g, ' ') || 'Casual';
+      return {
+        id: b.id,
+        companion: {
+          name: b.companion?.user?.fullName || '',
+          image:
+            b.companion?.user?.avatarUrl || b.companion?.photos?.[0]?.url || '',
+        },
+        occasion: occasionText.charAt(0).toUpperCase() + occasionText.slice(1),
+        occasionEmoji: getOccasionEmoji(occasionText),
+        date: b.startDatetime
+          ? new Date(b.startDatetime).toLocaleDateString('en-US', {
+              month: 'short',
+              day: 'numeric',
+            })
+          : '',
+        time: b.startDatetime
+          ? new Date(b.startDatetime).toLocaleTimeString('en-US', {
+              hour: 'numeric',
+              minute: '2-digit',
+              hour12: true,
+            })
+          : `${b.durationHours}h`,
+        location: b.locationAddress?.split(',')[0] || '',
+        status: mapStatus(b.status),
+      };
+    }) as Booking[];
+  }, [bookingsData]);
 
   const handleBookingPress = React.useCallback(
     (booking: Booking) => {
@@ -192,16 +246,15 @@ export default function MyBookings() {
     [router]
   );
 
-  const filteredBookings = React.useMemo(() => {
-    if (activeTab === 'all') return MOCK_BOOKINGS;
-    return MOCK_BOOKINGS.filter(b => b.status === activeTab);
-  }, [activeTab]);
+  const handleRefresh = React.useCallback(() => {
+    refetch();
+  }, [refetch]);
 
   const renderBooking = React.useCallback(
     ({ item }: { item: Booking }) => (
-      <BookingCard booking={item} onPress={() => handleBookingPress(item)} t={t} />
+      <BookingCard booking={item} onPress={() => handleBookingPress(item)} />
     ),
-    [handleBookingPress, t]
+    [handleBookingPress]
   );
 
   return (
@@ -209,44 +262,74 @@ export default function MyBookings() {
       <FocusAwareStatusBar />
 
       <SafeAreaView edges={['top']}>
-        {/* Header */}
-        <View className="flex-row items-center gap-4 border-b border-border-light px-4 py-3">
-          <Pressable onPress={handleBack}>
-            <ArrowLeft color={colors.midnight.DEFAULT} width={24} height={24} />
-          </Pressable>
-          <Text style={styles.headerTitle} className="flex-1 text-xl text-midnight">
+        {/* Header - Left-aligned title, no back button */}
+        <View className="bg-white px-4 pb-0 pt-2">
+          <Text style={styles.headerTitle} className="text-2xl text-midnight">
             {t('hirer.orders.header')}
           </Text>
         </View>
 
-        {/* Tabs */}
-        <View className="flex-row gap-2 px-4 py-3">
-          {TABS.map(tab => (
-            <Pressable key={tab.id} onPress={() => setActiveTab(tab.id)}>
-              <Badge
-                label={t(tab.labelKey)}
-                variant={activeTab === tab.id ? 'default' : 'outline'}
-                size="default"
-              />
-            </Pressable>
-          ))}
+        {/* Segmented Tabs */}
+        <View className="flex-row gap-2 bg-white px-4 py-3">
+          {TABS.map((tab) => {
+            const isActive = activeTab === tab.id;
+            return (
+              <Pressable
+                key={tab.id}
+                onPress={() => setActiveTab(tab.id)}
+                className="flex-1"
+              >
+                <View
+                  style={[
+                    styles.tab,
+                    isActive ? styles.tabActive : styles.tabInactive,
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.tabText,
+                      isActive ? styles.tabTextActive : styles.tabTextInactive,
+                    ]}
+                  >
+                    {t(tab.labelKey)}
+                  </Text>
+                </View>
+              </Pressable>
+            );
+          })}
         </View>
       </SafeAreaView>
 
       {/* Bookings List */}
-      <FlashList
-        data={filteredBookings}
-        renderItem={renderBooking}
-        estimatedItemSize={150}
-        keyExtractor={item => item.id}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingTop: 8 }}
-        ListEmptyComponent={
-          <View className="flex-1 items-center justify-center py-20">
-            <Text className="text-lg text-text-tertiary">{t('hirer.orders.empty')}</Text>
-          </View>
-        }
-      />
+      {isLoading ? (
+        <View className="flex-1 items-center justify-center">
+          <ActivityIndicator color={colors.teal[400]} size="large" />
+        </View>
+      ) : (
+        <FlashList
+          data={bookings}
+          renderItem={renderBooking}
+          estimatedItemSize={130}
+          keyExtractor={(item) => item.id}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingTop: 12 }}
+          refreshControl={
+            <RefreshControl
+              refreshing={isRefetching}
+              onRefresh={handleRefresh}
+              tintColor={colors.teal[400]}
+              colors={[colors.teal[400]]}
+            />
+          }
+          ListEmptyComponent={
+            <View className="flex-1 items-center justify-center py-20">
+              <Text className="text-lg text-text-tertiary">
+                {t('hirer.orders.empty')}
+              </Text>
+            </View>
+          }
+        />
+      )}
     </View>
   );
 }
@@ -254,5 +337,45 @@ export default function MyBookings() {
 const styles = StyleSheet.create({
   headerTitle: {
     fontFamily: 'Urbanist_700Bold',
+  },
+  card: {
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  tab: {
+    paddingVertical: 8,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  tabActive: {
+    backgroundColor: colors.teal[400],
+  },
+  tabInactive: {
+    backgroundColor: '#F0EEF2',
+  },
+  tabText: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  tabTextActive: {
+    color: 'white',
+  },
+  tabTextInactive: {
+    color: colors.text.secondary,
+  },
+  badge: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  badgeText: {
+    fontSize: 11,
+    fontWeight: '600',
+  },
+  companionName: {
+    fontFamily: 'Urbanist_600SemiBold',
   },
 });

@@ -1,6 +1,6 @@
 import * as React from 'react';
 import type { SvgProps } from 'react-native-svg';
-import Svg, { Path, Circle } from 'react-native-svg';
+import Svg, { Circle, Path } from 'react-native-svg';
 
 export function Money({ color = '#4ECDC4', ...props }: SvgProps) {
   return (

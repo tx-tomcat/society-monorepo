@@ -4,7 +4,6 @@ import {
   type BottomSheetModal,
 } from '@gorhom/bottom-sheet';
 import { FlashList } from '@shopify/flash-list';
-import { useColorScheme } from 'nativewind';
 import * as React from 'react';
 import type { FieldValues } from 'react-hook-form';
 import { useController } from 'react-hook-form';
@@ -25,29 +24,29 @@ const selectTv = tv({
   slots: {
     container: 'mb-4 gap-2',
     label:
-      'text-lg font-semibold leading-[1.6] tracking-[0.2px] text-midnight dark:text-white',
+      'text-lg font-semibold leading-[1.6] tracking-[0.2px] text-midnight',
     input:
-      'flex-row items-center justify-between rounded-[10px] border border-neutral-300 bg-offwhite px-5 py-[18px] dark:border-charcoal-700 dark:bg-charcoal-800',
+      'flex-row items-center justify-between rounded-[10px] border border-neutral-300 bg-offwhite px-5 py-[18px]',
     inputValue:
-      'text-lg font-semibold leading-[1.6] tracking-[0.2px] text-midnight dark:text-white',
+      'text-lg font-semibold leading-[1.6] tracking-[0.2px] text-midnight',
   },
 
   variants: {
     focused: {
       true: {
-        input: 'border-neutral-400 dark:border-neutral-600',
+        input: 'border-neutral-400',
       },
     },
     error: {
       true: {
         input: 'border-2 border-danger-500',
-        label: 'text-midnight dark:text-white',
-        inputValue: 'text-midnight dark:text-white',
+        label: 'text-midnight',
+        inputValue: 'text-midnight',
       },
     },
     disabled: {
       true: {
-        input: 'bg-neutral-200 dark:bg-neutral-700',
+        input: 'bg-neutral-200',
       },
     },
   },
@@ -76,9 +75,6 @@ export const Options = React.forwardRef<BottomSheetModal, OptionsProps>(
   ({ options, onSelect, value, testID }, ref) => {
     const height = options.length * 70 + 100;
     const snapPoints = React.useMemo(() => [height], [height]);
-    const { colorScheme } = useColorScheme();
-    const isDark = colorScheme === 'dark';
-
     const renderSelectItem = React.useCallback(
       ({ item, index }: { item: OptionType; index: number }) => (
         <Option
@@ -99,7 +95,7 @@ export const Options = React.forwardRef<BottomSheetModal, OptionsProps>(
         index={0}
         snapPoints={snapPoints}
         backgroundStyle={{
-          backgroundColor: isDark ? colors.charcoal[850] : colors.white,
+          backgroundColor: colors.white,
         }}
       >
         <List
@@ -132,7 +128,7 @@ const Option = React.memo(
           <View className="size-6 items-center justify-center">
             {selected && <Check />}
           </View>
-          <Text className="flex-1 text-lg font-semibold leading-[1.6] tracking-[0.2px] text-offwhite dark:text-offwhite">
+          <Text className="flex-1 text-lg font-semibold leading-[1.6] tracking-[0.2px] text-offwhite">
             {label}
           </Text>
         </Pressable>
@@ -219,7 +215,7 @@ export const Select = (props: SelectProps) => {
         {error && (
           <Text
             testID={`${testID}-error`}
-            className="text-sm text-danger-300 dark:text-danger-600"
+            className="text-sm text-danger-300"
           >
             {error}
           </Text>

@@ -1,24 +1,21 @@
 import type { AxiosInstance, AxiosRequestConfig } from 'axios';
 import axios from 'axios';
-import Constants from 'expo-constants';
+import * as SecureStore from 'expo-secure-store';
+
+import { Env } from '@env';
+
+import { TOKEN_KEY } from './constants';
 
 /**
- * API Client with Clerk Authentication Integration
- *
- * This client automatically injects Clerk JWT tokens into requests.
- * Token injection happens at request time via a function parameter.
+ * API Client with automatic JWT token injection.
+ * Fetches token from SecureStore and adds to Authorization header.
  */
 class ApiClient {
   private client: AxiosInstance;
 
   constructor() {
-    const apiUrl =
-      Constants.expoConfig?.extra?.apiUrl ||
-      process.env.EXPO_PUBLIC_API_URL ||
-      'http://localhost:3000/api';
-
     this.client = axios.create({
-      baseURL: apiUrl,
+      baseURL: Env.API_URL,
       timeout: 30000,
       headers: {
         'Content-Type': 'application/json',
@@ -29,12 +26,28 @@ class ApiClient {
   }
 
   private setupInterceptors() {
+    // Request interceptor - Add auth token
+    this.client.interceptors.request.use(
+      async (config) => {
+        try {
+          const token = await SecureStore.getItemAsync(TOKEN_KEY);
+          if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+          }
+        } catch (error) {
+          console.warn('Failed to get auth token:', error);
+        }
+        return config;
+      },
+      (error) => Promise.reject(error)
+    );
+
     // Response interceptor - Handle errors globally
     this.client.interceptors.response.use(
       (response) => response.data,
       async (error) => {
         if (error.response?.status === 401) {
-          // Handle unauthorized - Clerk will handle re-auth automatically
+          // Handle unauthorized - user may need to re-authenticate
           console.warn(
             'Unauthorized request - user may need to re-authenticate'
           );
@@ -55,79 +68,48 @@ class ApiClient {
   /**
    * GET request
    */
-  async get<T>(
-    url: string,
-    config?: AxiosRequestConfig & { getToken?: () => Promise<string | null> }
-  ): Promise<T> {
-    const token = config?.getToken ? await config.getToken() : null;
-    const headers = token
-      ? { ...config?.headers, Authorization: `Bearer ${token}` }
-      : config?.headers;
-
-    return this.client.get(url, { ...config, headers });
+  async get<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
+    return this.client.get(url, config);
   }
 
   /**
    * POST request
    */
-  async post<T>(
+  async post<T, D = unknown>(
     url: string,
-    data?: any,
-    config?: AxiosRequestConfig & { getToken?: () => Promise<string | null> }
+    data?: D,
+    config?: AxiosRequestConfig
   ): Promise<T> {
-    const token = config?.getToken ? await config.getToken() : null;
-    const headers = token
-      ? { ...config?.headers, Authorization: `Bearer ${token}` }
-      : config?.headers;
-
-    return this.client.post(url, data, { ...config, headers });
+    return this.client.post(url, data, config);
   }
 
   /**
    * PUT request
    */
-  async put<T>(
+  async put<T, D = unknown>(
     url: string,
-    data?: any,
-    config?: AxiosRequestConfig & { getToken?: () => Promise<string | null> }
+    data?: D,
+    config?: AxiosRequestConfig
   ): Promise<T> {
-    const token = config?.getToken ? await config.getToken() : null;
-    const headers = token
-      ? { ...config?.headers, Authorization: `Bearer ${token}` }
-      : config?.headers;
-
-    return this.client.put(url, data, { ...config, headers });
+    return this.client.put(url, data, config);
   }
 
   /**
    * DELETE request
    */
-  async delete<T>(
-    url: string,
-    config?: AxiosRequestConfig & { getToken?: () => Promise<string | null> }
-  ): Promise<T> {
-    const token = config?.getToken ? await config.getToken() : null;
-    const headers = token
-      ? { ...config?.headers, Authorization: `Bearer ${token}` }
-      : config?.headers;
-
-    return this.client.delete(url, { ...config, headers });
+  async delete<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
+    return this.client.delete(url, config);
   }
 
   /**
    * PATCH request
    */
-  async patch<T>(
+  async patch<T, D = unknown>(
     url: string,
-    data?: any,
-    config?: AxiosRequestConfig & { getToken?: () => Promise<string | null> }
+    data?: D,
+    config?: AxiosRequestConfig
   ): Promise<T> {
-    const token = config?.getToken ? await config.getToken() : null;
-    const headers = token
-      ? { ...config?.headers, Authorization: `Bearer ${token}` }
-      : config?.headers;
-
-    return this.client.patch(url, data, { ...config, headers });
+    return this.client.patch(url, data, config);
   }
 }
 

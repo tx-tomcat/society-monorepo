@@ -6,6 +6,9 @@ export class DateUtils {
    * Calculate age from date of birth
    */
   static calculateAge(dateOfBirth: Date): number {
+    if (!dateOfBirth) {
+      return 0;
+    }
     const today = new Date();
     let age = today.getFullYear() - dateOfBirth.getFullYear();
     const monthDiff = today.getMonth() - dateOfBirth.getMonth();

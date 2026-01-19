@@ -10,15 +10,15 @@ const chatListItem = tv({
     avatar: 'size-[60px] rounded-full',
     content: 'flex-1 gap-2',
     header: 'flex-row items-center gap-2',
-    name: 'text-lg font-bold leading-[1.4] text-midnight dark:text-white',
+    name: 'text-lg font-bold leading-[1.4] text-midnight',
     levelBadge:
       'bg-primary-400/8 rounded-full border border-primary-400 px-2.5 py-0.5',
     levelText:
       'text-xs font-semibold leading-[1.6] tracking-[0.2px] text-primary-400',
     message:
-      'text-sm font-medium leading-[1.6] tracking-[0.2px] text-neutral-600 dark:text-neutral-400',
+      'text-sm font-medium leading-[1.6] tracking-[0.2px] text-neutral-600',
     timeContainer: 'items-end justify-center',
-    time: 'text-sm font-medium leading-[1.6] tracking-[0.2px] text-neutral-600 dark:text-neutral-400',
+    time: 'text-sm font-medium leading-[1.6] tracking-[0.2px] text-neutral-600',
   },
 });
 

@@ -45,10 +45,7 @@ export type FormatVNDOptions = {
  * formatVND(1500000, { abbreviated: true }) // "₫1.5M"
  * formatVND(1500000, { symbolPosition: 'suffix' }) // "1.500.000₫"
  */
-export function formatVND(
-  amount: number,
-  options?: FormatVNDOptions
-): string {
+export function formatVND(amount: number, options?: FormatVNDOptions): string {
   const {
     showSymbol = true,
     symbolPosition = 'prefix',

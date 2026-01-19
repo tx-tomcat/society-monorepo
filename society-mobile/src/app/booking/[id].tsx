@@ -2,7 +2,8 @@
 import type { Href } from 'expo-router';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React from 'react';
-import { Pressable, ScrollView } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView } from 'react-native';
+import { showMessage } from 'react-native-flash-message';
 
 import {
   Badge,
@@ -14,60 +15,83 @@ import {
   Text,
   View,
 } from '@/components/ui';
-import {
-  ArrowLeft,
-  Calendar,
-  Clock,
-  MapPin,
-  ShieldCheck,
-} from '@/components/ui/icons';
+import { ArrowLeft, Clock, MapPin, ShieldCheck } from '@/components/ui/icons';
+import type { ServiceType } from '@/lib/api/services/companions.service';
+import { useCompanion, useCreateBooking } from '@/lib/hooks';
 import { formatVND } from '@/lib/utils';
 
 // Booking steps
 type BookingStep = 'details' | 'datetime' | 'payment';
 
-// Mock companion data
-const mockCompanion = {
-  id: '1',
-  name: 'Minh Anh',
-  age: 24,
-  image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=800&q=80',
-  rating: 4.9,
-  pricePerHour: 500000,
-  isVerified: true,
-};
-
-// Mock occasion types
-const occasionTypes = [
-  { id: 'wedding', label: 'Wedding', icon: 'wedding-rings' },
-  { id: 'family', label: 'Family Event', icon: 'family' },
-  { id: 'tet', label: 'Tet Celebration', icon: 'mai-flower' },
-  { id: 'corporate', label: 'Corporate', icon: 'briefcase' },
-  { id: 'coffee', label: 'Coffee Date', icon: 'coffee' },
-  { id: 'other', label: 'Other', icon: 'confetti' },
+// Occasion types mapped to API ServiceType
+const occasionTypes: {
+  id: ServiceType;
+  label: string;
+}[] = [
+  { id: 'WEDDING_ATTENDANCE', label: 'Wedding' },
+  { id: 'FAMILY_INTRODUCTION', label: 'Family Event' },
+  { id: 'TET_COMPANIONSHIP', label: 'Tet Celebration' },
+  { id: 'BUSINESS_EVENT', label: 'Corporate' },
+  { id: 'CASUAL_OUTING', label: 'Coffee Date' },
+  { id: 'OTHER', label: 'Other' },
 ];
 
 // Time slots
 const timeSlots = [
-  '09:00', '10:00', '11:00', '12:00', '13:00', '14:00',
-  '15:00', '16:00', '17:00', '18:00', '19:00', '20:00',
+  '09:00',
+  '10:00',
+  '11:00',
+  '12:00',
+  '13:00',
+  '14:00',
+  '15:00',
+  '16:00',
+  '17:00',
+  '18:00',
+  '19:00',
+  '20:00',
 ];
 
 export default function BookingFlow() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
 
+  // Fetch companion data from API
+  const {
+    data: companionData,
+    isLoading: isLoadingCompanion,
+    isError: isCompanionError,
+  } = useCompanion(id || '');
+
+  // Create booking mutation
+  const createBooking = useCreateBooking();
+
   const [step, setStep] = React.useState<BookingStep>('details');
-  const [selectedOccasion, setSelectedOccasion] = React.useState<string | null>(null);
+  const [selectedOccasion, setSelectedOccasion] =
+    React.useState<ServiceType | null>(null);
   const [selectedDate, setSelectedDate] = React.useState<Date | null>(null);
   const [selectedTime, setSelectedTime] = React.useState<string | null>(null);
   const [duration, setDuration] = React.useState(2); // hours
   const [location, setLocation] = React.useState('');
-  const [notes, setNotes] = React.useState('');
 
-  const companion = mockCompanion;
+  // Get companion display data
+  const companion = React.useMemo(() => {
+    if (!companionData) return null;
+    const primaryPhoto = companionData.photos?.find((p) => p.isPrimary);
+    return {
+      id: companionData.id,
+      name: companionData.user?.fullName || 'Unknown',
+      image:
+        primaryPhoto?.url ||
+        companionData.photos?.[0]?.url ||
+        companionData.user?.avatarUrl ||
+        'https://via.placeholder.com/400',
+      pricePerHour: companionData.hourlyRate || 0,
+      isVerified: companionData.verificationStatus === 'verified',
+    };
+  }, [companionData]);
 
-  const totalPrice = companion.pricePerHour * duration;
+  const totalPrice = (companion?.pricePerHour || 0) * duration;
   const serviceFee = totalPrice * 0.18; // 18% commission
   const grandTotal = totalPrice + serviceFee;
 
@@ -81,14 +105,41 @@ export default function BookingFlow() {
     }
   };
 
-  const handleNextPress = () => {
+  const handleNextPress = async () => {
     if (step === 'details') {
       setStep('datetime');
     } else if (step === 'datetime') {
       setStep('payment');
     } else {
-      // Submit booking
-      router.push('/booking/confirmation' as Href);
+      // Submit booking via API
+      if (!selectedDate || !selectedTime || !selectedOccasion || !id) return;
+
+      // Calculate start and end datetime
+      const [hours, minutes] = selectedTime.split(':').map(Number);
+      const startDatetime = new Date(selectedDate);
+      startDatetime.setHours(hours, minutes, 0, 0);
+
+      const endDatetime = new Date(startDatetime);
+      endDatetime.setHours(startDatetime.getHours() + duration);
+
+      try {
+        await createBooking.mutateAsync({
+          companionId: id,
+          occasionType: selectedOccasion,
+          startDatetime: startDatetime.toISOString(),
+          endDatetime: endDatetime.toISOString(),
+          locationAddress: location || 'To be confirmed',
+        });
+
+        router.push('/booking/confirmation' as Href);
+      } catch (error) {
+        console.error('Booking error:', error);
+        showMessage({
+          message: 'Booking Failed',
+          description: 'Unable to create booking. Please try again.',
+          type: 'danger',
+        });
+      }
     }
   };
 
@@ -119,7 +170,9 @@ export default function BookingFlow() {
       case 'datetime':
         return 'Review Booking';
       case 'payment':
-        return `Pay ${formatVND(grandTotal)}`;
+        return createBooking.isPending
+          ? 'Processing...'
+          : `Pay ${formatVND(grandTotal)}`;
     }
   };
 
@@ -142,6 +195,54 @@ export default function BookingFlow() {
       date: date.getDate(),
     };
   };
+
+  // Loading state
+  if (isLoadingCompanion) {
+    return (
+      <View className="flex-1 items-center justify-center bg-warmwhite">
+        <FocusAwareStatusBar />
+        <ActivityIndicator size="large" color={colors.rose[400]} />
+        <Text className="mt-4 text-text-secondary">Loading companion...</Text>
+      </View>
+    );
+  }
+
+  // Error state
+  if (isCompanionError || !companion) {
+    return (
+      <View className="flex-1 bg-warmwhite">
+        <FocusAwareStatusBar />
+        <SafeAreaView edges={['top']}>
+          <View className="flex-row items-center gap-4 border-b border-border-light px-4 py-3">
+            <Pressable onPress={() => router.back()}>
+              <ArrowLeft
+                color={colors.midnight.DEFAULT}
+                width={24}
+                height={24}
+              />
+            </Pressable>
+            <Text className="flex-1 text-lg font-semibold text-midnight">
+              Booking
+            </Text>
+          </View>
+        </SafeAreaView>
+        <View className="flex-1 items-center justify-center px-8">
+          <Text className="text-center text-lg font-semibold text-midnight">
+            Companion not found
+          </Text>
+          <Text className="mt-2 text-center text-text-secondary">
+            This companion may no longer be available.
+          </Text>
+          <Pressable
+            onPress={() => router.back()}
+            className="mt-4 rounded-full bg-rose-400 px-6 py-3"
+          >
+            <Text className="font-semibold text-white">Go Back</Text>
+          </Pressable>
+        </View>
+      </View>
+    );
+  }
 
   return (
     <View className="flex-1 bg-warmwhite">
@@ -173,7 +274,7 @@ export default function BookingFlow() {
           <View className="flex-1">
             <View className="flex-row items-center gap-2">
               <Text className="text-lg font-semibold text-midnight">
-                {companion.name}, {companion.age}
+                {companion.name}
               </Text>
               {companion.isVerified && (
                 <ShieldCheck color={colors.teal[400]} width={16} height={16} />
@@ -201,7 +302,9 @@ export default function BookingFlow() {
                   >
                     <Badge
                       label={occasion.label}
-                      variant={selectedOccasion === occasion.id ? 'default' : 'outline'}
+                      variant={
+                        selectedOccasion === occasion.id ? 'default' : 'outline'
+                      }
                       size="lg"
                     />
                   </Pressable>
@@ -312,7 +415,9 @@ export default function BookingFlow() {
                   >
                     <Text
                       className={`font-medium ${
-                        selectedTime === time ? 'text-rose-400' : 'text-midnight'
+                        selectedTime === time
+                          ? 'text-rose-400'
+                          : 'text-midnight'
                       }`}
                     >
                       {time}
@@ -326,7 +431,8 @@ export default function BookingFlow() {
             <View className="flex-row items-center gap-2 rounded-xl bg-lavender-400/20 p-4">
               <Clock color={colors.lavender[400]} width={20} height={20} />
               <Text className="text-midnight">
-                Duration: <Text className="font-semibold">{duration} hours</Text>
+                Duration:{' '}
+                <Text className="font-semibold">{duration} hours</Text>
               </Text>
             </View>
           </View>
@@ -343,7 +449,10 @@ export default function BookingFlow() {
                 <View className="flex-row justify-between">
                   <Text className="text-text-secondary">Occasion</Text>
                   <Text className="font-medium text-midnight">
-                    {occasionTypes.find((o) => o.id === selectedOccasion)?.label}
+                    {
+                      occasionTypes.find((o) => o.id === selectedOccasion)
+                        ?.label
+                    }
                   </Text>
                 </View>
                 <View className="flex-row justify-between">
@@ -358,11 +467,15 @@ export default function BookingFlow() {
                 </View>
                 <View className="flex-row justify-between">
                   <Text className="text-text-secondary">Time</Text>
-                  <Text className="font-medium text-midnight">{selectedTime}</Text>
+                  <Text className="font-medium text-midnight">
+                    {selectedTime}
+                  </Text>
                 </View>
                 <View className="flex-row justify-between">
                   <Text className="text-text-secondary">Duration</Text>
-                  <Text className="font-medium text-midnight">{duration} hours</Text>
+                  <Text className="font-medium text-midnight">
+                    {duration} hours
+                  </Text>
                 </View>
               </View>
             </View>
@@ -419,7 +532,8 @@ export default function BookingFlow() {
           <Button
             label={getNextButtonLabel()}
             onPress={handleNextPress}
-            disabled={!canProceed()}
+            disabled={!canProceed() || createBooking.isPending}
+            loading={createBooking.isPending}
           />
         </View>
       </SafeAreaView>

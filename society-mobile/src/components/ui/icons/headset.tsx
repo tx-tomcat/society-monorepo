@@ -10,8 +10,24 @@ export function Headset({ color = '#FF6B8A', ...props }: SvgProps) {
         stroke={color}
         strokeWidth={2}
       />
-      <Rect x={2} y={13} width={4} height={6} rx={2} stroke={color} strokeWidth={2} />
-      <Rect x={18} y={13} width={4} height={6} rx={2} stroke={color} strokeWidth={2} />
+      <Rect
+        x={2}
+        y={13}
+        width={4}
+        height={6}
+        rx={2}
+        stroke={color}
+        strokeWidth={2}
+      />
+      <Rect
+        x={18}
+        y={13}
+        width={4}
+        height={6}
+        rx={2}
+        stroke={color}
+        strokeWidth={2}
+      />
       <Path
         d="M20 19C20 20.1046 19.1046 21 18 21H14"
         stroke={color}

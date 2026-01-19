@@ -1,8 +1,7 @@
-/* eslint-disable max-lines-per-function */
 import { MotiView } from 'moti';
 import React from 'react';
-import { Pressable, ScrollView, StyleSheet, TextInput } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { Pressable, ScrollView, StyleSheet, TextInput } from 'react-native';
 import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 
 import {
@@ -19,19 +18,18 @@ import {
   Facebook,
   Google,
   Mail,
-  Phone,
   SocietyLogo,
 } from '@/components/ui/icons';
+import { isValidEmail } from '@/lib/validation';
 
 import type { UserType } from './types';
 
 export type { UserType };
-type AuthMethod = 'phone' | 'email';
 
 export type AuthLoginScreenProps = {
-  userType: UserType;
+  userType?: UserType;
   onBack: () => void;
-  onContinue: (data: { method: AuthMethod; value: string }) => void;
+  onContinue: (data: { method: 'email'; value: string }) => void;
   onSocialLogin?: (provider: 'google' | 'apple' | 'facebook') => void;
   onRegister?: () => void;
   onTermsPress?: () => void;
@@ -41,28 +39,20 @@ export type AuthLoginScreenProps = {
 };
 
 const themeConfig = {
-  companion: {
-    accentColor: colors.lavender[400],
-    accentBgClass: 'bg-lavender-400/20',
-    activeToggleBgClass: 'bg-lavender-400',
-    activeToggleTextClass: 'text-white',
-    buttonClassName: 'w-full bg-lavender-400',
-    accentTextClass: 'text-lavender-400',
-    logoContainerClass: 'mb-4 size-20 items-center justify-center rounded-full bg-lavender-400/20',
-  },
   hirer: {
     accentColor: colors.rose[400],
     accentBgClass: 'bg-softpink',
     activeToggleBgClass: 'bg-white',
     activeToggleTextClass: 'text-rose-400',
+    activeIconColor: colors.rose[400],
     buttonClassName: 'w-full',
     accentTextClass: 'text-rose-400',
-    logoContainerClass: 'mb-4 size-16 items-center justify-center rounded-2xl bg-softpink',
+    logoContainerClass:
+      'mb-4 size-16 items-center justify-center rounded-2xl bg-softpink',
   },
 } as const;
 
 export function AuthLoginScreen({
-  userType,
   onBack,
   onContinue,
   onSocialLogin,
@@ -73,22 +63,41 @@ export function AuthLoginScreen({
   testID,
 }: AuthLoginScreenProps) {
   const { t } = useTranslation();
-  const [authMethod, setAuthMethod] = React.useState<AuthMethod>('phone');
-  const [phoneNumber, setPhoneNumber] = React.useState('');
   const [email, setEmail] = React.useState('');
 
-  const theme = themeConfig[userType];
+  const theme = themeConfig['hirer'];
+  const [error, setError] = React.useState<string>('');
 
-  const isValid = authMethod === 'phone'
-    ? phoneNumber.length >= 9
-    : email.includes('@');
+  // Validate email
+  const isValid = React.useMemo(() => {
+    return isValidEmail(email);
+  }, [email]);
+
+  // Clear error when input changes
+  React.useEffect(() => {
+    setError('');
+  }, [email]);
+
+  // Get validation error message
+  const getValidationError = React.useCallback((): string => {
+    if (email.length > 0 && !isValidEmail(email)) {
+      return t('auth.validation.email_invalid');
+    }
+    return '';
+  }, [email, t]);
+
+  const validationError = getValidationError();
 
   const handleContinue = React.useCallback(() => {
+    if (!isValid) {
+      setError(getValidationError());
+      return;
+    }
     onContinue({
-      method: authMethod,
-      value: authMethod === 'phone' ? phoneNumber : email,
+      method: 'email',
+      value: email,
     });
-  }, [authMethod, phoneNumber, email, onContinue]);
+  }, [email, isValid, getValidationError, onContinue]);
 
   return (
     <View className="flex-1 bg-warmwhite" testID={testID}>
@@ -96,7 +105,10 @@ export function AuthLoginScreen({
 
       <SafeAreaView edges={['top']}>
         <View className="flex-row items-center gap-4 px-4 py-3">
-          <Pressable onPress={onBack} testID={testID ? `${testID}-back` : undefined}>
+          <Pressable
+            onPress={onBack}
+            testID={testID ? `${testID}-back` : undefined}
+          >
             <ArrowLeft color={colors.midnight.DEFAULT} width={24} height={24} />
           </Pressable>
           <View className="flex-1" />
@@ -120,88 +132,41 @@ export function AuthLoginScreen({
             <View className={theme.logoContainerClass}>
               <SocietyLogo color={theme.accentColor} width={40} height={40} />
             </View>
-            <Text style={styles.title} className="mb-2 text-center text-2xl text-midnight">
-              {t(`auth.login.${userType}.title`)}
+            <Text
+              style={styles.title}
+              className="mb-2 text-center text-2xl text-midnight"
+            >
+              {t(`auth.login.title`)}
             </Text>
             <Text className="text-center text-base text-text-secondary">
-              {t(`auth.login.${userType}.subtitle`)}
+              {t(`auth.login.subtitle`)}
             </Text>
           </MotiView>
 
-          {/* Auth Method Toggle */}
+          {/* Email Input */}
           <MotiView
             from={{ opacity: 0, translateY: 20 }}
             animate={{ opacity: 1, translateY: 0 }}
             transition={{ type: 'timing', duration: 500, delay: 100 }}
-            className="mb-6 flex-row gap-2 rounded-xl bg-softpink p-1"
-          >
-            <Pressable
-              onPress={() => setAuthMethod('phone')}
-              testID={testID ? `${testID}-method-phone` : undefined}
-              className={`flex-1 flex-row items-center justify-center gap-2 rounded-lg py-3 ${
-                authMethod === 'phone' ? theme.activeToggleBgClass : ''
-              }`}
-            >
-              <Phone
-                color={authMethod === 'phone' ? (userType === 'companion' ? '#FFFFFF' : colors.rose[400]) : colors.text.secondary}
-                width={18}
-                height={18}
-              />
-              <Text
-                className={`font-semibold ${
-                  authMethod === 'phone' ? theme.activeToggleTextClass : 'text-text-secondary'
-                }`}
-              >
-                {t('auth.login.phone')}
-              </Text>
-            </Pressable>
-            <Pressable
-              onPress={() => setAuthMethod('email')}
-              testID={testID ? `${testID}-method-email` : undefined}
-              className={`flex-1 flex-row items-center justify-center gap-2 rounded-lg py-3 ${
-                authMethod === 'email' ? theme.activeToggleBgClass : ''
-              }`}
-            >
-              <Mail
-                color={authMethod === 'email' ? (userType === 'companion' ? '#FFFFFF' : colors.rose[400]) : colors.text.secondary}
-                width={18}
-                height={18}
-              />
-              <Text
-                className={`font-semibold ${
-                  authMethod === 'email' ? theme.activeToggleTextClass : 'text-text-secondary'
-                }`}
-              >
-                {t('auth.login.email')}
-              </Text>
-            </Pressable>
-          </MotiView>
-
-          {/* Input Field */}
-          <MotiView
-            from={{ opacity: 0, translateY: 20 }}
-            animate={{ opacity: 1, translateY: 0 }}
-            transition={{ type: 'timing', duration: 500, delay: 200 }}
             className="mb-6"
           >
-            {authMethod === 'phone' ? (
-              <View className="flex-row items-center rounded-xl border border-border-light bg-white px-4">
-                <Text className="mr-2 text-base font-medium text-midnight">{t('auth.login.country_code')}</Text>
-                <View className="mx-2 h-6 w-px bg-border-light" />
-                <TextInput
-                  value={phoneNumber}
-                  onChangeText={setPhoneNumber}
-                  placeholder={t('auth.login.phone_placeholder')}
-                  placeholderTextColor={colors.text.tertiary}
-                  keyboardType="phone-pad"
-                  testID={testID ? `${testID}-phone-input` : undefined}
-                  className="flex-1 py-4 text-base text-midnight"
-                  style={styles.input}
+            <View>
+              <View
+                className={`flex-row items-center rounded-xl border bg-white px-4 ${
+                  validationError || error
+                    ? 'border-red-400'
+                    : 'border-border-light'
+                }`}
+              >
+                <Mail
+                  color={
+                    validationError || error
+                      ? colors.rose[400]
+                      : colors.text.tertiary
+                  }
+                  width={20}
+                  height={20}
                 />
-              </View>
-            ) : (
-              <View className="flex-row items-center rounded-xl border border-border-light bg-white px-4">
-                <Mail color={colors.text.tertiary} width={20} height={20} />
                 <TextInput
                   value={email}
                   onChangeText={setEmail}
@@ -209,19 +174,25 @@ export function AuthLoginScreen({
                   placeholderTextColor={colors.text.tertiary}
                   keyboardType="email-address"
                   autoCapitalize="none"
+                  autoComplete="email"
                   testID={testID ? `${testID}-email-input` : undefined}
-                  className="flex-1 py-4 pl-3 text-base text-midnight"
-                  style={styles.input}
+                  className="flex-1 py-4 pl-3 text-base"
+                  style={[styles.input, { color: colors.midnight.DEFAULT }]}
                 />
               </View>
-            )}
+              {(validationError || error) && (
+                <Text className="mt-2 text-sm text-red-400">
+                  {validationError || error}
+                </Text>
+              )}
+            </View>
           </MotiView>
 
           {/* Continue Button */}
           <MotiView
             from={{ opacity: 0, translateY: 20 }}
             animate={{ opacity: 1, translateY: 0 }}
-            transition={{ type: 'timing', duration: 500, delay: 300 }}
+            transition={{ type: 'timing', duration: 500, delay: 200 }}
           >
             <Button
               label={t('common.continue')}
@@ -239,11 +210,13 @@ export function AuthLoginScreen({
           <MotiView
             from={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ type: 'timing', duration: 500, delay: 400 }}
+            transition={{ type: 'timing', duration: 500, delay: 300 }}
             className="my-8 flex-row items-center"
           >
             <View className="h-px flex-1 bg-border-light" />
-            <Text className="mx-4 text-sm text-text-tertiary">{t('auth.login.or_continue_with')}</Text>
+            <Text className="mx-4 text-sm text-text-tertiary">
+              {t('auth.login.or_continue_with')}
+            </Text>
             <View className="h-px flex-1 bg-border-light" />
           </MotiView>
 
@@ -251,7 +224,7 @@ export function AuthLoginScreen({
           <MotiView
             from={{ opacity: 0, translateY: 20 }}
             animate={{ opacity: 1, translateY: 0 }}
-            transition={{ type: 'timing', duration: 500, delay: 500 }}
+            transition={{ type: 'timing', duration: 500, delay: 400 }}
             className="flex-row justify-center gap-4"
           >
             <Pressable
@@ -281,14 +254,19 @@ export function AuthLoginScreen({
           <MotiView
             from={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ type: 'timing', duration: 500, delay: 600 }}
+            transition={{ type: 'timing', duration: 500, delay: 500 }}
             className="mt-8"
           >
             {showRegisterLink ? (
-              <Pressable onPress={onRegister} testID={testID ? `${testID}-register` : undefined}>
+              <Pressable
+                onPress={onRegister}
+                testID={testID ? `${testID}-register` : undefined}
+              >
                 <Text className="text-center text-base text-text-secondary">
                   {t('auth.login.no_account')}{' '}
-                  <Text className={`font-bold ${theme.accentTextClass}`}>{t('auth.login.sign_up')}</Text>
+                  <Text className={`font-bold ${theme.accentTextClass}`}>
+                    {t('auth.login.sign_up')}
+                  </Text>
                 </Text>
               </Pressable>
             ) : (
@@ -299,8 +277,8 @@ export function AuthLoginScreen({
                   onPress={onTermsPress}
                 >
                   {t('auth.login.terms_of_service')}
-                </Text>
-                {' '}{t('common.and')}{' '}
+                </Text>{' '}
+                {t('common.and')}{' '}
                 <Text
                   className={`font-semibold ${theme.accentTextClass}`}
                   onPress={onPrivacyPress}

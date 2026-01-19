@@ -1,12 +1,16 @@
 import * as React from 'react';
 import type { SvgProps } from 'react-native-svg';
-import Svg, { Path, Circle } from 'react-native-svg';
+import Svg, { Circle, Path } from 'react-native-svg';
 
 interface BellProps extends SvgProps {
   hasNotification?: boolean;
 }
 
-export function Bell({ color = '#6B6572', hasNotification = false, ...props }: BellProps) {
+export function Bell({
+  color = '#6B6572',
+  hasNotification = false,
+  ...props
+}: BellProps) {
   return (
     <Svg width={24} height={24} viewBox="0 0 24 24" fill="none" {...props}>
       <Path

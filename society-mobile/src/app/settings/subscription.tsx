@@ -51,7 +51,7 @@ function PlanDetails({ plan }: PlanDetailsProps) {
             className="text-2xl font-bold leading-[1.4] text-offwhite"
             style={styles.planTitle}
           >
-            Society Premium
+            Hireme Premium
           </Text>
           {savings && (
             <View className="rounded-lg bg-gold-400 px-3 py-1">
@@ -69,7 +69,7 @@ function PlanDetails({ plan }: PlanDetailsProps) {
           >
             {price}
           </Text>
-          <Text className="mb-2 ml-2 text-xl leading-[1.4] text-platinum">
+          <Text className="text-platinum mb-2 ml-2 text-xl leading-[1.4]">
             / {period}
           </Text>
         </View>

@@ -10,7 +10,12 @@ type Props = {
   height?: number;
 };
 
-export const Filter = ({ color = colors.charcoal[900], size = 24, width, height }: Props) => {
+export const Filter = ({
+  color = colors.charcoal[900],
+  size = 24,
+  width,
+  height,
+}: Props) => {
   const w = width ?? size;
   const h = height ?? size;
   return (

@@ -1,9 +1,7 @@
 export enum Role {
-  PROFESSIONAL = 'PROFESSIONAL',
-  STUDENT = 'STUDENT',
   ADMIN = 'ADMIN',
-  MODERATOR = 'MODERATOR',
-  SUPPORT = 'SUPPORT',
+  HIRER = 'HIRER',
+  COMPANION = 'COMPANION',
 }
 
 export enum Permission {
@@ -53,41 +51,56 @@ export enum Permission {
 }
 
 export const RolePermissions: Record<Role, Permission[]> = {
-  [Role.PROFESSIONAL]: [
+  [Role.ADMIN]: [
     Permission.USER_READ,
+    Permission.USER_WRITE,
+    Permission.USER_DELETE,
+    Permission.USER_MANAGE,
     Permission.PROFILE_READ,
     Permission.PROFILE_WRITE,
     Permission.MATCH_READ,
     Permission.MATCH_WRITE,
     Permission.MESSAGE_READ,
     Permission.MESSAGE_WRITE,
-    Permission.PAYMENT_READ,
-    Permission.EVENT_READ,
-  ],
-  [Role.STUDENT]: [
-    Permission.USER_READ,
-    Permission.PROFILE_READ,
-    Permission.PROFILE_WRITE,
-    Permission.MATCH_READ,
-    Permission.MATCH_WRITE,
-    Permission.MESSAGE_READ,
-    Permission.MESSAGE_WRITE,
-    Permission.PAYMENT_READ,
-    Permission.EVENT_READ,
-  ],
-  [Role.MODERATOR]: [
-    Permission.USER_READ,
-    Permission.PROFILE_READ,
+    Permission.MESSAGE_DELETE,
     Permission.MODERATION_READ,
     Permission.MODERATION_WRITE,
-    Permission.MESSAGE_READ,
-    Permission.MESSAGE_DELETE,
+    Permission.MODERATION_BAN,
+    Permission.ADMIN_ACCESS,
+    Permission.ADMIN_USERS,
+    Permission.ADMIN_ANALYTICS,
+    Permission.ADMIN_CONFIG,
+    Permission.PAYMENT_READ,
+    Permission.PAYMENT_REFUND,
+    Permission.EVENT_READ,
+    Permission.EVENT_WRITE,
+    Permission.EVENT_MANAGE,
+    Permission.VERIFICATION_READ,
+    Permission.VERIFICATION_WRITE,
+    Permission.VERIFICATION_APPROVE,
   ],
-  [Role.SUPPORT]: [
+  [Role.HIRER]: [
     Permission.USER_READ,
     Permission.PROFILE_READ,
+    Permission.PROFILE_WRITE,
+    Permission.MATCH_READ,
+    Permission.MATCH_WRITE,
+    Permission.MESSAGE_READ,
+    Permission.MESSAGE_WRITE,
     Permission.PAYMENT_READ,
-    Permission.VERIFICATION_READ,
+    Permission.EVENT_READ,
   ],
-  [Role.ADMIN]: Object.values(Permission),
+  [Role.COMPANION]: [
+    Permission.USER_READ,
+    Permission.PROFILE_READ,
+    Permission.PROFILE_WRITE,
+    Permission.MATCH_READ,
+    Permission.MATCH_WRITE,
+    Permission.MESSAGE_READ,
+    Permission.MESSAGE_WRITE,
+    Permission.PAYMENT_READ,
+    Permission.EVENT_READ,
+  ],
+
+
 };

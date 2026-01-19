@@ -1,6 +1,6 @@
 import * as React from 'react';
 import type { SvgProps } from 'react-native-svg';
-import Svg, { Path, Circle } from 'react-native-svg';
+import Svg, { Circle, Path } from 'react-native-svg';
 
 export function XCircle({ color = '#FF5757', ...props }: SvgProps) {
   return (

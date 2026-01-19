@@ -1,24 +1,24 @@
+import { JwtAuthGuard } from '@/auth/guards/jwt.guard';
+import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import {
-  Controller,
-  Get,
-  Post,
-  Put,
-  Delete,
-  Param,
   Body,
-  UseGuards,
+  Controller,
+  Delete,
+  Get,
   HttpCode,
   HttpStatus,
+  Param,
+  Post,
+  Put,
+  UseGuards,
 } from '@nestjs/common';
-import { JwtAuthGuard } from '@/auth/guards/jwt-auth.guard';
-import { CurrentUser } from '@/common/decorators/current-user.decorator';
-import { FavoritesService } from '../services/favorites.service';
 import { AddFavoriteDto, UpdateFavoriteNotesDto } from '../dto/favorites.dto';
+import { FavoritesService } from '../services/favorites.service';
 
 @Controller('favorites')
 @UseGuards(JwtAuthGuard)
 export class FavoritesController {
-  constructor(private readonly favoritesService: FavoritesService) {}
+  constructor(private readonly favoritesService: FavoritesService) { }
 
   /**
    * Get user's favorite companions

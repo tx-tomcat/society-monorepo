@@ -44,7 +44,12 @@ const mockCompanionDetails = {
   isOnline: true,
   isPremium: true,
   languages: ['Vietnamese', 'English'],
-  specialties: ['Wedding', 'Corporate Events', 'Family Gatherings', 'Tet Celebrations'],
+  specialties: [
+    'Wedding',
+    'Corporate Events',
+    'Family Gatherings',
+    'Tet Celebrations',
+  ],
   availability: 'Available today',
   responseTime: 'Usually responds within 1 hour',
   reviews: [
@@ -53,7 +58,8 @@ const mockCompanionDetails = {
       author: 'Nguyen Van A',
       rating: 5,
       date: '2024-01-15',
-      comment: 'Minh Anh was wonderful at my sister wedding. Very professional and friendly!',
+      comment:
+        'Minh Anh was wonderful at my sister wedding. Very professional and friendly!',
     },
     {
       id: '2',
@@ -151,7 +157,9 @@ export default function CompanionProfile() {
               </Text>
               <View className="mt-1 flex-row items-center gap-1">
                 <MapPin color={colors.text.tertiary} width={16} height={16} />
-                <Text className="text-sm text-text-tertiary">{companion.location}</Text>
+                <Text className="text-sm text-text-tertiary">
+                  {companion.location}
+                </Text>
               </View>
             </View>
             <View className="items-end">
@@ -191,7 +199,9 @@ export default function CompanionProfile() {
 
           {/* Specialties */}
           <View>
-            <Text className="mb-2 text-lg font-semibold text-midnight">Specialties</Text>
+            <Text className="mb-2 text-lg font-semibold text-midnight">
+              Specialties
+            </Text>
             <View className="flex-row flex-wrap gap-2">
               {companion.specialties.map((specialty) => (
                 <Badge key={specialty} label={specialty} variant="secondary" />
@@ -201,13 +211,19 @@ export default function CompanionProfile() {
 
           {/* About */}
           <View>
-            <Text className="mb-2 text-lg font-semibold text-midnight">About</Text>
-            <Text className="leading-6 text-text-secondary">{companion.bio}</Text>
+            <Text className="mb-2 text-lg font-semibold text-midnight">
+              About
+            </Text>
+            <Text className="leading-6 text-text-secondary">
+              {companion.bio}
+            </Text>
           </View>
 
           {/* Languages */}
           <View>
-            <Text className="mb-2 text-lg font-semibold text-midnight">Languages</Text>
+            <Text className="mb-2 text-lg font-semibold text-midnight">
+              Languages
+            </Text>
             <View className="flex-row gap-2">
               {companion.languages.map((language) => (
                 <Badge key={language} label={language} variant="outline" />
@@ -219,29 +235,43 @@ export default function CompanionProfile() {
           <View className="flex-row items-center gap-2 rounded-xl bg-teal-400/10 p-4">
             <Calendar color={colors.teal[400]} width={20} height={20} />
             <View>
-              <Text className="font-semibold text-teal-400">{companion.availability}</Text>
-              <Text className="text-sm text-text-tertiary">{companion.responseTime}</Text>
+              <Text className="font-semibold text-teal-400">
+                {companion.availability}
+              </Text>
+              <Text className="text-sm text-text-tertiary">
+                {companion.responseTime}
+              </Text>
             </View>
           </View>
 
           {/* Reviews Preview */}
           <View>
             <View className="mb-2 flex-row items-center justify-between">
-              <Text className="text-lg font-semibold text-midnight">Reviews</Text>
+              <Text className="text-lg font-semibold text-midnight">
+                Reviews
+              </Text>
               <Pressable>
-                <Text className="text-sm font-medium text-rose-400">See All</Text>
+                <Text className="text-sm font-medium text-rose-400">
+                  See All
+                </Text>
               </Pressable>
             </View>
             {companion.reviews.slice(0, 2).map((review) => (
               <View key={review.id} className="mb-3 rounded-xl bg-softpink p-4">
                 <View className="mb-2 flex-row items-center justify-between">
-                  <Text className="font-semibold text-midnight">{review.author}</Text>
+                  <Text className="font-semibold text-midnight">
+                    {review.author}
+                  </Text>
                   <View className="flex-row items-center gap-1">
                     <Star color="#FFD93D" width={14} height={14} filled />
-                    <Text className="text-sm text-midnight">{review.rating}</Text>
+                    <Text className="text-sm text-midnight">
+                      {review.rating}
+                    </Text>
                   </View>
                 </View>
-                <Text className="text-sm text-text-secondary">{review.comment}</Text>
+                <Text className="text-sm text-text-secondary">
+                  {review.comment}
+                </Text>
               </View>
             ))}
           </View>
@@ -263,7 +293,11 @@ export default function CompanionProfile() {
               {formatVND(companion.pricePerHour)}/hour
             </Text>
           </View>
-          <Button label="Book Now" onPress={handleBookPress} className="flex-1" />
+          <Button
+            label="Book Now"
+            onPress={handleBookPress}
+            className="flex-1"
+          />
         </View>
       </SafeAreaView>
     </View>

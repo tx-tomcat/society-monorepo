@@ -1,19 +1,19 @@
 import {
-  Controller,
-  Post,
   Body,
+  Controller,
   Param,
-  UseGuards,
+  Post,
   Request,
+  UseGuards,
 } from '@nestjs/common';
-import { JwtAuthGuard } from '../../../auth/guards/jwt-auth.guard';
-import { ModerationService } from '../services/moderation.service';
+import { JwtAuthGuard } from '../../../auth/guards/jwt.guard';
 import { AppealDto } from '../dto/moderation.dto';
+import { ModerationService } from '../services/moderation.service';
 
 @Controller('appeals')
 @UseGuards(JwtAuthGuard)
 export class AppealsController {
-  constructor(private readonly moderationService: ModerationService) {}
+  constructor(private readonly moderationService: ModerationService) { }
 
   @Post(':suspensionId')
   async submitAppeal(

@@ -13,7 +13,12 @@ import {
   Text,
   View,
 } from '@/components/ui';
-import { MoreVertical, OnlineDot, Search, SocietyLogo } from '@/components/ui/icons';
+import {
+  MoreVertical,
+  OnlineDot,
+  Search,
+  SocietyLogo,
+} from '@/components/ui/icons';
 
 type Tab = {
   id: string;
@@ -38,14 +43,15 @@ type ChatItemData = {
   bookingStatus?: 'upcoming' | 'active' | 'completed';
 };
 
-// Mock data for Society chat list
+// Mock data for Hireme chat list
 const MOCK_CHATS: ChatItemData[] = [
   {
     id: '1',
     name: 'Minh Anh',
     lastMessage: 'See you at Rex Hotel at 2pm!',
     timestamp: '10:30 AM',
-    avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=120',
+    avatar:
+      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=120',
     unreadCount: 2,
     isOnline: true,
     isBookingChat: true,
@@ -56,14 +62,15 @@ const MOCK_CHATS: ChatItemData[] = [
     name: 'Thu Hương',
     lastMessage: 'Thank you for the great review! Hope to see you again.',
     timestamp: 'Yesterday',
-    avatar: 'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=120',
+    avatar:
+      'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=120',
     isOnline: false,
     isBookingChat: true,
     bookingStatus: 'completed',
   },
   {
     id: '3',
-    name: 'Society Support',
+    name: 'Hireme Support',
     lastMessage: 'Your payment has been processed successfully.',
     timestamp: 'Yesterday',
     avatar: 'https://images.unsplash.com/photo-1560179707-f14e90ef3623?w=120',
@@ -74,7 +81,8 @@ const MOCK_CHATS: ChatItemData[] = [
     name: 'Ngọc Trâm',
     lastMessage: 'Looking forward to the coffee date!',
     timestamp: '12/28/24',
-    avatar: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=120',
+    avatar:
+      'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=120',
     isOnline: true,
     isBookingChat: true,
     bookingStatus: 'active',
@@ -104,10 +112,7 @@ function ChatListItem({
   };
 
   return (
-    <Pressable
-      onPress={onPress}
-      className="flex-row items-center gap-3 py-3"
-    >
+    <Pressable onPress={onPress} className="flex-row items-center gap-3 py-3">
       {/* Avatar */}
       <View className="relative">
         <Image
@@ -133,7 +138,9 @@ function ChatListItem({
         <View className="flex-row items-center gap-2">
           <Text
             className={`flex-1 text-sm ${
-              chat.unreadCount ? 'font-medium text-midnight' : 'text-text-tertiary'
+              chat.unreadCount
+                ? 'font-medium text-midnight'
+                : 'text-text-tertiary'
             }`}
             numberOfLines={1}
           >
@@ -170,17 +177,16 @@ export default function Chats() {
 
   const filteredChats = React.useMemo(() => {
     if (activeTab === 'all') return MOCK_CHATS;
-    if (activeTab === 'bookings') return MOCK_CHATS.filter((c) => c.isBookingChat);
-    if (activeTab === 'support') return MOCK_CHATS.filter((c) => c.name === 'Society Support');
+    if (activeTab === 'bookings')
+      return MOCK_CHATS.filter((c) => c.isBookingChat);
+    if (activeTab === 'support')
+      return MOCK_CHATS.filter((c) => c.name === 'Hireme Support');
     return MOCK_CHATS;
   }, [activeTab]);
 
   const renderChatItem = React.useCallback(
     ({ item }: { item: ChatItemData }) => (
-      <ChatListItem
-        chat={item}
-        onPress={() => handleChatPress(item.id)}
-      />
+      <ChatListItem chat={item} onPress={() => handleChatPress(item.id)} />
     ),
     [handleChatPress]
   );
@@ -213,7 +219,11 @@ export default function Chats() {
               <Search color={colors.midnight.DEFAULT} width={24} height={24} />
             </Pressable>
             <Pressable onPress={handleMorePress} testID="more-button">
-              <MoreVertical color={colors.midnight.DEFAULT} width={24} height={24} />
+              <MoreVertical
+                color={colors.midnight.DEFAULT}
+                width={24}
+                height={24}
+              />
             </Pressable>
           </View>
         </View>
@@ -224,10 +234,7 @@ export default function Chats() {
         {/* Tab Switcher */}
         <View className="flex-row gap-2 py-3">
           {TABS.map((tab) => (
-            <Pressable
-              key={tab.id}
-              onPress={() => setActiveTab(tab.id)}
-            >
+            <Pressable key={tab.id} onPress={() => setActiveTab(tab.id)}>
               <Badge
                 label={tab.label}
                 variant={activeTab === tab.id ? 'default' : 'outline'}
@@ -247,7 +254,9 @@ export default function Chats() {
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={
             <View className="flex-1 items-center justify-center py-20">
-              <Text className="text-lg text-text-tertiary">No messages yet</Text>
+              <Text className="text-lg text-text-tertiary">
+                No messages yet
+              </Text>
             </View>
           }
         />

@@ -3,8 +3,8 @@ import type { Href } from 'expo-router';
 import { useRouter } from 'expo-router';
 import { MotiView } from 'moti';
 import React from 'react';
-import { Pressable, ScrollView, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { Pressable, ScrollView, StyleSheet } from 'react-native';
 
 import {
   Badge,
@@ -22,7 +22,6 @@ import {
   Crown,
   Edit,
   MapPin,
-  MoreVertical,
   Settings,
   ShieldCheck,
   SocietyLogo,
@@ -77,7 +76,10 @@ export default function CompanionProfile() {
       <SafeAreaView edges={['top']}>
         <View className="flex-row items-center gap-4 px-4 py-3">
           <SocietyLogo color={colors.lavender[400]} width={32} height={32} />
-          <Text style={styles.headerTitle} className="flex-1 text-xl text-midnight">
+          <Text
+            style={styles.headerTitle}
+            className="flex-1 text-xl text-midnight"
+          >
             {t('companion.profile.header')}
           </Text>
           <Pressable onPress={handleSettings} testID="settings-button">
@@ -86,10 +88,7 @@ export default function CompanionProfile() {
         </View>
       </SafeAreaView>
 
-      <ScrollView
-        className="flex-1"
-        showsVerticalScrollIndicator={false}
-      >
+      <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
         {/* Profile Header */}
         <MotiView
           from={{ opacity: 0, translateY: 20 }}
@@ -105,7 +104,11 @@ export default function CompanionProfile() {
             />
             {MOCK_PROFILE.isVerified && (
               <View className="absolute -bottom-1 -right-1 rounded-full bg-white p-1">
-                <VerifiedBadge color={colors.teal[400]} width={28} height={28} />
+                <VerifiedBadge
+                  color={colors.teal[400]}
+                  width={28}
+                  height={28}
+                />
               </View>
             )}
           </View>
@@ -121,18 +124,26 @@ export default function CompanionProfile() {
 
           <View className="mt-2 flex-row items-center gap-1">
             <MapPin color={colors.text.tertiary} width={14} height={14} />
-            <Text className="text-sm text-text-secondary">{MOCK_PROFILE.location}</Text>
+            <Text className="text-sm text-text-secondary">
+              {MOCK_PROFILE.location}
+            </Text>
           </View>
 
           <View className="mt-3 flex-row items-center gap-3">
             <View className="flex-row items-center gap-1">
               <Star color={colors.yellow[400]} width={18} height={18} />
-              <Text className="font-semibold text-midnight">{MOCK_PROFILE.rating}</Text>
+              <Text className="font-semibold text-midnight">
+                {MOCK_PROFILE.rating}
+              </Text>
               <Text className="text-sm text-text-tertiary">
                 ({MOCK_PROFILE.reviewCount})
               </Text>
             </View>
-            <Badge label={t('companion.profile.top_rated')} variant="teal" size="sm" />
+            <Badge
+              label={t('companion.profile.top_rated')}
+              variant="teal"
+              size="sm"
+            />
           </View>
 
           <Pressable
@@ -141,7 +152,9 @@ export default function CompanionProfile() {
             className="mt-4 flex-row items-center gap-2 rounded-full bg-lavender-400/10 px-6 py-2"
           >
             <Edit color={colors.lavender[400]} width={18} height={18} />
-            <Text className="font-semibold text-lavender-400">{t('companion.profile.edit_profile')}</Text>
+            <Text className="font-semibold text-lavender-400">
+              {t('companion.profile.edit_profile')}
+            </Text>
           </Pressable>
         </MotiView>
 
@@ -154,24 +167,41 @@ export default function CompanionProfile() {
         >
           <View className="flex-1 items-center rounded-xl bg-white p-4">
             <Calendar color={colors.lavender[400]} width={24} height={24} />
-            <Text style={styles.statValue} className="mt-2 text-xl text-midnight">
+            <Text
+              style={styles.statValue}
+              className="mt-2 text-xl text-midnight"
+            >
               {MOCK_PROFILE.stats.totalBookings}
             </Text>
-            <Text className="text-xs text-text-tertiary">{t('companion.profile.stats.bookings')}</Text>
+            <Text className="text-xs text-text-tertiary">
+              {t('companion.profile.stats.bookings')}
+            </Text>
           </View>
           <View className="flex-1 items-center rounded-xl bg-white p-4">
             <Wallet color={colors.teal[400]} width={24} height={24} />
-            <Text style={styles.statValue} className="mt-2 text-xl text-midnight">
-              {formatVND(MOCK_PROFILE.stats.totalEarnings, { abbreviated: true })}
+            <Text
+              style={styles.statValue}
+              className="mt-2 text-xl text-midnight"
+            >
+              {formatVND(MOCK_PROFILE.stats.totalEarnings, {
+                abbreviated: true,
+              })}
             </Text>
-            <Text className="text-xs text-text-tertiary">{t('companion.profile.stats.earned')}</Text>
+            <Text className="text-xs text-text-tertiary">
+              {t('companion.profile.stats.earned')}
+            </Text>
           </View>
           <View className="flex-1 items-center rounded-xl bg-white p-4">
             <Chart color={colors.rose[400]} width={24} height={24} />
-            <Text style={styles.statValue} className="mt-2 text-xl text-midnight">
+            <Text
+              style={styles.statValue}
+              className="mt-2 text-xl text-midnight"
+            >
               {MOCK_PROFILE.stats.responseRate}%
             </Text>
-            <Text className="text-xs text-text-tertiary">{t('companion.profile.stats.response')}</Text>
+            <Text className="text-xs text-text-tertiary">
+              {t('companion.profile.stats.response')}
+            </Text>
           </View>
         </MotiView>
 
@@ -182,7 +212,9 @@ export default function CompanionProfile() {
           transition={{ type: 'timing', duration: 500, delay: 200 }}
           className="mx-4 mb-4 rounded-2xl bg-white p-4"
         >
-          <Text className="mb-2 text-lg font-semibold text-midnight">{t('companion.profile.about_me')}</Text>
+          <Text className="mb-2 text-lg font-semibold text-midnight">
+            {t('companion.profile.about_me')}
+          </Text>
           <Text className="leading-relaxed text-text-secondary">
             {MOCK_PROFILE.bio}
           </Text>
@@ -195,10 +227,17 @@ export default function CompanionProfile() {
           transition={{ type: 'timing', duration: 500, delay: 300 }}
           className="mx-4 mb-4 rounded-2xl bg-white p-4"
         >
-          <Text className="mb-3 text-lg font-semibold text-midnight">{t('companion.profile.specialties')}</Text>
+          <Text className="mb-3 text-lg font-semibold text-midnight">
+            {t('companion.profile.specialties')}
+          </Text>
           <View className="flex-row flex-wrap gap-2">
             {MOCK_PROFILE.specialties.map((specialty) => (
-              <Badge key={specialty} label={specialty} variant="lavender" size="default" />
+              <Badge
+                key={specialty}
+                label={specialty}
+                variant="lavender"
+                size="default"
+              />
             ))}
           </View>
         </MotiView>
@@ -211,9 +250,17 @@ export default function CompanionProfile() {
           className="mx-4 mb-4 rounded-2xl bg-white p-4"
         >
           <View className="mb-3 flex-row items-center justify-between">
-            <Text className="text-lg font-semibold text-midnight">{t('companion.profile.photos')}</Text>
-            <Pressable onPress={handleEditProfile} testID="edit-photos-button" className="flex-row items-center gap-1">
-              <Text className="text-sm font-medium text-lavender-400">{t('common.edit')}</Text>
+            <Text className="text-lg font-semibold text-midnight">
+              {t('companion.profile.photos')}
+            </Text>
+            <Pressable
+              onPress={handleEditProfile}
+              testID="edit-photos-button"
+              className="flex-row items-center gap-1"
+            >
+              <Text className="text-sm font-medium text-lavender-400">
+                {t('common.edit')}
+              </Text>
               <ArrowRight color={colors.lavender[400]} width={16} height={16} />
             </Pressable>
           </View>
@@ -239,7 +286,9 @@ export default function CompanionProfile() {
           <View className="flex-row items-center gap-3">
             <ShieldCheck color={colors.teal[400]} width={32} height={32} />
             <View className="flex-1">
-              <Text className="font-semibold text-teal-700">{t('companion.profile.fully_verified')}</Text>
+              <Text className="font-semibold text-teal-700">
+                {t('companion.profile.fully_verified')}
+              </Text>
               <Text className="text-sm text-text-secondary">
                 {t('companion.profile.verification_description')}
               </Text>

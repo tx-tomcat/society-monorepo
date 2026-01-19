@@ -10,7 +10,7 @@ import {
   Text,
   View,
 } from '@/components/ui';
-import { CheckCircle, Calendar, Clock, MapPin } from '@/components/ui/icons';
+import { Calendar, CheckCircle, Clock, MapPin } from '@/components/ui/icons';
 
 export default function BookingConfirmation() {
   const router = useRouter();
@@ -39,8 +39,8 @@ export default function BookingConfirmation() {
             Booking Confirmed!
           </Text>
           <Text className="mb-8 text-center text-text-secondary">
-            Your booking has been confirmed. The companion has been notified
-            and will contact you shortly.
+            Your booking has been confirmed. The companion has been notified and
+            will contact you shortly.
           </Text>
 
           {/* Booking Details Card */}
@@ -62,14 +62,18 @@ export default function BookingConfirmation() {
 
               <View className="flex-row items-center gap-3">
                 <MapPin color={colors.rose[400]} width={20} height={20} />
-                <Text className="text-midnight">District 1, Ho Chi Minh City</Text>
+                <Text className="text-midnight">
+                  District 1, Ho Chi Minh City
+                </Text>
               </View>
             </View>
 
             <View className="mt-4 border-t border-border-light pt-4">
               <View className="flex-row justify-between">
                 <Text className="text-text-secondary">Total Paid</Text>
-                <Text className="text-lg font-bold text-rose-400">1,770,000 VND</Text>
+                <Text className="text-lg font-bold text-rose-400">
+                  1,770,000 VND
+                </Text>
               </View>
             </View>
           </View>
@@ -77,7 +81,8 @@ export default function BookingConfirmation() {
           {/* Safety Reminder */}
           <View className="mb-6 w-full rounded-xl bg-lavender-400/20 p-4">
             <Text className="text-center text-sm text-midnight">
-              Remember to check in when you meet using the GPS feature for your safety.
+              Remember to check in when you meet using the GPS feature for your
+              safety.
             </Text>
           </View>
         </View>

@@ -1,24 +1,48 @@
-import { ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { AuthGuard } from '@nestjs/passport';
-import { createClient } from '@supabase/supabase-js';
-import { PrismaService } from '../../prisma/prisma.service';
 import { UserRole, UserStatus } from '@generated/client';
+import { ExecutionContext, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+import { AuthGuard } from '@nestjs/passport';
+import { createHash } from 'crypto';
+import { CacheService } from '../../modules/cache/cache.service';
+import { PrismaService } from '../../prisma/prisma.service';
+
+type CachedUser = {
+  id: string;
+  zaloId: string;
+  role: UserRole;
+  status: UserStatus;
+};
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
-  private supabase;
+  private readonly logger = new Logger(JwtAuthGuard.name);
+  private readonly CACHE_TTL = 300; // 5 minutes
+  private readonly CACHE_PREFIX = 'auth:session:';
 
   constructor(
-    private configService: ConfigService,
     private prisma: PrismaService,
+    private cacheService: CacheService,
+    private jwtService: JwtService,
   ) {
     super();
 
-    const supabaseUrl = this.configService.get<string>('SUPABASE_URL');
-    const supabaseKey = this.configService.get<string>('SUPABASE_SERVICE_KEY');
 
-    this.supabase = createClient(supabaseUrl, supabaseKey);
+  }
+
+  /**
+   * Hash token for cache key (don't store full token in Redis)
+   */
+  private hashToken(token: string): string {
+    return createHash('sha256').update(token).digest('hex').substring(0, 32);
+  }
+
+  /**
+   * Invalidate cached session for a token (call on logout)
+   */
+  async invalidateSession(token: string): Promise<void> {
+    const cacheKey = `${this.CACHE_PREFIX}${this.hashToken(token)}`;
+    await this.cacheService.del(cacheKey);
+    this.logger.debug('Session cache invalidated');
   }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -30,34 +54,39 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     }
 
     try {
-      const { data: { user }, error } = await this.supabase.auth.getUser(token);
+      const cacheKey = `${this.CACHE_PREFIX}${this.hashToken(token)}`;
 
-      if (error || !user) {
+      // 1. Try to get user from cache first
+      const cachedUser = await this.cacheService.get<CachedUser>(cacheKey);
+      if (cachedUser) {
+        // Verify cached user is still valid (not suspended/deleted)
+        if (cachedUser.status === UserStatus.SUSPENDED) {
+          throw new UnauthorizedException('Your account has been suspended. Please contact support.');
+        }
+        if (cachedUser.status === UserStatus.DELETED) {
+          throw new UnauthorizedException('This account has been deleted.');
+        }
+
+        request.user = {
+          id: cachedUser.id,
+          zaloId: cachedUser.zaloId,
+          sub: cachedUser.id,
+          role: cachedUser.role,
+          status: cachedUser.status,
+        };
+        this.logger.debug(`Cache hit for user: ${cachedUser.zaloId}`);
+        return true;
+      }
+
+      // 2. Cache miss - try Society JWT first (Zalo auth)
+      let dbUser = await this.verifySocietyJwt(token);
+
+
+      if (!dbUser) {
         return false;
       }
 
-      // Check if user exists in our database, create if not
-      let dbUser = await this.prisma.user.findFirst({
-        where: { email: user.email },
-      });
-
-      if (!dbUser) {
-        console.log(`[JwtAuthGuard] User not found in DB, creating: ${user.email}`);
-        // Auto-provision user in database
-        const userType = user.user_metadata?.user_type as 'hirer' | 'companion' | undefined;
-        const role = userType === 'companion' ? UserRole.COMPANION : UserRole.HIRER;
-
-        dbUser = await this.prisma.user.create({
-          data: {
-            email: user.email!,
-            fullName: '', // Will be set during onboarding
-            role,
-            status: 'PENDING',
-          },
-        });
-      }
-
-      // Check if user account is active (not suspended or deleted)
+      // 4. Check if user account is active
       if (dbUser.status === UserStatus.SUSPENDED) {
         throw new UnauthorizedException('Your account has been suspended. Please contact support.');
       }
@@ -66,24 +95,67 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
         throw new UnauthorizedException('This account has been deleted.');
       }
 
-      // Add the database user object to the request
+      // 5. Cache the verified user data
+      const userToCache: CachedUser = {
+        id: dbUser.id,
+        zaloId: dbUser.zaloId,
+        role: dbUser.role,
+        status: dbUser.status,
+      };
+      await this.cacheService.set(cacheKey, userToCache, this.CACHE_TTL);
+      this.logger.debug(`Cached session for user: ${dbUser.zaloId}`);
+      this.logger.debug(`User: ${JSON.stringify(dbUser)}`);
+
+      // 6. Add user to request
       request.user = {
-        id: dbUser.id,  // Use PostgreSQL user ID, not Supabase ID
-        email: dbUser.email,
+        id: dbUser.id,
+        zaloId: dbUser.zaloId,
         sub: dbUser.id,
         role: dbUser.role,
         status: dbUser.status,
       };
       return true;
     } catch (error) {
-      // Rethrow UnauthorizedException to show proper error message
       if (error instanceof UnauthorizedException) {
         throw error;
       }
-      console.error('JWT Guard error:', error);
+      this.logger.error('JWT Guard error:', error);
       return false;
     }
   }
+
+  /**
+   * Verify Society-issued JWT token (from Zalo auth)
+   */
+  private async verifySocietyJwt(token: string): Promise<{ id: string; zaloId: string; role: UserRole; status: UserStatus } | null> {
+    try {
+      const payload = this.jwtService.verify(token);
+
+      if (!payload.sub) {
+        return null;
+      }
+
+      const dbUser = await this.prisma.user.findUnique({
+        where: { id: payload.sub },
+      });
+
+      if (!dbUser) {
+        return null;
+      }
+
+      return {
+        id: dbUser.id,
+        zaloId: dbUser.zaloId,
+        role: dbUser.role,
+        status: dbUser.status,
+      };
+    } catch {
+      // Token is not a valid Society JWT, return null to try Supabase
+      return null;
+    }
+  }
+
+
 
   private extractToken(request: { headers: { authorization?: string } }): string | undefined {
     const [type, token] = request.headers.authorization?.split(' ') ?? [];

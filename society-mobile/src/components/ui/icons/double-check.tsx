@@ -6,7 +6,11 @@ interface DoubleCheckProps extends SvgProps {
   read?: boolean;
 }
 
-export function DoubleCheck({ color, read = false, ...props }: DoubleCheckProps) {
+export function DoubleCheck({
+  color,
+  read = false,
+  ...props
+}: DoubleCheckProps) {
   const checkColor = color || (read ? '#4ECDC4' : '#9B95A3');
   return (
     <Svg width={24} height={24} viewBox="0 0 24 24" fill="none" {...props}>

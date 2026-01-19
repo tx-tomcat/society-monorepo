@@ -3,8 +3,8 @@ import type { Href } from 'expo-router';
 import { useRouter } from 'expo-router';
 import { MotiView } from 'moti';
 import React from 'react';
-import { Pressable, ScrollView, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { Pressable, ScrollView, StyleSheet } from 'react-native';
 
 import {
   Badge,
@@ -25,6 +25,7 @@ import {
   MaiFlower,
   WeddingRings,
 } from '@/components/ui/icons';
+import { useCompanionOnboarding } from '@/lib/stores';
 
 type OccasionType = {
   id: string;
@@ -38,7 +39,8 @@ const OCCASIONS: OccasionType[] = [
   {
     id: 'wedding',
     labelKey: 'companion.onboard.set_services.occasions.wedding.label',
-    descriptionKey: 'companion.onboard.set_services.occasions.wedding.description',
+    descriptionKey:
+      'companion.onboard.set_services.occasions.wedding.description',
     icon: WeddingRings,
     popular: true,
   },
@@ -52,25 +54,29 @@ const OCCASIONS: OccasionType[] = [
   {
     id: 'family',
     labelKey: 'companion.onboard.set_services.occasions.family.label',
-    descriptionKey: 'companion.onboard.set_services.occasions.family.description',
+    descriptionKey:
+      'companion.onboard.set_services.occasions.family.description',
     icon: Family,
   },
   {
     id: 'corporate',
     labelKey: 'companion.onboard.set_services.occasions.corporate.label',
-    descriptionKey: 'companion.onboard.set_services.occasions.corporate.description',
+    descriptionKey:
+      'companion.onboard.set_services.occasions.corporate.description',
     icon: Briefcase,
   },
   {
     id: 'coffee',
     labelKey: 'companion.onboard.set_services.occasions.coffee.label',
-    descriptionKey: 'companion.onboard.set_services.occasions.coffee.description',
+    descriptionKey:
+      'companion.onboard.set_services.occasions.coffee.description',
     icon: Coffee,
   },
   {
     id: 'social',
     labelKey: 'companion.onboard.set_services.occasions.social.label',
-    descriptionKey: 'companion.onboard.set_services.occasions.social.description',
+    descriptionKey:
+      'companion.onboard.set_services.occasions.social.description',
     icon: Confetti,
   },
 ];
@@ -78,7 +84,14 @@ const OCCASIONS: OccasionType[] = [
 export default function SetServices() {
   const router = useRouter();
   const { t } = useTranslation();
-  const [selectedOccasions, setSelectedOccasions] = React.useState<string[]>([]);
+
+  // Get data from store
+  const selectedServices = useCompanionOnboarding.use.selectedServices();
+  const setServicesData = useCompanionOnboarding.use.setServicesData();
+  const markStepComplete = useCompanionOnboarding.use.markStepComplete();
+
+  const [selectedOccasions, setSelectedOccasions] =
+    React.useState<string[]>(selectedServices);
 
   const handleBack = React.useCallback(() => {
     router.back();
@@ -93,8 +106,14 @@ export default function SetServices() {
   }, []);
 
   const handleContinue = React.useCallback(() => {
+    // Save to store
+    setServicesData(selectedOccasions);
+    markStepComplete('set-services');
     router.push('/companion/onboard/set-pricing' as Href);
-  }, [router]);
+  }, [selectedOccasions, setServicesData, markStepComplete, router]);
+
+  // Validation state
+  const hasNoServicesSelected = selectedOccasions.length === 0;
 
   const isValid = selectedOccasions.length >= 1;
 
@@ -107,10 +126,15 @@ export default function SetServices() {
           <Pressable onPress={handleBack}>
             <ArrowLeft color={colors.midnight.DEFAULT} width={24} height={24} />
           </Pressable>
-          <Text style={styles.headerTitle} className="flex-1 text-xl text-midnight">
+          <Text
+            style={styles.headerTitle}
+            className="flex-1 text-xl text-midnight"
+          >
             {t('companion.onboard.set_services.header')}
           </Text>
-          <Text className="text-sm text-text-tertiary">{t('companion.onboard.step', { current: 2, total: 4 })}</Text>
+          <Text className="text-sm text-text-tertiary">
+            {t('companion.onboard.step', { current: 2, total: 4 })}
+          </Text>
         </View>
       </SafeAreaView>
 
@@ -143,7 +167,11 @@ export default function SetServices() {
                 key={occasion.id}
                 from={{ opacity: 0, translateX: -20 }}
                 animate={{ opacity: 1, translateX: 0 }}
-                transition={{ type: 'timing', duration: 400, delay: 100 + index * 50 }}
+                transition={{
+                  type: 'timing',
+                  duration: 400,
+                  delay: 100 + index * 50,
+                }}
               >
                 <Pressable
                   onPress={() => handleToggleOccasion(occasion.id)}
@@ -171,7 +199,11 @@ export default function SetServices() {
                         {t(occasion.labelKey)}
                       </Text>
                       {occasion.popular && (
-                        <Badge label={t('common.popular')} variant="lavender" size="sm" />
+                        <Badge
+                          label={t('common.popular')}
+                          variant="lavender"
+                          size="sm"
+                        />
                       )}
                     </View>
                     <Text className="mt-0.5 text-sm text-text-secondary">
@@ -196,21 +228,32 @@ export default function SetServices() {
           })}
         </View>
 
-        {/* Selected Count */}
+        {/* Selected Count / Validation */}
         <MotiView
           from={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ type: 'timing', duration: 500, delay: 400 }}
           className="mt-4"
         >
-          <Text className="text-center text-sm text-text-tertiary">
-            {t('companion.onboard.set_services.selected_count', { count: selectedOccasions.length })}
-          </Text>
+          {hasNoServicesSelected ? (
+            <Text className="text-center text-sm text-danger-400">
+              {t('companion.onboard.set_services.select_service_error')}
+            </Text>
+          ) : (
+            <Text className="text-center text-sm text-text-tertiary">
+              {t('companion.onboard.set_services.selected_count', {
+                count: selectedOccasions.length,
+              })}
+            </Text>
+          )}
         </MotiView>
       </ScrollView>
 
       {/* Bottom CTA */}
-      <SafeAreaView edges={['bottom']} className="border-t border-border-light bg-white">
+      <SafeAreaView
+        edges={['bottom']}
+        className="border-t border-border-light bg-white"
+      >
         <View className="px-6 py-4">
           <Button
             label={t('common.continue')}

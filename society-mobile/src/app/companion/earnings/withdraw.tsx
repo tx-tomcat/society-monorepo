@@ -2,8 +2,16 @@
 import { useRouter } from 'expo-router';
 import { MotiView } from 'moti';
 import React from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, TextInput } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import {
+  ActivityIndicator,
+  Alert,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  TextInput,
+} from 'react-native';
+import { showMessage } from 'react-native-flash-message';
 
 import {
   Badge,
@@ -21,32 +29,12 @@ import {
   Info,
   Wallet,
 } from '@/components/ui/icons';
+import {
+  type BankAccount,
+  type EarningsOverview,
+  earningsService,
+} from '@/lib/api/services/earnings.service';
 import { formatVND } from '@/lib/utils';
-
-type BankAccount = {
-  id: string;
-  bankName: string;
-  accountNumber: string;
-  accountHolder: string;
-  isDefault: boolean;
-};
-
-const MOCK_BANK_ACCOUNTS: BankAccount[] = [
-  {
-    id: '1',
-    bankName: 'Vietcombank',
-    accountNumber: '****4589',
-    accountHolder: 'NGUYEN THI MINH ANH',
-    isDefault: true,
-  },
-  {
-    id: '2',
-    bankName: 'Techcombank',
-    accountNumber: '****7823',
-    accountHolder: 'NGUYEN THI MINH ANH',
-    isDefault: false,
-  },
-];
 
 const QUICK_AMOUNTS = [500000, 1000000, 2000000, 3000000];
 
@@ -54,11 +42,43 @@ export default function WithdrawFunds() {
   const router = useRouter();
   const { t } = useTranslation();
   const [amount, setAmount] = React.useState('');
-  const [selectedBank, setSelectedBank] = React.useState(
-    MOCK_BANK_ACCOUNTS.find((b) => b.isDefault)?.id || ''
-  );
+  const [selectedBank, setSelectedBank] = React.useState('');
+  const [bankAccounts, setBankAccounts] = React.useState<BankAccount[]>([]);
+  const [overview, setOverview] = React.useState<EarningsOverview | null>(null);
+  const [isLoading, setIsLoading] = React.useState(true);
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
 
-  const availableBalance = 3460000;
+  React.useEffect(() => {
+    async function fetchData() {
+      try {
+        const [accountsData, overviewData] = await Promise.all([
+          earningsService.getBankAccounts(),
+          earningsService.getEarningsOverview(),
+        ]);
+        setBankAccounts(accountsData);
+        setOverview(overviewData);
+        // Set default selected bank
+        const primary = accountsData.find((b) => b.isPrimary);
+        if (primary) {
+          setSelectedBank(primary.id);
+        } else if (accountsData.length > 0) {
+          setSelectedBank(accountsData[0].id);
+        }
+      } catch (error) {
+        console.error('Failed to fetch withdrawal data:', error);
+        showMessage({
+          message: t('companion.withdraw.load_error'),
+          description: t('companion.withdraw.load_error_description'),
+          type: 'danger',
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    fetchData();
+  }, [t]);
+
+  const availableBalance = overview?.availableBalance || 0;
 
   const handleBack = React.useCallback(() => {
     router.back();
@@ -68,35 +88,81 @@ export default function WithdrawFunds() {
     setAmount(value.toString());
   }, []);
 
-  const handleWithdraw = React.useCallback(() => {
+  const handleWithdraw = React.useCallback(async () => {
     const withdrawAmount = parseInt(amount, 10);
     if (withdrawAmount > availableBalance) {
-      Alert.alert('Error', 'Insufficient balance');
+      Alert.alert(
+        t('companion.withdraw.error'),
+        t('companion.withdraw.insufficient_balance')
+      );
       return;
     }
     if (withdrawAmount < 100000) {
-      Alert.alert('Error', 'Minimum withdrawal is ₫100,000');
+      Alert.alert(
+        t('companion.withdraw.error'),
+        t('companion.withdraw.minimum_amount')
+      );
       return;
     }
 
     Alert.alert(
-      'Confirm Withdrawal',
-      `Withdraw ₫${withdrawAmount.toLocaleString('vi-VN')} to your bank account?`,
+      t('companion.withdraw.confirm_title'),
+      t('companion.withdraw.confirm_message', {
+        amount: formatVND(withdrawAmount, { symbolPosition: 'suffix' }),
+      }),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Confirm',
-          onPress: () => {
-            Alert.alert('Success', 'Withdrawal request submitted! Funds will arrive in 1-2 business days.');
-            router.back();
+          text: t('common.confirm'),
+          onPress: async () => {
+            setIsSubmitting(true);
+            try {
+              await earningsService.requestWithdrawal({
+                bankAccountId: selectedBank,
+                amount: withdrawAmount,
+              });
+              showMessage({
+                message: t('companion.withdraw.success'),
+                description: t('companion.withdraw.success_description'),
+                type: 'success',
+              });
+              router.back();
+            } catch (error) {
+              console.error('Withdrawal request failed:', error);
+              showMessage({
+                message: t('companion.withdraw.request_failed'),
+                description: t('companion.withdraw.request_failed_description'),
+                type: 'danger',
+              });
+            } finally {
+              setIsSubmitting(false);
+            }
           },
         },
       ]
     );
-  }, [amount, availableBalance, router]);
+  }, [amount, availableBalance, selectedBank, router, t]);
 
   const amountNum = parseInt(amount, 10) || 0;
-  const isValid = amountNum >= 100000 && amountNum <= availableBalance && selectedBank;
+
+  // Validation states
+  const isBelowMinimum = amountNum > 0 && amountNum < 100000;
+  const isAboveBalance = amountNum > availableBalance;
+  const hasNoBankSelected = !selectedBank && bankAccounts.length > 0;
+
+  const isValid =
+    amountNum >= 100000 &&
+    amountNum <= availableBalance &&
+    selectedBank &&
+    !isSubmitting;
+
+  if (isLoading) {
+    return (
+      <View className="flex-1 items-center justify-center bg-warmwhite">
+        <ActivityIndicator size="large" color={colors.lavender[400]} />
+      </View>
+    );
+  }
 
   return (
     <View className="flex-1 bg-warmwhite">
@@ -107,7 +173,10 @@ export default function WithdrawFunds() {
           <Pressable onPress={handleBack} testID="back-button">
             <ArrowLeft color={colors.midnight.DEFAULT} width={24} height={24} />
           </Pressable>
-          <Text style={styles.headerTitle} className="flex-1 text-xl text-midnight">
+          <Text
+            style={styles.headerTitle}
+            className="flex-1 text-xl text-midnight"
+          >
             {t('companion.withdraw.header')}
           </Text>
         </View>
@@ -131,7 +200,9 @@ export default function WithdrawFunds() {
               <Wallet color="#FFFFFF" width={20} height={20} />
             </View>
             <View>
-              <Text className="text-sm text-white/80">{t('companion.earnings.available_balance')}</Text>
+              <Text className="text-sm text-white/80">
+                {t('companion.earnings.available_balance')}
+              </Text>
               <Text style={styles.balance} className="text-xl text-white">
                 {formatVND(availableBalance, { symbolPosition: 'suffix' })}
               </Text>
@@ -149,7 +220,13 @@ export default function WithdrawFunds() {
           <Text className="mb-2 text-lg font-semibold text-midnight">
             {t('companion.withdraw.amount_label')}
           </Text>
-          <View className="flex-row items-center rounded-xl border border-border-light bg-white px-4">
+          <View
+            className={`flex-row items-center rounded-xl border bg-white px-4 ${
+              isBelowMinimum || isAboveBalance
+                ? 'border-danger-400'
+                : 'border-border-light'
+            }`}
+          >
             <Text className="text-xl text-text-tertiary">₫</Text>
             <TextInput
               value={amount ? parseInt(amount, 10).toLocaleString('vi-VN') : ''}
@@ -158,10 +235,28 @@ export default function WithdrawFunds() {
               placeholderTextColor={colors.text.tertiary}
               keyboardType="number-pad"
               testID="amount-input"
-              className="flex-1 py-4 text-right text-2xl font-bold text-midnight"
-              style={{ fontFamily: 'Urbanist_700Bold' }}
+              className="flex-1 py-4 text-right text-2xl font-bold"
+              style={{ fontFamily: 'Urbanist_700Bold', color: colors.midnight.DEFAULT }}
             />
           </View>
+
+          {/* Validation Messages */}
+          {isBelowMinimum && (
+            <Text className="mt-2 text-sm text-danger-400">
+              {t('companion.withdraw.minimum_error', {
+                amount: formatVND(100000, { symbolPosition: 'suffix' }),
+              })}
+            </Text>
+          )}
+          {isAboveBalance && (
+            <Text className="mt-2 text-sm text-danger-400">
+              {t('companion.withdraw.exceeds_balance_error', {
+                amount: formatVND(availableBalance, {
+                  symbolPosition: 'suffix',
+                }),
+              })}
+            </Text>
+          )}
 
           {/* Quick Amounts */}
           <View className="mt-3 flex-row flex-wrap gap-2">
@@ -209,45 +304,65 @@ export default function WithdrawFunds() {
           </Text>
 
           <View className="gap-3">
-            {MOCK_BANK_ACCOUNTS.map((bank) => (
-              <Pressable
-                key={bank.id}
-                onPress={() => setSelectedBank(bank.id)}
-                testID={`bank-account-${bank.id}`}
-                className={`flex-row items-center gap-4 rounded-xl p-4 ${
-                  selectedBank === bank.id
-                    ? 'border border-lavender-400 bg-lavender-400/10'
-                    : 'border border-border-light bg-white'
-                }`}
-              >
-                <View className="size-12 items-center justify-center rounded-full bg-lavender-400/20">
-                  <Bank color={colors.lavender[400]} width={24} height={24} />
-                </View>
-                <View className="flex-1">
-                  <View className="flex-row items-center gap-2">
-                    <Text className="font-semibold text-midnight">{bank.bankName}</Text>
-                    {bank.isDefault && (
-                      <Badge label={t('common.default')} variant="lavender" size="sm" />
-                    )}
-                  </View>
-                  <Text className="text-sm text-text-secondary">
-                    {bank.accountNumber} • {bank.accountHolder}
-                  </Text>
-                </View>
-                <View
-                  className={`size-6 items-center justify-center rounded-full border-2 ${
+            {bankAccounts.length > 0 ? (
+              bankAccounts.map((bank) => (
+                <Pressable
+                  key={bank.id}
+                  onPress={() => setSelectedBank(bank.id)}
+                  testID={`bank-account-${bank.id}`}
+                  className={`flex-row items-center gap-4 rounded-xl p-4 ${
                     selectedBank === bank.id
-                      ? 'border-lavender-400 bg-lavender-400'
-                      : 'border-border-light'
+                      ? 'border border-lavender-400 bg-lavender-400/10'
+                      : 'border border-border-light bg-white'
                   }`}
                 >
-                  {selectedBank === bank.id && (
-                    <CheckCircle color="#FFFFFF" width={16} height={16} />
-                  )}
-                </View>
-              </Pressable>
-            ))}
+                  <View className="size-12 items-center justify-center rounded-full bg-lavender-400/20">
+                    <Bank color={colors.lavender[400]} width={24} height={24} />
+                  </View>
+                  <View className="flex-1">
+                    <View className="flex-row items-center gap-2">
+                      <Text className="font-semibold text-midnight">
+                        {bank.bankName}
+                      </Text>
+                      {bank.isPrimary && (
+                        <Badge
+                          label={t('common.default')}
+                          variant="lavender"
+                          size="sm"
+                        />
+                      )}
+                    </View>
+                    <Text className="text-sm text-text-secondary">
+                      {bank.accountNumber} • {bank.accountHolder}
+                    </Text>
+                  </View>
+                  <View
+                    className={`size-6 items-center justify-center rounded-full border-2 ${
+                      selectedBank === bank.id
+                        ? 'border-lavender-400 bg-lavender-400'
+                        : 'border-border-light'
+                    }`}
+                  >
+                    {selectedBank === bank.id && (
+                      <CheckCircle color="#FFFFFF" width={16} height={16} />
+                    )}
+                  </View>
+                </Pressable>
+              ))
+            ) : (
+              <View className="items-center rounded-xl bg-white py-8">
+                <Text className="text-text-secondary">
+                  {t('companion.withdraw.no_bank_accounts')}
+                </Text>
+              </View>
+            )}
           </View>
+
+          {hasNoBankSelected && amountNum > 0 && (
+            <Text className="mt-2 text-sm text-danger-400">
+              {t('companion.withdraw.select_bank_error')}
+            </Text>
+          )}
 
           <Pressable testID="add-bank-account" className="mt-3 items-center">
             <Text className="text-sm font-semibold text-lavender-400">
@@ -278,11 +393,19 @@ export default function WithdrawFunds() {
       </ScrollView>
 
       {/* Bottom CTA */}
-      <SafeAreaView edges={['bottom']} className="border-t border-border-light bg-white">
+      <SafeAreaView
+        edges={['bottom']}
+        className="border-t border-border-light bg-white"
+      >
         <View className="px-6 py-4">
           <View className="mb-3 flex-row justify-between">
-            <Text className="text-text-secondary">{t('companion.withdraw.you_will_receive')}</Text>
-            <Text style={styles.receiveAmount} className="text-lg text-midnight">
+            <Text className="text-text-secondary">
+              {t('companion.withdraw.you_will_receive')}
+            </Text>
+            <Text
+              style={styles.receiveAmount}
+              className="text-lg text-midnight"
+            >
               {formatVND(amountNum, { symbolPosition: 'suffix' })}
             </Text>
           </View>

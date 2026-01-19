@@ -3,8 +3,8 @@ import type { Href } from 'expo-router';
 import { useRouter } from 'expo-router';
 import { MotiView } from 'moti';
 import React from 'react';
-import { Pressable, ScrollView, StyleSheet, TextInput } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { Pressable, ScrollView, StyleSheet, TextInput } from 'react-native';
 
 import {
   Button,
@@ -14,11 +14,8 @@ import {
   Text,
   View,
 } from '@/components/ui';
-import {
-  ArrowLeft,
-  Info,
-  PriceTag,
-} from '@/components/ui/icons';
+import { ArrowLeft, Info, PriceTag } from '@/components/ui/icons';
+import { useCompanionOnboarding } from '@/lib/stores';
 import { formatVND } from '@/lib/utils';
 
 const SUGGESTED_RATES = [300000, 400000, 500000, 600000, 800000];
@@ -26,8 +23,19 @@ const SUGGESTED_RATES = [300000, 400000, 500000, 600000, 800000];
 export default function SetPricing() {
   const router = useRouter();
   const { t } = useTranslation();
-  const [hourlyRate, setHourlyRate] = React.useState('500000');
-  const [minimumHours, setMinimumHours] = React.useState('2');
+
+  // Get data from store
+  const storedHourlyRate = useCompanionOnboarding.use.hourlyRate();
+  const storedMinimumHours = useCompanionOnboarding.use.minimumHours();
+  const setPricingData = useCompanionOnboarding.use.setPricingData();
+  const markStepComplete = useCompanionOnboarding.use.markStepComplete();
+
+  const [hourlyRate, setHourlyRate] = React.useState(
+    storedHourlyRate.toString()
+  );
+  const [minimumHours, setMinimumHours] = React.useState(
+    storedMinimumHours.toString()
+  );
 
   const handleBack = React.useCallback(() => {
     router.back();
@@ -38,8 +46,23 @@ export default function SetPricing() {
   }, []);
 
   const handleContinue = React.useCallback(() => {
+    const hourlyRateNum = parseInt(hourlyRate, 10) || 500000;
+    const minHoursNum = parseInt(minimumHours, 10) || 2;
+
+    // Calculate optional rates
+    const halfDayRate = Math.round(hourlyRateNum * 4 * 0.9); // 10% discount for 4 hours
+    const fullDayRate = Math.round(hourlyRateNum * 8 * 0.8); // 20% discount for 8 hours
+
+    // Save to store
+    setPricingData({
+      hourlyRate: hourlyRateNum,
+      minimumHours: minHoursNum,
+      halfDayRate,
+      fullDayRate,
+    });
+    markStepComplete('set-pricing');
     router.push('/companion/onboard/set-availability' as Href);
-  }, [router]);
+  }, [hourlyRate, minimumHours, setPricingData, markStepComplete, router]);
 
   const hourlyRateNum = parseInt(hourlyRate, 10) || 0;
   const minHoursNum = parseInt(minimumHours, 10) || 2;
@@ -48,7 +71,14 @@ export default function SetPricing() {
 
   const estimatedMonthly = yourEarnings * minHoursNum * 20; // 20 bookings per month estimate
 
-  const isValid = hourlyRateNum >= 200000 && minHoursNum >= 1;
+  // Validation states
+  const MIN_RATE = 200000;
+  const MAX_RATE = 5000000;
+  const isBelowMinimum = hourlyRateNum > 0 && hourlyRateNum < MIN_RATE;
+  const isAboveMaximum = hourlyRateNum > MAX_RATE;
+
+  const isValid =
+    hourlyRateNum >= MIN_RATE && hourlyRateNum <= MAX_RATE && minHoursNum >= 1;
 
   return (
     <View className="flex-1 bg-warmwhite">
@@ -59,10 +89,15 @@ export default function SetPricing() {
           <Pressable onPress={handleBack}>
             <ArrowLeft color={colors.midnight.DEFAULT} width={24} height={24} />
           </Pressable>
-          <Text style={styles.headerTitle} className="flex-1 text-xl text-midnight">
+          <Text
+            style={styles.headerTitle}
+            className="flex-1 text-xl text-midnight"
+          >
             {t('companion.onboard.set_pricing.header')}
           </Text>
-          <Text className="text-sm text-text-tertiary">{t('companion.onboard.step', { current: 3, total: 4 })}</Text>
+          <Text className="text-sm text-text-tertiary">
+            {t('companion.onboard.step', { current: 3, total: 4 })}
+          </Text>
         </View>
       </SafeAreaView>
 
@@ -82,17 +117,51 @@ export default function SetPricing() {
           <Text className="mb-2 text-lg font-semibold text-midnight">
             {t('companion.onboard.set_pricing.hourly_rate')}
           </Text>
-          <View className="flex-row items-center gap-2 rounded-xl border border-border-light bg-white px-4">
-            <PriceTag color={colors.lavender[400]} width={24} height={24} />
+          <View
+            className={`flex-row items-center gap-2 rounded-xl border bg-white px-4 ${
+              isBelowMinimum || isAboveMaximum
+                ? 'border-danger-400'
+                : 'border-border-light'
+            }`}
+          >
+            <PriceTag
+              color={
+                isBelowMinimum || isAboveMaximum
+                  ? colors.danger[400]
+                  : colors.lavender[400]
+              }
+              width={24}
+              height={24}
+            />
             <TextInput
-              value={formatVND(parseInt(hourlyRate, 10) || 0, { showSymbol: false })}
+              value={formatVND(parseInt(hourlyRate, 10) || 0, {
+                showSymbol: false,
+              })}
               onChangeText={(text) => setHourlyRate(text.replace(/\D/g, ''))}
               keyboardType="number-pad"
-              className="flex-1 py-4 text-2xl font-bold text-midnight"
-              style={{ fontFamily: 'Urbanist_700Bold' }}
+              className="flex-1 py-4 text-2xl font-bold"
+              style={{ fontFamily: 'Urbanist_700Bold', color: colors.midnight.DEFAULT }}
             />
-            <Text className="text-lg text-text-secondary">{t('companion.onboard.set_pricing.per_hour')}</Text>
+            <Text className="text-lg text-text-secondary">
+              {t('companion.onboard.set_pricing.per_hour')}
+            </Text>
           </View>
+
+          {/* Validation Messages */}
+          {isBelowMinimum && (
+            <Text className="mt-2 text-sm text-danger-400">
+              {t('companion.onboard.set_pricing.minimum_rate_error', {
+                amount: formatVND(MIN_RATE),
+              })}
+            </Text>
+          )}
+          {isAboveMaximum && (
+            <Text className="mt-2 text-sm text-danger-400">
+              {t('companion.onboard.set_pricing.maximum_rate_error', {
+                amount: formatVND(MAX_RATE),
+              })}
+            </Text>
+          )}
 
           {/* Suggested Rates */}
           <View className="mt-3 flex-row flex-wrap gap-2">
@@ -141,7 +210,9 @@ export default function SetPricing() {
               >
                 <Text
                   className={`text-lg font-semibold ${
-                    minHoursNum === hours ? 'text-lavender-400' : 'text-midnight'
+                    minHoursNum === hours
+                      ? 'text-lavender-400'
+                      : 'text-midnight'
                   }`}
                 >
                   {hours}h
@@ -163,20 +234,26 @@ export default function SetPricing() {
           </Text>
           <View className="gap-3">
             <View className="flex-row justify-between">
-              <Text className="text-text-secondary">{t('companion.onboard.set_pricing.your_hourly_rate')}</Text>
+              <Text className="text-text-secondary">
+                {t('companion.onboard.set_pricing.your_hourly_rate')}
+              </Text>
               <Text className="font-medium text-midnight">
                 {formatVND(parseInt(hourlyRate, 10) || 0)}
               </Text>
             </View>
             <View className="flex-row justify-between">
-              <Text className="text-text-secondary">{t('companion.onboard.set_pricing.platform_fee')}</Text>
+              <Text className="text-text-secondary">
+                {t('companion.onboard.set_pricing.platform_fee')}
+              </Text>
               <Text className="font-medium text-rose-400">
                 -{formatVND(platformFee)}
               </Text>
             </View>
             <View className="h-px bg-border-light" />
             <View className="flex-row justify-between">
-              <Text className="font-semibold text-midnight">{t('companion.onboard.set_pricing.you_earn')}</Text>
+              <Text className="font-semibold text-midnight">
+                {t('companion.onboard.set_pricing.you_earn')}
+              </Text>
               <Text className="text-xl font-bold text-teal-400">
                 {formatVND(yourEarnings)}
               </Text>
@@ -201,7 +278,10 @@ export default function SetPricing() {
             {formatVND(estimatedMonthly)}
           </Text>
           <Text className="mt-1 text-xs text-text-secondary">
-            {t('companion.onboard.set_pricing.estimate_basis', { bookings: 20, hours: minHoursNum })}
+            {t('companion.onboard.set_pricing.estimate_basis', {
+              bookings: 20,
+              hours: minHoursNum,
+            })}
           </Text>
         </MotiView>
 
@@ -213,14 +293,19 @@ export default function SetPricing() {
           className="rounded-xl bg-teal-400/10 p-4"
         >
           <Text className="text-sm text-text-secondary">
-            <Text className="font-semibold text-teal-700">{t('companion.onboard.set_pricing.pro_tip_label')}</Text>
+            <Text className="font-semibold text-teal-700">
+              {t('companion.onboard.set_pricing.pro_tip_label')}
+            </Text>
             {t('companion.onboard.set_pricing.pro_tip_text')}
           </Text>
         </MotiView>
       </ScrollView>
 
       {/* Bottom CTA */}
-      <SafeAreaView edges={['bottom']} className="border-t border-border-light bg-white">
+      <SafeAreaView
+        edges={['bottom']}
+        className="border-t border-border-light bg-white"
+      >
         <View className="px-6 py-4">
           <Button
             label={t('common.continue')}

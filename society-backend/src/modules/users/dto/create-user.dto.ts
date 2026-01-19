@@ -1,3 +1,5 @@
+import { IsVietnamPhone } from '@/common/validators/vietnam-phone.validator';
+import { Transform, Type } from 'class-transformer';
 import {
   IsBoolean,
   IsDate,
@@ -6,14 +8,11 @@ import {
   IsInt,
   IsOptional,
   IsString,
-  IsUrl,
   Max,
   MaxLength,
   Min,
-  MinLength,
+  MinLength
 } from 'class-validator';
-import { Type } from 'class-transformer';
-import { IsVietnamPhone } from '@/common/validators/vietnam-phone.validator';
 
 export enum UserRoleDto {
   HIRER = 'HIRER',
@@ -46,37 +45,6 @@ export class CreateUserDto {
   role?: UserRoleDto;
 }
 
-export class RegisterUserDto {
-  @IsOptional()
-  @IsEmail()
-  email?: string;
-
-  @IsOptional()
-  @IsString()
-  @IsVietnamPhone()
-  phone?: string;
-
-  @IsString()
-  @MinLength(2)
-  @MaxLength(100)
-  fullName: string;
-
-  @IsOptional()
-  @IsEnum(GenderDto)
-  gender?: GenderDto;
-
-  @IsOptional()
-  @Type(() => Date)
-  @IsDate()
-  dateOfBirth?: Date;
-
-  @IsOptional()
-  @IsString()
-  avatarUrl?: string;
-
-  @IsEnum(UserRoleDto)
-  role: UserRoleDto;
-}
 
 export class UpdateUserDto {
   @IsOptional()
@@ -90,10 +58,24 @@ export class UpdateUserDto {
   avatarUrl?: string;
 
   @IsOptional()
+  @Transform(({ value }) => {
+    // Handle case-insensitive gender from mobile app (male -> MALE)
+    if (typeof value === 'string') {
+      return value.toUpperCase();
+    }
+    return value;
+  })
   @IsEnum(GenderDto)
   gender?: GenderDto;
 
   @IsOptional()
+  @Transform(({ value }) => {
+    // Handle ISO date strings from mobile app (2000-01-15 -> Date)
+    if (typeof value === 'string') {
+      return new Date(value);
+    }
+    return value;
+  })
   @Type(() => Date)
   @IsDate()
   dateOfBirth?: Date;

@@ -1,4 +1,4 @@
-// Society - Warm & Trustworthy Color Palette
+// Hireme - Warm & Trustworthy Color Palette
 // Vietnam's First Trusted Companion Booking Platform
 module.exports = {
   white: '#FFFFFF',

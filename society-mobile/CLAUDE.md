@@ -127,7 +127,7 @@ const signIn = useAuth.use.signIn();      // Get action (no subscription)
 - Persisted to MMKV storage via `getToken()/setToken()`
 - Hydrated at module level (before React renders) in `_layout.tsx` via `hydrateAuth()`
 
-**Important**: Despite `@clerk/clerk-expo` being installed, the app uses custom JWT-based auth with Zustand. Do not assume Clerk is the auth provider.
+**Important**: The app uses Zalo SDK for authentication via custom `useAuth` hook at `src/lib/hooks/use-auth.ts`. The authentication flow exchanges Zalo tokens with the backend for Society JWT tokens.
 
 ### Data Fetching (React Query + react-query-kit)
 
@@ -553,7 +553,7 @@ modal.dismiss();
 1. **Don't use `npm` or `yarn`** - This project enforces pnpm (preinstall hook will error)
 2. **Don't bypass custom env system** - Never remove `EXPO_NO_DOTENV=1` or use Expo's `.env` loading
 3. **Don't import from `expo-constants` directly** - Use `@env` alias which re-exports properly
-4. **Don't assume Clerk is active** - Despite being installed, the app uses custom JWT auth
+4. **Use Zalo for auth** - Authentication is handled via custom `useAuth` hook using Zalo SDK + backend JWT tokens
 5. **Don't skip type imports** - ESLint enforces `import type` syntax
 6. **Don't use relative imports across features** - Use `@/` alias for all cross-folder imports
 7. **Don't install RN packages with pnpm** - Use `npx expo install` for compatibility

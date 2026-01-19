@@ -1,24 +1,25 @@
+import { DateUtils } from '@/common/utils/date.utils';
+import { PrismaService } from '@/prisma/prisma.service';
+import { BoostStatus, BoostTier, CompanionAvailability, Prisma, ServiceType, UserRole, VerificationStatus } from '@generated/client';
 import {
+  BadRequestException,
   Injectable,
   Logger,
   NotFoundException,
-  BadRequestException,
 } from '@nestjs/common';
-import { Prisma, CompanionAvailability, ServiceType, UserRole, VerificationStatus, BoostStatus, BoostTier } from '@generated/client';
-import { PrismaService } from '@/prisma/prisma.service';
 import {
+  ActiveBoostInfo,
+  BoostHistoryItem,
+  BoostPricing,
+  BoostPurchaseResult,
+  BoostTierEnum,
   BrowseCompanionsQueryDto,
-  UpdateCompanionProfileDto,
-  UpdateAvailabilityDto,
   CompanionListItem,
   CompanionProfileResponse,
   DayAvailabilityDetail,
-  BoostTierEnum,
-  BoostPricing,
-  ActiveBoostInfo,
-  BoostHistoryItem,
-  BoostPurchaseResult,
   PurchaseBoostDto,
+  UpdateAvailabilityDto,
+  UpdateCompanionProfileDto,
 } from '../dto/companion.dto';
 
 // Boost pricing configuration (in VND)
@@ -50,7 +51,7 @@ const BOOST_PRICING: Record<BoostTierEnum, { durationHours: number; price: numbe
 export class CompanionsService {
   private readonly logger = new Logger(CompanionsService.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   /**
    * Browse companions with filters
@@ -201,7 +202,7 @@ export class CompanionsService {
       userId: c.userId,
       displayName: c.user.fullName,
       age: c.user.dateOfBirth
-        ? this.calculateAge(c.user.dateOfBirth)
+        ? DateUtils.calculateAge(c.user.dateOfBirth as Date)
         : null,
       avatar: c.user.avatarUrl || (c.photos.length > 0 ? c.photos[0].url : null),
       gender: c.user.gender,
@@ -317,7 +318,7 @@ export class CompanionsService {
       id: companion.id,
       userId: companion.userId,
       displayName: companion.user.fullName,
-      age: companion.user.dateOfBirth ? this.calculateAge(companion.user.dateOfBirth) : null,
+      age: companion.user.dateOfBirth ? DateUtils.calculateAge(companion.user.dateOfBirth) : null,
       bio: companion.bio,
       avatar: companion.user.avatarUrl,
       photos: companion.photos.map((p) => p.url),
@@ -815,19 +816,7 @@ export class CompanionsService {
     return updatedServices;
   }
 
-  // ============================================
-  // Helper Methods
-  // ============================================
 
-  private calculateAge(dateOfBirth: Date): number {
-    const today = new Date();
-    let age = today.getFullYear() - dateOfBirth.getFullYear();
-    const monthDiff = today.getMonth() - dateOfBirth.getMonth();
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dateOfBirth.getDate())) {
-      age--;
-    }
-    return age;
-  }
 
   private getThisWeekAvailability(availability: CompanionAvailability[]): { date: string; slots: string[] }[] {
     const result: { date: string; slots: string[] }[] = [];

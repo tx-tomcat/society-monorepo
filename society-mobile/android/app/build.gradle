@@ -87,13 +87,17 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace 'com.society.development'
+    namespace 'vn.hireme.mobile'
     defaultConfig {
-        applicationId 'com.society.development'
+        applicationId 'vn.hireme.mobile'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "0.0.1"
+
+        // Zalo SDK App ID - read from environment variable or gradle.properties
+        def zaloAppId = System.getenv("EXPO_PUBLIC_ZALO_APP_ID") ?: project.findProperty("ZALO_APP_ID") ?: ""
+        manifestPlaceholders = [ZALO_APP_ID: zaloAppId]
     }
     signingConfigs {
         debug {

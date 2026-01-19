@@ -6,7 +6,11 @@ interface HeartProps extends SvgProps {
   filled?: boolean;
 }
 
-export function Heart({ color = '#FF6B8A', filled = false, ...props }: HeartProps) {
+export function Heart({
+  color = '#FF6B8A',
+  filled = false,
+  ...props
+}: HeartProps) {
   return (
     <Svg width={24} height={24} viewBox="0 0 24 24" fill="none" {...props}>
       <Path

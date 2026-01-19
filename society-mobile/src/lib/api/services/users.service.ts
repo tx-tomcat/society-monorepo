@@ -1,62 +1,40 @@
 import { apiClient } from '../client';
+import type { UserProfileResponse } from '../types';
 
-export interface User {
-  id: string;
-  clerkId: string;
-  email?: string;
-  phoneNumber?: string;
-  firstName?: string;
-  lastName?: string;
-  fullName?: string;
-  profileImageUrl?: string;
-  bio?: string;
-  location?: string;
-  interests?: string[];
-  verified: boolean;
-  role: 'user' | 'premium' | 'admin';
-  createdAt: string;
-  updatedAt: string;
-}
+export type { UserProfileResponse };
 
 export interface UpdateProfileData {
-  firstName?: string;
-  lastName?: string;
-  bio?: string;
-  location?: string;
-  interests?: string[];
+  fullName?: string;
+  avatarUrl?: string;
+  gender?: string;
+  dateOfBirth?: string;
 }
 
 /**
  * Users API Service
- * All methods require authentication via getToken
+ * Auth token is automatically injected by apiClient
  */
 export const usersService = {
   /**
    * Get current user profile
+   * Uses /users/profile which returns comprehensive profile data including role
    */
-  async getCurrentUser(getToken: () => Promise<string | null>): Promise<User> {
-    return apiClient.get('/users/me', { getToken });
+  async getCurrentUser(): Promise<UserProfileResponse> {
+    return apiClient.get('/users/profile');
   },
 
   /**
    * Update user profile
    */
-  async updateProfile(
-    data: UpdateProfileData,
-    getToken: () => Promise<string | null>
-  ): Promise<User> {
-    return apiClient.put('/users/profile', data, { getToken });
+  async updateProfile(data: UpdateProfileData): Promise<UserProfileResponse> {
+    return apiClient.put('/users/profile', data);
   },
 
   /**
    * Upload profile avatar
    */
-  async uploadAvatar(
-    file: FormData,
-    getToken: () => Promise<string | null>
-  ): Promise<{ url: string }> {
+  async uploadAvatar(file: FormData): Promise<{ url: string }> {
     return apiClient.post('/users/avatar', file, {
-      getToken,
       headers: { 'Content-Type': 'multipart/form-data' },
     });
   },
@@ -64,9 +42,7 @@ export const usersService = {
   /**
    * Delete user account
    */
-  async deleteAccount(
-    getToken: () => Promise<string | null>
-  ): Promise<{ success: boolean }> {
-    return apiClient.delete('/users/me', { getToken });
+  async deleteAccount(): Promise<{ success: boolean }> {
+    return apiClient.delete('/users/me');
   },
 };

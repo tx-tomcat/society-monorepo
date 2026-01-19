@@ -1,30 +1,30 @@
+import { JwtAuthGuard } from '@/auth/guards/jwt.guard';
+import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import {
+  Body,
   Controller,
+  Delete,
   Get,
+  Param,
   Post,
   Put,
-  Delete,
-  Param,
-  Body,
   UseGuards,
 } from '@nestjs/common';
-import { JwtAuthGuard } from '@/auth/guards/jwt-auth.guard';
-import { CurrentUser } from '@/common/decorators/current-user.decorator';
-import { SafetyService } from '../services/safety.service';
 import {
-  TriggerSosDto,
-  UpdateSosStatusDto,
-  UpdateLocationDto,
   AddEmergencyContactDto,
-  UpdateEmergencyContactDto,
   CancelSosDto,
   ResolveSosDto,
+  TriggerSosDto,
+  UpdateEmergencyContactDto,
+  UpdateLocationDto,
+  UpdateSosStatusDto,
 } from '../dto/safety.dto';
+import { SafetyService } from '../services/safety.service';
 
 @Controller('safety')
 @UseGuards(JwtAuthGuard)
 export class SafetyController {
-  constructor(private readonly safetyService: SafetyService) {}
+  constructor(private readonly safetyService: SafetyService) { }
 
   // ============================================
   // EMERGENCY CONTACTS

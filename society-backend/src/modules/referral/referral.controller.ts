@@ -1,33 +1,33 @@
+import { CurrentUser, CurrentUserData } from '@/common/decorators/current-user.decorator';
 import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
-import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
-import { User } from '../../auth/decorators/user.decorator';
+import { JwtAuthGuard } from '../../auth/guards/jwt.guard';
 import { ApplyReferralDto } from './dto/apply-referral.dto';
 import { ReferralService } from './referral.service';
 
 @Controller('referral')
 @UseGuards(JwtAuthGuard)
 export class ReferralController {
-  constructor(private readonly referralService: ReferralService) {}
+  constructor(private readonly referralService: ReferralService) { }
 
   @Get('my-code')
-  async getMyCode(@User() userId: string) {
-    const code = await this.referralService.generateCode(userId);
+  async getMyCode(@CurrentUser() user: CurrentUserData) {
+    const code = await this.referralService.generateCode(user.id);
     return { code };
   }
 
   @Get('stats')
-  async getStats(@User() userId: string) {
-    return this.referralService.getStats(userId);
+  async getStats(@CurrentUser() user: CurrentUserData) {
+    return this.referralService.getStats(user.id);
   }
 
   @Get('info')
-  async getInfo(@User() userId: string) {
-    return this.referralService.getReferralInfo(userId);
+  async getInfo(@CurrentUser() user: CurrentUserData) {
+    return this.referralService.getReferralInfo(user.id);
   }
 
   @Post('apply')
-  async applyReferralCode(@User() userId: string, @Body() dto: ApplyReferralDto) {
-    await this.referralService.applyReferralCode(userId, dto.code);
+  async applyReferralCode(@CurrentUser() user: CurrentUserData, @Body() dto: ApplyReferralDto) {
+    await this.referralService.applyReferralCode(user.id, dto.code);
     return { success: true, message: 'Referral code applied successfully' };
   }
 
@@ -37,8 +37,8 @@ export class ReferralController {
   }
 
   @Get('history')
-  async getHistory(@User() userId: string) {
-    const info = await this.referralService.getReferralInfo(userId);
+  async getHistory(@CurrentUser() user: CurrentUserData) {
+    const info = await this.referralService.getReferralInfo(user.id);
     return info?.referredUsers || [];
   }
 }

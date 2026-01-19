@@ -4,10 +4,12 @@
   <dict>
     <key>CADisableMinimumFrameDurationOnPhone</key>
     <true/>
+    <key>CFBundleAllowMixedLocalizations</key>
+    <true/>
     <key>CFBundleDevelopmentRegion</key>
     <string>$(DEVELOPMENT_LANGUAGE)</string>
     <key>CFBundleDisplayName</key>
-    <string>Society</string>
+    <string>Hireme</string>
     <key>CFBundleExecutable</key>
     <string>$(EXECUTABLE_NAME)</string>
     <key>CFBundleIdentifier</key>
@@ -27,8 +29,8 @@
       <dict>
         <key>CFBundleURLSchemes</key>
         <array>
-          <string>Society</string>
-          <string>com.society.development</string>
+          <string>Hireme</string>
+          <string>vn.hireme.mobile</string>
         </array>
       </dict>
       <dict>
@@ -37,6 +39,19 @@
           <string>exp+obytesapp</string>
         </array>
       </dict>
+      <dict>
+        <key>CFBundleURLSchemes</key>
+        <array>
+          <string>zalo-777910443319084766</string>
+        </array>
+      </dict>
+    </array>
+    <key>ZaloAppID</key>
+    <string>777910443319084766</string>
+    <key>LSApplicationQueriesSchemes</key>
+    <array>
+      <string>zalosdk</string>
+      <string>zaloshareext</string>
     </array>
     <key>CFBundleVersion</key>
     <string>1</string>
@@ -64,10 +79,6 @@
     <key>NSUserActivityTypes</key>
     <array>
       <string>$(PRODUCT_BUNDLE_IDENTIFIER).expo.index_route</string>
-    </array>
-    <key>UIAppFonts</key>
-    <array>
-      <string>Inter.ttf</string>
     </array>
     <key>UILaunchStoryboardName</key>
     <string>SplashScreen</string>

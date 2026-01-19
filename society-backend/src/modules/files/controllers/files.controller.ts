@@ -15,8 +15,9 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 // Using Express.Multer.File type from multer
-import { Roles } from '../../../auth/decorators/roles.decorator';
-import { JwtAuthGuard } from '../../../auth/guards/jwt-auth.guard';
+import { Roles } from '@/common/decorators/roles.decorator';
+import { Role } from '@/common/enums/roles.enum';
+import { JwtAuthGuard } from '../../../auth/guards/jwt.guard';
 import { RolesGuard } from '../../../auth/guards/roles.guard';
 import {
   FileFilterDto,
@@ -29,7 +30,7 @@ import { FilesService } from '../services/files.service';
 @Controller('files')
 @UseGuards(JwtAuthGuard)
 export class FilesController {
-  constructor(private readonly filesService: FilesService) {}
+  constructor(private readonly filesService: FilesService) { }
 
   @Post('upload-url')
   async getUploadUrl(@Request() req: any, @Body() dto: GetUploadUrlDto) {
@@ -101,9 +102,9 @@ export class FilesController {
 
 @Controller('admin/files')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles('admin')
+@Roles(Role.ADMIN)
 export class FilesAdminController {
-  constructor(private readonly filesService: FilesService) {}
+  constructor(private readonly filesService: FilesService) { }
 
   @Get('stats')
   async getGlobalStorageStats() {

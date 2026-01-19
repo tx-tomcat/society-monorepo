@@ -10,7 +10,12 @@ type Props = {
   height?: number;
 };
 
-export const Phone = ({ color = colors.charcoal[900], size = 28, width, height }: Props) => {
+export const Phone = ({
+  color = colors.charcoal[900],
+  size = 28,
+  width,
+  height,
+}: Props) => {
   const w = width ?? size;
   const h = height ?? size;
   return (

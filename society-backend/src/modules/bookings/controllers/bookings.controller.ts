@@ -1,34 +1,34 @@
+import { JwtAuthGuard } from '@/auth/guards/jwt.guard';
+import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import {
+  Body,
   Controller,
   Get,
-  Post,
-  Put,
-  Param,
-  Query,
-  Body,
-  UseGuards,
   HttpCode,
   HttpStatus,
+  Param,
+  Post,
+  Put,
+  Query,
+  UseGuards,
 } from '@nestjs/common';
-import { JwtAuthGuard } from '@/auth/guards/jwt-auth.guard';
-import { CurrentUser } from '@/common/decorators/current-user.decorator';
-import { BookingsService } from '../services/bookings.service';
 import {
   CreateBookingDto,
-  UpdateBookingStatusDto,
-  GetBookingsQueryDto,
-  SubmitReviewDto,
-  EditReviewDto,
-  UpdateLocationDto,
   DeclineBookingDto,
   DisputeReviewDto,
+  EditReviewDto,
   EmergencyCancellationDto,
+  GetBookingsQueryDto,
+  SubmitReviewDto,
+  UpdateBookingStatusDto,
+  UpdateLocationDto,
 } from '../dto/booking.dto';
+import { BookingsService } from '../services/bookings.service';
 
 @Controller('bookings')
 @UseGuards(JwtAuthGuard)
 export class BookingsController {
-  constructor(private readonly bookingsService: BookingsService) {}
+  constructor(private readonly bookingsService: BookingsService) { }
 
   /**
    * Create a new booking (Hirer)

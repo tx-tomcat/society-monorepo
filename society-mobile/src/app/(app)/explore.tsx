@@ -33,7 +33,8 @@ const topRatedCompanions: CompanionData[] = [
     id: '1',
     name: 'Minh Anh',
     age: 24,
-    image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80',
+    image:
+      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80',
     rating: 4.9,
     reviewCount: 127,
     location: 'District 1',
@@ -46,7 +47,8 @@ const topRatedCompanions: CompanionData[] = [
     id: '4',
     name: 'Hoàng Yến',
     age: 25,
-    image: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400&q=80',
+    image:
+      'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400&q=80',
     rating: 4.9,
     reviewCount: 156,
     location: 'District 7',
@@ -100,8 +102,8 @@ export default function Explore() {
               placeholderTextColor={colors.text.tertiary}
               value={searchQuery}
               onChangeText={setSearchQuery}
-              className="flex-1 text-base text-midnight"
-              style={{ fontFamily: 'Urbanist_500Medium' }}
+              className="flex-1 text-base"
+              style={{ fontFamily: 'Urbanist_500Medium', color: colors.midnight.DEFAULT }}
             />
           </View>
         </View>
@@ -138,7 +140,9 @@ export default function Explore() {
         {/* Top Rated */}
         <View className="py-4">
           <View className="mb-3 flex-row items-center justify-between px-4">
-            <Text className="text-lg font-semibold text-midnight">Top Rated</Text>
+            <Text className="text-lg font-semibold text-midnight">
+              Top Rated
+            </Text>
             <Pressable>
               <Text className="text-sm font-medium text-rose-400">See All</Text>
             </Pressable>
@@ -181,7 +185,7 @@ export default function Explore() {
         </View>
 
         {/* Popular Locations */}
-        <View className="px-4 py-4">
+        <View className="p-4">
           <Text className="mb-3 text-lg font-semibold text-midnight">
             Popular Locations
           </Text>
@@ -193,30 +197,38 @@ export default function Explore() {
                 className="flex-row items-center gap-2 rounded-xl bg-white px-4 py-3"
               >
                 <MapPin color={colors.rose[400]} width={16} height={16} />
-                <Text className="font-medium text-midnight">{location.name}</Text>
-                <Badge label={`${location.count}`} variant="secondary" size="sm" />
+                <Text className="font-medium text-midnight">
+                  {location.name}
+                </Text>
+                <Badge
+                  label={`${location.count}`}
+                  variant="secondary"
+                  size="sm"
+                />
               </Pressable>
             ))}
           </View>
         </View>
 
         {/* Recent Searches */}
-        <View className="px-4 py-4">
+        <View className="p-4">
           <Text className="mb-3 text-lg font-semibold text-midnight">
             Recent Searches
           </Text>
           <View className="gap-2">
-            {['Wedding companion District 1', 'Tet celebration', 'Coffee date'].map(
-              (search) => (
-                <Pressable
-                  key={search}
-                  className="flex-row items-center gap-3 rounded-xl bg-white px-4 py-3"
-                >
-                  <Search color={colors.text.tertiary} width={16} height={16} />
-                  <Text className="flex-1 text-midnight">{search}</Text>
-                </Pressable>
-              )
-            )}
+            {[
+              'Wedding companion District 1',
+              'Tet celebration',
+              'Coffee date',
+            ].map((search) => (
+              <Pressable
+                key={search}
+                className="flex-row items-center gap-3 rounded-xl bg-white px-4 py-3"
+              >
+                <Search color={colors.text.tertiary} width={16} height={16} />
+                <Text className="flex-1 text-midnight">{search}</Text>
+              </Pressable>
+            ))}
           </View>
         </View>
 

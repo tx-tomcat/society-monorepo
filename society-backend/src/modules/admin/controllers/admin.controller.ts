@@ -1,26 +1,27 @@
+import { Roles } from '@/common/decorators/roles.decorator';
+import { Role } from '@/common/enums/roles.enum';
 import {
+  Body,
   Controller,
   Get,
+  Param,
   Post,
   Put,
-  Body,
-  Param,
   Query,
-  UseGuards,
   Request,
+  UseGuards,
 } from '@nestjs/common';
-import { JwtAuthGuard } from '../../../auth/guards/jwt-auth.guard';
+import { JwtAuthGuard } from '../../../auth/guards/jwt.guard';
 import { RolesGuard } from '../../../auth/guards/roles.guard';
-import { Roles } from '../../../auth/decorators/roles.decorator';
-import { AdminService } from '../services/admin.service';
 import {
-  UserSearchDto,
+  BroadcastNotificationDto,
   UpdateUserRoleDto,
   UpdateUserStatusDto,
-  BroadcastNotificationDto,
+  UserSearchDto,
   VerificationApprovalDto,
   WithdrawalRejectionDto,
 } from '../dto/admin.dto';
+import { AdminService } from '../services/admin.service';
 
 interface AuthenticatedRequest {
   user: { id: string; email: string; role: string };
@@ -28,9 +29,9 @@ interface AuthenticatedRequest {
 
 @Controller('admin')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles('ADMIN')
+@Roles(Role.ADMIN)
 export class AdminController {
-  constructor(private readonly adminService: AdminService) {}
+  constructor(private readonly adminService: AdminService) { }
 
   // Dashboard
   @Get('dashboard')

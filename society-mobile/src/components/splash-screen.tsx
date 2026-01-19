@@ -11,9 +11,10 @@ import Animated, {
 import Svg, { Circle, G, Path } from 'react-native-svg';
 
 import { FocusAwareStatusBar, Text, View } from '@/components/ui';
+import { Image } from 'expo-image';
 
-// Society Logo Component with animation
-function SocietyLogo({ size = 160 }: { size?: number }) {
+// Hireme Logo Component with animation
+function HiremeLogo({ size = 160 }: { size?: number }) {
   const scale = useSharedValue(1);
 
   React.useEffect(() => {
@@ -40,7 +41,7 @@ function SocietyLogo({ size = 160 }: { size?: number }) {
     >
       <Svg width={size * 0.7} height={size * 0.7} viewBox="0 0 100 100">
         <G>
-          {/* Elegant S monogram for Society */}
+          {/* Elegant S monogram for Hireme */}
           <Circle
             cx="50"
             cy="50"
@@ -107,7 +108,7 @@ interface SplashScreenProps {
 }
 
 export function SplashScreen({
-  appName = 'Society',
+  appName = 'Hireme',
   variant = 'brand',
   showLoading = true,
   subtitle,
@@ -127,7 +128,7 @@ export function SplashScreen({
       <View className="absolute inset-0 items-center justify-center">
         <View className="items-center gap-8">
           {/* Logo */}
-          <SocietyLogo size={160} />
+          <Image source={require('../../assets/logo.png')} style={{ width: 160, height: 160 }} />
 
           {/* App Name */}
           <View className="items-center gap-2">

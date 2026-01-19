@@ -1,5 +1,31 @@
 {
+  "occasions": {
+    "wedding": "Wedding",
+    "family": "Family Event",
+    "business": "Business",
+    "tet": "Tết",
+    "casual": "Casual",
+    "party": "Party"
+  },
   "auth": {
+    "welcome_back": "Welcome Back",
+    "login_with_zalo_description": "Sign in with your Zalo account to continue",
+    "continue_with_zalo": "Continue with Zalo",
+    "terms_agreement": "By continuing, you agree to our Terms of Service and Privacy Policy",
+    "errors": {
+      "email_registered_as_companion": "This email is registered as a companion. Please use the companion login.",
+      "invalid_otp": "Invalid verification code. Please try again.",
+      "login_failed": "Login failed. Please try again.",
+      "max_otp_attempts": "Maximum attempts reached. Please try again later.",
+      "network_error": "Network error. Please check your connection.",
+      "otp_request_failed": "Unable to send verification code. Please try again.",
+      "otp_resend_failed": "Unable to resend code. Please try again.",
+      "phone_registered_as_companion": "This phone number is registered as a companion. Please use the companion login.",
+      "set_role_failed": "Unable to set your role. Please try again.",
+      "unknown_error": "Something went wrong. Please try again.",
+      "voice_call_failed": "Unable to initiate voice call. Please try again.",
+      "zalo_login_failed": "Zalo login failed. Please try again."
+    },
     "login": {
       "companion": {
         "subtitle": "Sign in to manage your bookings and earnings",
@@ -18,18 +44,75 @@
       "phone_placeholder": "Phone number",
       "privacy_policy": "Privacy Policy",
       "sign_up": "Sign Up",
+      "subtitle": "Sign in to continue",
       "terms_agreement": "By continuing, you agree to our",
-      "terms_of_service": "Terms of Service"
+      "terms_of_service": "Terms of Service",
+      "title": "Welcome Back"
     },
     "otp": {
       "didnt_receive": "Didn't receive the code?",
       "get_help": "Get help",
       "resend_code": "Resend Code",
       "resend_in": "Resend code in",
+      "resend_success": "Verification code sent!",
       "subtitle": "We've sent a 6-digit code to",
-      "title": "Verify your number",
+      "title": "Verify your email",
       "verify": "Verify",
-      "verify_continue": "Verify & Continue"
+      "verify_continue": "Verify & Continue",
+      "voice_call_initiated": "Voice call initiated. Please wait for the call."
+    },
+    "select_role": {
+      "companion": {
+        "description": "Create a profile, set your rates, and start earning by accompanying clients to events.",
+        "title": "Become a Companion"
+      },
+      "continue_as_companion": "Continue as Companion",
+      "continue_as_hirer": "Continue as Hirer",
+      "hirer": {
+        "description": "Browse verified companions for weddings, family events, corporate gatherings, and more.",
+        "title": "Find a Companion"
+      },
+      "note": "You can only choose one role. This cannot be changed later.",
+      "subtitle": "How would you like to use Hireme?",
+      "title": "Choose Your Role"
+    },
+    "social_login_coming_soon": "Social login coming soon!",
+    "validation": {
+      "age_minimum": "You must be at least 18 years old",
+      "email_invalid": "Please enter a valid email address",
+      "email_required": "Email is required",
+      "gender_required": "Please select your gender",
+      "name_invalid": "Name can only contain letters, spaces, hyphens, and apostrophes",
+      "name_max_length": "Name cannot exceed 50 characters",
+      "name_min_length": "Name must be at least 2 characters",
+      "otp_length": "OTP must be 6 digits",
+      "otp_numeric": "OTP must contain only numbers",
+      "password_lowercase": "Password must contain at least one lowercase letter",
+      "password_min_length": "Password must be at least 8 characters",
+      "password_number": "Password must contain at least one number",
+      "password_uppercase": "Password must contain at least one uppercase letter",
+      "phone_invalid": "Please enter a valid phone number",
+      "phone_max_length": "Phone number cannot exceed 15 digits",
+      "phone_min_length": "Phone number must be at least 9 digits",
+      "vietnam_phone_invalid": "Please enter a valid Vietnamese phone number (09x, 03x, 07x, 08x, 05x)"
+    },
+    "onboarding": {
+      "create_profile": "Create Your Profile",
+      "tap_to_add_photo": "Tap to add a profile photo",
+      "select_date": "Select your date of birth",
+      "age_requirement": "You must be at least 18 years old",
+      "terms_notice": "By continuing, you agree to our Terms of Service and Privacy Policy. Your information is kept secure and private.",
+      "profile_creation_failed": "Failed to create profile. Please try again."
+    },
+    "verification": {
+      "camera_permission_required": "Camera permission is required to take a selfie.",
+      "gallery_permission_required": "Photo library permission is required to select ID photos.",
+      "missing_documents": "Please complete all required verification steps.",
+      "skip_confirm": "Skip for Now",
+      "skip_message": "You can still use the app, but some features will be limited until you verify your identity.",
+      "skip_title": "Skip Verification?",
+      "submission_failed": "Unable to submit verification. Please try again.",
+      "submitted_success": "Verification submitted! We'll review your documents within 24-48 hours."
     },
     "verify_identity": {
       "benefits": {
@@ -51,7 +134,7 @@
       "completed": "Completed",
       "header": "Identity Verification",
       "hirer": {
-        "subtitle": "Help us keep Society safe for everyone",
+        "subtitle": "Help us keep Hireme safe for everyone",
         "title": "Verify Your Identity"
       },
       "privacy_description": "We use zkTLS technology for secure verification. Your data is encrypted and never shared without consent.",
@@ -79,8 +162,9 @@
       "why_verify": "Why Verify?"
     },
     "welcome": {
+      "already_have_account": "Already have an account? Sign In",
       "become_companion": "Become a Companion",
-      "brand_name": "Society",
+      "brand_name": "Hireme",
       "companion_login": "Companion?",
       "earn_money": "Earn ₫₫₫",
       "features": {
@@ -89,6 +173,7 @@
         "verified_safe": "Verified & Safe"
       },
       "find_companion": "Find a Companion",
+      "get_started": "Get Started",
       "hero_subtitle": "Book verified companions for weddings, family events,\ncorporate gatherings, and more.",
       "hero_title": "Connect with\nConfidence",
       "hirer_login": "Hirer?",
@@ -99,458 +184,707 @@
     }
   },
   "common": {
+    "add": "Add",
     "and": "and",
     "back": "Back",
+    "go_back": "Go Back",
     "cancel": "Cancel",
+    "coming_soon": "Coming Soon",
     "confirm": "Confirm",
     "continue": "Continue",
+    "days": {
+      "fri_short": "Fri",
+      "friday": "Friday",
+      "mon_short": "Mon",
+      "monday": "Monday",
+      "sat_short": "Sat",
+      "saturday": "Saturday",
+      "sun_short": "Sun",
+      "sunday": "Sunday",
+      "thu_short": "Thu",
+      "thursday": "Thursday",
+      "tue_short": "Tue",
+      "tuesday": "Tuesday",
+      "wed_short": "Wed",
+      "wednesday": "Wednesday"
+    },
+    "default": "Default",
     "done": "Done",
     "edit": "Edit",
+    "error": "Error",
     "hours": "hours",
+    "loading": "Loading...",
+    "new": "New",
+    "ok": "OK",
     "or": "or",
+    "popular": "Popular",
+    "retry": "Retry",
+    "reviews": "reviews",
     "save": "Save",
     "save_changes": "Save Changes",
     "see_all": "See All",
     "skip": "Skip",
-    "success": "Success",
-    "view_all": "View All",
-    "ok": "OK",
-    "add": "Add",
-    "new": "New",
-    "default": "Default",
-    "popular": "Popular",
-    "verified": "Verified",
-    "reviews": "reviews",
-    "days": {
-      "sun_short": "Sun",
-      "mon_short": "Mon",
-      "tue_short": "Tue",
-      "wed_short": "Wed",
-      "thu_short": "Thu",
-      "fri_short": "Fri",
-      "sat_short": "Sat",
-      "sunday": "Sunday",
-      "monday": "Monday",
-      "tuesday": "Tuesday",
-      "wednesday": "Wednesday",
-      "thursday": "Thursday",
-      "friday": "Friday",
-      "saturday": "Saturday"
-    },
     "status": {
+      "active": "Active",
+      "cancelled": "Cancelled",
+      "completed": "Completed",
       "confirmed": "Confirmed",
       "pending": "Pending",
-      "upcoming": "Upcoming",
-      "active": "Active",
-      "completed": "Completed",
-      "cancelled": "Cancelled"
-    }
+      "upcoming": "Upcoming"
+    },
+    "success": "Success",
+    "today": "Today",
+    "verified": "Verified",
+    "view_all": "View All",
+    "yesterday": "Yesterday"
   },
-  "hirer": {
-    "splash": {
-      "get_started": "Get Started",
-      "already_have_account": "Already have an account?",
-      "hero_title": "Find Your Perfect Companion",
-      "hero_subtitle": "Book verified companions for weddings, family events, corporate gatherings, and more.",
-      "tagline": "Vietnam's Trusted Companion Platform",
-      "features": {
-        "verified": "Verified Companions",
-        "premium": "Premium Experience",
-        "trusted": "Trusted Community"
-      }
-    },
-    "orders": {
-      "header": "My Bookings",
-      "tabs": {
-        "all": "All",
-        "upcoming": "Upcoming",
-        "active": "Active",
-        "past": "Past"
-      },
-      "status": {
-        "upcoming": "Upcoming",
-        "in_progress": "In Progress",
-        "completed": "Completed",
-        "cancelled": "Cancelled"
-      },
-      "empty": "No bookings found"
-    },
-    "booking_detail": {
-      "header": "Booking Details",
-      "call": "Call",
-      "message": "Message",
-      "booking_info": "Booking Information",
-      "occasion": "Occasion",
-      "date_time": "Date & Time",
-      "location": "Location",
-      "special_requests": "Special Requests",
-      "payment_summary": "Payment Summary",
-      "service_fee": "Service Fee",
-      "total": "Total",
-      "escrow_notice": "Payment held in secure escrow until booking completion",
-      "booking_code": "Booking Code",
-      "cancel_booking": "Cancel Booking",
-      "get_directions": "Get Directions",
-      "booked_on": "Booked on",
-      "reviews": "reviews"
-    }
+  "errors": {
+    "accept_failed": "Failed to accept booking",
+    "decline_failed": "Failed to decline booking",
+    "not_found": "Not Found",
+    "try_again": "Please try again"
   },
   "companion": {
-    "splash": {
-      "badge": "COMPANION",
-      "hero_title": "Turn your time into earnings",
-      "hero_subtitle": "Join Vietnam's premier companion platform. Set your rates, choose your bookings, grow your income.",
+    "booking_detail": {
+      "booked_on": "Booked on",
+      "booking_amount": "Booking Amount",
+      "booking_code": "Booking Code",
+      "booking_info": "Booking Information",
+      "bookings_count": "{{count}} bookings",
+      "call": "Call",
+      "calling": "Calling",
+      "cancel_booking": "Cancel Booking",
+      "cancel_warning": "Are you sure you want to cancel this booking? This action cannot be undone.",
+      "check_in": "Check In",
+      "checked_in": "You've successfully checked in!",
+      "date_time": "Date & Time",
+      "get_directions": "Get Directions",
+      "header": "Booking Details",
+      "ive_arrived": "I've Arrived",
+      "location": "Location",
+      "member_since": "Member since",
+      "message": "Message",
+      "navigation": "Navigation",
+      "no_keep_it": "No, Keep It",
+      "occasion": "Occasion",
+      "opening_maps": "Opening maps app...",
+      "payment_release_notice": "Payment will be released within 24 hours after booking completion",
+      "platform_fee": "Platform Fee (18%)",
+      "safety_reminder": "Safety Reminder",
+      "safety_reminder_text": "Use the SOS button if you feel unsafe. GPS tracking is active during bookings.",
+      "special_requests": "Special Requests",
+      "yes_cancel": "Yes, Cancel",
+      "you_will_earn": "You Will Earn",
+      "your_earnings": "Your Earnings"
+    },
+    "bookings": {
+      "detail": {
+        "arrived": "I've Arrived",
+        "booked_on": "Booked on",
+        "booking_amount": "Booking Amount",
+        "booking_code": "Booking Code",
+        "booking_info": "Booking Information",
+        "call": "Call",
+        "cancel_booking": "Cancel Booking",
+        "date_time": "Date & Time",
+        "get_directions": "Get Directions",
+        "header": "Booking Details",
+        "location": "Location",
+        "member_since": "Member since",
+        "message": "Message",
+        "occasion": "Occasion",
+        "payment_notice": "Payment will be released within 24 hours after booking completion",
+        "platform_fee": "Platform Fee (18%)",
+        "safety_message": "Use the SOS button if you feel unsafe. GPS tracking is active during bookings.",
+        "safety_title": "Safety Reminder",
+        "special_requests": "Special Requests",
+        "status": {
+          "cancelled": "Cancelled",
+          "completed": "Completed",
+          "confirmed": "Confirmed",
+          "pending": "Pending"
+        },
+        "you_will_earn": "You Will Earn",
+        "your_earnings": "Your Earnings"
+      },
+      "requests": {
+        "accept": "Accept",
+        "accept_message": "Are you sure you want to accept this booking request?",
+        "accept_success": "Booking accepted! Check your schedule.",
+        "accept_title": "Accept Booking",
+        "decline": "Decline",
+        "decline_message": "Are you sure you want to decline this request?",
+        "decline_title": "Decline Booking",
+        "empty_message": "You'll be notified when clients send booking requests",
+        "empty_title": "No New Requests",
+        "header": "Booking Requests",
+        "new_badge": "New",
+        "your_earnings": "Your Earnings"
+      },
+      "schedule": {
+        "days_short": {
+          "fri": "Fri",
+          "mon": "Mon",
+          "sat": "Sat",
+          "sun": "Sun",
+          "thu": "Thu",
+          "tue": "Tue",
+          "wed": "Wed"
+        },
+        "header": "My Schedule",
+        "no_bookings": "No Bookings",
+        "no_bookings_description": "You have no bookings scheduled for this day",
+        "no_bookings_message": "You have no bookings scheduled for this day"
+      }
+    },
+    "companion_profile": {
+      "available_today": "Available today",
+      "book_now": "Book Now",
+      "rate_unit": "/hour",
+      "response_time": "Usually responds within 1 hour",
+      "reviews": "reviews",
+      "sections": {
+        "about": "About",
+        "languages": "Languages",
+        "reviews": "Reviews",
+        "specialties": "Specialties"
+      },
+      "starting_from": "Starting from",
       "stats": {
-        "earnings": "Avg Monthly Earnings",
-        "rating": "Avg Rating",
-        "companions": "Active Companions"
-      },
-      "features": {
-        "earn": "Earn on your schedule",
-        "verified": "Verified & protected",
-        "track": "Track your earnings"
-      },
-      "start_earning": "Start Earning Today",
-      "already_companion": "Already a companion?",
-      "badges": {
-        "verified": "ID Verified",
-        "top_rated": "Top Rated",
-        "premium": "Premium"
+        "bookings": "Bookings",
+        "experience": "Years Exp",
+        "rating": "Rating"
       }
     },
     "dashboard": {
-      "greeting": {
-        "morning": "Good morning",
-        "afternoon": "Good afternoon",
-        "evening": "Good evening"
-      },
-      "stats": {
-        "this_week": "This Week",
-        "rating": "Rating",
-        "bookings": "Bookings",
-        "total_earnings": "Total Earnings"
-      },
-      "today_bookings": "Today's Bookings",
-      "no_bookings_today": "No Bookings Today",
-      "enjoy_day_off": "Enjoy your day off!",
-      "quick_actions": "Quick Actions",
       "actions": {
+        "new_count": "{{count}} new",
         "requests": "Requests",
         "schedule": "Schedule",
         "withdraw": "Withdraw"
       },
-      "new_badge": "{{count}} new"
+      "enjoy_day_off": "Enjoy your day off!",
+      "greeting": "Welcome back",
+      "no_bookings_today": "No Bookings Today",
+      "quick_actions": "Quick Actions",
+      "stats": {
+        "bookings": "Bookings",
+        "rating": "Rating",
+        "this_week": "This Week"
+      },
+      "todays_bookings": "Today's Bookings",
+      "total_earnings": "Total Earnings"
+    },
+    "earnings": {
+      "available_balance": "Available Balance",
+      "from_bookings": "from {{count}} bookings",
+      "header": "Earnings",
+      "no_transactions": "No transactions yet",
+      "period_labels": {
+        "month": "Month",
+        "week": "Week",
+        "year": "Year"
+      },
+      "periods": {
+        "this_month": "This Month",
+        "this_week": "This Week",
+        "this_year": "This Year"
+      },
+      "recent_transactions": "Recent Transactions",
+      "total_earnings": "Total Earnings",
+      "withdraw_funds": "Withdraw Funds"
+    },
+    "edit_profile": {
+      "about_me": "About Me",
+      "about_placeholder": "Tell clients about yourself...",
+      "availability_description": "Manage your working days and hours",
+      "display_name": "Display Name",
+      "display_name_placeholder": "Your display name",
+      "header": "Edit Profile",
+      "hourly_rate": "Hourly Rate",
+      "main": "Main",
+      "main_badge": "Main",
+      "occasions_i_accept": "Occasions I Accept",
+      "occasions_title": "Occasions I Accept",
+      "per_hour": "/hour",
+      "photo_hint": "Long press to remove. First photo is your main profile picture.",
+      "photos_instruction": "Long press to remove. First photo is your main profile picture.",
+      "photos_title": "Profile Photos",
+      "profile_photos": "Profile Photos",
+      "rate_unit": "/hour",
+      "save_changes": "Save Changes",
+      "success_message": "Your profile has been updated successfully!",
+      "update_availability": "Update Availability"
     },
     "onboard": {
-      "step_indicator": "Step {{current}}/{{total}}",
       "create_profile": {
-        "header": "Create Your Profile",
-        "photos_title": "Profile Photos",
-        "photos_instruction": "Add at least 3 photos. First photo is your main profile picture.",
-        "main_badge": "Main",
-        "add_main": "Add Main",
-        "photos_count": "{{count}}/6 photos added (minimum 3)",
-        "display_name": "Display Name",
-        "display_name_placeholder": "How should clients call you?",
-        "about_you": "About You",
         "about_placeholder": "Tell clients about yourself, your personality, and what makes you a great companion...",
+        "about_you": "About You",
+        "add_main": "Add Main",
         "char_count": "{{count}}/{{max}}",
         "char_count_min": "{{count}}/{{max}} (minimum {{min}})",
-        "tips_title": "Tips for a Great Profile",
+        "display_name": "Display Name",
+        "display_name_placeholder": "How should clients call you?",
+        "header": "Create Your Profile",
+        "main_badge": "Main",
+        "photos_count": "{{count}}/6 photos added (minimum 3)",
+        "photos_instruction": "Add at least 3 photos. First photo is your main profile picture.",
+        "photos_title": "Profile Photos",
         "tips": {
-          "smile": "Use a clear, friendly photo with a natural smile",
-          "variety": "Include variety: full body, close-up, in different settings",
           "authentic": "Be authentic - clients appreciate genuine profiles",
           "highlights": "Highlight your interests and conversation topics",
-          "professional": "Keep it professional and appropriate"
-        }
+          "professional": "Keep it professional and appropriate",
+          "smile": "Use a clear, friendly photo with a natural smile",
+          "variety": "Include variety: full body, close-up, in different settings"
+        },
+        "tips_title": "Tips for a Great Profile"
+      },
+      "set_availability": {
+        "complete_setup": "Complete Setup",
+        "days": {
+          "friday": "Friday",
+          "monday": "Monday",
+          "saturday": "Saturday",
+          "sunday": "Sunday",
+          "thursday": "Thursday",
+          "tuesday": "Tuesday",
+          "wednesday": "Wednesday"
+        },
+        "days_instruction": "Select days when you're typically available for bookings",
+        "days_title": "Available Days",
+        "footer_note": "You can adjust your availability anytime from your profile settings",
+        "header": "Set Availability",
+        "notice_instruction": "How much notice do you need before a booking?",
+        "notice_title": "Advance Notice Required",
+        "review_notice": "Your profile will be reviewed within 24-48 hours",
+        "summary_days": "Available {{days}} day(s) per week, {{slots}} time slot(s) per day.",
+        "summary_notice": "Minimum {{hours}} hours advance notice required.",
+        "summary_title": "Your Availability Summary",
+        "time_ranges": {
+          "afternoon": "12:00 - 17:00",
+          "evening": "17:00 - 22:00",
+          "morning": "8:00 - 12:00"
+        },
+        "time_slots": {
+          "afternoon": "Afternoon",
+          "evening": "Evening",
+          "morning": "Morning"
+        },
+        "time_slots_instruction": "When are you most available during the day?",
+        "time_slots_title": "Preferred Time Slots"
+      },
+      "set_pricing": {
+        "earnings_breakdown": "Earnings Breakdown",
+        "estimated_monthly": "Estimated Monthly Earnings",
+        "estimation_note": "Based on 20 bookings/month at {{hours}} hours each",
+        "header": "Set Your Pricing",
+        "hourly_rate": "Hourly Rate",
+        "min_hours": "Minimum Booking Hours",
+        "platform_fee": "Platform fee (18%)",
+        "pro_tip": "Pro Tip: Start with competitive rates to build your reputation. You can increase your prices as you gain more positive reviews.",
+        "rate_unit": "₫/hour",
+        "you_earn": "You earn per hour",
+        "your_rate": "Your hourly rate"
       },
       "set_services": {
         "header": "Your Services",
-        "title": "What occasions do you offer?",
         "instruction": "Select all the types of events you're comfortable attending. You can change this anytime.",
         "occasions": {
-          "wedding": {
-            "title": "Wedding & Engagement",
-            "description": "Accompany clients to weddings, engagement parties"
-          },
-          "tet": {
-            "title": "Tết Celebration",
-            "description": "Join families for Lunar New Year gatherings"
-          },
-          "family": {
-            "title": "Family Events",
-            "description": "Birthday parties, anniversaries, reunions"
+          "coffee": {
+            "description": "Casual meetups, coffee dates, meals",
+            "title": "Coffee & Casual"
           },
           "corporate": {
-            "title": "Corporate Events",
-            "description": "Business dinners, conferences, networking"
+            "description": "Business dinners, conferences, networking",
+            "title": "Corporate Events"
           },
-          "coffee": {
-            "title": "Coffee & Casual",
-            "description": "Casual meetups, coffee dates, meals"
+          "family": {
+            "description": "Birthday parties, anniversaries, reunions",
+            "title": "Family Events"
           },
           "social": {
-            "title": "Social Events",
-            "description": "Parties, nightlife, social gatherings"
+            "description": "Parties, nightlife, social gatherings",
+            "title": "Social Events"
+          },
+          "tet": {
+            "description": "Join families for Lunar New Year gatherings",
+            "title": "Tết Celebration"
+          },
+          "wedding": {
+            "description": "Accompany clients to weddings, engagement parties",
+            "title": "Wedding & Engagement"
           }
         },
         "popular": "Popular",
-        "selected_count": "{{count}} occasion(s) selected"
+        "selected_count": "{{count}} occasion(s) selected",
+        "title": "What occasions do you offer?"
       },
-      "set_pricing": {
-        "header": "Set Your Pricing",
-        "hourly_rate": "Hourly Rate",
-        "rate_unit": "₫/hour",
-        "min_hours": "Minimum Booking Hours",
-        "earnings_breakdown": "Earnings Breakdown",
-        "your_rate": "Your hourly rate",
-        "platform_fee": "Platform fee (18%)",
-        "you_earn": "You earn per hour",
-        "estimated_monthly": "Estimated Monthly Earnings",
-        "estimation_note": "Based on 20 bookings/month at {{hours}} hours each",
-        "pro_tip": "Pro Tip: Start with competitive rates to build your reputation. You can increase your prices as you gain more positive reviews."
-      },
-      "set_availability": {
-        "header": "Set Availability",
-        "days_title": "Available Days",
-        "days_instruction": "Select days when you're typically available for bookings",
-        "days": {
-          "monday": "Monday",
-          "tuesday": "Tuesday",
-          "wednesday": "Wednesday",
-          "thursday": "Thursday",
-          "friday": "Friday",
-          "saturday": "Saturday",
-          "sunday": "Sunday"
-        },
-        "time_slots_title": "Preferred Time Slots",
-        "time_slots_instruction": "When are you most available during the day?",
-        "time_slots": {
-          "morning": "Morning",
-          "afternoon": "Afternoon",
-          "evening": "Evening"
-        },
-        "time_ranges": {
-          "morning": "8:00 - 12:00",
-          "afternoon": "12:00 - 17:00",
-          "evening": "17:00 - 22:00"
-        },
-        "notice_title": "Advance Notice Required",
-        "notice_instruction": "How much notice do you need before a booking?",
-        "summary_title": "Your Availability Summary",
-        "summary_days": "Available {{days}} day(s) per week, {{slots}} time slot(s) per day.",
-        "summary_notice": "Minimum {{hours}} hours advance notice required.",
-        "complete_setup": "Complete Setup",
-        "review_notice": "Your profile will be reviewed within 24-48 hours",
-        "footer_note": "You can adjust your availability anytime from your profile settings"
-      }
-    },
-    "bookings": {
-      "schedule": {
-        "header": "My Schedule",
-        "days_short": {
-          "sun": "Sun",
-          "mon": "Mon",
-          "tue": "Tue",
-          "wed": "Wed",
-          "thu": "Thu",
-          "fri": "Fri",
-          "sat": "Sat"
-        },
-        "no_bookings": "No Bookings",
-        "no_bookings_message": "You have no bookings scheduled for this day"
-      },
-      "requests": {
-        "header": "Booking Requests",
-        "new_badge": "New",
-        "your_earnings": "Your Earnings",
-        "decline": "Decline",
-        "accept": "Accept",
-        "empty_title": "No New Requests",
-        "empty_message": "You'll be notified when clients send booking requests",
-        "accept_title": "Accept Booking",
-        "accept_message": "Are you sure you want to accept this booking request?",
-        "decline_title": "Decline Booking",
-        "decline_message": "Are you sure you want to decline this request?",
-        "accept_success": "Booking accepted! Check your schedule."
-      },
-      "detail": {
-        "header": "Booking Details",
-        "status": {
-          "confirmed": "Confirmed",
-          "pending": "Pending",
-          "completed": "Completed",
-          "cancelled": "Cancelled"
-        },
-        "call": "Call",
-        "message": "Message",
-        "booking_info": "Booking Information",
-        "occasion": "Occasion",
-        "date_time": "Date & Time",
-        "location": "Location",
-        "get_directions": "Get Directions",
-        "special_requests": "Special Requests",
-        "your_earnings": "Your Earnings",
-        "booking_amount": "Booking Amount",
-        "platform_fee": "Platform Fee (18%)",
-        "you_will_earn": "You Will Earn",
-        "payment_notice": "Payment will be released within 24 hours after booking completion",
-        "booking_code": "Booking Code",
-        "booked_on": "Booked on",
-        "safety_title": "Safety Reminder",
-        "safety_message": "Use the SOS button if you feel unsafe. GPS tracking is active during bookings.",
-        "cancel_booking": "Cancel Booking",
-        "arrived": "I've Arrived",
-        "member_since": "Member since"
-      }
-    },
-    "earnings": {
-      "header": "Earnings",
-      "available_balance": "Available Balance",
-      "withdraw_funds": "Withdraw Funds",
-      "periods": {
-        "week": "week",
-        "month": "month",
-        "year": "year"
-      },
-      "period_labels": {
-        "this_week": "This Week",
-        "this_month": "This Month",
-        "this_year": "This Year"
-      },
-      "from_bookings": "from {{count}} bookings",
-      "recent_transactions": "Recent Transactions"
-    },
-    "withdraw": {
-      "header": "Withdraw Funds",
-      "available_balance": "Available Balance",
-      "amount_label": "Withdrawal Amount",
-      "withdraw_all": "Withdraw All",
-      "withdraw_to": "Withdraw To",
-      "default_badge": "Default",
-      "add_bank": "+ Add New Bank Account",
-      "add_bank_account": "Add New Bank Account",
-      "processing_title": "Processing Time",
-      "processing_time": "Processing Time",
-      "processing_info": "Withdrawals are processed within 1-2 business days. Minimum withdrawal amount is ₫100,000.",
-      "you_receive": "You will receive",
-      "you_will_receive": "You will receive",
-      "submit_button": "Withdraw Funds",
-      "errors": {
-        "insufficient": "Insufficient balance",
-        "minimum": "Minimum withdrawal is ₫100,000"
-      },
-      "success_message": "Withdrawal request submitted! Funds will arrive in 1-2 business days."
+      "step_indicator": "Step {{current}}/{{total}}"
     },
     "profile": {
-      "header": "My Profile",
+      "about_me": "About Me",
+      "badges": {
+        "top_rated": "Top Rated",
+        "verified": "Verified"
+      },
       "edit_profile": "Edit Profile",
+      "fully_verified": "Fully Verified",
+      "header": "My Profile",
+      "photos": "Photos",
+      "specialties": "Specialties",
       "stats": {
         "bookings": "Bookings",
         "earned": "Earned",
         "response": "Response"
       },
-      "about_me": "About Me",
-      "specialties": "Specialties",
-      "photos": "Photos",
-      "fully_verified": "Fully Verified",
-      "verification_description": "ID, Background Check & Photo Verified",
       "top_rated": "Top Rated",
       "verification": {
         "fully_verified": "Fully Verified",
         "verified_description": "ID, Background Check & Photo Verified"
       },
-      "badges": {
-        "top_rated": "Top Rated",
-        "verified": "Verified"
-      }
-    },
-    "edit_profile": {
-      "header": "Edit Profile",
-      "profile_photos": "Profile Photos",
-      "photos_title": "Profile Photos",
-      "photos_instruction": "Long press to remove. First photo is your main profile picture.",
-      "photo_hint": "Long press to remove. First photo is your main profile picture.",
-      "main_badge": "Main",
-      "main": "Main",
-      "display_name": "Display Name",
-      "display_name_placeholder": "Your display name",
-      "about_me": "About Me",
-      "about_placeholder": "Tell clients about yourself...",
-      "hourly_rate": "Hourly Rate",
-      "rate_unit": "/hour",
-      "per_hour": "/hour",
-      "occasions_title": "Occasions I Accept",
-      "occasions_i_accept": "Occasions I Accept",
-      "update_availability": "Update Availability",
-      "availability_description": "Manage your working days and hours",
-      "save_changes": "Save Changes",
-      "success_message": "Your profile has been updated successfully!"
-    },
-    "booking_detail": {
-      "header": "Booking Details",
-      "call": "Call",
-      "calling": "Calling",
-      "message": "Message",
-      "navigation": "Navigation",
-      "opening_maps": "Opening maps app...",
-      "booking_info": "Booking Information",
-      "occasion": "Occasion",
-      "date_time": "Date & Time",
-      "location": "Location",
-      "get_directions": "Get Directions",
-      "special_requests": "Special Requests",
-      "your_earnings": "Your Earnings",
-      "booking_amount": "Booking Amount",
-      "platform_fee": "Platform Fee (18%)",
-      "you_will_earn": "You Will Earn",
-      "payment_release_notice": "Payment will be released within 24 hours after booking completion",
-      "booking_code": "Booking Code",
-      "booked_on": "Booked on",
-      "safety_reminder": "Safety Reminder",
-      "safety_reminder_text": "Use the SOS button if you feel unsafe. GPS tracking is active during bookings.",
-      "cancel_booking": "Cancel Booking",
-      "cancel_warning": "Are you sure you want to cancel this booking? This action cannot be undone.",
-      "no_keep_it": "No, Keep It",
-      "yes_cancel": "Yes, Cancel",
-      "ive_arrived": "I've Arrived",
-      "check_in": "Check In",
-      "checked_in": "You've successfully checked in!",
-      "bookings_count": "{{count}} bookings",
-      "member_since": "Member since"
+      "verification_description": "ID, Background Check & Photo Verified"
     },
     "requests": {
-      "header": "Booking Requests",
-      "your_earnings": "Your Earnings",
-      "decline": "Decline",
       "accept": "Accept",
       "accept_booking": "Accept Booking",
       "accept_confirmation": "Are you sure you want to accept this booking request?",
+      "accept_success": "Booking accepted! Check your schedule.",
+      "decline": "Decline",
       "decline_booking": "Decline Booking",
       "decline_confirmation": "Are you sure you want to decline this request?",
-      "accept_success": "Booking accepted! Check your schedule.",
+      "decline_success": "Booking request declined",
+      "header": "Booking Requests",
       "no_requests": "No New Requests",
-      "no_requests_description": "You'll be notified when clients send booking requests"
+      "no_requests_description": "You'll be notified when clients send booking requests",
+      "your_earnings": "Your Earnings"
     },
-    "companion_profile": {
-      "starting_from": "Starting from",
-      "rate_unit": "/hour",
-      "book_now": "Book Now",
-      "reviews": "reviews",
+    "splash": {
+      "already_companion": "Already a companion?",
+      "badge": "COMPANION",
+      "badges": {
+        "premium": "Premium",
+        "top_rated": "Top Rated",
+        "verified": "ID Verified"
+      },
+      "features": {
+        "earn": "Earn on your schedule",
+        "track": "Track your earnings",
+        "verified": "Verified & protected"
+      },
+      "hero_subtitle": "Join Vietnam's premier companion platform. Set your rates, choose your bookings, grow your income.",
+      "hero_title": "Turn your time into earnings",
+      "start_earning": "Start Earning Today",
       "stats": {
-        "bookings": "Bookings",
-        "rating": "Rating",
-        "experience": "Years Exp"
+        "companions": "Active Companions",
+        "earnings": "Avg Monthly Earnings",
+        "rating": "Avg Rating"
+      }
+    },
+    "schedule": {
+      "header": "My Schedule",
+      "no_bookings": "No Bookings",
+      "no_bookings_description": "You have no bookings scheduled for this day"
+    },
+    "services": {
+      "BUSINESS_EVENT": "Corporate Event",
+      "CASUAL_OUTING": "Coffee & Casual",
+      "CLASS_REUNION": "Class Reunion",
+      "FAMILY_INTRODUCTION": "Family Event",
+      "OTHER": "Other",
+      "TET_COMPANIONSHIP": "Tết Celebration",
+      "WEDDING_ATTENDANCE": "Wedding"
+    },
+    "settings": {
+      "account": "Account",
+      "account_title": "Account",
+      "availability": "Availability",
+      "bank_account": "Bank Account",
+      "bank_accounts": "Bank Accounts",
+      "bookings": "Bookings",
+      "companion": "Companion",
+      "earnings_history": "Earnings History",
+      "edit_profile": "Edit Profile",
+      "help_center": "Help Center",
+      "joined": "Joined",
+      "language": "Language",
+      "logout": "Log Out",
+      "logout_message": "Are you sure you want to log out of your account?",
+      "logout_title": "Log Out",
+      "my_photos": "My Photos",
+      "notifications": "Notifications",
+      "preferences": "Preferences",
+      "privacy": "Privacy & Security",
+      "safety_guidelines": "Safety Guidelines",
+      "support_section": "Support",
+      "switch_to_hirer": "Switch to Hirer Mode",
+      "title": "Settings",
+      "total_earnings": "Total Earnings",
+      "verification": "Verification",
+      "verified_companion": "Verified Companion",
+      "view_public_profile": "View Public Profile"
+    },
+    "withdraw": {
+      "add_bank": "+ Add New Bank Account",
+      "add_bank_account": "Add New Bank Account",
+      "amount_label": "Withdrawal Amount",
+      "available_balance": "Available Balance",
+      "confirm_message": "Withdraw {{amount}} to {{bank}}?",
+      "confirm_title": "Confirm Withdrawal",
+      "default_badge": "Default",
+      "error": "Error",
+      "errors": {
+        "insufficient": "Insufficient balance",
+        "minimum": "Minimum withdrawal is ₫100,000"
       },
-      "sections": {
-        "specialties": "Specialties",
-        "about": "About",
-        "languages": "Languages",
-        "reviews": "Reviews"
+      "exceeds_balance_error": "Amount exceeds available balance ({{balance}})",
+      "header": "Withdraw Funds",
+      "insufficient_balance": "Insufficient balance for this withdrawal",
+      "load_error": "Failed to load",
+      "load_error_description": "Could not load your balance and bank accounts",
+      "minimum_amount": "Minimum withdrawal amount is ₫100,000",
+      "minimum_error": "Minimum withdrawal is {{amount}}",
+      "no_bank_accounts": "No bank accounts added",
+      "processing_info": "Withdrawals are processed within 1-2 business days. Minimum withdrawal amount is ₫100,000.",
+      "processing_time": "Processing Time",
+      "processing_title": "Processing Time",
+      "request_failed": "Request Failed",
+      "request_failed_description": "Could not submit withdrawal request. Please try again.",
+      "select_bank_error": "Please select a bank account",
+      "submit_button": "Withdraw Funds",
+      "success": "Success",
+      "success_description": "Your withdrawal request has been submitted",
+      "success_message": "Withdrawal request submitted! Funds will arrive in 1-2 business days.",
+      "withdraw_all": "Withdraw All",
+      "withdraw_to": "Withdraw To",
+      "you_receive": "You will receive",
+      "you_will_receive": "You will receive"
+    }
+  },
+  "hirer": {
+    "companion": {
+      "about": "About",
+      "availability": "Availability",
+      "book_now": "Book Now",
+      "hour": "hour",
+      "no_reviews": "No reviews yet",
+      "online": "Online",
+      "reviews": "reviews",
+      "reviews_title": "Reviews",
+      "see_all": "See all",
+      "select_date": "Select a date to see available times",
+      "specialties": "Specialties",
+      "verified_desc": "Identity verified through government ID and background check",
+      "verified_profile": "Verified Profile"
+    },
+    "companion_card": {
+      "online": "Online",
+      "verified": "Verified",
+      "per_hour": "/hour",
+      "book_now": "Book Now"
+    },
+    "booking_detail": {
+      "booked_on": "Booked on",
+      "booking_code": "Booking Code",
+      "booking_info": "Booking Information",
+      "call": "Call",
+      "cancel_booking": "Cancel Booking",
+      "cancel_title": "Cancel Booking",
+      "cancel_message": "Are you sure you want to cancel this booking? Cancellation fees may apply.",
+      "cancelled_success": "Booking cancelled successfully",
+      "cancelled_error": "Failed to cancel booking. Please try again.",
+      "date_time": "Date & Time",
+      "escrow_notice": "Payment held in secure escrow until booking completion",
+      "get_directions": "Get Directions",
+      "header": "Booking Details",
+      "location": "Location",
+      "message": "Message",
+      "not_found": "Booking not found",
+      "occasion": "Occasion",
+      "payment_summary": "Payment Summary",
+      "reviews": "reviews",
+      "service_fee": "Service Fee",
+      "special_requests": "Special Requests",
+      "total": "Total",
+      "view_receipt": "View Receipt"
+    },
+    "browse": {
+      "all_companions": "All Companions",
+      "featured": "Featured",
+      "filters": {
+        "apply": "Apply Filters",
+        "location": "Location",
+        "price_range": "Price Range",
+        "rating": "Minimum Rating",
+        "reset": "Reset",
+        "title": "Filters",
+        "verified_only": "Verified Only"
       },
-      "available_today": "Available today",
-      "response_time": "Usually responds within 1 hour"
+      "header": "Browse Companions",
+      "no_results": "No companions found",
+      "no_results_subtitle": "Try adjusting your filters",
+      "search_placeholder": "Search companions..."
+    },
+    "home": {
+      "title": "Discover",
+      "welcome_back": "Welcome back",
+      "available_now": "Available Now",
+      "filters": "Filters",
+      "loading": "Finding companions...",
+      "error": {
+        "title": "Something went wrong",
+        "description": "We couldn't load companions. Please try again.",
+        "retry": "Try Again"
+      },
+      "empty": {
+        "title": "No companions found",
+        "description": "Try adjusting your filters or check back later."
+      },
+      "popular_occasions": "Popular Occasions",
+      "top_companions": "Top Companions",
+      "see_all": "See all",
+      "search_placeholder": "Search companions...",
+      "occasions": {
+        "all": "All",
+        "dining": "🍽️ Dining",
+        "party": "🎉 Party",
+        "wedding": "💒 Wedding",
+        "tet": "🧧 Tết",
+        "family": "👨‍👩‍👧 Family",
+        "corporate": "💼 Corporate",
+        "coffee": "☕ Coffee",
+        "event": "🎭 Event",
+        "reunion": "🎓 Reunion",
+        "other": "Other"
+      },
+      "bookings_count": "{{count}}+ bookings",
+      "default_location": "Ho Chi Minh City",
+      "unknown_name": "Unknown"
+    },
+    "chat": {
+      "browse_companions": "Browse Companions",
+      "conversation_not_found": "Conversation not found",
+      "empty_subtitle": "Start a conversation by booking a companion",
+      "empty_title": "No Messages Yet",
+      "header": "Messages",
+      "message_placeholder": "Type a message...",
+      "no_messages": "No messages yet",
+      "offline": "Offline",
+      "online": "Online",
+      "start_conversation": "Start a conversation"
+    },
+    "favorites": {
+      "browse_companions": "Browse Companions",
+      "empty_subtitle": "Save companions you like to book them later",
+      "empty_title": "No Favorites Yet",
+      "header": "My Favorites",
+      "saved": "saved"
+    },
+    "onboarding": {
+      "profile": {
+        "avatar_hint": "Add a profile photo",
+        "date_of_birth": "Date of Birth",
+        "errors": {
+          "age_minimum": "You must be at least 18 years old to use Hireme",
+          "dob_required": "Please enter your date of birth",
+          "gender_required": "Please select your gender",
+          "name_required": "Please enter your full name"
+        },
+        "full_name": "Full Name",
+        "full_name_placeholder": "Enter your full name",
+        "gender": "Gender",
+        "gender_options": {
+          "female": "Female",
+          "male": "Male",
+          "other": "Other"
+        },
+        "header": "Create Your Profile",
+        "subtitle": "This helps us personalize your experience",
+        "title": "Tell us about yourself"
+      }
+    },
+    "orders": {
+      "empty": "No bookings found",
+      "header": "My Bookings",
+      "status": {
+        "cancelled": "Cancelled",
+        "completed": "Completed",
+        "in_progress": "In Progress",
+        "pending": "Pending",
+        "upcoming": "Upcoming"
+      },
+      "tabs": {
+        "active": "Active",
+        "all": "All",
+        "past": "Past",
+        "upcoming": "Upcoming"
+      }
+    },
+    "booking": {
+      "title": "Book Companion",
+      "hour": "hour",
+      "occasion": "Occasion",
+      "select_date": "Select Date",
+      "select_time": "Select Time",
+      "duration": "Duration",
+      "location": "Location",
+      "location_placeholder": "Enter meeting location",
+      "notes": "Special Requests",
+      "notes_placeholder": "Any special requests or notes for your companion...",
+      "hourly_rate": "Hourly Rate",
+      "duration_label": "Duration",
+      "hours": "hours",
+      "estimated_total": "Estimated Total",
+      "service_fee_note": "Service fee will be added at checkout",
+      "total": "Total",
+      "continue": "Continue to Payment",
+      "no_slots_available": "No time slots available for this date"
+    },
+    "payment": {
+      "title": "Payment",
+      "booking_summary": "Booking Summary",
+      "date": "Date",
+      "time": "Time & Duration",
+      "hours": "hours",
+      "location": "Location",
+      "payment_method": "Payment Method",
+      "default": "Default",
+      "add_new_method": "Add New Payment Method",
+      "price_breakdown": "Price Breakdown",
+      "service_fee": "Service Fee (18%)",
+      "total": "Total",
+      "secure_payment": "Secure Payment",
+      "secure_payment_desc": "Your payment is protected by escrow. Funds are only released after the booking is completed.",
+      "terms_agreement": "I agree to the booking terms and cancellation policy. I understand that cancellation fees may apply.",
+      "total_to_pay": "Total to pay",
+      "processing": "Processing...",
+      "confirm_pay": "Confirm & Pay"
+    },
+    "confirmation": {
+      "success_title": "Booking Confirmed!",
+      "success_subtitle": "Your companion will be notified and will reach out to you shortly.",
+      "booking_id": "Booking ID",
+      "date_time": "Date & Time",
+      "hours": "hours",
+      "location": "Location",
+      "occasion": "Occasion",
+      "whats_next": "What's Next?",
+      "step_1": "Your companion will confirm the booking within 24 hours.",
+      "step_2": "You'll receive a message with meeting details and contact info.",
+      "step_3": "Payment will be held in escrow until the booking is complete.",
+      "need_help": "Need help? Contact support",
+      "view_bookings": "View My Bookings"
+    },
+    "splash": {
+      "already_have_account": "Already have an account?",
+      "features": {
+        "premium": "Premium Experience",
+        "trusted": "Trusted Community",
+        "verified": "Verified Companions"
+      },
+      "get_started": "Get Started",
+      "hero_subtitle": "Book verified companions for weddings, family events, corporate gatherings, and more.",
+      "hero_title": "Find Your Perfect Companion",
+      "tagline": "Vietnam's Trusted Companion Platform"
     }
   },
   "onboarding": {

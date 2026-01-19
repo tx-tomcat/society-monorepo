@@ -10,7 +10,12 @@ type Props = {
   height?: number;
 };
 
-export const Shield = ({ color = colors.rose[400], size = 20, width, height }: Props) => {
+export const Shield = ({
+  color = colors.rose[400],
+  size = 20,
+  width,
+  height,
+}: Props) => {
   const w = width ?? size;
   const h = height ?? size;
   return (

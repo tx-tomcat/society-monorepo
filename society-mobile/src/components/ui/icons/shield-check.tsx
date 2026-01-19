@@ -6,7 +6,11 @@ interface ShieldCheckProps extends SvgProps {
   filled?: boolean;
 }
 
-export function ShieldCheck({ color = '#4ECDC4', filled = true, ...props }: ShieldCheckProps) {
+export function ShieldCheck({
+  color = '#4ECDC4',
+  filled = true,
+  ...props
+}: ShieldCheckProps) {
   return (
     <Svg width={24} height={24} viewBox="0 0 24 24" fill="none" {...props}>
       <Path

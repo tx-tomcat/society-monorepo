@@ -6,11 +6,20 @@ import colors from '@/components/ui/colors';
 type Props = {
   color?: string;
   size?: number;
+  width?: number;
+  height?: number;
 };
 
-export const Camera = ({ color = colors.charcoal[900], size = 20 }: Props) => {
+export const Camera = ({
+  color = colors.charcoal[900],
+  size = 20,
+  width,
+  height,
+}: Props) => {
+  const w = width || size;
+  const h = height || size;
   return (
-    <Svg width={size} height={size} viewBox="0 0 20 20" fill="none">
+    <Svg width={w} height={h} viewBox="0 0 20 20" fill="none">
       <Path
         d="M10 12.8333C11.3807 12.8333 12.5 11.714 12.5 10.3333C12.5 8.95262 11.3807 7.83333 10 7.83333C8.61929 7.83333 7.5 8.95262 7.5 10.3333C7.5 11.714 8.61929 12.8333 10 12.8333Z"
         stroke={color}

@@ -37,7 +37,8 @@ const mockBooking = {
     id: '1',
     name: 'Minh Anh',
     age: 24,
-    image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=800&q=80',
+    image:
+      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=800&q=80',
     phone: '+84 123 456 789',
     isVerified: true,
   },
@@ -55,7 +56,9 @@ export default function ActiveBooking() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const [isCheckedIn, setIsCheckedIn] = React.useState(true);
-  const [lastGpsUpdate, setLastGpsUpdate] = React.useState(mockBooking.lastCheckIn);
+  const [lastGpsUpdate, setLastGpsUpdate] = React.useState(
+    mockBooking.lastCheckIn
+  );
 
   const booking = mockBooking;
 
@@ -190,7 +193,11 @@ export default function ActiveBooking() {
                   {booking.companion.name}
                 </Text>
                 {booking.companion.isVerified && (
-                  <ShieldCheck color={colors.teal[400]} width={18} height={18} />
+                  <ShieldCheck
+                    color={colors.teal[400]}
+                    width={18}
+                    height={18}
+                  />
                 )}
               </View>
               <Text className="text-sm text-text-tertiary">Your companion</Text>
@@ -228,7 +235,9 @@ export default function ActiveBooking() {
                   <Gps color="#FFFFFF" width={24} height={24} />
                 </View>
                 <View>
-                  <Text className="font-semibold text-midnight">GPS Active</Text>
+                  <Text className="font-semibold text-midnight">
+                    GPS Active
+                  </Text>
                   <Text className="text-sm text-text-tertiary">
                     Last update: {lastGpsUpdate}
                   </Text>
@@ -252,10 +261,7 @@ export default function ActiveBooking() {
             <Text className="text-lg font-bold text-white">Emergency SOS</Text>
           </Pressable>
 
-          <Pressable
-            onPress={handleSafetyCenter}
-            className="mt-3 items-center"
-          >
+          <Pressable onPress={handleSafetyCenter} className="mt-3 items-center">
             <Text className="text-sm text-rose-400">Go to Safety Center</Text>
           </Pressable>
         </View>
@@ -286,7 +292,9 @@ export default function ActiveBooking() {
             <View className="mt-2 border-t border-border-light pt-3">
               <View className="flex-row justify-between">
                 <Text className="text-text-secondary">Occasion</Text>
-                <Text className="font-medium text-midnight">{booking.occasion}</Text>
+                <Text className="font-medium text-midnight">
+                  {booking.occasion}
+                </Text>
               </View>
               <View className="mt-2 flex-row justify-between">
                 <Text className="text-text-secondary">Total Paid</Text>
@@ -310,7 +318,9 @@ export default function ActiveBooking() {
                 <View className="mt-1 h-8 w-0.5 bg-teal-400" />
               </View>
               <View>
-                <Text className="font-medium text-midnight">Booking started</Text>
+                <Text className="font-medium text-midnight">
+                  Booking started
+                </Text>
                 <Text className="text-sm text-text-tertiary">14:00</Text>
               </View>
             </View>
@@ -322,7 +332,9 @@ export default function ActiveBooking() {
               </View>
               <View>
                 <Text className="font-medium text-midnight">GPS check-in</Text>
-                <Text className="text-sm text-text-tertiary">{booking.checkedInAt}</Text>
+                <Text className="text-sm text-text-tertiary">
+                  {booking.checkedInAt}
+                </Text>
               </View>
             </View>
 

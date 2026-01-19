@@ -1,10 +1,18 @@
 /* eslint-disable max-lines-per-function */
+import * as ImagePicker from 'expo-image-picker';
 import type { Href } from 'expo-router';
 import { useRouter } from 'expo-router';
 import { MotiView } from 'moti';
 import React from 'react';
-import { Pressable, ScrollView, StyleSheet, TextInput } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import {
+  Alert,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  TextInput,
+} from 'react-native';
+import { showMessage } from 'react-native-flash-message';
 
 import {
   Button,
@@ -15,43 +23,170 @@ import {
   Text,
   View,
 } from '@/components/ui';
-import {
-  ArrowLeft,
-  Camera,
-  Gallery,
-  Plus,
-} from '@/components/ui/icons';
+import { ArrowLeft, Camera, Plus, X } from '@/components/ui/icons';
+import { useCompanionOnboarding } from '@/lib/stores';
 
 export default function CreateProfile() {
   const router = useRouter();
   const { t } = useTranslation();
-  const [name, setName] = React.useState('');
-  const [bio, setBio] = React.useState('');
-  const [photos, setPhotos] = React.useState<string[]>([
-    'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80',
-  ]);
+
+  // Get data from store
+  const displayName = useCompanionOnboarding.use.displayName();
+  const bio = useCompanionOnboarding.use.bio();
+  const photoFiles = useCompanionOnboarding.use.photoFiles();
+  const setProfileData = useCompanionOnboarding.use.setProfileData();
+  const markStepComplete = useCompanionOnboarding.use.markStepComplete();
+
+  // Local state for inputs
+  const [name, setName] = React.useState(displayName);
+  const [bioText, setBioText] = React.useState(bio);
+  const [photos, setPhotos] = React.useState<string[]>(photoFiles);
 
   const handleBack = React.useCallback(() => {
     router.back();
   }, [router]);
 
-  const handleAddPhoto = React.useCallback(() => {
-    // Simulate adding a photo
-    const newPhotos = [
-      'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=400&q=80',
-      'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=400&q=80',
-      'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400&q=80',
-    ];
-    if (photos.length < 6) {
-      setPhotos([...photos, newPhotos[photos.length % newPhotos.length]]);
+  const pickImage = async (useCamera = false): Promise<string | null> => {
+    if (useCamera) {
+      const permissionResult =
+        await ImagePicker.requestCameraPermissionsAsync();
+
+      if (!permissionResult.granted) {
+        Alert.alert(
+          t('permissions.camera_required'),
+          t('permissions.camera_description'),
+          [{ text: t('common.ok') }]
+        );
+        return null;
+      }
+
+      const result = await ImagePicker.launchCameraAsync({
+        mediaTypes: 'images',
+        allowsEditing: true,
+        aspect: [3, 4],
+        quality: 0.8,
+      });
+
+      if (!result.canceled && result.assets[0]) {
+        return result.assets[0].uri;
+      }
+    } else {
+      const permissionResult =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+      if (!permissionResult.granted) {
+        Alert.alert(
+          t('permissions.photos_required'),
+          t('permissions.photos_description'),
+          [{ text: t('common.ok') }]
+        );
+        return null;
+      }
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: 'images',
+        allowsEditing: true,
+        aspect: [3, 4],
+        quality: 0.8,
+      });
+
+      if (!result.canceled && result.assets[0]) {
+        return result.assets[0].uri;
+      }
     }
-  }, [photos]);
+    return null;
+  };
+
+  const handleAddPhoto = React.useCallback(
+    async (index: number) => {
+      if (photos.length >= 6 && index >= photos.length) {
+        showMessage({
+          message: t('companion.onboard.create_profile.max_photos'),
+          type: 'warning',
+        });
+        return;
+      }
+
+      Alert.alert(
+        t('companion.onboard.create_profile.add_photo'),
+        t('companion.onboard.create_profile.choose_source'),
+        [
+          {
+            text: t('common.camera'),
+            onPress: async () => {
+              const uri = await pickImage(true);
+              if (uri) {
+                const newPhotos = [...photos];
+                if (index < photos.length) {
+                  newPhotos[index] = uri;
+                } else {
+                  newPhotos.push(uri);
+                }
+                setPhotos(newPhotos);
+              }
+            },
+          },
+          {
+            text: t('common.gallery'),
+            onPress: async () => {
+              const uri = await pickImage(false);
+              if (uri) {
+                const newPhotos = [...photos];
+                if (index < photos.length) {
+                  newPhotos[index] = uri;
+                } else {
+                  newPhotos.push(uri);
+                }
+                setPhotos(newPhotos);
+              }
+            },
+          },
+          { text: t('common.cancel'), style: 'cancel' },
+        ]
+      );
+    },
+    [photos, t]
+  );
+
+  const handleRemovePhoto = React.useCallback(
+    (index: number) => {
+      if (index === 0 && photos.length === 1) {
+        showMessage({
+          message: t('companion.onboard.create_profile.need_main_photo'),
+          type: 'warning',
+        });
+        return;
+      }
+      const newPhotos = photos.filter((_, i) => i !== index);
+      setPhotos(newPhotos);
+    },
+    [photos, t]
+  );
 
   const handleContinue = React.useCallback(() => {
+    // Save to store
+    setProfileData({
+      displayName: name,
+      bio: bioText,
+      photoFiles: photos,
+    });
+    markStepComplete('create-profile');
     router.push('/companion/onboard/set-services' as Href);
-  }, [router]);
+  }, [name, bioText, photos, setProfileData, markStepComplete, router]);
 
-  const isValid = name.length >= 2 && bio.length >= 20 && photos.length >= 3;
+  // Validation states
+  const MIN_NAME_LENGTH = 2;
+  const MIN_BIO_LENGTH = 20;
+  const MIN_PHOTOS = 3;
+
+  const isNameTooShort = name.length > 0 && name.length < MIN_NAME_LENGTH;
+  const isBioTooShort = bioText.length > 0 && bioText.length < MIN_BIO_LENGTH;
+  const needsMorePhotos = photos.length > 0 && photos.length < MIN_PHOTOS;
+
+  const isValid =
+    name.length >= MIN_NAME_LENGTH &&
+    bioText.length >= MIN_BIO_LENGTH &&
+    photos.length >= MIN_PHOTOS;
 
   return (
     <View className="flex-1 bg-warmwhite">
@@ -62,10 +197,15 @@ export default function CreateProfile() {
           <Pressable onPress={handleBack}>
             <ArrowLeft color={colors.midnight.DEFAULT} width={24} height={24} />
           </Pressable>
-          <Text style={styles.headerTitle} className="flex-1 text-xl text-midnight">
+          <Text
+            style={styles.headerTitle}
+            className="flex-1 text-xl text-midnight"
+          >
             {t('companion.onboard.create_profile.header')}
           </Text>
-          <Text className="text-sm text-text-tertiary">{t('companion.onboard.step', { current: 1, total: 4 })}</Text>
+          <Text className="text-sm text-text-tertiary">
+            {t('companion.onboard.step', { current: 1, total: 4 })}
+          </Text>
         </View>
       </SafeAreaView>
 
@@ -91,7 +231,10 @@ export default function CreateProfile() {
 
           <View className="flex-row flex-wrap gap-3">
             {/* Main Photo */}
-            <Pressable className="relative h-40 w-[48%] overflow-hidden rounded-2xl bg-softpink">
+            <Pressable
+              onPress={() => handleAddPhoto(0)}
+              className="relative h-40 w-[48%] overflow-hidden rounded-2xl bg-softpink"
+            >
               {photos[0] ? (
                 <>
                   <Image
@@ -100,13 +243,25 @@ export default function CreateProfile() {
                     contentFit="cover"
                   />
                   <View className="absolute bottom-2 left-2 rounded-full bg-lavender-400 px-2 py-1">
-                    <Text className="text-xs font-semibold text-white">{t('companion.onboard.create_profile.main')}</Text>
+                    <Text className="text-xs font-semibold text-white">
+                      {t('companion.onboard.create_profile.main')}
+                    </Text>
                   </View>
+                  {photos.length > 1 && (
+                    <Pressable
+                      onPress={() => handleRemovePhoto(0)}
+                      className="absolute right-2 top-2 size-6 items-center justify-center rounded-full bg-midnight/60"
+                    >
+                      <X color="#FFFFFF" width={14} height={14} />
+                    </Pressable>
+                  )}
                 </>
               ) : (
                 <View className="flex-1 items-center justify-center">
-                  <Camera color={colors.lavender[400]} size={32} />
-                  <Text className="mt-2 text-sm text-lavender-400">{t('companion.onboard.create_profile.add_main')}</Text>
+                  <Camera color={colors.lavender[400]} width={32} height={32} />
+                  <Text className="mt-2 text-sm text-lavender-400">
+                    {t('companion.onboard.create_profile.add_main')}
+                  </Text>
                 </View>
               )}
             </Pressable>
@@ -115,15 +270,23 @@ export default function CreateProfile() {
             {[1, 2, 3, 4, 5].map((index) => (
               <Pressable
                 key={index}
-                onPress={handleAddPhoto}
-                className="h-24 w-[30%] overflow-hidden rounded-xl bg-softpink"
+                onPress={() => handleAddPhoto(index)}
+                className="relative h-24 w-[30%] overflow-hidden rounded-xl bg-softpink"
               >
                 {photos[index] ? (
-                  <Image
-                    source={{ uri: photos[index] }}
-                    className="size-full"
-                    contentFit="cover"
-                  />
+                  <>
+                    <Image
+                      source={{ uri: photos[index] }}
+                      className="size-full"
+                      contentFit="cover"
+                    />
+                    <Pressable
+                      onPress={() => handleRemovePhoto(index)}
+                      className="absolute right-1 top-1 size-5 items-center justify-center rounded-full bg-midnight/60"
+                    >
+                      <X color="#FFFFFF" width={12} height={12} />
+                    </Pressable>
+                  </>
                 ) : (
                   <View className="flex-1 items-center justify-center">
                     <Plus color={colors.lavender[400]} width={24} height={24} />
@@ -133,8 +296,18 @@ export default function CreateProfile() {
             ))}
           </View>
 
-          <Text className="mt-2 text-xs text-text-tertiary">
-            {t('companion.onboard.create_profile.photos_count', { count: photos.length, max: 6, min: 3 })}
+          <Text
+            className={`mt-2 text-xs ${needsMorePhotos ? 'text-danger-400' : 'text-text-tertiary'}`}
+          >
+            {needsMorePhotos
+              ? t('companion.onboard.create_profile.need_more_photos', {
+                  count: MIN_PHOTOS - photos.length,
+                })
+              : t('companion.onboard.create_profile.photos_count', {
+                  count: photos.length,
+                  max: 6,
+                  min: MIN_PHOTOS,
+                })}
           </Text>
         </MotiView>
 
@@ -151,15 +324,28 @@ export default function CreateProfile() {
           <TextInput
             value={name}
             onChangeText={setName}
-            placeholder={t('companion.onboard.create_profile.display_name_placeholder')}
+            placeholder={t(
+              'companion.onboard.create_profile.display_name_placeholder'
+            )}
             placeholderTextColor={colors.text.tertiary}
-            className="rounded-xl border border-border-light bg-white px-4 py-4 text-base text-midnight"
-            style={{ fontFamily: 'Urbanist_500Medium' }}
+            className={`rounded-xl border bg-white p-4 text-base ${
+              isNameTooShort ? 'border-danger-400' : 'border-border-light'
+            }`}
+            style={{ fontFamily: 'Urbanist_500Medium', color: colors.midnight.DEFAULT }}
             maxLength={30}
           />
-          <Text className="mt-1 text-right text-xs text-text-tertiary">
-            {name.length}/30
-          </Text>
+          <View className="mt-1 flex-row justify-between">
+            {isNameTooShort ? (
+              <Text className="text-xs text-danger-400">
+                {t('companion.onboard.create_profile.name_too_short', {
+                  min: MIN_NAME_LENGTH,
+                })}
+              </Text>
+            ) : (
+              <View />
+            )}
+            <Text className="text-xs text-text-tertiary">{name.length}/30</Text>
+          </View>
         </MotiView>
 
         {/* Bio */}
@@ -173,19 +359,44 @@ export default function CreateProfile() {
             {t('companion.onboard.create_profile.about_you')}
           </Text>
           <TextInput
-            value={bio}
-            onChangeText={setBio}
-            placeholder={t('companion.onboard.create_profile.about_you_placeholder')}
+            value={bioText}
+            onChangeText={setBioText}
+            placeholder={t(
+              'companion.onboard.create_profile.about_you_placeholder'
+            )}
             placeholderTextColor={colors.text.tertiary}
             multiline
             numberOfLines={4}
-            className="min-h-[120px] rounded-xl border border-border-light bg-white px-4 py-4 text-base text-midnight"
-            style={{ fontFamily: 'Urbanist_500Medium', textAlignVertical: 'top' }}
+            className={`min-h-[120px] rounded-xl border bg-white p-4 text-base ${
+              isBioTooShort ? 'border-danger-400' : 'border-border-light'
+            }`}
+            style={{
+              fontFamily: 'Urbanist_500Medium',
+              textAlignVertical: 'top',
+              color: colors.midnight.DEFAULT,
+            }}
             maxLength={500}
           />
-          <Text className="mt-1 text-right text-xs text-text-tertiary">
-            {t('companion.onboard.create_profile.bio_count', { count: bio.length, max: 500, min: 20 })}
-          </Text>
+          <View className="mt-1 flex-row justify-between">
+            {isBioTooShort ? (
+              <Text className="text-xs text-danger-400">
+                {t('companion.onboard.create_profile.bio_too_short', {
+                  remaining: MIN_BIO_LENGTH - bioText.length,
+                })}
+              </Text>
+            ) : (
+              <View />
+            )}
+            <Text
+              className={`text-xs ${bioText.length >= 450 ? 'text-yellow-600' : 'text-text-tertiary'}`}
+            >
+              {t('companion.onboard.create_profile.bio_count', {
+                count: bioText.length,
+                max: 500,
+                min: MIN_BIO_LENGTH,
+              })}
+            </Text>
+          </View>
         </MotiView>
 
         {/* Tips */}
@@ -216,7 +427,10 @@ export default function CreateProfile() {
       </ScrollView>
 
       {/* Bottom CTA */}
-      <SafeAreaView edges={['bottom']} className="border-t border-border-light bg-white">
+      <SafeAreaView
+        edges={['bottom']}
+        className="border-t border-border-light bg-white"
+      >
         <View className="px-6 py-4">
           <Button
             label={t('common.continue')}

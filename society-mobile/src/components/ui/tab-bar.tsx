@@ -2,12 +2,12 @@
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import React from 'react';
 import { Pressable, StyleSheet } from 'react-native';
-import Svg, { Path, Circle } from 'react-native-svg';
+import Svg, { Circle, Path } from 'react-native-svg';
 
 import { SafeAreaView, Text, View } from '@/components/ui';
 import colors from '@/components/ui/colors';
 
-// Society Tab Icons - Using new Rose Pink color palette
+// Hireme Tab Icons - Using new Rose Pink color palette
 
 function HomeIcon({ focused }: { focused: boolean }) {
   const color = focused ? colors.rose[400] : colors.text.tertiary;
@@ -37,7 +37,12 @@ function SearchIcon({ focused }: { focused: boolean }) {
         stroke={color}
         strokeWidth={2}
       />
-      <Path d="M16 16L21 21" stroke={color} strokeWidth={2} strokeLinecap="round" />
+      <Path
+        d="M16 16L21 21"
+        stroke={color}
+        strokeWidth={2}
+        strokeLinecap="round"
+      />
     </Svg>
   );
 }
@@ -53,7 +58,12 @@ function CalendarIcon({ focused }: { focused: boolean }) {
         strokeWidth={2}
       />
       <Path d="M3 9H21" stroke={focused ? 'white' : color} strokeWidth={2} />
-      <Path d="M8 3V5M16 3V5" stroke={color} strokeWidth={2} strokeLinecap="round" />
+      <Path
+        d="M8 3V5M16 3V5"
+        stroke={color}
+        strokeWidth={2}
+        strokeLinecap="round"
+      />
       <Circle cx={12} cy={15} r={2} fill={focused ? 'white' : color} />
     </Svg>
   );
@@ -122,7 +132,7 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
 
           const isFocused = state.index === index;
 
-          // Map route names to Society icons and labels
+          // Map route names to Hireme icons and labels
           const getIcon = () => {
             switch (route.name) {
               case 'index':
@@ -140,7 +150,7 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
             }
           };
 
-          // Society-specific labels
+          // Hireme-specific labels
           const getLabel = (): string => {
             switch (route.name) {
               case 'index':

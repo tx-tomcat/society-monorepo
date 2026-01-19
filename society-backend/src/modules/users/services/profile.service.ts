@@ -4,9 +4,9 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { UserRole } from '@generated/client';
+import { Gender, UserRole } from '@generated/client';
 import { PrismaService } from '../../../prisma/prisma.service';
-import { UpdateCompanionProfileDto } from '../dto/create-user.dto';
+import { UpdateCompanionProfileDto, UpdateUserDto } from '../dto/create-user.dto';
 
 @Injectable()
 export class ProfileService {
@@ -58,6 +58,77 @@ export class ProfileService {
         type: v.type,
         verifiedAt: v.verifiedAt,
       })),
+    };
+  }
+
+  async updateUserProfile(userId: string, updateData: UpdateUserDto) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    // Build update data, only including fields that are provided
+    const dataToUpdate: {
+      fullName?: string;
+      avatarUrl?: string;
+      gender?: Gender;
+      dateOfBirth?: Date;
+      phone?: string;
+    } = {};
+
+    if (updateData.fullName !== undefined) {
+      dataToUpdate.fullName = updateData.fullName;
+    }
+    if (updateData.avatarUrl !== undefined) {
+      dataToUpdate.avatarUrl = updateData.avatarUrl;
+    }
+    if (updateData.gender !== undefined) {
+      // Handle case-insensitive gender (mobile may send lowercase)
+      const genderUpper = String(updateData.gender).toUpperCase() as Gender;
+      if (['MALE', 'FEMALE', 'OTHER'].includes(genderUpper)) {
+        dataToUpdate.gender = genderUpper;
+      }
+    }
+    if (updateData.dateOfBirth !== undefined) {
+      dataToUpdate.dateOfBirth = updateData.dateOfBirth;
+    }
+    if (updateData.phone !== undefined) {
+      dataToUpdate.phone = updateData.phone;
+    }
+
+    const updatedUser = await this.prisma.user.update({
+      where: { id: userId },
+      data: dataToUpdate,
+      include: {
+        companionProfile: true,
+        hirerProfile: true,
+      },
+    });
+
+    this.logger.log(`Updated user profile: ${userId}`);
+
+    return {
+      user: {
+        id: updatedUser.id,
+        email: updatedUser.email,
+        phone: updatedUser.phone,
+        fullName: updatedUser.fullName,
+        avatarUrl: updatedUser.avatarUrl,
+        gender: updatedUser.gender,
+        dateOfBirth: updatedUser.dateOfBirth,
+        role: updatedUser.role,
+        status: updatedUser.status,
+        isVerified: updatedUser.isVerified,
+        trustScore: updatedUser.trustScore,
+      },
+      profile:
+        updatedUser.role === UserRole.COMPANION
+          ? updatedUser.companionProfile
+          : updatedUser.hirerProfile,
+      verifications: [],
     };
   }
 

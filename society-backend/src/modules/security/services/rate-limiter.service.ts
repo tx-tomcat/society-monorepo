@@ -76,6 +76,7 @@ export class RateLimiterService {
     const key = `ratelimit:${type}:${identifier}`;
 
     const data = await this.cacheService.get<RateLimitData>(key);
+    console.log(data)
     const now = Date.now();
 
     let count: number;

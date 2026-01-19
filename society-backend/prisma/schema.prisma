@@ -53,20 +53,20 @@ enum ServiceType {
 }
 
 enum BookingStatus {
-  PENDING      // Request submitted by hirer
-  CONFIRMED    // Companion accepted
-  ACTIVE       // Booking in progress
-  COMPLETED    // Successfully completed
-  CANCELLED    // Either party cancelled
-  DISPUTED     // Under dispute resolution
-  EXPIRED      // Request timed out (24h no response)
+  PENDING // Request submitted by hirer
+  CONFIRMED // Companion accepted
+  ACTIVE // Booking in progress
+  COMPLETED // Successfully completed
+  CANCELLED // Either party cancelled
+  DISPUTED // Under dispute resolution
+  EXPIRED // Request timed out (24h no response)
 }
 
 enum PaymentStatus {
   PENDING
   PAID
-  HELD         // In escrow
-  RELEASED     // Released to companion
+  HELD // In escrow
+  RELEASED // Released to companion
   REFUNDED
   PARTIAL_REFUND
   FAILED
@@ -178,33 +178,33 @@ enum AppealStatus {
 // ============================================
 
 model User {
-  id            String     @id @default(uuid()) @db.Uuid
-  clerkId       String?    @unique @map("clerk_id")
-  phone         String?    @unique
-  email         String?    @unique
-  fullName      String     @map("full_name")
-  avatarUrl     String?    @map("avatar_url")
-  gender        Gender?
-  dateOfBirth   DateTime?  @map("date_of_birth") @db.Date
-  role          UserRole   @default(HIRER)
-  status        UserStatus @default(PENDING)
-  isVerified    Boolean    @default(false) @map("is_verified")
-  trustScore    Int        @default(100) @map("trust_score")
-  createdAt     DateTime   @default(now()) @map("created_at")
-  updatedAt     DateTime   @updatedAt @map("updated_at")
+  id          String     @id @default(uuid()) @db.Uuid
+  zaloId      String     @unique @map("zalo_id")
+  phone       String?
+  email       String?
+  fullName    String?    @map("full_name")
+  avatarUrl   String?    @map("avatar_url")
+  gender      Gender?
+  dateOfBirth DateTime?  @map("date_of_birth") @db.Date
+  role        UserRole?
+  status      UserStatus @default(PENDING)
+  isVerified  Boolean    @default(false) @map("is_verified")
+  trustScore  Int        @default(100) @map("trust_score")
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @updatedAt @map("updated_at")
 
   // Relations
-  settings              UserSettings?
-  devices               UserDevice[]
-  sessions              UserSession[]
+  settings UserSettings?
+  devices  UserDevice[]
+  sessions UserSession[]
 
   // Role-specific profiles
-  companionProfile      CompanionProfile?
-  hirerProfile          HirerProfile?
+  companionProfile CompanionProfile?
+  hirerProfile     HirerProfile?
 
   // Bookings
-  hirerBookings         Booking[]          @relation("HirerBookings")
-  companionBookings     Booking[]          @relation("CompanionBookings")
+  hirerBookings     Booking[] @relation("HirerBookings")
+  companionBookings Booking[] @relation("CompanionBookings")
 
   // Messaging (stored in Supabase for realtime)
   conversationsAsHirer     Conversation[] @relation("HirerConversations")
@@ -212,64 +212,65 @@ model User {
   messagesSent             Message[]
 
   // Reviews
-  reviewsGiven          Review[]           @relation("ReviewsGiven")
-  reviewsReceived       Review[]           @relation("ReviewsReceived")
+  reviewsGiven    Review[] @relation("ReviewsGiven")
+  reviewsReceived Review[] @relation("ReviewsReceived")
 
   // Trust & Safety
-  blockedUsers          UserBlock[]        @relation("Blocker")
-  blockedByUsers        UserBlock[]        @relation("Blocked")
-  reportsMade           Report[]           @relation("Reporter")
-  reportsReceived       Report[]           @relation("Reported")
-  strikes               UserStrike[]
+  blockedUsers    UserBlock[]  @relation("Blocker")
+  blockedByUsers  UserBlock[]  @relation("Blocked")
+  reportsMade     Report[]     @relation("Reporter")
+  reportsReceived Report[]     @relation("Reported")
+  strikes         UserStrike[]
 
   // Verifications
-  verifications         Verification[]
-  photoVerifications    PhotoVerification[]
+  verifications      Verification[]
+  photoVerifications PhotoVerification[]
 
   // Notifications
-  notifications         Notification[]
-  pushTokens            PushToken[]
+  notifications Notification[]
+  pushTokens    PushToken[]
 
   // Earnings & Payments
-  payments              Payment[]
+  payments Payment[]
 
   // Moderation
-  moderationQueue       ModerationQueue[]
-  moderationActions     ModerationAction[] @relation("Moderator")
-  suspensions           UserSuspension[]   @relation("SuspendedUser")
-  suspendedBy           UserSuspension[]   @relation("SuspendedBy")
-  liftedSuspensions     UserSuspension[]   @relation("LiftedBy")
-  appeals               Appeal[]
-  appealReviews         Appeal[]           @relation("AppealReviewer")
+  moderationQueue   ModerationQueue[]
+  moderationActions ModerationAction[] @relation("Moderator")
+  suspensions       UserSuspension[]   @relation("SuspendedUser")
+  suspendedBy       UserSuspension[]   @relation("SuspendedBy")
+  liftedSuspensions UserSuspension[]   @relation("LiftedBy")
+  appeals           Appeal[]
+  appealReviews     Appeal[]           @relation("AppealReviewer")
 
   // Files
-  files                 File[]
+  files File[]
 
   // Security
-  securityEvents        SecurityEvent[]
+  securityEvents SecurityEvent[]
 
   // Admin
-  adminAuditLogs        AdminAuditLog[]
-  supportTickets        SupportTicket[]    @relation("TicketUser")
-  assignedTickets       SupportTicket[]    @relation("TicketAssignee")
-  ticketMessages        SupportTicketMessage[]
+  adminAuditLogs  AdminAuditLog[]
+  supportTickets  SupportTicket[]        @relation("TicketUser")
+  assignedTickets SupportTicket[]        @relation("TicketAssignee")
+  ticketMessages  SupportTicketMessage[]
 
   // Referrals
-  referral              Referral?
-  referredBy            Referral?          @relation("ReferredUsers", fields: [referredById], references: [id])
-  referredById          String?            @map("referred_by_id") @db.Uuid
+  referral     Referral?
+  referredBy   Referral? @relation("ReferredUsers", fields: [referredById], references: [id])
+  referredById String?   @map("referred_by_id") @db.Uuid
 
   // Favorites
-  favoriteCompanions    FavoriteCompanion[] @relation("HirerFavorites")
-  favoritedBy           FavoriteCompanion[] @relation("FavoritedBy")
+  favoriteCompanions FavoriteCompanion[] @relation("HirerFavorites")
+  favoritedBy        FavoriteCompanion[] @relation("FavoritedBy")
 
   // Emergency & Safety
-  emergencyContacts     EmergencyContact[]
-  emergencyEvents       EmergencyEvent[]    @relation("UserEmergencies")
-  resolvedEmergencies   EmergencyEvent[]    @relation("ResolvedEmergencies")
+  emergencyContacts   EmergencyContact[]
+  emergencyEvents     EmergencyEvent[]   @relation("UserEmergencies")
+  resolvedEmergencies EmergencyEvent[]   @relation("ResolvedEmergencies")
 
   @@index([phone])
   @@index([email])
+  @@index([zaloId])
   @@index([role])
   @@index([status])
   @@map("users")
@@ -329,34 +330,34 @@ model UserSession {
 // ============================================
 
 model CompanionProfile {
-  id                  String   @id @default(uuid()) @db.Uuid
-  userId              String   @unique @map("user_id") @db.Uuid
-  bio                 String?
-  heightCm            Int?     @map("height_cm")
-  languages           String[] @default(["vi"])
-  hourlyRate          Int      @map("hourly_rate")        // in VND
-  halfDayRate         Int?     @map("half_day_rate")
-  fullDayRate         Int?     @map("full_day_rate")
-  ratingAvg           Decimal  @default(0.0) @map("rating_avg") @db.Decimal(2, 1)
-  ratingCount         Int      @default(0) @map("rating_count")
-  totalBookings       Int      @default(0) @map("total_bookings")
-  completedBookings   Int      @default(0) @map("completed_bookings")
-  verificationStatus  VerificationStatus @default(PENDING) @map("verification_status")
-  isFeatured          Boolean  @default(false) @map("is_featured")
-  isActive            Boolean  @default(true) @map("is_active")
-  isHidden            Boolean  @default(false) @map("is_hidden")
-  responseRate        Int      @default(100) @map("response_rate")
-  acceptanceRate      Int      @default(100) @map("acceptance_rate")
-  createdAt           DateTime @default(now()) @map("created_at")
-  updatedAt           DateTime @updatedAt @map("updated_at")
+  id                 String             @id @default(uuid()) @db.Uuid
+  userId             String             @unique @map("user_id") @db.Uuid
+  bio                String?
+  heightCm           Int?               @map("height_cm")
+  languages          String[]           @default(["vi"])
+  hourlyRate         Int                @map("hourly_rate") // in VND
+  halfDayRate        Int?               @map("half_day_rate")
+  fullDayRate        Int?               @map("full_day_rate")
+  ratingAvg          Decimal            @default(0.0) @map("rating_avg") @db.Decimal(2, 1)
+  ratingCount        Int                @default(0) @map("rating_count")
+  totalBookings      Int                @default(0) @map("total_bookings")
+  completedBookings  Int                @default(0) @map("completed_bookings")
+  verificationStatus VerificationStatus @default(PENDING) @map("verification_status")
+  isFeatured         Boolean            @default(false) @map("is_featured")
+  isActive           Boolean            @default(true) @map("is_active")
+  isHidden           Boolean            @default(false) @map("is_hidden")
+  responseRate       Int                @default(100) @map("response_rate")
+  acceptanceRate     Int                @default(100) @map("acceptance_rate")
+  createdAt          DateTime           @default(now()) @map("created_at")
+  updatedAt          DateTime           @updatedAt @map("updated_at")
 
-  user          User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  photos        CompanionPhoto[]
-  services      CompanionService[]
-  availability  CompanionAvailability[]
-  bankAccounts  BankAccount[]
-  earnings      Earning[]
-  boosts        ProfileBoost[]
+  user         User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  photos       CompanionPhoto[]
+  services     CompanionService[]
+  availability CompanionAvailability[]
+  bankAccounts BankAccount[]
+  earnings     Earning[]
+  boosts       ProfileBoost[]
 
   @@index([ratingAvg(sort: Desc)])
   @@index([hourlyRate])
@@ -379,13 +380,13 @@ model CompanionPhoto {
 }
 
 model CompanionService {
-  id          String      @id @default(uuid()) @db.Uuid
-  companionId String      @map("companion_id") @db.Uuid
-  serviceType ServiceType @map("service_type")
-  description String?
-  priceAdjustment Int     @default(0) @map("price_adjustment") // +/- from base rate
-  isEnabled   Boolean     @default(true) @map("is_enabled")
-  createdAt   DateTime    @default(now()) @map("created_at")
+  id              String      @id @default(uuid()) @db.Uuid
+  companionId     String      @map("companion_id") @db.Uuid
+  serviceType     ServiceType @map("service_type")
+  description     String?
+  priceAdjustment Int         @default(0) @map("price_adjustment") // +/- from base rate
+  isEnabled       Boolean     @default(true) @map("is_enabled")
+  createdAt       DateTime    @default(now()) @map("created_at")
 
   companion CompanionProfile @relation(fields: [companionId], references: [id], onDelete: Cascade)
 
@@ -396,9 +397,9 @@ model CompanionService {
 model CompanionAvailability {
   id           String    @id @default(uuid()) @db.Uuid
   companionId  String    @map("companion_id") @db.Uuid
-  dayOfWeek    Int?      @map("day_of_week")    // 0-6 (Sunday-Saturday) for recurring
-  startTime    String    @map("start_time")     // "09:00"
-  endTime      String    @map("end_time")       // "18:00"
+  dayOfWeek    Int?      @map("day_of_week") // 0-6 (Sunday-Saturday) for recurring
+  startTime    String    @map("start_time") // "09:00"
+  endTime      String    @map("end_time") // "18:00"
   isRecurring  Boolean   @default(true) @map("is_recurring")
   specificDate DateTime? @map("specific_date") @db.Date
   isAvailable  Boolean   @default(true) @map("is_available")
@@ -415,14 +416,14 @@ model CompanionAvailability {
 // ============================================
 
 model HirerProfile {
-  id             String   @id @default(uuid()) @db.Uuid
-  userId         String   @unique @map("user_id") @db.Uuid
-  totalBookings  Int      @default(0) @map("total_bookings")
-  totalSpent     Int      @default(0) @map("total_spent")       // in VND
-  ratingAvg      Decimal  @default(5.0) @map("rating_avg") @db.Decimal(2, 1)
-  ratingCount    Int      @default(0) @map("rating_count")
-  createdAt      DateTime @default(now()) @map("created_at")
-  updatedAt      DateTime @updatedAt @map("updated_at")
+  id            String   @id @default(uuid()) @db.Uuid
+  userId        String   @unique @map("user_id") @db.Uuid
+  totalBookings Int      @default(0) @map("total_bookings")
+  totalSpent    Int      @default(0) @map("total_spent") // in VND
+  ratingAvg     Decimal  @default(5.0) @map("rating_avg") @db.Decimal(2, 1)
+  ratingCount   Int      @default(0) @map("rating_count")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -434,16 +435,16 @@ model HirerProfile {
 // ============================================
 
 model Verification {
-  id            String             @id @default(uuid()) @db.Uuid
-  userId        String             @map("user_id") @db.Uuid
-  type          String                                         // 'identity', 'phone', 'email'
-  status        VerificationStatus @default(PENDING)
-  provider      String?                                        // 'vneid', 'twilio', etc.
-  verifiedAt    DateTime?          @map("verified_at")
-  expiresAt     DateTime?          @map("expires_at")
-  metadata      Json               @default("{}")
-  createdAt     DateTime           @default(now()) @map("created_at")
-  updatedAt     DateTime           @updatedAt @map("updated_at")
+  id         String             @id @default(uuid()) @db.Uuid
+  userId     String             @map("user_id") @db.Uuid
+  type       String // 'identity', 'phone', 'email'
+  status     VerificationStatus @default(PENDING)
+  provider   String? // 'vneid', 'twilio', etc.
+  verifiedAt DateTime?          @map("verified_at")
+  expiresAt  DateTime?          @map("expires_at")
+  metadata   Json               @default("{}")
+  createdAt  DateTime           @default(now()) @map("created_at")
+  updatedAt  DateTime           @updatedAt @map("updated_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -471,44 +472,44 @@ model PhotoVerification {
 // ============================================
 
 model Booking {
-  id               String        @id @default(uuid()) @db.Uuid
-  bookingNumber    String        @unique @map("booking_number")  // SOC-2025-XXXX
-  hirerId          String        @map("hirer_id") @db.Uuid
-  companionId      String        @map("companion_id") @db.Uuid
-  status           BookingStatus @default(PENDING)
+  id            String        @id @default(uuid()) @db.Uuid
+  bookingNumber String        @unique @map("booking_number") // SOC-2025-XXXX
+  hirerId       String        @map("hirer_id") @db.Uuid
+  companionId   String        @map("companion_id") @db.Uuid
+  status        BookingStatus @default(PENDING)
 
   // Booking Details
-  occasionType     ServiceType   @map("occasion_type")
-  startDatetime    DateTime      @map("start_datetime")
-  endDatetime      DateTime      @map("end_datetime")
-  durationHours    Decimal       @map("duration_hours") @db.Decimal(4, 2)
-  locationAddress  String        @map("location_address")
-  locationLat      Decimal?      @map("location_lat") @db.Decimal(10, 8)
-  locationLng      Decimal?      @map("location_lng") @db.Decimal(11, 8)
-  specialRequests  String?       @map("special_requests")
+  occasionType    ServiceType @map("occasion_type")
+  startDatetime   DateTime    @map("start_datetime")
+  endDatetime     DateTime    @map("end_datetime")
+  durationHours   Decimal     @map("duration_hours") @db.Decimal(4, 2)
+  locationAddress String      @map("location_address")
+  locationLat     Decimal?    @map("location_lat") @db.Decimal(10, 8)
+  locationLng     Decimal?    @map("location_lng") @db.Decimal(11, 8)
+  specialRequests String?     @map("special_requests")
 
   // Pricing
-  basePrice        Int           @map("base_price")              // in VND
-  platformFee      Int           @map("platform_fee")            // 18%
-  surgeFee         Int           @default(0) @map("surge_fee")
-  totalPrice       Int           @map("total_price")
+  basePrice   Int @map("base_price") // in VND
+  platformFee Int @map("platform_fee") // 18%
+  surgeFee    Int @default(0) @map("surge_fee")
+  totalPrice  Int @map("total_price")
 
   // Payment
-  paymentStatus    PaymentStatus @default(PENDING) @map("payment_status")
+  paymentStatus PaymentStatus @default(PENDING) @map("payment_status")
 
   // Cancellation
-  cancelledBy      String?       @map("cancelled_by") @db.Uuid
-  cancelReason     String?       @map("cancel_reason")
-  cancelledAt      DateTime?     @map("cancelled_at")
+  cancelledBy  String?   @map("cancelled_by") @db.Uuid
+  cancelReason String?   @map("cancel_reason")
+  cancelledAt  DateTime? @map("cancelled_at")
 
   // Timeline
-  requestExpiresAt DateTime?     @map("request_expires_at")      // 24h from creation
-  confirmedAt      DateTime?     @map("confirmed_at")
-  startedAt        DateTime?     @map("started_at")
-  completedAt      DateTime?     @map("completed_at")
+  requestExpiresAt DateTime? @map("request_expires_at") // 24h from creation
+  confirmedAt      DateTime? @map("confirmed_at")
+  startedAt        DateTime? @map("started_at")
+  completedAt      DateTime? @map("completed_at")
 
-  createdAt        DateTime      @default(now()) @map("created_at")
-  updatedAt        DateTime      @updatedAt @map("updated_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   hirer        User          @relation("HirerBookings", fields: [hirerId], references: [id])
   companion    User          @relation("CompanionBookings", fields: [companionId], references: [id])
@@ -530,19 +531,19 @@ model Booking {
 // ============================================
 
 model Payment {
-  id                String          @id @default(uuid()) @db.Uuid
-  bookingId         String          @unique @map("booking_id") @db.Uuid
-  userId            String          @map("user_id") @db.Uuid
-  amount            Int                                             // in VND
-  currency          String          @default("VND")
-  provider          PaymentProvider
-  providerTxnId     String?         @map("provider_txn_id")
-  status            PaymentStatus   @default(PENDING)
-  providerResponse  Json?           @map("provider_response")
-  paidAt            DateTime?       @map("paid_at")
-  releasedAt        DateTime?       @map("released_at")
-  refundedAt        DateTime?       @map("refunded_at")
-  createdAt         DateTime        @default(now()) @map("created_at")
+  id               String          @id @default(uuid()) @db.Uuid
+  bookingId        String          @unique @map("booking_id") @db.Uuid
+  userId           String          @map("user_id") @db.Uuid
+  amount           Int // in VND
+  currency         String          @default("VND")
+  provider         PaymentProvider
+  providerTxnId    String?         @map("provider_txn_id")
+  status           PaymentStatus   @default(PENDING)
+  providerResponse Json?           @map("provider_response")
+  paidAt           DateTime?       @map("paid_at")
+  releasedAt       DateTime?       @map("released_at")
+  refundedAt       DateTime?       @map("refunded_at")
+  createdAt        DateTime        @default(now()) @map("created_at")
 
   booking Booking @relation(fields: [bookingId], references: [id])
   user    User    @relation(fields: [userId], references: [id])
@@ -552,15 +553,15 @@ model Payment {
 }
 
 model Earning {
-  id           String         @id @default(uuid()) @db.Uuid
-  companionId  String         @map("companion_id") @db.Uuid
-  bookingId    String         @unique @map("booking_id") @db.Uuid
-  grossAmount  Int            @map("gross_amount")               // Total before fees
-  platformFee  Int            @map("platform_fee")               // 18%
-  netAmount    Int            @map("net_amount")                 // What companion receives
-  status       EarningsStatus @default(PENDING)
-  releasedAt   DateTime?      @map("released_at")
-  createdAt    DateTime       @default(now()) @map("created_at")
+  id          String         @id @default(uuid()) @db.Uuid
+  companionId String         @map("companion_id") @db.Uuid
+  bookingId   String         @unique @map("booking_id") @db.Uuid
+  grossAmount Int            @map("gross_amount") // Total before fees
+  platformFee Int            @map("platform_fee") // 18%
+  netAmount   Int            @map("net_amount") // What companion receives
+  status      EarningsStatus @default(PENDING)
+  releasedAt  DateTime?      @map("released_at")
+  createdAt   DateTime       @default(now()) @map("created_at")
 
   companion CompanionProfile @relation(fields: [companionId], references: [id])
   booking   Booking          @relation(fields: [bookingId], references: [id])
@@ -590,7 +591,7 @@ model Withdrawal {
   id            String           @id @default(uuid()) @db.Uuid
   companionId   String           @map("companion_id") @db.Uuid
   bankAccountId String           @map("bank_account_id") @db.Uuid
-  amount        Int                                                // in VND
+  amount        Int // in VND
   status        WithdrawalStatus @default(PENDING)
   requestedAt   DateTime         @default(now()) @map("requested_at")
   completedAt   DateTime?        @map("completed_at")
@@ -605,16 +606,16 @@ model Withdrawal {
 // ============================================
 
 model Review {
-  id          String   @id @default(uuid()) @db.Uuid
-  bookingId   String   @map("booking_id") @db.Uuid
-  reviewerId  String   @map("reviewer_id") @db.Uuid
-  revieweeId  String   @map("reviewee_id") @db.Uuid
-  rating      Int                                      // 1-5
-  comment     String?
-  tags        String[] @default([])
-  isVisible   Boolean  @default(true) @map("is_visible")
-  isDisputed  Boolean  @default(false) @map("is_disputed")
-  createdAt   DateTime @default(now()) @map("created_at")
+  id         String   @id @default(uuid()) @db.Uuid
+  bookingId  String   @map("booking_id") @db.Uuid
+  reviewerId String   @map("reviewer_id") @db.Uuid
+  revieweeId String   @map("reviewee_id") @db.Uuid
+  rating     Int // 1-5
+  comment    String?
+  tags       String[] @default([])
+  isVisible  Boolean  @default(true) @map("is_visible")
+  isDisputed Boolean  @default(false) @map("is_disputed")
+  createdAt  DateTime @default(now()) @map("created_at")
 
   booking  Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
   reviewer User    @relation("ReviewsGiven", fields: [reviewerId], references: [id])
@@ -935,16 +936,16 @@ model AdminAuditLog {
 }
 
 model SupportTicket {
-  id          String    @id @default(uuid()) @db.Uuid
-  userId      String    @map("user_id") @db.Uuid
+  id          String   @id @default(uuid()) @db.Uuid
+  userId      String   @map("user_id") @db.Uuid
   subject     String
   description String
   category    String?
-  priority    String    @default("normal")
-  status      String    @default("open")
-  assignedTo  String?   @map("assigned_to") @db.Uuid
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @updatedAt @map("updated_at")
+  priority    String   @default("normal")
+  status      String   @default("open")
+  assignedTo  String?  @map("assigned_to") @db.Uuid
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
 
   user     User                   @relation("TicketUser", fields: [userId], references: [id], onDelete: Cascade)
   assignee User?                  @relation("TicketAssignee", fields: [assignedTo], references: [id])
@@ -1039,7 +1040,7 @@ model FavoriteCompanion {
   id          String   @id @default(uuid()) @db.Uuid
   hirerId     String   @map("hirer_id") @db.Uuid
   companionId String   @map("companion_id") @db.Uuid
-  notes       String?  // Private notes for the hirer
+  notes       String? // Private notes for the hirer
   createdAt   DateTime @default(now()) @map("created_at")
 
   hirer     User @relation("HirerFavorites", fields: [hirerId], references: [id], onDelete: Cascade)
@@ -1056,29 +1057,29 @@ model FavoriteCompanion {
 // ============================================
 
 enum BoostStatus {
-  PENDING    // Payment pending
-  ACTIVE     // Currently boosted
-  EXPIRED    // Boost period ended
-  CANCELLED  // Manually cancelled
+  PENDING // Payment pending
+  ACTIVE // Currently boosted
+  EXPIRED // Boost period ended
+  CANCELLED // Manually cancelled
 }
 
 enum BoostTier {
-  STANDARD   // 24 hours, moderate visibility
-  PREMIUM    // 48 hours, high visibility
-  SUPER      // 72 hours, maximum visibility
+  STANDARD // 24 hours, moderate visibility
+  PREMIUM // 48 hours, high visibility
+  SUPER // 72 hours, maximum visibility
 }
 
 model ProfileBoost {
-  id           String      @id @default(uuid()) @db.Uuid
-  companionId  String      @map("companion_id") @db.Uuid
-  tier         BoostTier   @default(STANDARD)
-  status       BoostStatus @default(PENDING)
-  multiplier   Decimal     @default(1.5) @db.Decimal(3, 2)  // Ranking multiplier
-  price        Int                                           // Amount paid in VND
-  startedAt    DateTime?   @map("started_at")
-  expiresAt    DateTime?   @map("expires_at")
-  createdAt    DateTime    @default(now()) @map("created_at")
-  updatedAt    DateTime    @updatedAt @map("updated_at")
+  id          String      @id @default(uuid()) @db.Uuid
+  companionId String      @map("companion_id") @db.Uuid
+  tier        BoostTier   @default(STANDARD)
+  status      BoostStatus @default(PENDING)
+  multiplier  Decimal     @default(1.5) @db.Decimal(3, 2) // Ranking multiplier
+  price       Int // Amount paid in VND
+  startedAt   DateTime?   @map("started_at")
+  expiresAt   DateTime?   @map("expires_at")
+  createdAt   DateTime    @default(now()) @map("created_at")
+  updatedAt   DateTime    @updatedAt @map("updated_at")
 
   companion CompanionProfile @relation(fields: [companionId], references: [id], onDelete: Cascade)
 

@@ -1,26 +1,26 @@
+import { JwtAuthGuard } from '@/auth/guards/jwt.guard';
+import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import {
-  Controller,
-  Get,
-  Post,
-  Delete,
-  Param,
-  Query,
   Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
-import { JwtAuthGuard } from '@/auth/guards/jwt-auth.guard';
-import { CurrentUser } from '@/common/decorators/current-user.decorator';
-import { EarningsService } from '../services/earnings.service';
 import {
   CreateBankAccountDto,
-  WithdrawFundsDto,
   GetTransactionsQueryDto,
+  WithdrawFundsDto,
 } from '../dto/earnings.dto';
+import { EarningsService } from '../services/earnings.service';
 
 @Controller('companion/earnings')
 @UseGuards(JwtAuthGuard)
 export class EarningsController {
-  constructor(private readonly earningsService: EarningsService) {}
+  constructor(private readonly earningsService: EarningsService) { }
 
   /**
    * Get earnings overview

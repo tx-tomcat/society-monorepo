@@ -1,6 +1,7 @@
 import Expo
 import React
 import ReactAppDependencyProvider
+import ZaloSDK
 
 @UIApplicationMain
 public class AppDelegate: ExpoAppDelegate {
@@ -21,6 +22,11 @@ public class AppDelegate: ExpoAppDelegate {
     reactNativeFactory = factory
     bindReactNativeFactory(factory)
 
+    // Initialize Zalo SDK
+    if let zaloAppId = Bundle.main.object(forInfoDictionaryKey: "ZaloAppID") as? String {
+      ZaloSDK.sharedInstance().initialize(withAppId: zaloAppId)
+    }
+
 #if os(iOS) || os(tvOS)
     window = UIWindow(frame: UIScreen.main.bounds)
     factory.startReactNative(
@@ -38,6 +44,10 @@ public class AppDelegate: ExpoAppDelegate {
     open url: URL,
     options: [UIApplication.OpenURLOptionsKey: Any] = [:]
   ) -> Bool {
+    // Handle Zalo SDK callback
+    if ZDKApplicationDelegate.sharedInstance().application(app, open: url, options: options) {
+      return true
+    }
     return super.application(app, open: url, options: options) || RCTLinkingManager.application(app, open: url, options: options)
   }
 

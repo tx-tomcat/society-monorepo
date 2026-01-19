@@ -7,7 +7,7 @@ import { Text, View } from '@/components/ui';
 const tabSwitcher = tv({
   slots: {
     container:
-      'flex-row gap-0 rounded-md bg-neutral-100 p-0 dark:bg-neutral-800',
+      'flex-row gap-0 rounded-md bg-neutral-100 p-0',
     tab: 'flex-1 items-center justify-center rounded-md px-3 py-2',
     tabText: 'text-base font-bold leading-[1.6] tracking-[0.2px]',
   },
@@ -19,7 +19,7 @@ const tabSwitcher = tv({
       },
       false: {
         tab: 'bg-transparent',
-        tabText: 'text-midnight dark:text-offwhite',
+        tabText: 'text-midnight',
       },
     },
   },

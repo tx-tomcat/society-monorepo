@@ -1,9 +1,10 @@
 /* eslint-disable max-lines-per-function */
 import { MotiView } from 'moti';
-import React from 'react';
 import type { ComponentType } from 'react';
-import { Pressable, ScrollView, StyleSheet } from 'react-native';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { Pressable, ScrollView, StyleSheet } from 'react-native';
+
 import {
   Button,
   colors,
@@ -76,6 +77,18 @@ const themeConfig = {
     buttonClassName: 'w-full',
     requiredBadgeBgClass: 'bg-rose-400/20',
   },
+  neutral: {
+    accentColor: colors.midnight.DEFAULT,
+    accentBgClass: 'bg-midnight/10',
+    accentBorderClass: 'border-midnight',
+    activeItemBgClass: 'bg-midnight',
+    inactiveIconBgClass: 'bg-midnight/20',
+    progressBgClass: 'bg-midnight/30',
+    progressFillClass: 'bg-midnight',
+    accentTextClass: 'text-midnight',
+    buttonClassName: 'w-full bg-midnight',
+    requiredBadgeBgClass: 'bg-midnight/20',
+  },
 } as const;
 
 const defaultBenefitKeys = [
@@ -116,7 +129,8 @@ export function IdentityVerificationScreen({
     .every((s) => s.completed);
   const allComplete = steps.every((s) => s.completed);
 
-  const canContinue = userType === 'companion' ? requiredCompleted : allComplete;
+  const canContinue =
+    userType === 'companion' ? requiredCompleted : allComplete;
 
   return (
     <View className="flex-1 bg-warmwhite" testID={testID}>
@@ -124,10 +138,16 @@ export function IdentityVerificationScreen({
 
       <SafeAreaView edges={['top']}>
         <View className="flex-row items-center gap-4 border-b border-border-light px-4 py-3">
-          <Pressable onPress={onBack} testID={testID ? `${testID}-back` : undefined}>
+          <Pressable
+            onPress={onBack}
+            testID={testID ? `${testID}-back` : undefined}
+          >
             <ArrowLeft color={colors.midnight.DEFAULT} width={24} height={24} />
           </Pressable>
-          <Text style={styles.headerTitle} className="flex-1 text-xl text-midnight">
+          <Text
+            style={styles.headerTitle}
+            className="flex-1 text-xl text-midnight"
+          >
             {t('auth.verify_identity.header')}
           </Text>
         </View>
@@ -145,17 +165,24 @@ export function IdentityVerificationScreen({
           transition={{ type: 'timing', duration: 500 }}
           className={`mb-6 items-center rounded-2xl p-6 ${theme.accentBgClass}`}
         >
-          <View className={`mb-3 size-16 items-center justify-center rounded-full ${theme.activeItemBgClass}`}>
+          <View
+            className={`mb-3 size-16 items-center justify-center rounded-full ${theme.activeItemBgClass}`}
+          >
             <ShieldCheck color="#FFFFFF" width={32} height={32} />
           </View>
-          <Text style={styles.progressTitle} className="mb-1 text-xl text-midnight">
+          <Text
+            style={styles.progressTitle}
+            className="mb-1 text-xl text-midnight"
+          >
             {t(`auth.verify_identity.${userType}.title`)}
           </Text>
           <Text className="mb-4 text-center text-sm text-text-secondary">
             {t(`auth.verify_identity.${userType}.subtitle`)}
           </Text>
           <View className="flex-row items-center gap-2">
-            <View className={`h-2 flex-1 overflow-hidden rounded-full ${theme.progressBgClass}`}>
+            <View
+              className={`h-2 flex-1 overflow-hidden rounded-full ${theme.progressBgClass}`}
+            >
               <View
                 className={`h-full rounded-full ${theme.progressFillClass}`}
                 style={{ width: `${(completedCount / steps.length) * 100}%` }}
@@ -174,7 +201,11 @@ export function IdentityVerificationScreen({
               key={step.id}
               from={{ opacity: 0, translateX: -20 }}
               animate={{ opacity: 1, translateX: 0 }}
-              transition={{ type: 'timing', duration: 400, delay: 100 + index * 100 }}
+              transition={{
+                type: 'timing',
+                duration: 400,
+                delay: 100 + index * 100,
+              }}
             >
               <Pressable
                 onPress={() => onStepPress(step.id)}
@@ -187,13 +218,19 @@ export function IdentityVerificationScreen({
               >
                 <View
                   className={`size-12 items-center justify-center rounded-full ${
-                    step.completed ? theme.activeItemBgClass : theme.inactiveIconBgClass
+                    step.completed
+                      ? theme.activeItemBgClass
+                      : theme.inactiveIconBgClass
                   }`}
                 >
                   {step.completed ? (
                     <CheckCircle color="#FFFFFF" width={24} height={24} />
                   ) : (
-                    <step.icon color={theme.accentColor} width={24} height={24} />
+                    <step.icon
+                      color={theme.accentColor}
+                      width={24}
+                      height={24}
+                    />
                   )}
                 </View>
                 <View className="flex-1">
@@ -202,8 +239,12 @@ export function IdentityVerificationScreen({
                       {t(step.title)}
                     </Text>
                     {step.required && (
-                      <View className={`rounded px-1.5 py-0.5 ${theme.requiredBadgeBgClass}`}>
-                        <Text className={`text-xs font-medium ${theme.accentTextClass}`}>
+                      <View
+                        className={`rounded px-1.5 py-0.5 ${theme.requiredBadgeBgClass}`}
+                      >
+                        <Text
+                          className={`text-xs font-medium ${theme.accentTextClass}`}
+                        >
                           {t('auth.verify_identity.required')}
                         </Text>
                       </View>
@@ -215,7 +256,9 @@ export function IdentityVerificationScreen({
                 </View>
                 {!step.completed && userType === 'hirer' && (
                   <View className="rounded-lg bg-rose-400 px-4 py-2">
-                    <Text className="font-semibold text-white">{t('auth.verify_identity.start')}</Text>
+                    <Text className="font-semibold text-white">
+                      {t('auth.verify_identity.start')}
+                    </Text>
                   </View>
                 )}
                 {userType === 'companion' && (
@@ -266,7 +309,9 @@ export function IdentityVerificationScreen({
             transition={{ type: 'timing', duration: 500, delay: 600 }}
             className="mt-6 rounded-2xl bg-lavender-400/10 p-4"
           >
-            <Text className="mb-3 font-semibold text-midnight">{t('auth.verify_identity.why_verify')}</Text>
+            <Text className="mb-3 font-semibold text-midnight">
+              {t('auth.verify_identity.why_verify')}
+            </Text>
             <View className="gap-2">
               {displayBenefits.map((benefit, index) => (
                 <View key={index} className="flex-row items-center gap-2">
@@ -280,10 +325,17 @@ export function IdentityVerificationScreen({
       </ScrollView>
 
       {/* Bottom CTA */}
-      <SafeAreaView edges={['bottom']} className="border-t border-border-light bg-white">
+      <SafeAreaView
+        edges={['bottom']}
+        className="border-t border-border-light bg-white"
+      >
         <View className="px-6 py-4">
           <Button
-            label={canContinue ? t('common.continue') : t('auth.verify_identity.complete_all_steps')}
+            label={
+              canContinue
+                ? t('common.continue')
+                : t('auth.verify_identity.complete_all_steps')
+            }
             onPress={onComplete}
             disabled={!canContinue}
             variant="default"

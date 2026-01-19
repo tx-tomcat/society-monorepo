@@ -1,28 +1,36 @@
 import {
+  Body,
   Controller,
   Get,
-  Put,
-  Body,
   Param,
-  UseGuards,
   ParseUUIDPipe,
+  Put,
+  UseGuards,
 } from '@nestjs/common';
-import { ProfileService } from '../services/profile.service';
-import { UpdateCompanionProfileDto } from '../dto/create-user.dto';
 import { JwtAuthGuard } from '../../../auth/guards/jwt.guard';
 import {
   CurrentUser,
   CurrentUserData,
 } from '../../../common/decorators/current-user.decorator';
+import { UpdateCompanionProfileDto, UpdateUserDto } from '../dto/create-user.dto';
+import { ProfileService } from '../services/profile.service';
 
 @Controller('users/profile')
 @UseGuards(JwtAuthGuard)
 export class ProfileController {
-  constructor(private readonly profileService: ProfileService) {}
+  constructor(private readonly profileService: ProfileService) { }
 
   @Get()
   async getMyProfile(@CurrentUser() user: CurrentUserData) {
     return this.profileService.getProfile(user.id);
+  }
+
+  @Put()
+  async updateMyProfile(
+    @CurrentUser() user: CurrentUserData,
+    @Body() updateData: UpdateUserDto,
+  ) {
+    return this.profileService.updateUserProfile(user.id, updateData);
   }
 
   @Get(':id')

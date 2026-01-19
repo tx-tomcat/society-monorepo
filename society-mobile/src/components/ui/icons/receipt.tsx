@@ -11,7 +11,12 @@ export function Receipt({ color = '#6B6572', ...props }: SvgProps) {
         strokeWidth={2}
         strokeLinejoin="round"
       />
-      <Path d="M8 8H16M8 12H14M8 16H12" stroke={color} strokeWidth={2} strokeLinecap="round" />
+      <Path
+        d="M8 8H16M8 12H14M8 16H12"
+        stroke={color}
+        strokeWidth={2}
+        strokeLinecap="round"
+      />
     </Svg>
   );
 }

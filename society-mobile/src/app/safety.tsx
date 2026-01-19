@@ -67,7 +67,11 @@ export default function SafetyCenter() {
       description: 'Share your real-time location during bookings',
       icon: <Gps color={colors.teal[400]} width={24} height={24} />,
       color: 'bg-teal-400/10',
-      onPress: () => Alert.alert('GPS Tracking', 'GPS tracking is enabled for all active bookings.'),
+      onPress: () =>
+        Alert.alert(
+          'GPS Tracking',
+          'GPS tracking is enabled for all active bookings.'
+        ),
     },
     {
       id: 'verified-profiles',
@@ -75,7 +79,11 @@ export default function SafetyCenter() {
       description: 'All companions verified with zkTLS technology',
       icon: <ShieldCheck color={colors.teal[400]} width={24} height={24} />,
       color: 'bg-teal-400/10',
-      onPress: () => Alert.alert('Verified Profiles', 'We use zkTLS to verify identity without storing personal data.'),
+      onPress: () =>
+        Alert.alert(
+          'Verified Profiles',
+          'We use zkTLS to verify identity without storing personal data.'
+        ),
     },
     {
       id: 'escrow-payment',
@@ -83,7 +91,11 @@ export default function SafetyCenter() {
       description: 'Payments held until booking completes',
       icon: <Shield color={colors.rose[400]} width={24} height={24} />,
       color: 'bg-softpink',
-      onPress: () => Alert.alert('Escrow Payment', 'Your payment is held securely and only released after successful booking completion.'),
+      onPress: () =>
+        Alert.alert(
+          'Escrow Payment',
+          'Your payment is held securely and only released after successful booking completion.'
+        ),
     },
     {
       id: 'emergency-contacts',
@@ -91,7 +103,11 @@ export default function SafetyCenter() {
       description: 'Set up trusted contacts for alerts',
       icon: <Phone color={colors.coral[400]} width={24} height={24} />,
       color: 'bg-coral-400/10',
-      onPress: () => Alert.alert('Emergency Contacts', 'Add up to 3 emergency contacts who will be notified in case of SOS.'),
+      onPress: () =>
+        Alert.alert(
+          'Emergency Contacts',
+          'Add up to 3 emergency contacts who will be notified in case of SOS.'
+        ),
     },
   ];
 
@@ -150,7 +166,8 @@ export default function SafetyCenter() {
             </View>
             <Text className="text-xl font-bold text-white">Emergency SOS</Text>
             <Text className="text-center text-sm text-white/80">
-              Tap to immediately alert our safety team and your emergency contacts
+              Tap to immediately alert our safety team and your emergency
+              contacts
             </Text>
           </Pressable>
         </View>
@@ -167,14 +184,24 @@ export default function SafetyCenter() {
                 onPress={feature.onPress}
                 className="flex-row items-center gap-4 rounded-xl bg-white p-4"
               >
-                <View className={`size-12 items-center justify-center rounded-full ${feature.color}`}>
+                <View
+                  className={`size-12 items-center justify-center rounded-full ${feature.color}`}
+                >
                   {feature.icon}
                 </View>
                 <View className="flex-1">
-                  <Text className="font-semibold text-midnight">{feature.title}</Text>
-                  <Text className="text-sm text-text-tertiary">{feature.description}</Text>
+                  <Text className="font-semibold text-midnight">
+                    {feature.title}
+                  </Text>
+                  <Text className="text-sm text-text-tertiary">
+                    {feature.description}
+                  </Text>
                 </View>
-                <ArrowRight color={colors.text.tertiary} width={20} height={20} />
+                <ArrowRight
+                  color={colors.text.tertiary}
+                  width={20}
+                  height={20}
+                />
               </Pressable>
             ))}
           </View>
@@ -186,9 +213,12 @@ export default function SafetyCenter() {
             <View className="flex-row items-center gap-3">
               <ShieldCheck color={colors.teal[400]} width={24} height={24} />
               <View className="flex-1">
-                <Text className="font-semibold text-teal-400">All Systems Active</Text>
+                <Text className="font-semibold text-teal-400">
+                  All Systems Active
+                </Text>
                 <Text className="text-sm text-text-secondary">
-                  GPS tracking, verified profiles, and escrow protection are enabled
+                  GPS tracking, verified profiles, and escrow protection are
+                  enabled
                 </Text>
               </View>
             </View>
@@ -210,10 +240,18 @@ export default function SafetyCenter() {
                   {option.icon}
                 </View>
                 <View className="flex-1">
-                  <Text className="font-semibold text-midnight">{option.title}</Text>
-                  <Text className="text-sm text-text-tertiary">{option.description}</Text>
+                  <Text className="font-semibold text-midnight">
+                    {option.title}
+                  </Text>
+                  <Text className="text-sm text-text-tertiary">
+                    {option.description}
+                  </Text>
                 </View>
-                <ArrowRight color={colors.text.tertiary} width={20} height={20} />
+                <ArrowRight
+                  color={colors.text.tertiary}
+                  width={20}
+                  height={20}
+                />
               </Pressable>
             ))}
           </View>
@@ -221,10 +259,12 @@ export default function SafetyCenter() {
 
         {/* Trust & Safety Info */}
         <View className="mx-4 mb-8 rounded-xl bg-lavender-400/20 p-4">
-          <Text className="mb-2 font-semibold text-midnight">Our Commitment</Text>
+          <Text className="mb-2 font-semibold text-midnight">
+            Our Commitment
+          </Text>
           <Text className="text-sm leading-5 text-text-secondary">
-            Society is committed to providing a safe platform for all users.
-            We use advanced verification technology, secure payments, and 24/7
+            Hireme is committed to providing a safe platform for all users. We
+            use advanced verification technology, secure payments, and 24/7
             monitoring to ensure every booking is safe and trustworthy.
           </Text>
         </View>

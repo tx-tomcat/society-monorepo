@@ -130,4 +130,4 @@ import { SafetyModule } from './modules/safety/safety.module';
   ],
   controllers: [AppController],
 })
-export class AppModule {} 
+export class AppModule { } 

@@ -2,11 +2,16 @@
 import { useRouter } from 'expo-router';
 import { MotiView } from 'moti';
 import React from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, TextInput } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import {
+  Alert,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  TextInput,
+} from 'react-native';
 
 import {
-  Badge,
   Button,
   colors,
   FocusAwareStatusBar,
@@ -15,15 +20,15 @@ import {
   Text,
   View,
 } from '@/components/ui';
-import {
-  ArrowLeft,
-  Camera,
-  CheckCircle,
-  Plus,
-} from '@/components/ui/icons';
+import { ArrowLeft, CheckCircle, Plus } from '@/components/ui/icons';
 
 const OCCASIONS = [
-  'Wedding', 'Tet', 'Family Events', 'Corporate', 'Coffee Date', 'Social Events'
+  'Wedding',
+  'Tet',
+  'Family Events',
+  'Corporate',
+  'Coffee Date',
+  'Social Events',
 ];
 
 export default function EditCompanionProfile() {
@@ -35,7 +40,10 @@ export default function EditCompanionProfile() {
   );
   const [hourlyRate, setHourlyRate] = React.useState('500000');
   const [selectedOccasions, setSelectedOccasions] = React.useState([
-    'Wedding', 'Corporate', 'Tet', 'Family Events'
+    'Wedding',
+    'Corporate',
+    'Tet',
+    'Family Events',
   ]);
   const [photos, setPhotos] = React.useState([
     'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400',
@@ -49,9 +57,11 @@ export default function EditCompanionProfile() {
   }, [router]);
 
   const handleSave = React.useCallback(() => {
-    Alert.alert(t('common.success'), t('companion.edit_profile.success_message'), [
-      { text: t('common.ok'), onPress: () => router.back() },
-    ]);
+    Alert.alert(
+      t('common.success'),
+      t('companion.edit_profile.success_message'),
+      [{ text: t('common.ok'), onPress: () => router.back() }]
+    );
   }, [router, t]);
 
   const handleToggleOccasion = React.useCallback((occasion: string) => {
@@ -73,11 +83,14 @@ export default function EditCompanionProfile() {
     }
   }, [photos]);
 
-  const handleRemovePhoto = React.useCallback((index: number) => {
-    if (photos.length > 1) {
-      setPhotos((prev) => prev.filter((_, i) => i !== index));
-    }
-  }, [photos.length]);
+  const handleRemovePhoto = React.useCallback(
+    (index: number) => {
+      if (photos.length > 1) {
+        setPhotos((prev) => prev.filter((_, i) => i !== index));
+      }
+    },
+    [photos.length]
+  );
 
   return (
     <View className="flex-1 bg-warmwhite">
@@ -88,11 +101,16 @@ export default function EditCompanionProfile() {
           <Pressable onPress={handleBack} testID="back-button">
             <ArrowLeft color={colors.midnight.DEFAULT} width={24} height={24} />
           </Pressable>
-          <Text style={styles.headerTitle} className="flex-1 text-xl text-midnight">
+          <Text
+            style={styles.headerTitle}
+            className="flex-1 text-xl text-midnight"
+          >
             {t('companion.edit_profile.header')}
           </Text>
           <Pressable onPress={handleSave} testID="header-save-button">
-            <Text className="font-semibold text-lavender-400">{t('common.save')}</Text>
+            <Text className="font-semibold text-lavender-400">
+              {t('common.save')}
+            </Text>
           </Pressable>
         </View>
       </SafeAreaView>
@@ -127,7 +145,9 @@ export default function EditCompanionProfile() {
                 />
                 {index === 0 && (
                   <View className="absolute bottom-1 left-1 rounded bg-lavender-400 px-1.5 py-0.5">
-                    <Text className="text-xs font-semibold text-white">{t('companion.edit_profile.main')}</Text>
+                    <Text className="text-xs font-semibold text-white">
+                      {t('companion.edit_profile.main')}
+                    </Text>
                   </View>
                 )}
               </Pressable>
@@ -138,7 +158,9 @@ export default function EditCompanionProfile() {
                 className="size-[30%] items-center justify-center rounded-xl border-2 border-dashed border-lavender-400"
               >
                 <Plus color={colors.lavender[400]} width={24} height={24} />
-                <Text className="mt-1 text-xs text-lavender-400">{t('common.add')}</Text>
+                <Text className="mt-1 text-xs text-lavender-400">
+                  {t('common.add')}
+                </Text>
               </Pressable>
             )}
           </View>
@@ -163,8 +185,8 @@ export default function EditCompanionProfile() {
             placeholder={t('companion.edit_profile.display_name_placeholder')}
             placeholderTextColor={colors.text.tertiary}
             testID="name-input"
-            className="rounded-xl border border-border-light bg-white px-4 py-4 text-base text-midnight"
-            style={{ fontFamily: 'Urbanist_500Medium' }}
+            className="rounded-xl border border-border-light bg-white p-4 text-base"
+            style={{ fontFamily: 'Urbanist_500Medium', color: colors.midnight.DEFAULT }}
             maxLength={30}
           />
         </MotiView>
@@ -176,7 +198,9 @@ export default function EditCompanionProfile() {
           transition={{ type: 'timing', duration: 500, delay: 200 }}
           className="mb-6"
         >
-          <Text className="mb-2 text-lg font-semibold text-midnight">{t('companion.edit_profile.about_me')}</Text>
+          <Text className="mb-2 text-lg font-semibold text-midnight">
+            {t('companion.edit_profile.about_me')}
+          </Text>
           <TextInput
             value={bio}
             onChangeText={setBio}
@@ -185,8 +209,12 @@ export default function EditCompanionProfile() {
             multiline
             numberOfLines={4}
             testID="bio-input"
-            className="min-h-[120px] rounded-xl border border-border-light bg-white px-4 py-4 text-base text-midnight"
-            style={{ fontFamily: 'Urbanist_500Medium', textAlignVertical: 'top' }}
+            className="min-h-[120px] rounded-xl border border-border-light bg-white p-4 text-base"
+            style={{
+              fontFamily: 'Urbanist_500Medium',
+              textAlignVertical: 'top',
+              color: colors.midnight.DEFAULT,
+            }}
             maxLength={500}
           />
           <Text className="mt-1 text-right text-xs text-text-tertiary">
@@ -211,10 +239,12 @@ export default function EditCompanionProfile() {
               onChangeText={(text) => setHourlyRate(text.replace(/\D/g, ''))}
               keyboardType="number-pad"
               testID="hourly-rate-input"
-              className="flex-1 py-4 pl-2 text-lg font-semibold text-midnight"
-              style={{ fontFamily: 'Urbanist_600SemiBold' }}
+              className="flex-1 py-4 pl-2 text-lg font-semibold"
+              style={{ fontFamily: 'Urbanist_600SemiBold', color: colors.midnight.DEFAULT }}
             />
-            <Text className="text-text-secondary">{t('companion.edit_profile.per_hour')}</Text>
+            <Text className="text-text-secondary">
+              {t('companion.edit_profile.per_hour')}
+            </Text>
           </View>
         </MotiView>
 
@@ -286,7 +316,10 @@ export default function EditCompanionProfile() {
       </ScrollView>
 
       {/* Bottom CTA */}
-      <SafeAreaView edges={['bottom']} className="border-t border-border-light bg-white">
+      <SafeAreaView
+        edges={['bottom']}
+        className="border-t border-border-light bg-white"
+      >
         <View className="px-6 py-4">
           <Button
             label={t('companion.edit_profile.save_changes')}

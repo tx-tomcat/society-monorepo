@@ -12,7 +12,12 @@ export function Warning({ color = '#FFD93D', ...props }: SvgProps) {
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-      <Path d="M12 10V14M12 17V17.01" stroke={color} strokeWidth={2} strokeLinecap="round" />
+      <Path
+        d="M12 10V14M12 17V17.01"
+        stroke={color}
+        strokeWidth={2}
+        strokeLinecap="round"
+      />
     </Svg>
   );
 }

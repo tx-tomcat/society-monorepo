@@ -1,0 +1,361 @@
+/* eslint-disable max-lines-per-function */
+import type { Href } from 'expo-router';
+import { useRouter } from 'expo-router';
+import { MotiView } from 'moti';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
+import { Alert, Pressable, ScrollView, StyleSheet } from 'react-native';
+
+import {
+  colors,
+  FocusAwareStatusBar,
+  Image,
+  SafeAreaView,
+  Text,
+  View,
+} from '@/components/ui';
+import {
+  ArrowLeft,
+  ArrowRight,
+  Bell,
+  CreditCard,
+  Edit,
+  Heart,
+  Help,
+  Language,
+  Lock,
+  Logout,
+  Shield,
+  SocietyLogo,
+  Star,
+} from '@/components/ui/icons';
+import { useAuth } from '@/lib/hooks';
+
+type SettingsItem = {
+  id: string;
+  labelKey: string;
+  icon: React.ComponentType<{ color: string; width: number; height: number }>;
+  iconBg: string;
+  iconColor: string;
+  route?: string;
+  action?: 'logout';
+  badge?: string;
+};
+
+const SETTINGS_SECTIONS: { titleKey: string; items: SettingsItem[] }[] = [
+  {
+    titleKey: 'hirer.settings.account',
+    items: [
+      {
+        id: 'edit-profile',
+        labelKey: 'hirer.settings.edit_profile',
+        icon: Edit,
+        iconBg: 'bg-lavender-400/10',
+        iconColor: colors.lavender[400],
+        route: '/hirer/profile/edit',
+      },
+      {
+        id: 'favorites',
+        labelKey: 'hirer.settings.favorites',
+        icon: Heart,
+        iconBg: 'bg-rose-400/10',
+        iconColor: colors.rose[400],
+        route: '/hirer/favorites',
+      },
+      {
+        id: 'payment-methods',
+        labelKey: 'hirer.settings.payment_methods',
+        icon: CreditCard,
+        iconBg: 'bg-teal-400/10',
+        iconColor: colors.teal[400],
+        route: '/hirer/payment-methods',
+      },
+    ],
+  },
+  {
+    titleKey: 'hirer.settings.preferences',
+    items: [
+      {
+        id: 'notifications',
+        labelKey: 'hirer.settings.notifications',
+        icon: Bell,
+        iconBg: 'bg-yellow-400/10',
+        iconColor: colors.yellow[400],
+        route: '/hirer/settings/notifications',
+      },
+      {
+        id: 'language',
+        labelKey: 'hirer.settings.language',
+        icon: Language,
+        iconBg: 'bg-lavender-400/10',
+        iconColor: colors.lavender[400],
+        route: '/hirer/settings/language',
+        badge: 'Tiếng Việt',
+      },
+      {
+        id: 'privacy',
+        labelKey: 'hirer.settings.privacy',
+        icon: Lock,
+        iconBg: 'bg-midnight/10',
+        iconColor: colors.midnight.DEFAULT,
+        route: '/hirer/settings/privacy',
+      },
+    ],
+  },
+  {
+    titleKey: 'hirer.settings.support_section',
+    items: [
+      {
+        id: 'help',
+        labelKey: 'hirer.settings.help_center',
+        icon: Help,
+        iconBg: 'bg-teal-400/10',
+        iconColor: colors.teal[400],
+        route: '/support',
+      },
+      {
+        id: 'safety',
+        labelKey: 'hirer.settings.safety_center',
+        icon: Shield,
+        iconBg: 'bg-rose-400/10',
+        iconColor: colors.rose[400],
+        route: '/safety',
+      },
+      {
+        id: 'rate-app',
+        labelKey: 'hirer.settings.rate_app',
+        icon: Star,
+        iconBg: 'bg-yellow-400/10',
+        iconColor: colors.yellow[400],
+      },
+    ],
+  },
+  {
+    titleKey: '',
+    items: [
+      {
+        id: 'logout',
+        labelKey: 'hirer.settings.logout',
+        icon: Logout,
+        iconBg: 'bg-danger-50',
+        iconColor: colors.danger[400],
+        action: 'logout',
+      },
+    ],
+  },
+];
+
+const MOCK_USER = {
+  name: 'Nguyễn Văn An',
+  email: 'an.nguyen@gmail.com',
+  avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400',
+  memberSince: 'January 2024',
+  totalBookings: 12,
+};
+
+function SettingsMenuItem({
+  item,
+  onPress,
+}: {
+  item: SettingsItem;
+  onPress: () => void;
+}) {
+  const { t } = useTranslation();
+  const isLogout = item.action === 'logout';
+
+  return (
+    <Pressable
+      onPress={onPress}
+      className="mb-2 flex-row items-center gap-4 rounded-xl bg-white p-4"
+    >
+      <View
+        className={`size-11 items-center justify-center rounded-xl ${item.iconBg}`}
+      >
+        <item.icon color={item.iconColor} width={22} height={22} />
+      </View>
+      <Text
+        className={`flex-1 text-base ${isLogout ? 'font-semibold text-danger-400' : 'text-midnight'}`}
+      >
+        {t(item.labelKey)}
+      </Text>
+      {item.badge && (
+        <Text className="text-sm text-text-tertiary">{item.badge}</Text>
+      )}
+      {!isLogout && (
+        <ArrowRight color={colors.text.tertiary} width={20} height={20} />
+      )}
+    </Pressable>
+  );
+}
+
+export default function HirerSettingsScreen() {
+  const router = useRouter();
+  const { t } = useTranslation();
+  const { signOut } = useAuth();
+
+  const handleBack = React.useCallback(() => {
+    router.back();
+  }, [router]);
+
+  const handleLogout = React.useCallback(() => {
+    Alert.alert(
+      t('hirer.settings.logout_title'),
+      t('hirer.settings.logout_message'),
+      [
+        {
+          text: t('common.cancel'),
+          style: 'cancel',
+        },
+        {
+          text: t('hirer.settings.logout'),
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await signOut();
+              // Navigation handled by _layout.tsx guard
+            } catch (error) {
+              console.error('Logout failed:', error);
+            }
+          },
+        },
+      ]
+    );
+  }, [router, t, signOut]);
+
+  const handleItemPress = React.useCallback(
+    (item: SettingsItem) => {
+      if (item.action === 'logout') {
+        handleLogout();
+      } else if (item.route) {
+        router.push(item.route as Href);
+      }
+    },
+    [router, handleLogout]
+  );
+
+  return (
+    <View className="flex-1 bg-warmwhite">
+      <FocusAwareStatusBar />
+
+      <SafeAreaView edges={['top']}>
+        {/* Header */}
+        <View className="flex-row items-center gap-4 px-4 py-3">
+          <Pressable
+            onPress={handleBack}
+            className="size-10 items-center justify-center"
+          >
+            <ArrowLeft color={colors.midnight.DEFAULT} width={24} height={24} />
+          </Pressable>
+          <Text
+            style={styles.headerTitle}
+            className="flex-1 text-xl text-midnight"
+          >
+            {t('hirer.settings.title')}
+          </Text>
+          <SocietyLogo color={colors.rose[400]} width={28} height={28} />
+        </View>
+      </SafeAreaView>
+
+      <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
+        {/* Profile Card */}
+        <MotiView
+          from={{ opacity: 0, translateY: 10 }}
+          animate={{ opacity: 1, translateY: 0 }}
+          transition={{ type: 'timing', duration: 400 }}
+          className="mx-4 mt-4 rounded-2xl bg-white p-5"
+        >
+          <View className="flex-row items-center gap-4">
+            <Image
+              source={{ uri: MOCK_USER.avatar }}
+              className="size-20 rounded-full"
+              contentFit="cover"
+            />
+            <View className="flex-1">
+              <Text style={styles.userName} className="text-xl text-midnight">
+                {MOCK_USER.name}
+              </Text>
+              <Text className="mt-1 text-sm text-text-secondary">
+                {MOCK_USER.email}
+              </Text>
+              <View className="mt-2 flex-row items-center gap-3">
+                <View className="rounded-full bg-lavender-400/10 px-3 py-1">
+                  <Text className="text-xs font-medium text-lavender-500">
+                    {MOCK_USER.totalBookings} {t('hirer.settings.bookings')}
+                  </Text>
+                </View>
+              </View>
+            </View>
+          </View>
+          <Pressable
+            onPress={() => router.push('/hirer/profile/edit' as Href)}
+            className="mt-4 flex-row items-center justify-center gap-2 rounded-xl bg-rose-400/10 py-3"
+          >
+            <Edit color={colors.rose[400]} width={18} height={18} />
+            <Text className="font-semibold text-rose-400">
+              {t('hirer.settings.view_profile')}
+            </Text>
+          </Pressable>
+        </MotiView>
+
+        {/* Settings Sections */}
+        {SETTINGS_SECTIONS.map((section, sectionIndex) => (
+          <MotiView
+            key={section.titleKey || `section-${sectionIndex}`}
+            from={{ opacity: 0, translateY: 10 }}
+            animate={{ opacity: 1, translateY: 0 }}
+            transition={{
+              type: 'timing',
+              duration: 400,
+              delay: 100 + sectionIndex * 50,
+            }}
+            className="px-4 pt-6"
+          >
+            {section.titleKey && (
+              <Text
+                style={styles.sectionTitle}
+                className="mb-3 text-sm uppercase tracking-wider text-text-tertiary"
+              >
+                {t(section.titleKey)}
+              </Text>
+            )}
+            {section.items.map((item) => (
+              <SettingsMenuItem
+                key={item.id}
+                item={item}
+                onPress={() => handleItemPress(item)}
+              />
+            ))}
+          </MotiView>
+        ))}
+
+        {/* App Info */}
+        <MotiView
+          from={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ type: 'timing', duration: 400, delay: 400 }}
+          className="items-center px-4 py-8"
+        >
+          <SocietyLogo color={colors.neutral[300]} width={40} height={40} />
+          <Text className="mt-3 text-sm text-text-tertiary">
+            Hireme v1.0.0
+          </Text>
+          <Text className="mt-1 text-xs text-text-tertiary">
+            {t('hirer.settings.member_since')} {MOCK_USER.memberSince}
+          </Text>
+        </MotiView>
+      </ScrollView>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  headerTitle: {
+    fontFamily: 'Urbanist_700Bold',
+  },
+  userName: {
+    fontFamily: 'Urbanist_700Bold',
+  },
+  sectionTitle: {
+    fontFamily: 'Urbanist_600SemiBold',
+  },
+});

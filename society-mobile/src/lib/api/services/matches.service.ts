@@ -26,27 +26,21 @@ export const matchesService = {
   /**
    * Get all matches for current user
    */
-  async getMatches(getToken: () => Promise<string | null>): Promise<Match[]> {
-    return apiClient.get('/matches', { getToken });
+  async getMatches(): Promise<Match[]> {
+    return apiClient.get('/matches');
   },
 
   /**
    * Swipe on a user profile
    */
-  async swipe(
-    data: SwipeData,
-    getToken: () => Promise<string | null>
-  ): Promise<{ match: boolean; matchId?: string }> {
-    return apiClient.post('/matches/swipe', data, { getToken });
+  async swipe(data: SwipeData): Promise<{ match: boolean; matchId?: string }> {
+    return apiClient.post('/matches/swipe', data);
   },
 
   /**
    * Get match details
    */
-  async getMatch(
-    matchId: string,
-    getToken: () => Promise<string | null>
-  ): Promise<Match> {
-    return apiClient.get(`/matches/${matchId}`, { getToken });
+  async getMatch(matchId: string): Promise<Match> {
+    return apiClient.get(`/matches/${matchId}`);
   },
 };

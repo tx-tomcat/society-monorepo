@@ -7,7 +7,7 @@ import { ProfileService } from './services/profile.service';
 import { SettingsService } from './services/settings.service';
 
 @Module({
-  controllers: [UsersController, ProfileController, SettingsController],
+  controllers: [ProfileController, SettingsController, UsersController],
   providers: [UsersService, ProfileService, SettingsService],
   exports: [UsersService, ProfileService, SettingsService],
 })

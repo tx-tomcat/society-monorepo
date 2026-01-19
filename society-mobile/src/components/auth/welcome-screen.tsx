@@ -1,220 +1,174 @@
 /* eslint-disable max-lines-per-function */
+import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MotiView } from 'moti';
 import React from 'react';
-import { Dimensions, Pressable, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { Pressable } from 'react-native';
 
 import {
-  Button,
   colors,
   FocusAwareStatusBar,
-  Image,
   SafeAreaView,
   Text,
   View,
 } from '@/components/ui';
-import {
-  Chart,
-  Heart,
-  ShieldCheck,
-  SocietyLogo,
-  Star,
-  Wallet,
-} from '@/components/ui/icons';
-
-const { width, height } = Dimensions.get('window');
+import { ShieldCheck, Star } from '@/components/ui/icons';
 
 export type WelcomeScreenProps = {
-  onGetStartedAsHirer: () => void;
-  onGetStartedAsCompanion: () => void;
-  onLoginAsHirer: () => void;
-  onLoginAsCompanion: () => void;
+  onLoginWithZalo: () => void;
+  isLoading?: boolean;
   testID?: string;
 };
 
 export function WelcomeScreen({
-  onGetStartedAsHirer,
-  onGetStartedAsCompanion,
-  onLoginAsHirer,
-  onLoginAsCompanion,
+  onLoginWithZalo,
+  isLoading = false,
   testID,
 }: WelcomeScreenProps) {
   const { t } = useTranslation();
 
-  const features = [
-    { icon: ShieldCheck, label: t('auth.welcome.features.verified_safe'), color: colors.teal[400] },
-    { icon: Star, label: t('auth.welcome.features.premium_quality'), color: colors.yellow[400] },
-    { icon: Heart, label: t('auth.welcome.features.trusted_community'), color: colors.rose[400] },
-  ];
-
   return (
-    <View className="flex-1" testID={testID}>
+    <View className="flex-1 bg-white" testID={testID}>
       <FocusAwareStatusBar />
 
-      {/* Background Image with Gradient Overlay */}
-      <View className="absolute inset-0">
-        <Image
-          source={{ uri: 'https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?w=800&q=80' }}
-          className="absolute inset-0"
-          style={{ width, height }}
-          contentFit="cover"
+      {/* Layered Background - Soft gradient with subtle warmth */}
+      <LinearGradient
+        colors={['#FFF8F6', '#FFF0ED', '#FFFBF9']}
+        locations={[0, 0.5, 1]}
+        className="absolute inset-0"
+      />
+
+      {/* Decorative Elements - Subtle geometric shapes */}
+      <View className="absolute inset-0 overflow-hidden" pointerEvents="none">
+        {/* Large soft circle - top right */}
+        <MotiView
+          from={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ type: 'timing', duration: 1200, delay: 200 }}
+          className="absolute -right-20 -top-24 size-72 rounded-full bg-rose-100 opacity-40"
         />
-        <LinearGradient
-          colors={['rgba(45, 42, 51, 0.3)', 'rgba(45, 42, 51, 0.7)', 'rgba(45, 42, 51, 0.95)']}
-          style={StyleSheet.absoluteFill}
+        {/* Medium circle - bottom left */}
+        <MotiView
+          from={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ type: 'timing', duration: 1200, delay: 400 }}
+          className="absolute -left-14 bottom-24 size-48 rounded-full bg-coral-100 opacity-30"
+        />
+        {/* Small accent - center */}
+        <MotiView
+          from={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ type: 'timing', duration: 800, delay: 600 }}
+          className="absolute right-10 top-1/3 h-14 w-px bg-rose-200 opacity-50"
         />
       </View>
 
       <SafeAreaView edges={['top', 'bottom']} className="flex-1">
-        <View className="flex-1 px-6">
-          {/* Logo & Brand */}
+        <View className="flex-1 px-8 pb-10 pt-16">
+          {/* Logo & Brand Identity */}
           <MotiView
-            from={{ opacity: 0, translateY: -20 }}
+            from={{ opacity: 0, translateY: -30 }}
             animate={{ opacity: 1, translateY: 0 }}
-            transition={{ type: 'timing', duration: 600 }}
-            className="mt-12 items-center"
+            transition={{ type: 'timing', duration: 800, delay: 100 }}
+            className="items-center"
           >
-            <View className="mb-4 size-20 items-center justify-center rounded-3xl bg-white/10">
-              <SocietyLogo color={colors.rose[400]} width={48} height={48} />
-            </View>
-            <Text style={styles.brandName} className="text-4xl text-white">
-              {t('auth.welcome.brand_name')}
-            </Text>
-            <Text className="mt-2 text-center text-lg text-white/80">
+            {/* Premium Logo Container */}
+            <Image
+              source={require('../../../assets/logo.png')}
+              style={{ width: 200, height: 200 }}
+            />
+
+            {/* Elegant divider */}
+            <View className="my-4 h-0.5 w-10 rounded-sm bg-rose-300" />
+
+            {/* Tagline */}
+            <Text className="font-urbanist-medium text-sm uppercase tracking-widest text-gray-400">
               {t('auth.welcome.tagline')}
             </Text>
           </MotiView>
 
-          {/* Hero Content */}
+          {/* Hero Section - Central Message */}
           <MotiView
-            from={{ opacity: 0, translateY: 30 }}
-            animate={{ opacity: 1, translateY: 0 }}
-            transition={{ type: 'timing', duration: 600, delay: 200 }}
-            className="mt-auto"
+            from={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ type: 'timing', duration: 800, delay: 400 }}
+            className="mt-12 flex-1 justify-center"
           >
-            <Text style={styles.heroTitle} className="text-center text-3xl text-white">
+            <Text className="mb-4 text-center font-urbanist-bold text-3xl leading-10 text-midnight">
               {t('auth.welcome.hero_title')}
             </Text>
-            <Text className="mt-4 text-center text-base leading-relaxed text-white/70">
+            <Text className="px-2 text-center font-urbanist text-base leading-6 text-gray-500">
               {t('auth.welcome.hero_subtitle')}
             </Text>
-          </MotiView>
 
-          {/* Feature Highlights */}
-          <MotiView
-            from={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ type: 'timing', duration: 600, delay: 400 }}
-            className="mt-8 flex-row justify-center gap-6"
-          >
-            {features.map((feature, index) => (
-              <MotiView
-                key={feature.label}
-                from={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ type: 'timing', duration: 400, delay: 500 + index * 100 }}
-                className="items-center"
-              >
-                <View className="mb-2 size-12 items-center justify-center rounded-full bg-white/10">
-                  <feature.icon color={feature.color} width={24} height={24} />
-                </View>
-                <Text className="text-center text-xs text-white/70">{feature.label}</Text>
-              </MotiView>
-            ))}
-          </MotiView>
-
-          {/* User Type Selection */}
-          <MotiView
-            from={{ opacity: 0, translateY: 20 }}
-            animate={{ opacity: 1, translateY: 0 }}
-            transition={{ type: 'timing', duration: 600, delay: 600 }}
-            className="mb-6 mt-10 gap-4"
-          >
-            {/* Hirer Button (Primary) */}
-            <Button
-              label={t('auth.welcome.find_companion')}
-              onPress={onGetStartedAsHirer}
-              variant="default"
-              size="lg"
-              fullWidth
-              testID={testID ? `${testID}-hirer-cta` : undefined}
-            />
-
-            {/* Companion Button (Secondary) */}
-            <Pressable
-              onPress={onGetStartedAsCompanion}
-              className="flex-row items-center justify-center gap-3 rounded-2xl border border-lavender-400/50 bg-lavender-400/10 py-4"
-              testID={testID ? `${testID}-companion-cta` : undefined}
-            >
-              <View className="flex-row items-center gap-2">
-                <Wallet color={colors.lavender[400]} width={20} height={20} />
-                <Text className="text-base font-semibold text-lavender-400">
-                  {t('auth.welcome.become_companion')}
+            {/* Trust Indicators - Minimal and Elegant */}
+            <View className="mt-7 flex-row items-center justify-center gap-4">
+              <View className="flex-row items-center gap-1.5">
+                <ShieldCheck color={colors.teal[400]} width={18} height={18} />
+                <Text className="font-urbanist-medium text-sm text-gray-400">
+                  {t('auth.welcome.features.verified_safe')}
                 </Text>
               </View>
-              <View className="rounded-full bg-lavender-400/20 px-2 py-0.5">
-                <Text className="text-xs font-medium text-lavender-400">{t('auth.welcome.earn_money')}</Text>
+              <View className="size-1 rounded-full bg-gray-200" />
+              <View className="flex-row items-center gap-1.5">
+                <Star color={colors.yellow[500]} width={18} height={18} />
+                <Text className="font-urbanist-medium text-sm text-gray-400">
+                  {t('auth.welcome.features.premium_quality')}
+                </Text>
               </View>
-            </Pressable>
+            </View>
           </MotiView>
 
-          {/* Login Links */}
+          {/* Bottom Actions - Floating Card Style */}
           <MotiView
-            from={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ type: 'timing', duration: 500, delay: 800 }}
-            className="mb-4 flex-row justify-center gap-6"
+            from={{ opacity: 0, translateY: 40 }}
+            animate={{ opacity: 1, translateY: 0 }}
+            transition={{ type: 'timing', duration: 700, delay: 600 }}
           >
-            <Pressable
-              onPress={onLoginAsHirer}
-              testID={testID ? `${testID}-hirer-login` : undefined}
-            >
-              <Text className="text-sm text-white/60">
-                {t('auth.welcome.hirer_login')} <Text className="font-semibold text-rose-400">{t('auth.welcome.sign_in')}</Text>
-              </Text>
-            </Pressable>
-            <View className="h-4 w-px bg-white/30" />
-            <Pressable
-              onPress={onLoginAsCompanion}
-              testID={testID ? `${testID}-companion-login` : undefined}
-            >
-              <Text className="text-sm text-white/60">
-                {t('auth.welcome.companion_login')} <Text className="font-semibold text-lavender-400">{t('auth.welcome.sign_in')}</Text>
-              </Text>
-            </Pressable>
-          </MotiView>
+            {/* Premium Card Container */}
+            <View className="rounded-3xl bg-white p-6 shadow-lg">
+              {/* Zalo Login Button - Premium styling */}
+              <Pressable
+                onPress={onLoginWithZalo}
+                disabled={isLoading}
+                className={`overflow-hidden rounded-2xl bg-[#0068FF] active:scale-[0.985] active:opacity-90 ${isLoading ? 'opacity-60' : ''}`}
+                testID={testID ? `${testID}-zalo-login` : undefined}
+              >
+                <View className="flex-row items-center justify-center gap-3 px-6 py-4">
+                  <Image
+                    source={require('../../../assets/zalo.svg')}
+                    style={{ width: 48, height: 48 }}
+                  />
+                  <Text className="font-urbanist-bold text-lg tracking-wide text-white">
+                    {isLoading
+                      ? t('common.loading')
+                      : t('auth.continue_with_zalo')}
+                  </Text>
+                </View>
+              </Pressable>
 
-          {/* Trust badges */}
-          <MotiView
-            from={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ type: 'timing', duration: 500, delay: 900 }}
-            className="flex-row items-center justify-center gap-4"
-          >
-            <View className="flex-row items-center gap-1">
-              <ShieldCheck color={colors.teal[400]} width={12} height={12} />
-              <Text className="text-xs text-white/50">{t('auth.welcome.id_verified')}</Text>
+              {/* Terms - Refined typography */}
+              <Text className="mt-4 text-center font-urbanist text-xs leading-5 text-gray-400">
+                {t('auth.terms_agreement')}
+              </Text>
             </View>
-            <View className="size-1 rounded-full bg-white/30" />
-            <View className="flex-row items-center gap-1">
-              <Chart color={colors.yellow[400]} width={12} height={12} />
-              <Text className="text-xs text-white/50">{t('auth.welcome.users_count')}</Text>
-            </View>
+
+            {/* User count badge */}
+            <MotiView
+              from={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ type: 'timing', duration: 500, delay: 900 }}
+              className="mt-5 flex-row items-center justify-center gap-2"
+            >
+              <View className="size-2 rounded-full bg-teal-400" />
+              <Text className="font-urbanist-medium text-sm text-gray-500">
+                {t('auth.welcome.users_count')}
+              </Text>
+            </MotiView>
           </MotiView>
         </View>
       </SafeAreaView>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  brandName: {
-    fontFamily: 'Urbanist_700Bold',
-    letterSpacing: 1,
-  },
-  heroTitle: {
-    fontFamily: 'Urbanist_700Bold',
-    lineHeight: 40,
-  },
-});

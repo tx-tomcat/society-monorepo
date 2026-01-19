@@ -16,7 +16,12 @@ export function Trash({ color = '#FF5757', ...props }: SvgProps) {
         stroke={color}
         strokeWidth={2}
       />
-      <Path d="M10 10V17M14 10V17" stroke={color} strokeWidth={2} strokeLinecap="round" />
+      <Path
+        d="M10 10V17M14 10V17"
+        stroke={color}
+        strokeWidth={2}
+        strokeLinecap="round"
+      />
     </Svg>
   );
 }

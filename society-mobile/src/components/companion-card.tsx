@@ -1,12 +1,13 @@
 /* eslint-disable max-lines-per-function */
 import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View as RNView } from 'react-native';
 import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 import { tv } from 'tailwind-variants';
 
-import { Image, Text, View } from '@/components/ui';
+import { colors, Image, Text, View } from '@/components/ui';
 import { Badge } from '@/components/ui/badge';
-import { ShieldCheck, Star, MapPin, OnlineDot } from '@/components/ui/icons';
+import { MapPin, OnlineDot, ShieldCheck, Star, VerifiedBadge } from '@/components/ui/icons';
 import { formatVND } from '@/lib/utils';
 
 const companionCard = tv({
@@ -64,8 +65,58 @@ export function CompanionCard({
   variant = 'default',
   testID,
 }: Props) {
+  const { t } = useTranslation();
   const styles = React.useMemo(() => companionCard(), []);
 
+  // Compact variant - row-based layout matching wireframe
+  if (variant === 'compact') {
+    return (
+      <Pressable onPress={onPress} testID={testID}>
+        <View className="flex-row items-center gap-3 rounded-xl border border-border-light bg-white p-3">
+          {/* Avatar */}
+          <Image
+            source={{ uri: companion.image }}
+            className="size-12 rounded-full"
+            contentFit="cover"
+            testID={testID ? `${testID}-image` : undefined}
+          />
+
+          {/* Info */}
+          <View className="flex-1">
+            <View className="flex-row items-center gap-1">
+              <Text className="text-sm font-semibold text-midnight">
+                {companion.name}
+              </Text>
+              {companion.isVerified && (
+                <VerifiedBadge color={colors.teal[400]} width={14} height={14} />
+              )}
+            </View>
+            <Text className="text-xs text-text-secondary">
+              ⭐ {companion.rating.toFixed(1)} · {t('hirer.home.bookings_count', { count: companion.reviewCount })}
+            </Text>
+          </View>
+
+          {/* Price & Book */}
+          <View className="items-end">
+            <Text className="text-sm font-semibold text-teal-400">
+              {formatVND(companion.pricePerHour)}/hr
+            </Text>
+            {onBookPress && (
+              <Pressable
+                onPress={onBookPress}
+                className="mt-1 rounded-lg bg-teal-400 px-3 py-1"
+                testID={testID ? `${testID}-book-button` : undefined}
+              >
+                <Text className="text-xs font-semibold text-white">Book</Text>
+              </Pressable>
+            )}
+          </View>
+        </View>
+      </Pressable>
+    );
+  }
+
+  // Default variant - full card with image
   return (
     <Pressable onPress={onPress} testID={testID}>
       <View className={styles.container()}>
@@ -95,7 +146,7 @@ export function CompanionCard({
           {companion.isOnline && (
             <View className={styles.onlineIndicator()}>
               <Badge
-                label="Online"
+                label={t('hirer.companion_card.online')}
                 variant="online"
                 size="sm"
                 icon={<OnlineDot color="#FFFFFF" width={8} height={8} />}
@@ -107,7 +158,7 @@ export function CompanionCard({
           {companion.isVerified && (
             <View className={styles.verifiedBadge()}>
               <Badge
-                label="Verified"
+                label={t('hirer.companion_card.verified')}
                 variant="verified"
                 size="sm"
                 icon={<ShieldCheck color="#FFFFFF" width={12} height={12} />}
@@ -122,7 +173,8 @@ export function CompanionCard({
           <View className={styles.header()}>
             <View className={styles.nameContainer()}>
               <Text className={styles.name()}>
-                {companion.name}, {companion.age}
+                {companion.name}
+                {companion.age > 0 && `, ${companion.age}`}
               </Text>
             </View>
             <View className={styles.ratingContainer()}>
@@ -159,19 +211,23 @@ export function CompanionCard({
               <Text className={styles.price()}>
                 {formatVND(companion.pricePerHour)}
               </Text>
-              <Text className={styles.priceUnit()}>/hour</Text>
+              <Text className={styles.priceUnit()}>
+                {t('hirer.companion_card.per_hour')}
+              </Text>
             </View>
           </View>
 
           {/* Book Button */}
-          {variant === 'default' && onBookPress && (
+          {onBookPress && (
             <Pressable
               className={styles.bookButton()}
               onPress={onBookPress}
               testID={testID ? `${testID}-book-button` : undefined}
             >
               <RNView className="items-center rounded-full bg-rose-400 py-3">
-                <Text className="text-base font-bold text-white">Book Now</Text>
+                <Text className="text-base font-bold text-white">
+                  {t('hirer.companion_card.book_now')}
+                </Text>
               </RNView>
             </Pressable>
           )}

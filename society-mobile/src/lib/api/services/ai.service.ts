@@ -23,38 +23,25 @@ export const aiService = {
   /**
    * Send message to AI chat
    */
-  async chat(
-    message: string,
-    getToken: () => Promise<string | null>
-  ): Promise<ChatResponse> {
-    return apiClient.post('/ai/chat', { message }, { getToken });
+  async chat(message: string): Promise<ChatResponse> {
+    return apiClient.post('/ai/chat', { message });
   },
 
   /**
    * Get AI-suggested replies for an incoming message
    */
-  async suggestReplies(
-    incomingMessage: string,
-    getToken: () => Promise<string | null>
-  ): Promise<SuggestRepliesResponse> {
-    return apiClient.post(
-      '/ai/suggest-replies',
-      { incomingMessage },
-      { getToken }
-    );
+  async suggestReplies(incomingMessage: string): Promise<SuggestRepliesResponse> {
+    return apiClient.post('/ai/suggest-replies', { incomingMessage });
   },
 
   /**
    * Generate AI profile suggestions
    */
-  async generateProfileSuggestions(
-    userData: {
-      interests?: string[];
-      bio?: string;
-      location?: string;
-    },
-    getToken: () => Promise<string | null>
-  ): Promise<{ suggestions: string[] }> {
-    return apiClient.post('/ai/profile-suggestions', userData, { getToken });
+  async generateProfileSuggestions(userData: {
+    interests?: string[];
+    bio?: string;
+    location?: string;
+  }): Promise<{ suggestions: string[] }> {
+    return apiClient.post('/ai/profile-suggestions', userData);
   },
 };
