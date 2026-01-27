@@ -4,7 +4,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { MotiView } from 'moti';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, ScrollView, StyleSheet } from 'react-native';
+import { Pressable, ScrollView } from 'react-native';
 
 import {
   Badge,
@@ -27,6 +27,7 @@ import {
   Phone,
   Share,
 } from '@/components/ui/icons';
+import { useOccasion } from '@/lib/hooks';
 
 const MOCK_COMPANION = {
   id: '1',
@@ -35,21 +36,14 @@ const MOCK_COMPANION = {
   phone: '+84 xxx xxx xxx',
 };
 
-const OCCASION_LABELS: Record<string, string> = {
-  wedding: 'Wedding',
-  family: 'Family Event',
-  business: 'Business',
-  tet: 'Tết Celebration',
-  casual: 'Casual Outing',
-  party: 'Party',
-};
-
 export default function BookingConfirmationScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{
     bookingId: string;
     companionId: string;
-    occasion: string;
+    occasionId: string;
+    occasionName: string;
+    occasionEmoji: string;
     date: string;
     time: string;
     duration: string;
@@ -57,6 +51,11 @@ export default function BookingConfirmationScreen() {
     notes: string;
   }>();
   const { t } = useTranslation();
+
+  // Fetch occasion details if we have an ID but no name
+  const { data: occasionData } = useOccasion(params.occasionId || '');
+  const occasionName = params.occasionName || occasionData?.name || '-';
+  const occasionEmoji = params.occasionEmoji || occasionData?.emoji || '';
 
   const companion = MOCK_COMPANION;
   const duration = parseInt(params.duration || '3', 10);
@@ -128,10 +127,7 @@ export default function BookingConfirmationScreen() {
               <CheckCircle color="#FFFFFF" width={48} height={48} />
             </MotiView>
           </View>
-          <Text
-            style={styles.title}
-            className="mb-2 text-center text-2xl text-midnight"
-          >
+          <Text className="mb-2 text-center font-urbanist-bold text-2xl text-midnight">
             {t('hirer.confirmation.success_title')}
           </Text>
           <Text className="mb-4 text-center text-base text-text-secondary">
@@ -159,10 +155,7 @@ export default function BookingConfirmationScreen() {
               contentFit="cover"
             />
             <View className="flex-1">
-              <Text
-                style={styles.companionName}
-                className="text-lg text-midnight"
-              >
+              <Text className="font-urbanist-semibold text-lg text-midnight">
                 {companion.name}
               </Text>
               <View className="mt-1 flex-row items-center gap-1">
@@ -190,10 +183,7 @@ export default function BookingConfirmationScreen() {
                 <Text className="text-xs uppercase tracking-wide text-text-tertiary">
                   {t('hirer.confirmation.date_time')}
                 </Text>
-                <Text
-                  style={styles.detailValue}
-                  className="mt-1 text-base text-midnight"
-                >
+                <Text className="mt-1 font-urbanist-semibold text-base text-midnight">
                   {params.date ? formatDate(params.date) : '-'}
                 </Text>
                 <Text className="text-sm text-text-secondary">
@@ -211,8 +201,7 @@ export default function BookingConfirmationScreen() {
                   {t('hirer.confirmation.location')}
                 </Text>
                 <Text
-                  style={styles.detailValue}
-                  className="mt-1 text-base text-midnight"
+                  className="mt-1 font-urbanist-semibold text-base text-midnight"
                   numberOfLines={2}
                 >
                   {params.location || '-'}
@@ -228,11 +217,8 @@ export default function BookingConfirmationScreen() {
                 <Text className="text-xs uppercase tracking-wide text-text-tertiary">
                   {t('hirer.confirmation.occasion')}
                 </Text>
-                <Text
-                  style={styles.detailValue}
-                  className="mt-1 text-base text-midnight"
-                >
-                  {OCCASION_LABELS[params.occasion || 'casual']}
+                <Text className="mt-1 font-urbanist-semibold text-base text-midnight">
+                  {occasionEmoji} {occasionName}
                 </Text>
               </View>
             </View>
@@ -246,10 +232,7 @@ export default function BookingConfirmationScreen() {
           transition={{ type: 'timing', duration: 400, delay: 300 }}
           className="mx-4 mt-4 rounded-2xl bg-lavender-400/10 p-5"
         >
-          <Text
-            style={styles.sectionTitle}
-            className="mb-4 text-base text-midnight"
-          >
+          <Text className="mb-4 font-urbanist-semibold text-base text-midnight">
             {t('hirer.confirmation.whats_next')}
           </Text>
           <View className="gap-3">
@@ -320,18 +303,3 @@ export default function BookingConfirmationScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  title: {
-    fontFamily: 'Urbanist_700Bold',
-  },
-  companionName: {
-    fontFamily: 'Urbanist_600SemiBold',
-  },
-  sectionTitle: {
-    fontFamily: 'Urbanist_600SemiBold',
-  },
-  detailValue: {
-    fontFamily: 'Urbanist_600SemiBold',
-  },
-});

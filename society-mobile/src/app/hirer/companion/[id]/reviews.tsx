@@ -4,7 +4,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { MotiView } from 'moti';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, ScrollView, StyleSheet } from 'react-native';
+import { Pressable, ScrollView } from 'react-native';
 
 import {
   colors,
@@ -26,6 +26,13 @@ import {
   WeddingRings,
 } from '@/components/ui/icons';
 
+type OccasionInfo = {
+  id: string;
+  code: string;
+  emoji: string;
+  name: string;
+};
+
 type Review = {
   id: string;
   author: string;
@@ -33,29 +40,21 @@ type Review = {
   rating: number;
   date: string;
   comment: string;
-  occasion: string;
+  occasion: OccasionInfo | null;
   isVerifiedBooking: boolean;
 };
 
+// Fallback icon mapping for occasions without emoji
 const OCCASION_ICONS: Record<
   string,
   React.ComponentType<{ color: string; width: number; height: number }>
 > = {
-  wedding: WeddingRings,
-  family: Family,
-  business: Briefcase,
-  tet: MaiFlower,
-  casual: Coffee,
-  party: Confetti,
-};
-
-const OCCASION_LABELS: Record<string, string> = {
-  wedding: 'Wedding',
-  family: 'Family',
-  business: 'Business',
-  tet: 'Tết',
-  casual: 'Casual',
-  party: 'Party',
+  wedding_attendance: WeddingRings,
+  family_introduction: Family,
+  business_event: Briefcase,
+  tet_celebration: MaiFlower,
+  casual_outing: Coffee,
+  social_event: Confetti,
 };
 
 const RATING_FILTERS = ['all', '5', '4', '3', '2', '1'];
@@ -70,7 +69,7 @@ const MOCK_REVIEWS: Review[] = [
     date: '2 weeks ago',
     comment:
       "Minh Anh was absolutely wonderful at my sister's wedding. She arrived early, dressed elegantly, and made everyone feel comfortable. Her conversation skills are excellent and she navigated family dynamics with grace. Highly recommend for any formal event!",
-    occasion: 'wedding',
+    occasion: { id: '1', code: 'wedding_attendance', emoji: '💒', name: 'Wedding' },
     isVerifiedBooking: true,
   },
   {
@@ -82,7 +81,7 @@ const MOCK_REVIEWS: Review[] = [
     date: '1 month ago',
     comment:
       'Perfect companion for our corporate dinner. Eloquent, well-dressed, and great at conversation. She made a wonderful impression on our business partners. Will definitely book again for future events.',
-    occasion: 'business',
+    occasion: { id: '2', code: 'business_event', emoji: '💼', name: 'Business' },
     isVerifiedBooking: true,
   },
   {
@@ -94,7 +93,7 @@ const MOCK_REVIEWS: Review[] = [
     date: '1 month ago',
     comment:
       'Very professional and punctual. Made the family gathering much more enjoyable. Great personality and knew how to engage with everyone from grandparents to cousins.',
-    occasion: 'family',
+    occasion: { id: '3', code: 'family_introduction', emoji: '👨‍👩‍👧', name: 'Family' },
     isVerifiedBooking: true,
   },
   {
@@ -106,7 +105,7 @@ const MOCK_REVIEWS: Review[] = [
     date: '2 months ago',
     comment:
       'Booked for Tết celebration. She helped make our family reunion so much warmer. Everyone loved her, especially the elderly relatives. Such a genuine and warm person!',
-    occasion: 'tet',
+    occasion: { id: '4', code: 'tet_celebration', emoji: '🏮', name: 'Tết' },
     isVerifiedBooking: true,
   },
   {
@@ -118,7 +117,7 @@ const MOCK_REVIEWS: Review[] = [
     date: '2 months ago',
     comment:
       'Amazing experience! Minh Anh is professional, charming, and a wonderful conversationalist. She made everyone feel at ease and added such a positive energy to the event.',
-    occasion: 'party',
+    occasion: { id: '5', code: 'social_event', emoji: '🎉', name: 'Party' },
     isVerifiedBooking: true,
   },
   {
@@ -129,7 +128,7 @@ const MOCK_REVIEWS: Review[] = [
     date: '3 months ago',
     comment:
       'Good companion for a casual outing. Friendly, easy to talk to, and very presentable. Would recommend for anyone looking for pleasant company.',
-    occasion: 'casual',
+    occasion: { id: '6', code: 'casual_outing', emoji: '☕', name: 'Casual' },
     isVerifiedBooking: true,
   },
 ];
@@ -148,7 +147,8 @@ const MOCK_STATS = {
 
 function ReviewItem({ review }: { review: Review }) {
   const { t } = useTranslation();
-  const OccasionIcon = OCCASION_ICONS[review.occasion] || Calendar;
+  const occasionCode = review.occasion?.code || '';
+  const OccasionIcon = OCCASION_ICONS[occasionCode] || Calendar;
 
   return (
     <MotiView
@@ -166,7 +166,7 @@ function ReviewItem({ review }: { review: Review }) {
         />
         <View className="flex-1">
           <View className="flex-row items-center gap-2">
-            <Text style={styles.authorName} className="text-base text-midnight">
+            <Text className="font-urbanist-semibold text-base text-midnight">
               {review.author}
             </Text>
             {review.isVerifiedBooking && (
@@ -181,7 +181,7 @@ function ReviewItem({ review }: { review: Review }) {
         </View>
         <View className="flex-row items-center gap-1 rounded-full bg-yellow-400/10 px-3 py-1.5">
           <Star color={colors.yellow[400]} width={14} height={14} />
-          <Text style={styles.rating} className="text-sm text-midnight">
+          <Text className="font-urbanist-bold text-sm text-midnight">
             {review.rating}
           </Text>
         </View>
@@ -193,12 +193,18 @@ function ReviewItem({ review }: { review: Review }) {
       </Text>
 
       {/* Occasion Tag */}
-      <View className="flex-row items-center gap-1.5">
-        <OccasionIcon color={colors.lavender[400]} width={14} height={14} />
-        <Text className="text-xs font-medium text-lavender-500">
-          {OCCASION_LABELS[review.occasion] || review.occasion}
-        </Text>
-      </View>
+      {review.occasion && (
+        <View className="flex-row items-center gap-1.5">
+          {review.occasion.emoji ? (
+            <Text className="text-sm">{review.occasion.emoji}</Text>
+          ) : (
+            <OccasionIcon color={colors.lavender[400]} width={14} height={14} />
+          )}
+          <Text className="text-xs font-medium text-lavender-500">
+            {review.occasion.name}
+          </Text>
+        </View>
+      )}
     </MotiView>
   );
 }
@@ -267,10 +273,7 @@ export default function CompanionReviewsScreen() {
           >
             <ArrowLeft color={colors.midnight.DEFAULT} width={24} height={24} />
           </Pressable>
-          <Text
-            style={styles.headerTitle}
-            className="flex-1 text-xl text-midnight"
-          >
+          <Text className="flex-1 font-urbanist-bold text-xl text-midnight">
             {t('hirer.reviews.title')}
           </Text>
         </View>
@@ -281,10 +284,7 @@ export default function CompanionReviewsScreen() {
         <View className="flex-row gap-6">
           {/* Average Rating */}
           <View className="items-center">
-            <Text
-              style={styles.averageRating}
-              className="text-5xl text-midnight"
-            >
+            <Text className="font-urbanist-bold text-5xl text-midnight">
               {MOCK_STATS.averageRating}
             </Text>
             <View className="mt-1 flex-row">
@@ -372,10 +372,7 @@ export default function CompanionReviewsScreen() {
             <View className="mb-4 size-16 items-center justify-center rounded-full bg-neutral-100">
               <Star color={colors.neutral[400]} width={28} height={28} />
             </View>
-            <Text
-              style={styles.emptyTitle}
-              className="text-center text-lg text-midnight"
-            >
+            <Text className="text-center font-urbanist-semibold text-lg text-midnight">
               {t('hirer.reviews.no_reviews')}
             </Text>
             <Text className="mt-2 text-center text-sm text-text-tertiary">
@@ -388,20 +385,3 @@ export default function CompanionReviewsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  headerTitle: {
-    fontFamily: 'Urbanist_700Bold',
-  },
-  averageRating: {
-    fontFamily: 'Urbanist_700Bold',
-  },
-  authorName: {
-    fontFamily: 'Urbanist_600SemiBold',
-  },
-  rating: {
-    fontFamily: 'Urbanist_700Bold',
-  },
-  emptyTitle: {
-    fontFamily: 'Urbanist_600SemiBold',
-  },
-});

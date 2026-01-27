@@ -24,18 +24,23 @@ import {
 } from '@expo-google-fonts/urbanist';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { ThemeProvider } from '@react-navigation/native';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import {
+  QueryClient,
+  QueryClientProvider,
+  focusManager
+} from '@tanstack/react-query';
 import { Slot, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import React from 'react';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import type { AppStateStatus } from 'react-native';
+import { ActivityIndicator, AppState, Platform, View } from 'react-native';
 import FlashMessage from 'react-native-flash-message';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { colors } from '@/components/ui';
-import { SocietyLogo } from '@/components/ui/icons';
+import { HiremeLogo } from '@/components/ui/icons';
 import { loadSelectedTheme } from '@/lib';
 import { useAuth, useCurrentUser } from '@/lib/hooks';
 import { useThemeConfig } from '@/lib/use-theme-config';
@@ -46,13 +51,53 @@ export const unstable_settings = {
   initialRouteName: '(app)',
 };
 
-// React Query client
+// ============================================
+// TanStack Query - Mobile-Optimized Configuration
+// ============================================
+// Optimized for bandwidth efficiency, battery life, and UX
+
+// Configure refetch on app focus (React Native specific)
+function onAppStateChange(status: AppStateStatus) {
+  if (Platform.OS !== 'web') {
+    focusManager.setFocused(status === 'active');
+  }
+}
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
+      // Retry configuration - exponential backoff for transient failures
       retry: 2,
+      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+
+      // Stale time - how long data is considered fresh (no refetch)
+      // 5 minutes is good for most data; specific queries can override
       staleTime: 5 * 60 * 1000, // 5 minutes
-      gcTime: 10 * 60 * 1000, // 10 minutes
+
+      // Garbage collection time - how long inactive data stays in cache
+      gcTime: 30 * 60 * 1000, // 30 minutes (increased for better offline experience)
+
+      // Refetch behaviors - optimized for mobile battery/bandwidth
+      refetchOnMount: 'always', // Refetch if stale when component mounts
+      refetchOnWindowFocus: true, // Refetch when app comes to foreground
+      refetchOnReconnect: true, // Refetch when network reconnects
+
+      // Disable automatic background refetching (saves battery)
+      refetchInterval: false,
+
+      // Network mode - fetch only when online
+      networkMode: 'online',
+
+      // Structural sharing - reduces re-renders by reusing unchanged objects
+      structuralSharing: true,
+    },
+    mutations: {
+      // Retry mutations once on failure (careful with non-idempotent operations)
+      retry: 1,
+      retryDelay: 1000,
+
+      // Network mode - mutations only when online
+      networkMode: 'online',
     },
   },
 });
@@ -101,9 +146,15 @@ function InitialLayout() {
     if (isUserError) return true;
     if (!userData?.user) return false;
     const user = userData.user;
-    // User needs onboarding if they don't have a role or haven't completed their profile
-    // This matches the hasProfile check from the auth response
-    return !user.role || !userData.profile;
+    // User needs onboarding if they don't have a role
+    if (!user.role) return true;
+    // For COMPANION, they need a companion profile record
+    if (user.role === 'COMPANION') {
+      return !userData.profile;
+    }
+    // For HIRER, consider onboarding complete when they have gender and dateOfBirth
+    // (HirerProfile record is not required - it only contains optional fields)
+    return !user.gender || !user.dateOfBirth;
   }, [userData, isUserError]);
 
   // Get the appropriate onboarding route based on user role
@@ -117,6 +168,15 @@ function InitialLayout() {
       return '/companion/onboard/create-profile';
     }
     return '/hirer/onboarding/profile';
+  }, [userData]);
+
+  // Get the appropriate dashboard route based on user role
+  const getDashboardRoute = React.useCallback(() => {
+    if (!userData?.user?.role) return '/(app)';
+    if (userData.user.role === 'COMPANION') {
+      return '/companion/(app)';
+    }
+    return '/(app)';
   }, [userData]);
 
   // Handle auth-based routing
@@ -146,13 +206,13 @@ function InitialLayout() {
       // User is signed in but needs to complete onboarding
       router.replace(getOnboardingRoute());
     } else if (isSignedIn && !needsOnboarding && (isPublicRoute || isOnboardingRoute)) {
-      // User is signed in, profile complete, but on auth/onboarding route - redirect to app
-      router.replace('/(app)');
+      // User is signed in, profile complete, but on auth/onboarding route - redirect to role-specific dashboard
+      router.replace(getDashboardRoute());
     }
 
     // Mark navigation as ready after auth check
     setIsNavigationReady(true);
-  }, [isLoaded, isSignedIn, isUserLoading, needsOnboarding, segments, fontsLoaded, router, getOnboardingRoute]);
+  }, [isLoaded, isSignedIn, isUserLoading, needsOnboarding, segments, fontsLoaded, router, getOnboardingRoute, getDashboardRoute]);
 
   React.useEffect(() => {
     // Hide splash screen after navigation is ready
@@ -167,12 +227,12 @@ function InitialLayout() {
   // Show splash screen while loading or navigating
   if (!fontsLoaded || !isLoaded || !isNavigationReady || (isSignedIn && isUserLoading)) {
     return (
-      <View style={styles.splashContainer}>
-        <SocietyLogo color={colors.rose[400]} width={80} height={80} />
+      <View className="flex-1 items-center justify-center bg-warmwhite">
+        <HiremeLogo color={colors.rose[400]} width={80} height={80} />
         <ActivityIndicator
           size="small"
           color={colors.rose[400]}
-          style={styles.loader}
+          className="mt-6"
         />
       </View>
     );
@@ -182,6 +242,12 @@ function InitialLayout() {
 }
 
 export default function RootLayout() {
+  // Set up AppState listener for refetch on app focus (React Native specific)
+  React.useEffect(() => {
+    const subscription = AppState.addEventListener('change', onAppStateChange);
+    return () => subscription.remove();
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <Providers>
@@ -196,8 +262,7 @@ function Providers({ children }: { children: React.ReactNode }) {
   return (
     <SafeAreaProvider>
       <GestureHandlerRootView
-        style={styles.container}
-        className={theme.dark ? `dark` : undefined}
+        className={`flex-1 ${theme.dark ? 'dark' : ''}`}
       >
         <KeyboardProvider>
           <ThemeProvider value={theme}>
@@ -212,17 +277,3 @@ function Providers({ children }: { children: React.ReactNode }) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  splashContainer: {
-    flex: 1,
-    backgroundColor: colors.warmwhite.DEFAULT,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  loader: {
-    marginTop: 24,
-  },
-});

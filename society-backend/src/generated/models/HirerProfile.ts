@@ -43,10 +43,13 @@ export type HirerProfileSumAggregateOutputType = {
 export type HirerProfileMinAggregateOutputType = {
   id: string | null
   userId: string | null
+  province: string | null
+  district: string | null
   totalBookings: number | null
   totalSpent: number | null
   ratingAvg: runtime.Decimal | null
   ratingCount: number | null
+  deletedAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -54,10 +57,13 @@ export type HirerProfileMinAggregateOutputType = {
 export type HirerProfileMaxAggregateOutputType = {
   id: string | null
   userId: string | null
+  province: string | null
+  district: string | null
   totalBookings: number | null
   totalSpent: number | null
   ratingAvg: runtime.Decimal | null
   ratingCount: number | null
+  deletedAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -65,10 +71,13 @@ export type HirerProfileMaxAggregateOutputType = {
 export type HirerProfileCountAggregateOutputType = {
   id: number
   userId: number
+  province: number
+  district: number
   totalBookings: number
   totalSpent: number
   ratingAvg: number
   ratingCount: number
+  deletedAt: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -92,10 +101,13 @@ export type HirerProfileSumAggregateInputType = {
 export type HirerProfileMinAggregateInputType = {
   id?: true
   userId?: true
+  province?: true
+  district?: true
   totalBookings?: true
   totalSpent?: true
   ratingAvg?: true
   ratingCount?: true
+  deletedAt?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -103,10 +115,13 @@ export type HirerProfileMinAggregateInputType = {
 export type HirerProfileMaxAggregateInputType = {
   id?: true
   userId?: true
+  province?: true
+  district?: true
   totalBookings?: true
   totalSpent?: true
   ratingAvg?: true
   ratingCount?: true
+  deletedAt?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -114,10 +129,13 @@ export type HirerProfileMaxAggregateInputType = {
 export type HirerProfileCountAggregateInputType = {
   id?: true
   userId?: true
+  province?: true
+  district?: true
   totalBookings?: true
   totalSpent?: true
   ratingAvg?: true
   ratingCount?: true
+  deletedAt?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -212,10 +230,13 @@ export type HirerProfileGroupByArgs<ExtArgs extends runtime.Types.Extensions.Int
 export type HirerProfileGroupByOutputType = {
   id: string
   userId: string
+  province: string | null
+  district: string | null
   totalBookings: number
   totalSpent: number
   ratingAvg: runtime.Decimal
   ratingCount: number
+  deletedAt: Date | null
   createdAt: Date
   updatedAt: Date
   _count: HirerProfileCountAggregateOutputType | null
@@ -246,10 +267,13 @@ export type HirerProfileWhereInput = {
   NOT?: Prisma.HirerProfileWhereInput | Prisma.HirerProfileWhereInput[]
   id?: Prisma.UuidFilter<"HirerProfile"> | string
   userId?: Prisma.UuidFilter<"HirerProfile"> | string
+  province?: Prisma.StringNullableFilter<"HirerProfile"> | string | null
+  district?: Prisma.StringNullableFilter<"HirerProfile"> | string | null
   totalBookings?: Prisma.IntFilter<"HirerProfile"> | number
   totalSpent?: Prisma.IntFilter<"HirerProfile"> | number
   ratingAvg?: Prisma.DecimalFilter<"HirerProfile"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   ratingCount?: Prisma.IntFilter<"HirerProfile"> | number
+  deletedAt?: Prisma.DateTimeNullableFilter<"HirerProfile"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"HirerProfile"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"HirerProfile"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
@@ -258,10 +282,13 @@ export type HirerProfileWhereInput = {
 export type HirerProfileOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  province?: Prisma.SortOrderInput | Prisma.SortOrder
+  district?: Prisma.SortOrderInput | Prisma.SortOrder
   totalBookings?: Prisma.SortOrder
   totalSpent?: Prisma.SortOrder
   ratingAvg?: Prisma.SortOrder
   ratingCount?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
@@ -273,10 +300,13 @@ export type HirerProfileWhereUniqueInput = Prisma.AtLeast<{
   AND?: Prisma.HirerProfileWhereInput | Prisma.HirerProfileWhereInput[]
   OR?: Prisma.HirerProfileWhereInput[]
   NOT?: Prisma.HirerProfileWhereInput | Prisma.HirerProfileWhereInput[]
+  province?: Prisma.StringNullableFilter<"HirerProfile"> | string | null
+  district?: Prisma.StringNullableFilter<"HirerProfile"> | string | null
   totalBookings?: Prisma.IntFilter<"HirerProfile"> | number
   totalSpent?: Prisma.IntFilter<"HirerProfile"> | number
   ratingAvg?: Prisma.DecimalFilter<"HirerProfile"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   ratingCount?: Prisma.IntFilter<"HirerProfile"> | number
+  deletedAt?: Prisma.DateTimeNullableFilter<"HirerProfile"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"HirerProfile"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"HirerProfile"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
@@ -285,10 +315,13 @@ export type HirerProfileWhereUniqueInput = Prisma.AtLeast<{
 export type HirerProfileOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  province?: Prisma.SortOrderInput | Prisma.SortOrder
+  district?: Prisma.SortOrderInput | Prisma.SortOrder
   totalBookings?: Prisma.SortOrder
   totalSpent?: Prisma.SortOrder
   ratingAvg?: Prisma.SortOrder
   ratingCount?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.HirerProfileCountOrderByAggregateInput
@@ -304,20 +337,26 @@ export type HirerProfileScalarWhereWithAggregatesInput = {
   NOT?: Prisma.HirerProfileScalarWhereWithAggregatesInput | Prisma.HirerProfileScalarWhereWithAggregatesInput[]
   id?: Prisma.UuidWithAggregatesFilter<"HirerProfile"> | string
   userId?: Prisma.UuidWithAggregatesFilter<"HirerProfile"> | string
+  province?: Prisma.StringNullableWithAggregatesFilter<"HirerProfile"> | string | null
+  district?: Prisma.StringNullableWithAggregatesFilter<"HirerProfile"> | string | null
   totalBookings?: Prisma.IntWithAggregatesFilter<"HirerProfile"> | number
   totalSpent?: Prisma.IntWithAggregatesFilter<"HirerProfile"> | number
   ratingAvg?: Prisma.DecimalWithAggregatesFilter<"HirerProfile"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   ratingCount?: Prisma.IntWithAggregatesFilter<"HirerProfile"> | number
+  deletedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"HirerProfile"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"HirerProfile"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"HirerProfile"> | Date | string
 }
 
 export type HirerProfileCreateInput = {
   id?: string
+  province?: string | null
+  district?: string | null
   totalBookings?: number
   totalSpent?: number
   ratingAvg?: runtime.Decimal | runtime.DecimalJsLike | number | string
   ratingCount?: number
+  deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutHirerProfileInput
@@ -326,20 +365,26 @@ export type HirerProfileCreateInput = {
 export type HirerProfileUncheckedCreateInput = {
   id?: string
   userId: string
+  province?: string | null
+  district?: string | null
   totalBookings?: number
   totalSpent?: number
   ratingAvg?: runtime.Decimal | runtime.DecimalJsLike | number | string
   ratingCount?: number
+  deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
 
 export type HirerProfileUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  province?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totalBookings?: Prisma.IntFieldUpdateOperationsInput | number
   totalSpent?: Prisma.IntFieldUpdateOperationsInput | number
   ratingAvg?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   ratingCount?: Prisma.IntFieldUpdateOperationsInput | number
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutHirerProfileNestedInput
@@ -348,10 +393,13 @@ export type HirerProfileUpdateInput = {
 export type HirerProfileUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
+  province?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totalBookings?: Prisma.IntFieldUpdateOperationsInput | number
   totalSpent?: Prisma.IntFieldUpdateOperationsInput | number
   ratingAvg?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   ratingCount?: Prisma.IntFieldUpdateOperationsInput | number
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -359,20 +407,26 @@ export type HirerProfileUncheckedUpdateInput = {
 export type HirerProfileCreateManyInput = {
   id?: string
   userId: string
+  province?: string | null
+  district?: string | null
   totalBookings?: number
   totalSpent?: number
   ratingAvg?: runtime.Decimal | runtime.DecimalJsLike | number | string
   ratingCount?: number
+  deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
 
 export type HirerProfileUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  province?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totalBookings?: Prisma.IntFieldUpdateOperationsInput | number
   totalSpent?: Prisma.IntFieldUpdateOperationsInput | number
   ratingAvg?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   ratingCount?: Prisma.IntFieldUpdateOperationsInput | number
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -380,10 +434,13 @@ export type HirerProfileUpdateManyMutationInput = {
 export type HirerProfileUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
+  province?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totalBookings?: Prisma.IntFieldUpdateOperationsInput | number
   totalSpent?: Prisma.IntFieldUpdateOperationsInput | number
   ratingAvg?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   ratingCount?: Prisma.IntFieldUpdateOperationsInput | number
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -396,10 +453,13 @@ export type HirerProfileNullableScalarRelationFilter = {
 export type HirerProfileCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  province?: Prisma.SortOrder
+  district?: Prisma.SortOrder
   totalBookings?: Prisma.SortOrder
   totalSpent?: Prisma.SortOrder
   ratingAvg?: Prisma.SortOrder
   ratingCount?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -414,10 +474,13 @@ export type HirerProfileAvgOrderByAggregateInput = {
 export type HirerProfileMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  province?: Prisma.SortOrder
+  district?: Prisma.SortOrder
   totalBookings?: Prisma.SortOrder
   totalSpent?: Prisma.SortOrder
   ratingAvg?: Prisma.SortOrder
   ratingCount?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -425,10 +488,13 @@ export type HirerProfileMaxOrderByAggregateInput = {
 export type HirerProfileMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  province?: Prisma.SortOrder
+  district?: Prisma.SortOrder
   totalBookings?: Prisma.SortOrder
   totalSpent?: Prisma.SortOrder
   ratingAvg?: Prisma.SortOrder
   ratingCount?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -474,20 +540,26 @@ export type HirerProfileUncheckedUpdateOneWithoutUserNestedInput = {
 
 export type HirerProfileCreateWithoutUserInput = {
   id?: string
+  province?: string | null
+  district?: string | null
   totalBookings?: number
   totalSpent?: number
   ratingAvg?: runtime.Decimal | runtime.DecimalJsLike | number | string
   ratingCount?: number
+  deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
 
 export type HirerProfileUncheckedCreateWithoutUserInput = {
   id?: string
+  province?: string | null
+  district?: string | null
   totalBookings?: number
   totalSpent?: number
   ratingAvg?: runtime.Decimal | runtime.DecimalJsLike | number | string
   ratingCount?: number
+  deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -510,20 +582,26 @@ export type HirerProfileUpdateToOneWithWhereWithoutUserInput = {
 
 export type HirerProfileUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  province?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totalBookings?: Prisma.IntFieldUpdateOperationsInput | number
   totalSpent?: Prisma.IntFieldUpdateOperationsInput | number
   ratingAvg?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   ratingCount?: Prisma.IntFieldUpdateOperationsInput | number
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type HirerProfileUncheckedUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  province?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   totalBookings?: Prisma.IntFieldUpdateOperationsInput | number
   totalSpent?: Prisma.IntFieldUpdateOperationsInput | number
   ratingAvg?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   ratingCount?: Prisma.IntFieldUpdateOperationsInput | number
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -533,10 +611,13 @@ export type HirerProfileUncheckedUpdateWithoutUserInput = {
 export type HirerProfileSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   userId?: boolean
+  province?: boolean
+  district?: boolean
   totalBookings?: boolean
   totalSpent?: boolean
   ratingAvg?: boolean
   ratingCount?: boolean
+  deletedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -545,10 +626,13 @@ export type HirerProfileSelect<ExtArgs extends runtime.Types.Extensions.Internal
 export type HirerProfileSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   userId?: boolean
+  province?: boolean
+  district?: boolean
   totalBookings?: boolean
   totalSpent?: boolean
   ratingAvg?: boolean
   ratingCount?: boolean
+  deletedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -557,10 +641,13 @@ export type HirerProfileSelectCreateManyAndReturn<ExtArgs extends runtime.Types.
 export type HirerProfileSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   userId?: boolean
+  province?: boolean
+  district?: boolean
   totalBookings?: boolean
   totalSpent?: boolean
   ratingAvg?: boolean
   ratingCount?: boolean
+  deletedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -569,15 +656,18 @@ export type HirerProfileSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.
 export type HirerProfileSelectScalar = {
   id?: boolean
   userId?: boolean
+  province?: boolean
+  district?: boolean
   totalBookings?: boolean
   totalSpent?: boolean
   ratingAvg?: boolean
   ratingCount?: boolean
+  deletedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type HirerProfileOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "totalBookings" | "totalSpent" | "ratingAvg" | "ratingCount" | "createdAt" | "updatedAt", ExtArgs["result"]["hirerProfile"]>
+export type HirerProfileOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "province" | "district" | "totalBookings" | "totalSpent" | "ratingAvg" | "ratingCount" | "deletedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["hirerProfile"]>
 export type HirerProfileInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
@@ -596,10 +686,13 @@ export type $HirerProfilePayload<ExtArgs extends runtime.Types.Extensions.Intern
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     userId: string
+    province: string | null
+    district: string | null
     totalBookings: number
     totalSpent: number
     ratingAvg: runtime.Decimal
     ratingCount: number
+    deletedAt: Date | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["hirerProfile"]>
@@ -1028,10 +1121,13 @@ export interface Prisma__HirerProfileClient<T, Null = never, ExtArgs extends run
 export interface HirerProfileFieldRefs {
   readonly id: Prisma.FieldRef<"HirerProfile", 'String'>
   readonly userId: Prisma.FieldRef<"HirerProfile", 'String'>
+  readonly province: Prisma.FieldRef<"HirerProfile", 'String'>
+  readonly district: Prisma.FieldRef<"HirerProfile", 'String'>
   readonly totalBookings: Prisma.FieldRef<"HirerProfile", 'Int'>
   readonly totalSpent: Prisma.FieldRef<"HirerProfile", 'Int'>
   readonly ratingAvg: Prisma.FieldRef<"HirerProfile", 'Decimal'>
   readonly ratingCount: Prisma.FieldRef<"HirerProfile", 'Int'>
+  readonly deletedAt: Prisma.FieldRef<"HirerProfile", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"HirerProfile", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"HirerProfile", 'DateTime'>
 }

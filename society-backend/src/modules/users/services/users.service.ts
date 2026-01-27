@@ -140,7 +140,6 @@ export class UsersService {
     const user = await this.prisma.user.update({
       where: { id: userId },
       data: {
-        fullName: updateData.fullName,
         avatarUrl: updateData.avatarUrl,
         gender: updateData.gender as Gender,
         dateOfBirth: updateData.dateOfBirth,

@@ -232,6 +232,7 @@ export type WithdrawalWhereInput = {
   status?: Prisma.EnumWithdrawalStatusFilter<"Withdrawal"> | $Enums.WithdrawalStatus
   requestedAt?: Prisma.DateTimeFilter<"Withdrawal"> | Date | string
   completedAt?: Prisma.DateTimeNullableFilter<"Withdrawal"> | Date | string | null
+  companion?: Prisma.XOR<Prisma.CompanionProfileScalarRelationFilter, Prisma.CompanionProfileWhereInput>
   bankAccount?: Prisma.XOR<Prisma.BankAccountScalarRelationFilter, Prisma.BankAccountWhereInput>
 }
 
@@ -243,6 +244,7 @@ export type WithdrawalOrderByWithRelationInput = {
   status?: Prisma.SortOrder
   requestedAt?: Prisma.SortOrder
   completedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  companion?: Prisma.CompanionProfileOrderByWithRelationInput
   bankAccount?: Prisma.BankAccountOrderByWithRelationInput
 }
 
@@ -257,6 +259,7 @@ export type WithdrawalWhereUniqueInput = Prisma.AtLeast<{
   status?: Prisma.EnumWithdrawalStatusFilter<"Withdrawal"> | $Enums.WithdrawalStatus
   requestedAt?: Prisma.DateTimeFilter<"Withdrawal"> | Date | string
   completedAt?: Prisma.DateTimeNullableFilter<"Withdrawal"> | Date | string | null
+  companion?: Prisma.XOR<Prisma.CompanionProfileScalarRelationFilter, Prisma.CompanionProfileWhereInput>
   bankAccount?: Prisma.XOR<Prisma.BankAccountScalarRelationFilter, Prisma.BankAccountWhereInput>
 }, "id">
 
@@ -290,11 +293,11 @@ export type WithdrawalScalarWhereWithAggregatesInput = {
 
 export type WithdrawalCreateInput = {
   id?: string
-  companionId: string
   amount: number
   status?: $Enums.WithdrawalStatus
   requestedAt?: Date | string
   completedAt?: Date | string | null
+  companion: Prisma.CompanionProfileCreateNestedOneWithoutWithdrawalsInput
   bankAccount: Prisma.BankAccountCreateNestedOneWithoutWithdrawalsInput
 }
 
@@ -310,11 +313,11 @@ export type WithdrawalUncheckedCreateInput = {
 
 export type WithdrawalUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  companionId?: Prisma.StringFieldUpdateOperationsInput | string
   amount?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumWithdrawalStatusFieldUpdateOperationsInput | $Enums.WithdrawalStatus
   requestedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  companion?: Prisma.CompanionProfileUpdateOneRequiredWithoutWithdrawalsNestedInput
   bankAccount?: Prisma.BankAccountUpdateOneRequiredWithoutWithdrawalsNestedInput
 }
 
@@ -340,7 +343,6 @@ export type WithdrawalCreateManyInput = {
 
 export type WithdrawalUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  companionId?: Prisma.StringFieldUpdateOperationsInput | string
   amount?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumWithdrawalStatusFieldUpdateOperationsInput | $Enums.WithdrawalStatus
   requestedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -405,6 +407,48 @@ export type WithdrawalSumOrderByAggregateInput = {
   amount?: Prisma.SortOrder
 }
 
+export type WithdrawalCreateNestedManyWithoutCompanionInput = {
+  create?: Prisma.XOR<Prisma.WithdrawalCreateWithoutCompanionInput, Prisma.WithdrawalUncheckedCreateWithoutCompanionInput> | Prisma.WithdrawalCreateWithoutCompanionInput[] | Prisma.WithdrawalUncheckedCreateWithoutCompanionInput[]
+  connectOrCreate?: Prisma.WithdrawalCreateOrConnectWithoutCompanionInput | Prisma.WithdrawalCreateOrConnectWithoutCompanionInput[]
+  createMany?: Prisma.WithdrawalCreateManyCompanionInputEnvelope
+  connect?: Prisma.WithdrawalWhereUniqueInput | Prisma.WithdrawalWhereUniqueInput[]
+}
+
+export type WithdrawalUncheckedCreateNestedManyWithoutCompanionInput = {
+  create?: Prisma.XOR<Prisma.WithdrawalCreateWithoutCompanionInput, Prisma.WithdrawalUncheckedCreateWithoutCompanionInput> | Prisma.WithdrawalCreateWithoutCompanionInput[] | Prisma.WithdrawalUncheckedCreateWithoutCompanionInput[]
+  connectOrCreate?: Prisma.WithdrawalCreateOrConnectWithoutCompanionInput | Prisma.WithdrawalCreateOrConnectWithoutCompanionInput[]
+  createMany?: Prisma.WithdrawalCreateManyCompanionInputEnvelope
+  connect?: Prisma.WithdrawalWhereUniqueInput | Prisma.WithdrawalWhereUniqueInput[]
+}
+
+export type WithdrawalUpdateManyWithoutCompanionNestedInput = {
+  create?: Prisma.XOR<Prisma.WithdrawalCreateWithoutCompanionInput, Prisma.WithdrawalUncheckedCreateWithoutCompanionInput> | Prisma.WithdrawalCreateWithoutCompanionInput[] | Prisma.WithdrawalUncheckedCreateWithoutCompanionInput[]
+  connectOrCreate?: Prisma.WithdrawalCreateOrConnectWithoutCompanionInput | Prisma.WithdrawalCreateOrConnectWithoutCompanionInput[]
+  upsert?: Prisma.WithdrawalUpsertWithWhereUniqueWithoutCompanionInput | Prisma.WithdrawalUpsertWithWhereUniqueWithoutCompanionInput[]
+  createMany?: Prisma.WithdrawalCreateManyCompanionInputEnvelope
+  set?: Prisma.WithdrawalWhereUniqueInput | Prisma.WithdrawalWhereUniqueInput[]
+  disconnect?: Prisma.WithdrawalWhereUniqueInput | Prisma.WithdrawalWhereUniqueInput[]
+  delete?: Prisma.WithdrawalWhereUniqueInput | Prisma.WithdrawalWhereUniqueInput[]
+  connect?: Prisma.WithdrawalWhereUniqueInput | Prisma.WithdrawalWhereUniqueInput[]
+  update?: Prisma.WithdrawalUpdateWithWhereUniqueWithoutCompanionInput | Prisma.WithdrawalUpdateWithWhereUniqueWithoutCompanionInput[]
+  updateMany?: Prisma.WithdrawalUpdateManyWithWhereWithoutCompanionInput | Prisma.WithdrawalUpdateManyWithWhereWithoutCompanionInput[]
+  deleteMany?: Prisma.WithdrawalScalarWhereInput | Prisma.WithdrawalScalarWhereInput[]
+}
+
+export type WithdrawalUncheckedUpdateManyWithoutCompanionNestedInput = {
+  create?: Prisma.XOR<Prisma.WithdrawalCreateWithoutCompanionInput, Prisma.WithdrawalUncheckedCreateWithoutCompanionInput> | Prisma.WithdrawalCreateWithoutCompanionInput[] | Prisma.WithdrawalUncheckedCreateWithoutCompanionInput[]
+  connectOrCreate?: Prisma.WithdrawalCreateOrConnectWithoutCompanionInput | Prisma.WithdrawalCreateOrConnectWithoutCompanionInput[]
+  upsert?: Prisma.WithdrawalUpsertWithWhereUniqueWithoutCompanionInput | Prisma.WithdrawalUpsertWithWhereUniqueWithoutCompanionInput[]
+  createMany?: Prisma.WithdrawalCreateManyCompanionInputEnvelope
+  set?: Prisma.WithdrawalWhereUniqueInput | Prisma.WithdrawalWhereUniqueInput[]
+  disconnect?: Prisma.WithdrawalWhereUniqueInput | Prisma.WithdrawalWhereUniqueInput[]
+  delete?: Prisma.WithdrawalWhereUniqueInput | Prisma.WithdrawalWhereUniqueInput[]
+  connect?: Prisma.WithdrawalWhereUniqueInput | Prisma.WithdrawalWhereUniqueInput[]
+  update?: Prisma.WithdrawalUpdateWithWhereUniqueWithoutCompanionInput | Prisma.WithdrawalUpdateWithWhereUniqueWithoutCompanionInput[]
+  updateMany?: Prisma.WithdrawalUpdateManyWithWhereWithoutCompanionInput | Prisma.WithdrawalUpdateManyWithWhereWithoutCompanionInput[]
+  deleteMany?: Prisma.WithdrawalScalarWhereInput | Prisma.WithdrawalScalarWhereInput[]
+}
+
 export type WithdrawalCreateNestedManyWithoutBankAccountInput = {
   create?: Prisma.XOR<Prisma.WithdrawalCreateWithoutBankAccountInput, Prisma.WithdrawalUncheckedCreateWithoutBankAccountInput> | Prisma.WithdrawalCreateWithoutBankAccountInput[] | Prisma.WithdrawalUncheckedCreateWithoutBankAccountInput[]
   connectOrCreate?: Prisma.WithdrawalCreateOrConnectWithoutBankAccountInput | Prisma.WithdrawalCreateOrConnectWithoutBankAccountInput[]
@@ -451,13 +495,70 @@ export type EnumWithdrawalStatusFieldUpdateOperationsInput = {
   set?: $Enums.WithdrawalStatus
 }
 
-export type WithdrawalCreateWithoutBankAccountInput = {
+export type WithdrawalCreateWithoutCompanionInput = {
   id?: string
-  companionId: string
   amount: number
   status?: $Enums.WithdrawalStatus
   requestedAt?: Date | string
   completedAt?: Date | string | null
+  bankAccount: Prisma.BankAccountCreateNestedOneWithoutWithdrawalsInput
+}
+
+export type WithdrawalUncheckedCreateWithoutCompanionInput = {
+  id?: string
+  bankAccountId: string
+  amount: number
+  status?: $Enums.WithdrawalStatus
+  requestedAt?: Date | string
+  completedAt?: Date | string | null
+}
+
+export type WithdrawalCreateOrConnectWithoutCompanionInput = {
+  where: Prisma.WithdrawalWhereUniqueInput
+  create: Prisma.XOR<Prisma.WithdrawalCreateWithoutCompanionInput, Prisma.WithdrawalUncheckedCreateWithoutCompanionInput>
+}
+
+export type WithdrawalCreateManyCompanionInputEnvelope = {
+  data: Prisma.WithdrawalCreateManyCompanionInput | Prisma.WithdrawalCreateManyCompanionInput[]
+  skipDuplicates?: boolean
+}
+
+export type WithdrawalUpsertWithWhereUniqueWithoutCompanionInput = {
+  where: Prisma.WithdrawalWhereUniqueInput
+  update: Prisma.XOR<Prisma.WithdrawalUpdateWithoutCompanionInput, Prisma.WithdrawalUncheckedUpdateWithoutCompanionInput>
+  create: Prisma.XOR<Prisma.WithdrawalCreateWithoutCompanionInput, Prisma.WithdrawalUncheckedCreateWithoutCompanionInput>
+}
+
+export type WithdrawalUpdateWithWhereUniqueWithoutCompanionInput = {
+  where: Prisma.WithdrawalWhereUniqueInput
+  data: Prisma.XOR<Prisma.WithdrawalUpdateWithoutCompanionInput, Prisma.WithdrawalUncheckedUpdateWithoutCompanionInput>
+}
+
+export type WithdrawalUpdateManyWithWhereWithoutCompanionInput = {
+  where: Prisma.WithdrawalScalarWhereInput
+  data: Prisma.XOR<Prisma.WithdrawalUpdateManyMutationInput, Prisma.WithdrawalUncheckedUpdateManyWithoutCompanionInput>
+}
+
+export type WithdrawalScalarWhereInput = {
+  AND?: Prisma.WithdrawalScalarWhereInput | Prisma.WithdrawalScalarWhereInput[]
+  OR?: Prisma.WithdrawalScalarWhereInput[]
+  NOT?: Prisma.WithdrawalScalarWhereInput | Prisma.WithdrawalScalarWhereInput[]
+  id?: Prisma.UuidFilter<"Withdrawal"> | string
+  companionId?: Prisma.UuidFilter<"Withdrawal"> | string
+  bankAccountId?: Prisma.UuidFilter<"Withdrawal"> | string
+  amount?: Prisma.IntFilter<"Withdrawal"> | number
+  status?: Prisma.EnumWithdrawalStatusFilter<"Withdrawal"> | $Enums.WithdrawalStatus
+  requestedAt?: Prisma.DateTimeFilter<"Withdrawal"> | Date | string
+  completedAt?: Prisma.DateTimeNullableFilter<"Withdrawal"> | Date | string | null
+}
+
+export type WithdrawalCreateWithoutBankAccountInput = {
+  id?: string
+  amount: number
+  status?: $Enums.WithdrawalStatus
+  requestedAt?: Date | string
+  completedAt?: Date | string | null
+  companion: Prisma.CompanionProfileCreateNestedOneWithoutWithdrawalsInput
 }
 
 export type WithdrawalUncheckedCreateWithoutBankAccountInput = {
@@ -495,17 +596,40 @@ export type WithdrawalUpdateManyWithWhereWithoutBankAccountInput = {
   data: Prisma.XOR<Prisma.WithdrawalUpdateManyMutationInput, Prisma.WithdrawalUncheckedUpdateManyWithoutBankAccountInput>
 }
 
-export type WithdrawalScalarWhereInput = {
-  AND?: Prisma.WithdrawalScalarWhereInput | Prisma.WithdrawalScalarWhereInput[]
-  OR?: Prisma.WithdrawalScalarWhereInput[]
-  NOT?: Prisma.WithdrawalScalarWhereInput | Prisma.WithdrawalScalarWhereInput[]
-  id?: Prisma.UuidFilter<"Withdrawal"> | string
-  companionId?: Prisma.UuidFilter<"Withdrawal"> | string
-  bankAccountId?: Prisma.UuidFilter<"Withdrawal"> | string
-  amount?: Prisma.IntFilter<"Withdrawal"> | number
-  status?: Prisma.EnumWithdrawalStatusFilter<"Withdrawal"> | $Enums.WithdrawalStatus
-  requestedAt?: Prisma.DateTimeFilter<"Withdrawal"> | Date | string
-  completedAt?: Prisma.DateTimeNullableFilter<"Withdrawal"> | Date | string | null
+export type WithdrawalCreateManyCompanionInput = {
+  id?: string
+  bankAccountId: string
+  amount: number
+  status?: $Enums.WithdrawalStatus
+  requestedAt?: Date | string
+  completedAt?: Date | string | null
+}
+
+export type WithdrawalUpdateWithoutCompanionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  amount?: Prisma.IntFieldUpdateOperationsInput | number
+  status?: Prisma.EnumWithdrawalStatusFieldUpdateOperationsInput | $Enums.WithdrawalStatus
+  requestedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  bankAccount?: Prisma.BankAccountUpdateOneRequiredWithoutWithdrawalsNestedInput
+}
+
+export type WithdrawalUncheckedUpdateWithoutCompanionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  bankAccountId?: Prisma.StringFieldUpdateOperationsInput | string
+  amount?: Prisma.IntFieldUpdateOperationsInput | number
+  status?: Prisma.EnumWithdrawalStatusFieldUpdateOperationsInput | $Enums.WithdrawalStatus
+  requestedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+}
+
+export type WithdrawalUncheckedUpdateManyWithoutCompanionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  bankAccountId?: Prisma.StringFieldUpdateOperationsInput | string
+  amount?: Prisma.IntFieldUpdateOperationsInput | number
+  status?: Prisma.EnumWithdrawalStatusFieldUpdateOperationsInput | $Enums.WithdrawalStatus
+  requestedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type WithdrawalCreateManyBankAccountInput = {
@@ -519,11 +643,11 @@ export type WithdrawalCreateManyBankAccountInput = {
 
 export type WithdrawalUpdateWithoutBankAccountInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  companionId?: Prisma.StringFieldUpdateOperationsInput | string
   amount?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumWithdrawalStatusFieldUpdateOperationsInput | $Enums.WithdrawalStatus
   requestedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  companion?: Prisma.CompanionProfileUpdateOneRequiredWithoutWithdrawalsNestedInput
 }
 
 export type WithdrawalUncheckedUpdateWithoutBankAccountInput = {
@@ -554,6 +678,7 @@ export type WithdrawalSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   status?: boolean
   requestedAt?: boolean
   completedAt?: boolean
+  companion?: boolean | Prisma.CompanionProfileDefaultArgs<ExtArgs>
   bankAccount?: boolean | Prisma.BankAccountDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["withdrawal"]>
 
@@ -565,6 +690,7 @@ export type WithdrawalSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   status?: boolean
   requestedAt?: boolean
   completedAt?: boolean
+  companion?: boolean | Prisma.CompanionProfileDefaultArgs<ExtArgs>
   bankAccount?: boolean | Prisma.BankAccountDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["withdrawal"]>
 
@@ -576,6 +702,7 @@ export type WithdrawalSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   status?: boolean
   requestedAt?: boolean
   completedAt?: boolean
+  companion?: boolean | Prisma.CompanionProfileDefaultArgs<ExtArgs>
   bankAccount?: boolean | Prisma.BankAccountDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["withdrawal"]>
 
@@ -591,18 +718,22 @@ export type WithdrawalSelectScalar = {
 
 export type WithdrawalOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "companionId" | "bankAccountId" | "amount" | "status" | "requestedAt" | "completedAt", ExtArgs["result"]["withdrawal"]>
 export type WithdrawalInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  companion?: boolean | Prisma.CompanionProfileDefaultArgs<ExtArgs>
   bankAccount?: boolean | Prisma.BankAccountDefaultArgs<ExtArgs>
 }
 export type WithdrawalIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  companion?: boolean | Prisma.CompanionProfileDefaultArgs<ExtArgs>
   bankAccount?: boolean | Prisma.BankAccountDefaultArgs<ExtArgs>
 }
 export type WithdrawalIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  companion?: boolean | Prisma.CompanionProfileDefaultArgs<ExtArgs>
   bankAccount?: boolean | Prisma.BankAccountDefaultArgs<ExtArgs>
 }
 
 export type $WithdrawalPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Withdrawal"
   objects: {
+    companion: Prisma.$CompanionProfilePayload<ExtArgs>
     bankAccount: Prisma.$BankAccountPayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
@@ -1007,6 +1138,7 @@ readonly fields: WithdrawalFieldRefs;
  */
 export interface Prisma__WithdrawalClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  companion<T extends Prisma.CompanionProfileDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.CompanionProfileDefaultArgs<ExtArgs>>): Prisma.Prisma__CompanionProfileClient<runtime.Types.Result.GetResult<Prisma.$CompanionProfilePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   bankAccount<T extends Prisma.BankAccountDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.BankAccountDefaultArgs<ExtArgs>>): Prisma.Prisma__BankAccountClient<runtime.Types.Result.GetResult<Prisma.$BankAccountPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.

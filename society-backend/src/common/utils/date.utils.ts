@@ -3,18 +3,27 @@
  */
 export class DateUtils {
   /**
+   * Ensure a value is a Date object (converts strings if needed)
+   * Prisma may return ISO strings depending on adapter/serialization
+   */
+  private static toDate(date: Date | string): Date {
+    return date instanceof Date ? date : new Date(date);
+  }
+
+  /**
    * Calculate age from date of birth
    */
-  static calculateAge(dateOfBirth: Date): number {
+  static calculateAge(dateOfBirth: Date | string): number {
     if (!dateOfBirth) {
       return 0;
     }
+    const dob = this.toDate(dateOfBirth);
     const today = new Date();
-    let age = today.getFullYear() - dateOfBirth.getFullYear();
-    const monthDiff = today.getMonth() - dateOfBirth.getMonth();
+    let age = today.getFullYear() - dob.getFullYear();
+    const monthDiff = today.getMonth() - dob.getMonth();
     if (
       monthDiff < 0 ||
-      (monthDiff === 0 && today.getDate() < dateOfBirth.getDate())
+      (monthDiff === 0 && today.getDate() < dob.getDate())
     ) {
       age--;
     }
@@ -54,22 +63,24 @@ export class DateUtils {
   /**
    * Get start of month
    */
-  static getStartOfMonth(date: Date = new Date()): Date {
-    return new Date(date.getFullYear(), date.getMonth(), 1);
+  static getStartOfMonth(date: Date | string = new Date()): Date {
+    const d = this.toDate(date);
+    return new Date(d.getFullYear(), d.getMonth(), 1);
   }
 
   /**
    * Get start of year
    */
-  static getStartOfYear(date: Date = new Date()): Date {
-    return new Date(date.getFullYear(), 0, 1);
+  static getStartOfYear(date: Date | string = new Date()): Date {
+    const d = this.toDate(date);
+    return new Date(d.getFullYear(), 0, 1);
   }
 
   /**
    * Format date as YYYY-MM-DD
    */
-  static formatDate(date: Date): string {
-    return date.toISOString().split('T')[0];
+  static formatDate(date: Date | string): string {
+    return this.toDate(date).toISOString().split('T')[0];
   }
 
   /**
@@ -138,19 +149,20 @@ export class DateUtils {
   /**
    * Check if a date is today
    */
-  static isToday(date: Date): boolean {
+  static isToday(date: Date | string): boolean {
+    const d = this.toDate(date);
     const today = new Date();
     return (
-      date.getFullYear() === today.getFullYear() &&
-      date.getMonth() === today.getMonth() &&
-      date.getDate() === today.getDate()
+      d.getFullYear() === today.getFullYear() &&
+      d.getMonth() === today.getMonth() &&
+      d.getDate() === today.getDate()
     );
   }
 
   /**
    * Check if a date is in the future
    */
-  static isFuture(date: Date): boolean {
-    return date.getTime() > Date.now();
+  static isFuture(date: Date | string): boolean {
+    return this.toDate(date).getTime() > Date.now();
   }
 }

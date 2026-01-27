@@ -1,7 +1,7 @@
 /* eslint-disable max-lines-per-function */
 import { router } from 'expo-router';
 import React from 'react';
-import { Pressable, ScrollView, StyleSheet } from 'react-native';
+import { Pressable, ScrollView } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
 import { FocusAwareStatusBar, SafeAreaView, Text, View } from '@/components/ui';
@@ -47,10 +47,7 @@ function PlanDetails({ plan }: PlanDetailsProps) {
       {/* Plan Header */}
       <View className="items-center gap-2">
         <View className="flex-row items-center gap-3">
-          <Text
-            className="text-2xl font-bold leading-[1.4] text-offwhite"
-            style={styles.planTitle}
-          >
+          <Text className="font-urbanist-bold text-2xl leading-[1.4] tracking-[0px] text-offwhite">
             Hireme Premium
           </Text>
           {savings && (
@@ -63,10 +60,7 @@ function PlanDetails({ plan }: PlanDetailsProps) {
         </View>
 
         <View className="flex-row items-end">
-          <Text
-            className="text-6xl font-bold leading-[1.2] text-offwhite"
-            style={styles.price}
-          >
+          <Text className="font-urbanist-bold text-6xl leading-[1.2] tracking-[0px] text-offwhite">
             {price}
           </Text>
           <Text className="text-platinum mb-2 ml-2 text-xl leading-[1.4]">
@@ -122,10 +116,7 @@ export default function SubscriptionScreen() {
             <ArrowLeft color="white" size={28} />
           </Pressable>
 
-          <Text
-            className="flex-1 text-center text-2xl font-bold leading-[1.4] text-offwhite"
-            style={styles.headerTitle}
-          >
+          <Text className="flex-1 text-center font-urbanist-bold text-2xl leading-[1.4] tracking-[0px] text-offwhite">
             Upgrade Plan
           </Text>
 
@@ -184,10 +175,7 @@ export default function SubscriptionScreen() {
           className="items-center justify-center rounded-full bg-gold-400 py-4"
           testID="continue-button"
         >
-          <Text
-            className="text-base font-bold leading-[1.6] tracking-[0.2px] text-midnight"
-            style={styles.continueButtonText}
-          >
+          <Text className="font-urbanist-bold text-base leading-[1.6] tracking-[0.2px] text-midnight">
             Continue - {selectedPlan === 'monthly' ? '$4.99' : '$49.99'}
           </Text>
         </Pressable>
@@ -196,21 +184,3 @@ export default function SubscriptionScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  headerTitle: {
-    fontFamily: 'Urbanist_700Bold',
-    letterSpacing: 0,
-  },
-  planTitle: {
-    fontFamily: 'Urbanist_700Bold',
-    letterSpacing: 0,
-  },
-  price: {
-    fontFamily: 'Urbanist_700Bold',
-    letterSpacing: 0,
-  },
-  continueButtonText: {
-    fontFamily: 'Urbanist_700Bold',
-    letterSpacing: 0,
-  },
-});

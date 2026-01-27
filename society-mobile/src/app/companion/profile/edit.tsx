@@ -4,10 +4,10 @@ import { MotiView } from 'moti';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import {
+  ActivityIndicator,
   Alert,
   Pressable,
   ScrollView,
-  StyleSheet,
   TextInput,
 } from 'react-native';
 
@@ -21,30 +21,19 @@ import {
   View,
 } from '@/components/ui';
 import { ArrowLeft, CheckCircle, Plus } from '@/components/ui/icons';
-
-const OCCASIONS = [
-  'Wedding',
-  'Tet',
-  'Family Events',
-  'Corporate',
-  'Coffee Date',
-  'Social Events',
-];
+import { useAllOccasions, useSafeBack } from '@/lib/hooks';
 
 export default function EditCompanionProfile() {
-  const router = useRouter();
   const { t } = useTranslation();
+  const router = useRouter();
+  const goBack = useSafeBack('/companion/profile');
+  const { data: occasions, isLoading: occasionsLoading } = useAllOccasions();
   const [name, setName] = React.useState('Minh Anh');
   const [bio, setBio] = React.useState(
     'Professional companion specializing in weddings and corporate events. Fluent in Vietnamese and English.'
   );
   const [hourlyRate, setHourlyRate] = React.useState('500000');
-  const [selectedOccasions, setSelectedOccasions] = React.useState([
-    'Wedding',
-    'Corporate',
-    'Tet',
-    'Family Events',
-  ]);
+  const [selectedOccasionIds, setSelectedOccasionIds] = React.useState<string[]>([]);
   const [photos, setPhotos] = React.useState([
     'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400',
     'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=400',
@@ -52,23 +41,19 @@ export default function EditCompanionProfile() {
     'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400',
   ]);
 
-  const handleBack = React.useCallback(() => {
-    router.back();
-  }, [router]);
-
   const handleSave = React.useCallback(() => {
     Alert.alert(
       t('common.success'),
       t('companion.edit_profile.success_message'),
-      [{ text: t('common.ok'), onPress: () => router.back() }]
+      [{ text: t('common.ok'), onPress: goBack }]
     );
-  }, [router, t]);
+  }, [goBack, t]);
 
-  const handleToggleOccasion = React.useCallback((occasion: string) => {
-    setSelectedOccasions((prev) =>
-      prev.includes(occasion)
-        ? prev.filter((o) => o !== occasion)
-        : [...prev, occasion]
+  const handleToggleOccasion = React.useCallback((occasionId: string) => {
+    setSelectedOccasionIds((prev) =>
+      prev.includes(occasionId)
+        ? prev.filter((o) => o !== occasionId)
+        : [...prev, occasionId]
     );
   }, []);
 
@@ -98,13 +83,10 @@ export default function EditCompanionProfile() {
 
       <SafeAreaView edges={['top']}>
         <View className="flex-row items-center gap-4 border-b border-border-light px-4 py-3">
-          <Pressable onPress={handleBack} testID="back-button">
+          <Pressable onPress={goBack} testID="back-button">
             <ArrowLeft color={colors.midnight.DEFAULT} width={24} height={24} />
           </Pressable>
-          <Text
-            style={styles.headerTitle}
-            className="flex-1 text-xl text-midnight"
-          >
+          <Text className="font-urbanist-bold flex-1 text-xl text-midnight">
             {t('companion.edit_profile.header')}
           </Text>
           <Pressable onPress={handleSave} testID="header-save-button">
@@ -258,34 +240,38 @@ export default function EditCompanionProfile() {
           <Text className="mb-3 text-lg font-semibold text-midnight">
             {t('companion.edit_profile.occasions_i_accept')}
           </Text>
-          <View className="flex-row flex-wrap gap-2">
-            {OCCASIONS.map((occasion) => {
-              const isSelected = selectedOccasions.includes(occasion);
-              return (
-                <Pressable
-                  key={occasion}
-                  onPress={() => handleToggleOccasion(occasion)}
-                  testID={`occasion-${occasion.toLowerCase().replace(' ', '-')}`}
-                  className={`flex-row items-center gap-2 rounded-full px-4 py-2 ${
-                    isSelected
-                      ? 'bg-lavender-400'
-                      : 'border border-border-light bg-white'
-                  }`}
-                >
-                  {isSelected && (
-                    <CheckCircle color="#FFFFFF" width={16} height={16} />
-                  )}
-                  <Text
-                    className={`font-medium ${
-                      isSelected ? 'text-white' : 'text-midnight'
+          {occasionsLoading ? (
+            <ActivityIndicator color={colors.lavender[400]} />
+          ) : (
+            <View className="flex-row flex-wrap gap-2">
+              {occasions?.map((occasion) => {
+                const isSelected = selectedOccasionIds.includes(occasion.id);
+                return (
+                  <Pressable
+                    key={occasion.id}
+                    onPress={() => handleToggleOccasion(occasion.id)}
+                    testID={`occasion-${occasion.code}`}
+                    className={`flex-row items-center gap-2 rounded-full px-4 py-2 ${
+                      isSelected
+                        ? 'bg-lavender-400'
+                        : 'border border-border-light bg-white'
                     }`}
                   >
-                    {occasion}
-                  </Text>
-                </Pressable>
-              );
-            })}
-          </View>
+                    {isSelected && (
+                      <CheckCircle color="#FFFFFF" width={16} height={16} />
+                    )}
+                    <Text
+                      className={`font-medium ${
+                        isSelected ? 'text-white' : 'text-midnight'
+                      }`}
+                    >
+                      {occasion.emoji} {occasion.name}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+          )}
         </MotiView>
 
         {/* Availability Link */}
@@ -334,9 +320,3 @@ export default function EditCompanionProfile() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  headerTitle: {
-    fontFamily: 'Urbanist_700Bold',
-  },
-});

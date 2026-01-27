@@ -1,7 +1,7 @@
 /* eslint-disable max-lines-per-function */
 import { router } from 'expo-router';
 import React from 'react';
-import { Pressable, ScrollView, StyleSheet, Switch } from 'react-native';
+import { Pressable, ScrollView, Switch } from 'react-native';
 
 import {
   colors,
@@ -231,7 +231,7 @@ export default function AccountSecurity() {
       {/* Content */}
       <ScrollView
         className="flex-1"
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={{ paddingHorizontal: 24, paddingVertical: 8, gap: 24 }}
         showsVerticalScrollIndicator={false}
       >
         {/* Security Toggles */}
@@ -286,10 +286,3 @@ export default function AccountSecurity() {
   );
 }
 
-const styles = StyleSheet.create({
-  scrollContent: {
-    paddingHorizontal: 24,
-    paddingVertical: 8,
-    gap: 24,
-  },
-});

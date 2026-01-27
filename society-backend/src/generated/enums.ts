@@ -88,9 +88,6 @@ export type PaymentStatus = (typeof PaymentStatus)[keyof typeof PaymentStatus]
 
 
 export const PaymentProvider = {
-  VNPAY: 'VNPAY',
-  MOMO: 'MOMO',
-  STRIPE: 'STRIPE',
   BANK_TRANSFER: 'BANK_TRANSFER'
 } as const
 
@@ -224,6 +221,14 @@ export const AppealStatus = {
 export type AppealStatus = (typeof AppealStatus)[keyof typeof AppealStatus]
 
 
+export const CancellationType = {
+  REGULAR: 'REGULAR',
+  EMERGENCY: 'EMERGENCY'
+} as const
+
+export type CancellationType = (typeof CancellationType)[keyof typeof CancellationType]
+
+
 export const EmergencyEventStatus = {
   ACTIVE: 'ACTIVE',
   CANCELLED: 'CANCELLED',
@@ -251,3 +256,44 @@ export const BoostTier = {
 } as const
 
 export type BoostTier = (typeof BoostTier)[keyof typeof BoostTier]
+
+
+export const OccasionEventType = {
+  VIEW: 'VIEW',
+  SELECT: 'SELECT',
+  BOOKING_CREATED: 'BOOKING_CREATED'
+} as const
+
+export type OccasionEventType = (typeof OccasionEventType)[keyof typeof OccasionEventType]
+
+
+export const InteractionEventType = {
+  VIEW: 'VIEW',
+  PROFILE_OPEN: 'PROFILE_OPEN',
+  BOOKMARK: 'BOOKMARK',
+  UNBOOKMARK: 'UNBOOKMARK',
+  MESSAGE_SENT: 'MESSAGE_SENT',
+  BOOKING_STARTED: 'BOOKING_STARTED',
+  BOOKING_COMPLETED: 'BOOKING_COMPLETED',
+  BOOKING_CANCELLED: 'BOOKING_CANCELLED'
+} as const
+
+export type InteractionEventType = (typeof InteractionEventType)[keyof typeof InteractionEventType]
+
+
+export const PaymentRequestType = {
+  TOPUP: 'TOPUP',
+  BOOKING: 'BOOKING'
+} as const
+
+export type PaymentRequestType = (typeof PaymentRequestType)[keyof typeof PaymentRequestType]
+
+
+export const PaymentRequestStatus = {
+  PENDING: 'PENDING',
+  COMPLETED: 'COMPLETED',
+  EXPIRED: 'EXPIRED',
+  FAILED: 'FAILED'
+} as const
+
+export type PaymentRequestStatus = (typeof PaymentRequestStatus)[keyof typeof PaymentRequestStatus]

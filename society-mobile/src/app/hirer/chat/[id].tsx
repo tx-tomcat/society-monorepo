@@ -7,7 +7,6 @@ import {
   ActivityIndicator,
   FlatList,
   Pressable,
-  StyleSheet,
   TextInput,
 } from 'react-native';
 import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
@@ -200,10 +199,7 @@ export default function ChatConversation() {
                 height={24}
               />
             </Pressable>
-            <Text
-              style={styles.headerTitle}
-              className="flex-1 text-xl text-midnight"
-            >
+            <Text className="flex-1 font-urbanist-bold text-xl text-midnight">
               {t('hirer.chat.header')}
             </Text>
           </View>
@@ -244,10 +240,7 @@ export default function ChatConversation() {
           </View>
 
           <View className="flex-1">
-            <Text
-              style={styles.headerTitle}
-              className="text-base text-midnight"
-            >
+            <Text className="font-urbanist-bold text-base text-midnight">
               {conversation.otherUser.fullName}
             </Text>
             <Text className="text-xs text-text-secondary">
@@ -315,7 +308,7 @@ export default function ChatConversation() {
                 multiline
                 maxLength={1000}
                 className="max-h-24 flex-1 py-3 text-base"
-                style={[styles.input, { color: colors.midnight.DEFAULT }]}
+                style={{ fontFamily: 'Urbanist_500Medium', color: colors.midnight.DEFAULT }}
               />
             </View>
             <Pressable
@@ -341,12 +334,3 @@ export default function ChatConversation() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  headerTitle: {
-    fontFamily: 'Urbanist_700Bold',
-  },
-  input: {
-    fontFamily: 'Urbanist_500Medium',
-  },
-});

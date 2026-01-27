@@ -5,13 +5,7 @@ import { useRouter } from 'expo-router';
 import { MotiView } from 'moti';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  Alert,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  TextInput,
-} from 'react-native';
+import { Alert, Pressable, ScrollView, TextInput } from 'react-native';
 import { showMessage } from 'react-native-flash-message';
 
 import {
@@ -23,24 +17,33 @@ import {
   Text,
   View,
 } from '@/components/ui';
-import { ArrowLeft, Camera, Plus, X } from '@/components/ui/icons';
+import { ArrowLeft, Camera, ChevronDown, MapPin, Plus, X } from '@/components/ui/icons';
+import { VIETNAM_PROVINCES, getProvinceName } from '@/lib/constants';
+import { usePhoneVerificationStatus } from '@/lib/hooks';
 import { useCompanionOnboarding } from '@/lib/stores';
 
 export default function CreateProfile() {
   const router = useRouter();
   const { t } = useTranslation();
 
+  // Phone verification status
+  const { data: phoneStatus } = usePhoneVerificationStatus();
+
   // Get data from store
   const displayName = useCompanionOnboarding.use.displayName();
   const bio = useCompanionOnboarding.use.bio();
   const photoFiles = useCompanionOnboarding.use.photoFiles();
+  const storeProvince = useCompanionOnboarding.use.province();
   const setProfileData = useCompanionOnboarding.use.setProfileData();
+  const setLocationData = useCompanionOnboarding.use.setLocationData();
   const markStepComplete = useCompanionOnboarding.use.markStepComplete();
 
   // Local state for inputs
   const [name, setName] = React.useState(displayName);
   const [bioText, setBioText] = React.useState(bio);
   const [photos, setPhotos] = React.useState<string[]>(photoFiles);
+  const [province, setProvince] = React.useState(storeProvince);
+  const [showProvincePicker, setShowProvincePicker] = React.useState(false);
 
   const handleBack = React.useCallback(() => {
     router.back();
@@ -164,15 +167,22 @@ export default function CreateProfile() {
   );
 
   const handleContinue = React.useCallback(() => {
+    // Check phone verification - redirect if not verified
+    if (!phoneStatus?.isVerified) {
+      router.push('/phone-verification' as Href);
+      return;
+    }
+
     // Save to store
     setProfileData({
       displayName: name,
       bio: bioText,
       photoFiles: photos,
     });
+    setLocationData({ province });
     markStepComplete('create-profile');
     router.push('/companion/onboard/set-services' as Href);
-  }, [name, bioText, photos, setProfileData, markStepComplete, router]);
+  }, [name, bioText, photos, province, phoneStatus, setProfileData, setLocationData, markStepComplete, router]);
 
   // Validation states
   const MIN_NAME_LENGTH = 2;
@@ -182,11 +192,13 @@ export default function CreateProfile() {
   const isNameTooShort = name.length > 0 && name.length < MIN_NAME_LENGTH;
   const isBioTooShort = bioText.length > 0 && bioText.length < MIN_BIO_LENGTH;
   const needsMorePhotos = photos.length > 0 && photos.length < MIN_PHOTOS;
+  const needsProvince = !province;
 
   const isValid =
     name.length >= MIN_NAME_LENGTH &&
     bioText.length >= MIN_BIO_LENGTH &&
-    photos.length >= MIN_PHOTOS;
+    photos.length >= MIN_PHOTOS &&
+    province.length > 0;
 
   return (
     <View className="flex-1 bg-warmwhite">
@@ -197,10 +209,7 @@ export default function CreateProfile() {
           <Pressable onPress={handleBack}>
             <ArrowLeft color={colors.midnight.DEFAULT} width={24} height={24} />
           </Pressable>
-          <Text
-            style={styles.headerTitle}
-            className="flex-1 text-xl text-midnight"
-          >
+          <Text className="font-urbanist-bold flex-1 text-xl text-midnight">
             {t('companion.onboard.create_profile.header')}
           </Text>
           <Text className="text-sm text-text-tertiary">
@@ -399,11 +408,96 @@ export default function CreateProfile() {
           </View>
         </MotiView>
 
+        {/* Location */}
+        <MotiView
+          from={{ opacity: 0, translateY: 20 }}
+          animate={{ opacity: 1, translateY: 0 }}
+          transition={{ type: 'timing', duration: 500, delay: 300 }}
+          className="mb-6"
+        >
+          <Text className="mb-2 text-lg font-semibold text-midnight">
+            {t('location.province')}
+          </Text>
+          <Pressable
+            onPress={() => setShowProvincePicker(true)}
+            className={`flex-row items-center rounded-xl border bg-white p-4 ${
+              needsProvince ? 'border-border-light' : 'border-lavender-400'
+            }`}
+          >
+            <MapPin
+              color={province ? colors.lavender[400] : colors.text.tertiary}
+              width={20}
+              height={20}
+            />
+            <Text
+              className={`flex-1 pl-3 text-base ${
+                province ? 'text-midnight' : 'text-text-tertiary'
+              }`}
+              style={{ fontFamily: 'Urbanist_500Medium' }}
+            >
+              {province
+                ? getProvinceName(province, 'vi')
+                : t('location.select_province')}
+            </Text>
+            <ChevronDown color={colors.text.tertiary} width={20} height={20} />
+          </Pressable>
+          {needsProvince && (
+            <Text className="mt-1 text-xs text-text-tertiary">
+              {t('location.province_required')}
+            </Text>
+          )}
+        </MotiView>
+
+        {/* Province Picker Modal */}
+        {showProvincePicker && (
+          <View className="absolute inset-0 z-50 bg-black/50">
+            <Pressable
+              className="flex-1"
+              onPress={() => setShowProvincePicker(false)}
+            />
+            <View className="max-h-[70%] rounded-t-3xl bg-white">
+              <View className="flex-row items-center justify-between border-b border-border-light px-4 py-3">
+                <Text className="text-lg font-semibold text-midnight">
+                  {t('location.select_province')}
+                </Text>
+                <Pressable onPress={() => setShowProvincePicker(false)}>
+                  <X color={colors.midnight.DEFAULT} width={24} height={24} />
+                </Pressable>
+              </View>
+              <ScrollView className="p-4">
+                {VIETNAM_PROVINCES.map((p) => (
+                  <Pressable
+                    key={p.code}
+                    onPress={() => {
+                      setProvince(p.code);
+                      setShowProvincePicker(false);
+                    }}
+                    className={`mb-2 rounded-xl border p-4 ${
+                      province === p.code
+                        ? 'border-lavender-400 bg-lavender-400/10'
+                        : 'border-border-light bg-white'
+                    }`}
+                  >
+                    <Text
+                      className={`text-base ${
+                        province === p.code ? 'text-lavender-400 font-semibold' : 'text-midnight'
+                      }`}
+                    >
+                      {p.name}
+                    </Text>
+                    <Text className="text-sm text-text-tertiary">{p.nameEn}</Text>
+                  </Pressable>
+                ))}
+              </ScrollView>
+            </View>
+          </View>
+        )}
+
         {/* Tips */}
         <MotiView
           from={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ type: 'timing', duration: 500, delay: 300 }}
+          transition={{ type: 'timing', duration: 500, delay: 400 }}
           className="rounded-xl bg-lavender-400/10 p-4"
         >
           <Text className="mb-2 text-sm font-semibold text-lavender-400">
@@ -445,9 +539,3 @@ export default function CreateProfile() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  headerTitle: {
-    fontFamily: 'Urbanist_700Bold',
-  },
-});

@@ -4,12 +4,7 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { MotiView } from 'moti';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  Pressable,
-  RefreshControl,
-  ScrollView,
-  StyleSheet,
-} from 'react-native';
+import { Pressable, RefreshControl, ScrollView } from 'react-native';
 
 import {
   Badge,
@@ -25,8 +20,8 @@ import {
   Calendar,
   Chart,
   Clock,
+  HiremeLogo,
   MapPin,
-  SocietyLogo,
   Star,
   Wallet,
 } from '@/components/ui/icons';
@@ -64,7 +59,7 @@ export default function CompanionDashboard() {
       // Fetch all dashboard data in parallel
       const [bookingsRes, earningsRes, profileRes, requestsRes] =
         await Promise.all([
-          bookingsService.getCompanionBookings('confirmed', 1, 10),
+          bookingsService.getCompanionBookings('CONFIRMED', 1, 10),
           earningsService.getEarningsOverview(),
           companionsService.getMyProfile(),
           bookingsService.getBookingRequests(),
@@ -76,7 +71,7 @@ export default function CompanionDashboard() {
       const todayEnd = new Date(today);
       todayEnd.setHours(23, 59, 59, 999);
 
-      const todaysBookings = bookingsRes.bookings
+      const todaysBookings = (bookingsRes.bookings || [])
         .filter((booking) => {
           const startDate = new Date(booking.startDatetime);
           return startDate >= today && startDate <= todayEnd;
@@ -99,7 +94,7 @@ export default function CompanionDashboard() {
       setTodayBookings(todaysBookings);
       setEarnings(earningsRes);
       setProfile(profileRes);
-      setPendingRequestsCount(requestsRes.length);
+      setPendingRequestsCount(requestsRes.requests?.length ?? 0);
     } catch (error) {
       console.error('Failed to fetch dashboard data:', error);
     } finally {
@@ -149,7 +144,7 @@ export default function CompanionDashboard() {
       },
       {
         labelKey: 'companion.dashboard.stats.rating',
-        value: profile?.ratingAvg?.toFixed(1) ?? '0.0',
+        value: profile?.rating?.toFixed(1) ?? '0.0',
         icon: Star,
         color: colors.yellow[400],
       },
@@ -170,13 +165,13 @@ export default function CompanionDashboard() {
       {/* Header */}
       <SafeAreaView edges={['top']}>
         <View className="flex-row items-center gap-4 px-4 py-3">
-          <SocietyLogo color={colors.lavender[400]} width={32} height={32} />
+          <HiremeLogo color={colors.lavender[400]} width={32} height={32} />
           <View className="flex-1">
             <Text className="text-sm text-text-tertiary">
               {t('companion.dashboard.greeting')}
             </Text>
-            <Text style={styles.title} className="text-xl text-midnight">
-              {profile?.user?.fullName ?? t('common.loading')}
+            <Text className="font-urbanist-bold text-xl text-midnight">
+              {profile?.displayName ?? t('common.loading')}
             </Text>
           </View>
           <Pressable
@@ -228,10 +223,7 @@ export default function CompanionDashboard() {
                 >
                   <stat.icon color={stat.color} width={20} height={20} />
                 </View>
-                <Text
-                  style={styles.statValue}
-                  className="text-xl text-midnight"
-                >
+                <Text className="font-urbanist-bold text-xl text-midnight">
                   {stat.value}
                 </Text>
                 <Text className="text-xs text-text-tertiary">
@@ -262,10 +254,7 @@ export default function CompanionDashboard() {
                 <Text className="text-sm text-white/80">
                   {t('companion.dashboard.total_earnings')}
                 </Text>
-                <Text
-                  style={styles.earningsValue}
-                  className="text-2xl text-white"
-                >
+                <Text className="font-urbanist-bold text-2xl text-white">
                   {formatVND(earnings?.totalEarnings ?? 0)}
                 </Text>
               </View>
@@ -290,7 +279,7 @@ export default function CompanionDashboard() {
           className="px-4"
         >
           <View className="mb-3 flex-row items-center justify-between">
-            <Text style={styles.sectionTitle} className="text-lg text-midnight">
+            <Text className="font-urbanist-bold text-lg text-midnight">
               {t('companion.dashboard.todays_bookings')}
             </Text>
             <Pressable
@@ -365,7 +354,7 @@ export default function CompanionDashboard() {
                           />
                         </View>
                         <Text className="mt-1 text-sm text-rose-400">
-                          {t(`companion.services.${booking.occasionType}`)}
+                          {booking.occasion ? `${booking.occasion.emoji} ${booking.occasion.name}` : t('common.occasion')}
                         </Text>
                         <View className="mt-2 flex-row items-center gap-4">
                           <View className="flex-row items-center gap-1">
@@ -418,10 +407,7 @@ export default function CompanionDashboard() {
           transition={{ type: 'timing', duration: 500, delay: 400 }}
           className="px-4 py-6"
         >
-          <Text
-            style={styles.sectionTitle}
-            className="mb-3 text-lg text-midnight"
-          >
+          <Text className="font-urbanist-bold mb-3 text-lg text-midnight">
             {t('companion.dashboard.quick_actions')}
           </Text>
           <View className="flex-row gap-3">
@@ -485,18 +471,3 @@ export default function CompanionDashboard() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  title: {
-    fontFamily: 'Urbanist_700Bold',
-  },
-  statValue: {
-    fontFamily: 'Urbanist_700Bold',
-  },
-  earningsValue: {
-    fontFamily: 'Urbanist_700Bold',
-  },
-  sectionTitle: {
-    fontFamily: 'Urbanist_700Bold',
-  },
-});

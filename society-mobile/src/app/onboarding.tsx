@@ -1,7 +1,7 @@
 /* eslint-disable max-lines-per-function */
 import { useRouter } from 'expo-router';
 import React from 'react';
-import { Dimensions, StyleSheet } from 'react-native';
+import { Dimensions } from 'react-native';
 import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 
 import {
@@ -22,7 +22,12 @@ function PhoneMockup() {
       {/* Phone frame */}
       <View
         className="overflow-hidden rounded-[40px] bg-midnight"
-        style={styles.phoneFrame}
+        style={{
+          width: SCREEN_WIDTH * 0.8,
+          height: SCREEN_HEIGHT * 0.5,
+          maxWidth: 345,
+          maxHeight: 700,
+        }}
       >
         {/* Phone screen with placeholder */}
         <View className="flex-1 items-center justify-center bg-charcoal-800">
@@ -42,7 +47,10 @@ function PhoneMockup() {
       {/* Glow effect behind phone */}
       <View
         className="absolute -z-10 rounded-full bg-brand-300 opacity-30 blur-3xl"
-        style={styles.glow}
+        style={{
+          width: SCREEN_WIDTH * 1.2,
+          height: SCREEN_HEIGHT * 0.4,
+        }}
       />
     </View>
   );
@@ -136,10 +144,7 @@ export default function Onboarding() {
       <CurvedBottom>
         {/* Title and description */}
         <View className="mb-6 gap-3">
-          <Text
-            className="text-center text-3xl font-bold leading-[1.4] text-midnight"
-            style={styles.title}
-          >
+          <Text className="text-center font-urbanist-bold text-3xl leading-[1.4] tracking-[0px] text-midnight">
             Welcome to Lovify - Where Love Meets AI!
           </Text>
           <Text className="text-center text-lg leading-[1.6] tracking-[0.2px] text-neutral-700">
@@ -179,19 +184,3 @@ export default function Onboarding() {
   );
 }
 
-const styles = StyleSheet.create({
-  phoneFrame: {
-    width: SCREEN_WIDTH * 0.8,
-    height: SCREEN_HEIGHT * 0.5,
-    maxWidth: 345,
-    maxHeight: 700,
-  },
-  glow: {
-    width: SCREEN_WIDTH * 1.2,
-    height: SCREEN_HEIGHT * 0.4,
-  },
-  title: {
-    fontFamily: 'Urbanist_700Bold',
-    letterSpacing: 0,
-  },
-});

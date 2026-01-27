@@ -18,6 +18,7 @@ import {
   DisputeReviewDto,
   EditReviewDto,
   EmergencyCancellationDto,
+  GetBookingRequestsQueryDto,
   GetBookingsQueryDto,
   SubmitReviewDto,
   UpdateBookingStatusDto,
@@ -67,8 +68,11 @@ export class BookingsController {
    * Get pending booking requests (Companion)
    */
   @Get('companion/requests')
-  async getBookingRequests(@CurrentUser('id') userId: string) {
-    return this.bookingsService.getBookingRequests(userId);
+  async getBookingRequests(
+    @CurrentUser('id') userId: string,
+    @Query() query: GetBookingRequestsQueryDto,
+  ) {
+    return this.bookingsService.getBookingRequests(userId, query);
   }
 
   /**

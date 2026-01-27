@@ -4,7 +4,7 @@ import { useRouter } from 'expo-router';
 import { MotiView } from 'moti';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, ScrollView, StyleSheet } from 'react-native';
+import { Pressable, ScrollView } from 'react-native';
 
 import {
   Badge,
@@ -21,10 +21,10 @@ import {
   Chart,
   Crown,
   Edit,
+  HiremeLogo,
   MapPin,
   Settings,
   ShieldCheck,
-  SocietyLogo,
   Star,
   VerifiedBadge,
   Wallet,
@@ -75,11 +75,8 @@ export default function CompanionProfile() {
       {/* Header */}
       <SafeAreaView edges={['top']}>
         <View className="flex-row items-center gap-4 px-4 py-3">
-          <SocietyLogo color={colors.lavender[400]} width={32} height={32} />
-          <Text
-            style={styles.headerTitle}
-            className="flex-1 text-xl text-midnight"
-          >
+          <HiremeLogo color={colors.lavender[400]} width={32} height={32} />
+          <Text className="font-urbanist-bold flex-1 text-xl text-midnight">
             {t('companion.profile.header')}
           </Text>
           <Pressable onPress={handleSettings} testID="settings-button">
@@ -114,7 +111,7 @@ export default function CompanionProfile() {
           </View>
 
           <View className="mt-4 flex-row items-center gap-2">
-            <Text style={styles.name} className="text-2xl text-midnight">
+            <Text className="font-urbanist-bold text-2xl text-midnight">
               {MOCK_PROFILE.name}, {MOCK_PROFILE.age}
             </Text>
             {MOCK_PROFILE.isPremium && (
@@ -167,10 +164,7 @@ export default function CompanionProfile() {
         >
           <View className="flex-1 items-center rounded-xl bg-white p-4">
             <Calendar color={colors.lavender[400]} width={24} height={24} />
-            <Text
-              style={styles.statValue}
-              className="mt-2 text-xl text-midnight"
-            >
+            <Text className="font-urbanist-bold mt-2 text-xl text-midnight">
               {MOCK_PROFILE.stats.totalBookings}
             </Text>
             <Text className="text-xs text-text-tertiary">
@@ -179,10 +173,7 @@ export default function CompanionProfile() {
           </View>
           <View className="flex-1 items-center rounded-xl bg-white p-4">
             <Wallet color={colors.teal[400]} width={24} height={24} />
-            <Text
-              style={styles.statValue}
-              className="mt-2 text-xl text-midnight"
-            >
+            <Text className="font-urbanist-bold mt-2 text-xl text-midnight">
               {formatVND(MOCK_PROFILE.stats.totalEarnings, {
                 abbreviated: true,
               })}
@@ -193,10 +184,7 @@ export default function CompanionProfile() {
           </View>
           <View className="flex-1 items-center rounded-xl bg-white p-4">
             <Chart color={colors.rose[400]} width={24} height={24} />
-            <Text
-              style={styles.statValue}
-              className="mt-2 text-xl text-midnight"
-            >
+            <Text className="font-urbanist-bold mt-2 text-xl text-midnight">
               {MOCK_PROFILE.stats.responseRate}%
             </Text>
             <Text className="text-xs text-text-tertiary">
@@ -303,15 +291,3 @@ export default function CompanionProfile() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  headerTitle: {
-    fontFamily: 'Urbanist_700Bold',
-  },
-  name: {
-    fontFamily: 'Urbanist_700Bold',
-  },
-  statValue: {
-    fontFamily: 'Urbanist_700Bold',
-  },
-});

@@ -53,6 +53,11 @@ export class BrowseCompanionsQueryDto {
 
   // Location-based filtering
   @IsOptional()
+  @IsString()
+  @MaxLength(10)
+  province?: string; // Vietnamese province/city code (e.g., "HCM", "HN")
+
+  @IsOptional()
   @Type(() => Number)
   @IsNumber()
   @Min(-90)

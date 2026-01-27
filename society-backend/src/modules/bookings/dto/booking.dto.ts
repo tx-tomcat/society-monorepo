@@ -12,7 +12,7 @@ import {
   MaxLength,
 } from 'class-validator';
 import { Transform } from 'class-transformer';
-import { BookingStatus, ServiceType, PaymentStatus } from '@generated/client';
+import { BookingStatus, PaymentStatus } from '@generated/client';
 
 // ============================================
 // Request DTOs
@@ -22,8 +22,9 @@ export class CreateBookingDto {
   @IsUUID()
   companionId: string; // User ID of the companion
 
-  @IsEnum(ServiceType)
-  occasionType: ServiceType;
+  @IsOptional()
+  @IsUUID()
+  occasionId?: string; // ID of the selected occasion (optional)
 
   @IsDateString()
   startDatetime: string;
@@ -80,6 +81,19 @@ export class GetBookingsQueryDto {
   @Min(1)
   @Max(50)
   limit?: number = 20;
+}
+
+export class GetBookingRequestsQueryDto {
+  @IsOptional()
+  @Transform(({ value }) => parseInt(value, 10))
+  @IsNumber()
+  @Min(1)
+  @Max(50)
+  limit?: number = 20;
+
+  @IsOptional()
+  @IsUUID()
+  cursor?: string; // Cursor-based pagination using booking ID
 }
 
 export class SubmitReviewDto {
@@ -173,11 +187,18 @@ export class DisputeReviewDto {
 // Response Types
 // ============================================
 
+export interface OccasionInfo {
+  id: string;
+  code: string;
+  emoji: string;
+  name: string;
+}
+
 export interface BookingListItem {
   id: string;
   bookingNumber: string;
   status: BookingStatus;
-  occasionType: ServiceType;
+  occasion: OccasionInfo | null;
   startDatetime: string;
   endDatetime: string;
   durationHours: number;
@@ -202,7 +223,7 @@ export interface BookingDetailResponse {
   id: string;
   bookingNumber: string;
   status: BookingStatus;
-  occasionType: ServiceType;
+  occasion: OccasionInfo | null;
   startDatetime: string;
   endDatetime: string;
   durationHours: number;
@@ -250,14 +271,14 @@ export interface ReviewInfo {
 export interface BookingRequestItem {
   id: string;
   bookingNumber: string;
-  occasionType: ServiceType;
+  occasion: OccasionInfo | null;
   startDatetime: string;
   endDatetime: string;
   durationHours: number;
   locationAddress: string;
   totalPrice: number;
   specialRequests: string | null;
-  hirer: {
+  hirer?: {
     id: string;
     displayName: string;
     avatar: string | null;
@@ -277,7 +298,7 @@ export interface ScheduleBooking {
   bookingNumber: string;
   startTime: string;
   endTime: string;
-  occasionType: ServiceType;
+  occasion: OccasionInfo | null;
   status: BookingStatus;
   hirer: {
     displayName: string;

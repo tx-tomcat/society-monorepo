@@ -98,10 +98,20 @@ export type PhotoVerification = Prisma.PhotoVerificationModel
  */
 export type Booking = Prisma.BookingModel
 /**
+ * Model BookingCancellation
+ * 
+ */
+export type BookingCancellation = Prisma.BookingCancellationModel
+/**
  * Model Payment
  * 
  */
 export type Payment = Prisma.PaymentModel
+/**
+ * Model PaymentStatusHistory
+ * 
+ */
+export type PaymentStatusHistory = Prisma.PaymentStatusHistoryModel
 /**
  * Model Earning
  * 
@@ -247,3 +257,43 @@ export type ProfileBoost = Prisma.ProfileBoostModel
  * 
  */
 export type Referral = Prisma.ReferralModel
+/**
+ * Model Occasion
+ * 
+ */
+export type Occasion = Prisma.OccasionModel
+/**
+ * Model Holiday
+ * 
+ */
+export type Holiday = Prisma.HolidayModel
+/**
+ * Model OccasionInteraction
+ * 
+ */
+export type OccasionInteraction = Prisma.OccasionInteractionModel
+/**
+ * Model UserInteraction
+ * 
+ */
+export type UserInteraction = Prisma.UserInteractionModel
+/**
+ * Model RecommendationCache
+ * 
+ */
+export type RecommendationCache = Prisma.RecommendationCacheModel
+/**
+ * Model PaymentRequest
+ * 
+ */
+export type PaymentRequest = Prisma.PaymentRequestModel
+/**
+ * Model WebhookLog
+ * 
+ */
+export type WebhookLog = Prisma.WebhookLogModel
+/**
+ * Model IdempotencyKey
+ * 
+ */
+export type IdempotencyKey = Prisma.IdempotencyKeyModel

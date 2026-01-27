@@ -5,7 +5,7 @@ import { useRouter } from 'expo-router';
 import { MotiView } from 'moti';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Keyboard, Pressable, StyleSheet, TextInput } from 'react-native';
+import { Keyboard, Pressable, TextInput } from 'react-native';
 
 import {
   colors,
@@ -105,7 +105,7 @@ function SearchResultItem({
       />
       <View className="flex-1">
         <View className="flex-row items-center gap-1">
-          <Text style={styles.name} className="text-base text-midnight">
+          <Text className="font-urbanist-semibold text-base text-midnight">
             {companion.name}
           </Text>
           {companion.isVerified && (
@@ -127,7 +127,7 @@ function SearchResultItem({
           </View>
         </View>
       </View>
-      <Text style={styles.price} className="text-sm text-rose-400">
+      <Text className="font-urbanist-semibold text-sm text-rose-400">
         {companion.hourlyRate.toLocaleString('vi-VN')}đ
       </Text>
     </Pressable>
@@ -219,7 +219,7 @@ export default function SearchScreen() {
               onChangeText={setQuery}
               placeholder={t('hirer.search.placeholder')}
               placeholderTextColor={colors.text.tertiary}
-              style={[styles.input, { color: colors.midnight.DEFAULT }]}
+              style={{ fontFamily: 'Urbanist_400Regular', color: colors.midnight.DEFAULT }}
               className="flex-1 text-base"
               returnKeyType="search"
               autoCapitalize="none"
@@ -242,10 +242,7 @@ export default function SearchScreen() {
           transition={{ type: 'timing', duration: 300 }}
           className="px-4 pt-4"
         >
-          <Text
-            style={styles.sectionTitle}
-            className="mb-3 text-base text-midnight"
-          >
+          <Text className="mb-3 font-urbanist-semibold text-base text-midnight">
             {t('hirer.search.recent')}
           </Text>
           {RECENT_SEARCHES.map((search, index) => (
@@ -287,10 +284,7 @@ export default function SearchScreen() {
               <View className="mb-4 size-16 items-center justify-center rounded-full bg-softpink">
                 <Search color={colors.rose[400]} width={28} height={28} />
               </View>
-              <Text
-                style={styles.emptyTitle}
-                className="text-center text-lg text-midnight"
-              >
+              <Text className="text-center font-urbanist-bold text-lg text-midnight">
                 {t('hirer.search.no_results')}
               </Text>
               <Text className="mt-2 text-center text-sm text-text-tertiary">
@@ -304,20 +298,3 @@ export default function SearchScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  input: {
-    fontFamily: 'Urbanist_400Regular',
-  },
-  sectionTitle: {
-    fontFamily: 'Urbanist_600SemiBold',
-  },
-  name: {
-    fontFamily: 'Urbanist_600SemiBold',
-  },
-  price: {
-    fontFamily: 'Urbanist_600SemiBold',
-  },
-  emptyTitle: {
-    fontFamily: 'Urbanist_700Bold',
-  },
-});

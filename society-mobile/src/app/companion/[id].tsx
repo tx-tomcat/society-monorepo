@@ -127,9 +127,8 @@ export default function CompanionProfile() {
             <Pressable
               key={index}
               onPress={() => setCurrentImageIndex(index)}
-              className={`h-2 rounded-full ${
-                index === currentImageIndex ? 'w-6 bg-white' : 'w-2 bg-white/50'
-              }`}
+              className={`h-2 rounded-full ${index === currentImageIndex ? 'w-6 bg-white' : 'w-2 bg-white/50'
+                }`}
             />
           ))}
         </View>

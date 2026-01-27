@@ -1,307 +1,464 @@
 /* eslint-disable max-lines-per-function */
-import { FlashList } from '@shopify/flash-list';
 import type { Href } from 'expo-router';
-import { useRouter } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
+import { MotiView } from 'moti';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Pressable, RefreshControl, ScrollView, TextInput, StyleSheet } from 'react-native';
+import { Pressable, RefreshControl, ScrollView } from 'react-native';
 
-import { CompanionCard, type CompanionData } from '@/components/companion-card';
 import {
+  Badge,
   colors,
   FocusAwareStatusBar,
+  Image,
   SafeAreaView,
   Text,
   View,
 } from '@/components/ui';
-import { Bell, Search } from '@/components/ui/icons';
-import type {
-  Companion,
-  ServiceType,
-} from '@/lib/api/services/companions.service';
-import { useCompanions, useCurrentUser } from '@/lib/hooks';
+import {
+  Bell,
+  Calendar,
+  Clock,
+  Heart,
+  HiremeLogo,
+  MapPin,
+  Search,
+  Star,
+} from '@/components/ui/icons';
+import type { Booking } from '@/lib/api/services/bookings.service';
+import { bookingsService } from '@/lib/api/services/bookings.service';
+import { getPrimaryPhotoUrl } from '@/lib/api/services/companions.service';
+import { favoritesService } from '@/lib/api/services/favorites.service';
+import { useCurrentUser } from '@/lib/hooks';
 
-// Map ServiceType to i18n keys
-const serviceTypeI18nKeys: Record<ServiceType, string> = {
-  FAMILY_INTRODUCTION: 'hirer.home.occasions.family',
-  WEDDING_ATTENDANCE: 'hirer.home.occasions.wedding',
-  TET_COMPANIONSHIP: 'hirer.home.occasions.tet',
-  BUSINESS_EVENT: 'hirer.home.occasions.corporate',
-  CASUAL_OUTING: 'hirer.home.occasions.coffee',
-  CLASS_REUNION: 'hirer.home.occasions.reunion',
-  OTHER: 'hirer.home.occasions.other',
+type UpcomingBooking = Booking & {
+  displayStatus: 'upcoming' | 'active';
 };
 
-// Occasion filter chips with emoji icons matching wireframe
-const occasionIds: { id: string; i18nKey: string; serviceType?: ServiceType }[] = [
-  { id: 'dining', i18nKey: 'hirer.home.occasions.dining', serviceType: 'CASUAL_OUTING' },
-  { id: 'party', i18nKey: 'hirer.home.occasions.party', serviceType: 'CLASS_REUNION' },
-  { id: 'coffee', i18nKey: 'hirer.home.occasions.coffee', serviceType: 'CASUAL_OUTING' },
-  { id: 'event', i18nKey: 'hirer.home.occasions.event', serviceType: 'BUSINESS_EVENT' },
-];
-
-export default function Home() {
+export default function HirerDashboard() {
   const router = useRouter();
   const { t } = useTranslation();
-  const [selectedOccasion, setSelectedOccasion] = React.useState('dining');
-  const [searchQuery, setSearchQuery] = React.useState('');
+
+  const [isRefreshing, setIsRefreshing] = React.useState(false);
+  const [upcomingBookings, setUpcomingBookings] = React.useState<
+    UpcomingBooking[]
+  >([]);
+  const [favoritesCount, setFavoritesCount] = React.useState(0);
+  const [completedBookingsCount, setCompletedBookingsCount] = React.useState(0);
+  const [upcomingCount, setUpcomingCount] = React.useState(0);
 
   // Get current user for greeting
   const { data: currentUser } = useCurrentUser();
   const userName = currentUser?.user?.fullName?.split(' ')[0] || 'there';
 
-  // Map API Companion to CompanionData for the card
-  const mapCompanionToCardData = React.useCallback(
-    (companion: Companion): CompanionData => {
-      const primaryPhoto = companion.photos?.find((p) => p.isPrimary);
-      const photoUrl =
-        primaryPhoto?.url ||
-        companion.photos?.[0]?.url ||
-        companion.user?.avatarUrl ||
-        'https://via.placeholder.com/400';
+  const fetchDashboardData = React.useCallback(async () => {
+    try {
+      // Fetch all dashboard data in parallel
+      const [confirmedRes, completedRes, favoritesRes] = await Promise.all([
+        bookingsService.getHirerBookings('CONFIRMED', 1, 10),
+        bookingsService.getHirerBookings('COMPLETED', 1, 1),
+        favoritesService.getFavorites(1, 1),
+      ]);
 
-      return {
-        id: companion.id,
-        name: companion.user?.fullName || t('hirer.home.unknown_name'),
-        age: 0,
-        image: photoUrl,
-        rating: companion.ratingAvg || 0,
-        reviewCount: companion.ratingCount || 0,
-        location: t('hirer.home.default_location'),
-        pricePerHour: companion.hourlyRate || 0,
-        isVerified: companion.verificationStatus === 'verified',
-        isOnline: companion.isActive ?? false,
-        isPremium: companion.isFeatured ?? false,
-        specialties: (companion.services || [])
-          .filter((s) => s.isAvailable)
-          .map((s) => t(serviceTypeI18nKeys[s.type]))
-          .slice(0, 3),
-      };
-    },
-    [t]
+      // Filter upcoming bookings (today and future)
+      const now = new Date();
+      const todayStart = new Date();
+      todayStart.setHours(0, 0, 0, 0);
+
+      const upcoming = (confirmedRes.bookings || [])
+        .filter((booking) => {
+          const endDate = new Date(booking.endDatetime);
+          return endDate >= now;
+        })
+        .map((booking) => {
+          const startDate = new Date(booking.startDatetime);
+          const endDate = new Date(booking.endDatetime);
+
+          let displayStatus: 'upcoming' | 'active' = 'upcoming';
+          if (now >= startDate && now <= endDate) {
+            displayStatus = 'active';
+          }
+
+          return { ...booking, displayStatus };
+        })
+        .slice(0, 3); // Show max 3 upcoming bookings
+
+      setUpcomingBookings(upcoming);
+      setUpcomingCount(confirmedRes.pagination?.total || 0);
+      setCompletedBookingsCount(completedRes.pagination?.total || 0);
+      setFavoritesCount(favoritesRes.total || 0);
+    } catch (error) {
+      console.error('Failed to fetch dashboard data:', error);
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, []);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchDashboardData();
+    }, [fetchDashboardData])
   );
 
-  // Get the service type filter based on selected occasion
-  const selectedServiceType = React.useMemo(() => {
-    const occasion = occasionIds.find((o) => o.id === selectedOccasion);
-    return occasion?.serviceType;
-  }, [selectedOccasion]);
-
-  // Fetch companions from API
-  const {
-    data: companionsData,
-    isLoading,
-    isError,
-    refetch,
-    isRefetching,
-  } = useCompanions({
-    serviceType: selectedServiceType,
-    verified: true,
-    sort: 'rating',
-  });
-
-  // Map API data to card format
-  const companions = React.useMemo(() => {
-    if (!companionsData?.companions) return [];
-    return companionsData.companions.map(mapCompanionToCardData);
-  }, [companionsData, mapCompanionToCardData]);
+  const handleRefresh = React.useCallback(() => {
+    setIsRefreshing(true);
+    fetchDashboardData();
+  }, [fetchDashboardData]);
 
   const handleNotificationPress = React.useCallback(() => {
     // TODO: Navigate to notifications
     console.log('Notifications pressed');
   }, []);
 
-  const handleSeeAllPress = React.useCallback(() => {
-    // Navigate to browse screen
+  const handleBookingPress = React.useCallback(
+    (booking: UpcomingBooking) => {
+      router.push(`/hirer/orders/${booking.id}` as Href);
+    },
+    [router]
+  );
+
+  const handleViewAllBookings = React.useCallback(() => {
+    router.push('/hirer/orders' as Href);
+  }, [router]);
+
+  const handleBrowseCompanions = React.useCallback(() => {
     router.push('/hirer/browse' as Href);
   }, [router]);
 
-  const handleCompanionPress = React.useCallback(
-    (companion: CompanionData) => {
-      // Navigate to companion profile
-      router.push(`/companion/${companion.id}` as Href);
-    },
-    [router]
-  );
+  const handleViewFavorites = React.useCallback(() => {
+    router.push('/hirer/favorites' as Href);
+  }, [router]);
 
-  const handleBookPress = React.useCallback(
-    (companion: CompanionData) => {
-      // Navigate to booking flow
-      router.push(`/booking/${companion.id}` as Href);
-    },
-    [router]
-  );
-
-  const renderCompanion = React.useCallback(
-    ({ item }: { item: CompanionData }) => (
-      <View className="px-4 pb-3">
-        <CompanionCard
-          companion={item}
-          variant="compact"
-          onPress={() => handleCompanionPress(item)}
-          onBookPress={() => handleBookPress(item)}
-          testID={`companion-card-${item.id}`}
-        />
-      </View>
-    ),
-    [handleCompanionPress, handleBookPress]
+  // Computed stats
+  const stats = React.useMemo(
+    () => [
+      {
+        labelKey: 'hirer.dashboard.stats.upcoming',
+        value: String(upcomingCount),
+        icon: Calendar,
+        color: colors.rose[400],
+      },
+      {
+        labelKey: 'hirer.dashboard.stats.favorites',
+        value: String(favoritesCount),
+        icon: Heart,
+        color: colors.lavender[400],
+      },
+      {
+        labelKey: 'hirer.dashboard.stats.completed',
+        value: String(completedBookingsCount),
+        icon: Star,
+        color: colors.teal[400],
+      },
+    ],
+    [upcomingCount, favoritesCount, completedBookingsCount]
   );
 
   return (
     <View className="flex-1 bg-warmwhite">
       <FocusAwareStatusBar />
 
-      {/* Header - Greeting style matching wireframe */}
+      {/* Header */}
       <SafeAreaView edges={['top']}>
-        <View className="flex-row items-center justify-between px-4 py-3">
-          {/* Greeting */}
-          <View>
-            <Text className="text-sm text-text-secondary">
-              {t('hirer.home.welcome_back')}
+        <View className="flex-row items-center gap-4 px-4 py-3">
+          <HiremeLogo color={colors.rose[400]} width={32} height={32} />
+          <View className="flex-1">
+            <Text className="text-sm text-text-tertiary">
+              {t('hirer.dashboard.greeting')}
             </Text>
-            <Text style={styles.userName} className="text-lg text-midnight">
+            <Text className="font-urbanist-bold text-xl text-midnight">
               {userName} 👋
             </Text>
           </View>
-
-          {/* Notification Icon */}
           <Pressable
-            className="size-10 items-center justify-center rounded-full bg-softpink"
             onPress={handleNotificationPress}
+            testID="notification-button"
+            className="relative"
           >
-            <Bell color={colors.midnight.DEFAULT} width={20} height={20} />
-          </Pressable>
-        </View>
-
-        {/* Search Bar */}
-        <View className="px-4 pb-3">
-          <View className="flex-row items-center gap-2 rounded-xl border border-border-light bg-white px-3 py-2.5">
-            <Search color={colors.text.tertiary} width={20} height={20} />
-            <TextInput
-              className="flex-1 text-sm"
-              placeholder={t('hirer.home.search_placeholder')}
-              placeholderTextColor={colors.text.tertiary}
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-              style={{ color: colors.midnight.DEFAULT }}
-            />
-          </View>
-        </View>
-
-        {/* Popular Occasions */}
-        <View className="px-4 pb-3">
-          <Text style={styles.sectionTitle} className="mb-3 text-sm text-midnight">
-            {t('hirer.home.popular_occasions')}
-          </Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            <View className="flex-row gap-2">
-              {occasionIds.map((occasion) => (
-                <Pressable
-                  key={occasion.id}
-                  onPress={() => setSelectedOccasion(occasion.id)}
-                  className={`rounded-full px-4 py-2 ${
-                    selectedOccasion === occasion.id
-                      ? 'bg-rose-400'
-                      : 'bg-softpink'
-                  }`}
-                >
-                  <Text
-                    className={`text-xs ${
-                      selectedOccasion === occasion.id
-                        ? 'font-semibold text-white'
-                        : 'text-midnight'
-                    }`}
-                  >
-                    {t(occasion.i18nKey)}
-                  </Text>
-                </Pressable>
-              ))}
-            </View>
-          </ScrollView>
-        </View>
-
-        {/* Top Companions Section Header */}
-        <View className="flex-row items-center justify-between px-4 pb-3">
-          <Text style={styles.sectionTitle} className="text-sm text-midnight">
-            {t('hirer.home.top_companions')}
-          </Text>
-          <Pressable onPress={handleSeeAllPress}>
-            <Text className="text-sm font-medium text-teal-400">
-              {t('hirer.home.see_all')}
-            </Text>
+            <Bell color={colors.midnight.DEFAULT} width={24} height={24} />
           </Pressable>
         </View>
       </SafeAreaView>
 
-      {/* Loading State */}
-      {isLoading && (
-        <View className="flex-1 items-center justify-center">
-          <ActivityIndicator size="large" color={colors.teal[400]} />
-          <Text className="mt-4 text-text-secondary">
-            {t('hirer.home.loading')}
-          </Text>
-        </View>
-      )}
+      <ScrollView
+        className="flex-1"
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} />
+        }
+      >
+        {/* Stats Cards */}
+        <MotiView
+          from={{ opacity: 0, translateY: 20 }}
+          animate={{ opacity: 1, translateY: 0 }}
+          transition={{ type: 'timing', duration: 500 }}
+          className="p-4"
+        >
+          <View className="flex-row gap-3">
+            {stats.map((stat) => (
+              <Pressable
+                key={stat.labelKey}
+                onPress={
+                  stat.labelKey === 'hirer.dashboard.stats.upcoming'
+                    ? handleViewAllBookings
+                    : stat.labelKey === 'hirer.dashboard.stats.favorites'
+                      ? handleViewFavorites
+                      : undefined
+                }
+                testID={`stat-card-${stat.labelKey.split('.').pop()}`}
+                className="flex-1 rounded-2xl bg-white p-4"
+              >
+                <View
+                  className="mb-2 size-10 items-center justify-center rounded-full"
+                  style={{ backgroundColor: `${stat.color}20` }}
+                >
+                  <stat.icon color={stat.color} width={20} height={20} />
+                </View>
+                <Text className="font-urbanist-bold text-xl text-midnight">
+                  {stat.value}
+                </Text>
+                <Text className="text-xs text-text-tertiary">
+                  {t(stat.labelKey)}
+                </Text>
+              </Pressable>
+            ))}
+          </View>
+        </MotiView>
 
-      {/* Error State */}
-      {isError && !isLoading && (
-        <View className="flex-1 items-center justify-center px-8">
-          <Text className="text-center text-lg font-semibold text-midnight">
-            {t('hirer.home.error.title')}
-          </Text>
-          <Text className="mt-2 text-center text-text-secondary">
-            {t('hirer.home.error.description')}
-          </Text>
+        {/* Browse Companions CTA */}
+        <MotiView
+          from={{ opacity: 0, translateY: 20 }}
+          animate={{ opacity: 1, translateY: 0 }}
+          transition={{ type: 'timing', duration: 500, delay: 100 }}
+          className="mx-4 mb-4"
+        >
           <Pressable
-            onPress={() => refetch()}
-            className="mt-4 rounded-full bg-teal-400 px-6 py-3"
+            onPress={handleBrowseCompanions}
+            testID="browse-card"
+            className="flex-row items-center justify-between rounded-2xl bg-rose-400 p-4"
           >
-            <Text className="font-semibold text-white">
-              {t('hirer.home.error.retry')}
-            </Text>
+            <View className="flex-row items-center gap-3">
+              <View className="size-12 items-center justify-center rounded-full bg-white/20">
+                <Search color="#FFFFFF" width={24} height={24} />
+              </View>
+              <View>
+                <Text className="text-sm text-white/80">
+                  {t('hirer.dashboard.find_companion')}
+                </Text>
+                <Text className="font-urbanist-bold text-lg text-white">
+                  {t('hirer.dashboard.browse_companions')}
+                </Text>
+              </View>
+            </View>
+            <View className="rounded-full bg-white/20 px-3 py-1">
+              <Text className="text-sm font-semibold text-white">
+                {t('hirer.dashboard.explore')}
+              </Text>
+            </View>
           </Pressable>
-        </View>
-      )}
+        </MotiView>
 
-      {/* Empty State */}
-      {!isLoading && !isError && companions.length === 0 && (
-        <View className="flex-1 items-center justify-center px-8">
-          <Text className="text-center text-lg font-semibold text-midnight">
-            {t('hirer.home.empty.title')}
-          </Text>
-          <Text className="mt-2 text-center text-text-secondary">
-            {t('hirer.home.empty.description')}
-          </Text>
-        </View>
-      )}
+        {/* Upcoming Bookings */}
+        <MotiView
+          from={{ opacity: 0, translateY: 20 }}
+          animate={{ opacity: 1, translateY: 0 }}
+          transition={{ type: 'timing', duration: 500, delay: 200 }}
+          className="px-4"
+        >
+          <View className="mb-3 flex-row items-center justify-between">
+            <Text style={{ fontFamily: 'Urbanist_700Bold' }} className="text-lg text-midnight">
+              {t('hirer.dashboard.upcoming_bookings')}
+            </Text>
+            <Pressable onPress={handleViewAllBookings} testID="view-all-bookings">
+              <Text className="text-sm font-semibold text-rose-400">
+                {t('common.view_all')}
+              </Text>
+            </Pressable>
+          </View>
 
-      {/* Companion List - Compact cards */}
-      {!isLoading && !isError && companions.length > 0 && (
-        <FlashList
-          data={companions}
-          renderItem={renderCompanion}
-          estimatedItemSize={80}
-          keyExtractor={(item) => item.id}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 20 }}
-          refreshControl={
-            <RefreshControl
-              refreshing={isRefetching}
-              onRefresh={refetch}
-              tintColor={colors.teal[400]}
-            />
-          }
-        />
-      )}
+          {upcomingBookings.length > 0 ? (
+            <View className="gap-3">
+              {upcomingBookings.map((booking, index) => {
+                const startTime = new Date(booking.startDatetime);
+                const endTime = new Date(booking.endDatetime);
+
+                // Format date
+                const isToday =
+                  startTime.toDateString() === new Date().toDateString();
+                const dateString = isToday
+                  ? t('common.today')
+                  : startTime.toLocaleDateString('en-US', {
+                    weekday: 'short',
+                    month: 'short',
+                    day: 'numeric',
+                  });
+
+                const timeString = `${startTime.toLocaleTimeString('en-US', {
+                  hour: 'numeric',
+                  minute: '2-digit',
+                })} - ${endTime.toLocaleTimeString('en-US', {
+                  hour: 'numeric',
+                  minute: '2-digit',
+                })}`;
+
+                // Get companion photo
+                const companionPhoto =
+                  getPrimaryPhotoUrl(booking.companion.photos) ||
+                  booking.companion.avatar ||
+                  'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=120';
+
+                return (
+                  <MotiView
+                    key={booking.id}
+                    from={{ opacity: 0, translateX: -20 }}
+                    animate={{ opacity: 1, translateX: 0 }}
+                    transition={{
+                      type: 'timing',
+                      duration: 400,
+                      delay: 300 + index * 100,
+                    }}
+                  >
+                    <Pressable
+                      onPress={() => handleBookingPress(booking)}
+                      testID={`booking-card-${booking.id}`}
+                      className="flex-row gap-4 rounded-2xl bg-white p-4"
+                    >
+                      <Image
+                        source={{ uri: companionPhoto }}
+                        className="size-14 rounded-full"
+                        contentFit="cover"
+                      />
+                      <View className="flex-1">
+                        <View className="flex-row items-center justify-between">
+                          <Text className="font-semibold text-midnight">
+                            {booking.companion.displayName}
+                          </Text>
+                          <Badge
+                            label={
+                              booking.displayStatus === 'active'
+                                ? t('common.status.active')
+                                : t('common.status.upcoming')
+                            }
+                            variant={
+                              booking.displayStatus === 'active'
+                                ? 'teal'
+                                : 'rose'
+                            }
+                            size="sm"
+                          />
+                        </View>
+                        <Text className="mt-1 text-sm text-rose-400">
+                          {booking.occasion ? `${booking.occasion.emoji} ${booking.occasion.name}` : t('common.occasion')}
+                        </Text>
+                        <View className="mt-2 flex-row items-center gap-4">
+                          <View className="flex-row items-center gap-1">
+                            <Clock
+                              color={colors.text.tertiary}
+                              width={14}
+                              height={14}
+                            />
+                            <Text className="text-xs text-text-tertiary">
+                              {dateString}, {timeString}
+                            </Text>
+                          </View>
+                        </View>
+                        <View className="mt-1 flex-row items-center gap-1">
+                          <MapPin
+                            color={colors.text.tertiary}
+                            width={14}
+                            height={14}
+                          />
+                          <Text
+                            className="text-xs text-text-tertiary"
+                            numberOfLines={1}
+                          >
+                            {booking.locationAddress}
+                          </Text>
+                        </View>
+                      </View>
+                    </Pressable>
+                  </MotiView>
+                );
+              })}
+            </View>
+          ) : (
+            <View className="items-center rounded-2xl bg-white py-12">
+              <Calendar color={colors.rose[400]} width={48} height={48} />
+              <Text className="mt-3 text-lg font-semibold text-midnight">
+                {t('hirer.dashboard.no_upcoming_bookings')}
+              </Text>
+              <Text className="mt-1 text-center text-sm text-text-tertiary">
+                {t('hirer.dashboard.start_browsing')}
+              </Text>
+              <Pressable
+                onPress={handleBrowseCompanions}
+                className="mt-4 rounded-full bg-rose-400 px-6 py-2"
+              >
+                <Text className="font-semibold text-white">
+                  {t('hirer.dashboard.browse_now')}
+                </Text>
+              </Pressable>
+            </View>
+          )}
+        </MotiView>
+
+        {/* Quick Actions */}
+        <MotiView
+          from={{ opacity: 0, translateY: 20 }}
+          animate={{ opacity: 1, translateY: 0 }}
+          transition={{ type: 'timing', duration: 500, delay: 400 }}
+          className="px-4 py-6"
+        >
+          <Text
+            style={{ fontFamily: 'Urbanist_700Bold' }}
+            className="mb-3 text-lg text-midnight"
+          >
+            {t('hirer.dashboard.quick_actions')}
+          </Text>
+          <View className="flex-row gap-3">
+            <Pressable
+              onPress={handleBrowseCompanions}
+              testID="quick-action-browse"
+              className="flex-1 items-center rounded-2xl bg-white p-4"
+            >
+              <View className="mb-2 size-12 items-center justify-center rounded-full bg-rose-400/10">
+                <Search color={colors.rose[400]} width={24} height={24} />
+              </View>
+              <Text className="text-sm font-medium text-midnight">
+                {t('hirer.dashboard.actions.browse')}
+              </Text>
+            </Pressable>
+            <Pressable
+              onPress={handleViewAllBookings}
+              testID="quick-action-bookings"
+              className="flex-1 items-center rounded-2xl bg-white p-4"
+            >
+              <View className="mb-2 size-12 items-center justify-center rounded-full bg-lavender-400/10">
+                <Calendar color={colors.lavender[400]} width={24} height={24} />
+              </View>
+              <Text className="text-sm font-medium text-midnight">
+                {t('hirer.dashboard.actions.bookings')}
+              </Text>
+            </Pressable>
+            <Pressable
+              onPress={handleViewFavorites}
+              testID="quick-action-favorites"
+              className="flex-1 items-center rounded-2xl bg-white p-4"
+            >
+              <View className="mb-2 size-12 items-center justify-center rounded-full bg-teal-400/10">
+                <Heart color={colors.teal[400]} width={24} height={24} />
+              </View>
+              <Text className="text-sm font-medium text-midnight">
+                {t('hirer.dashboard.actions.favorites')}
+              </Text>
+            </Pressable>
+          </View>
+        </MotiView>
+
+        {/* Bottom spacing */}
+        <View className="h-20" />
+      </ScrollView>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  userName: {
-    fontFamily: 'Urbanist_600SemiBold',
-  },
-  sectionTitle: {
-    fontFamily: 'Urbanist_600SemiBold',
-  },
-});

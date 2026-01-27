@@ -9,7 +9,6 @@ import {
   FlatList,
   Pressable,
   RefreshControl,
-  StyleSheet,
 } from 'react-native';
 
 import {
@@ -28,6 +27,7 @@ import {
   Star,
   Trash2,
 } from '@/components/ui/icons';
+import { getPhotoUrl } from '@/lib/api/services/companions.service';
 import { useFavorites, useRemoveFavorite } from '@/lib/hooks';
 
 type FavoriteItem = {
@@ -132,10 +132,7 @@ function EmptyState() {
       <View className="mb-4 size-20 items-center justify-center rounded-full bg-softpink">
         <Heart color={colors.rose[400]} width={40} height={40} />
       </View>
-      <Text
-        style={styles.emptyTitle}
-        className="mb-2 text-center text-lg text-midnight"
-      >
+      <Text className="mb-2 text-center font-urbanist-bold text-lg text-midnight">
         {t('hirer.favorites.empty_title')}
       </Text>
       <Text className="mb-6 text-center text-sm text-text-secondary">
@@ -174,14 +171,14 @@ export default function Favorites() {
       companionId: f.companionId,
       companion: {
         id: f.companion?.id || f.companionId,
-        name: f.companion?.user?.fullName || '',
+        name: f.companion?.displayName || '',
         profileImage:
-          f.companion?.user?.avatarUrl || f.companion?.photos?.[0]?.url,
+          f.companion?.avatar || getPhotoUrl(f.companion?.photos?.[0]),
         hourlyRate: f.companion?.hourlyRate || 0,
-        avgRating: f.companion?.ratingAvg ?? 0,
-        totalReviews: f.companion?.ratingCount ?? 0,
+        avgRating: f.companion?.rating ?? 0,
+        totalReviews: f.companion?.reviewCount ?? 0,
         location: f.companion?.languages?.join(', '),
-        isVerified: f.companion?.user?.isVerified ?? false,
+        isVerified: f.companion?.isVerified ?? false,
       },
     }));
   }, [favoritesData]);
@@ -238,10 +235,7 @@ export default function Favorites() {
           <Pressable onPress={handleBack}>
             <ArrowLeft color={colors.midnight.DEFAULT} width={24} height={24} />
           </Pressable>
-          <Text
-            style={styles.headerTitle}
-            className="flex-1 text-xl text-midnight"
-          >
+          <Text className="flex-1 font-urbanist-bold text-xl text-midnight">
             {t('hirer.favorites.header')}
           </Text>
           {favorites.length > 0 && (
@@ -274,11 +268,3 @@ export default function Favorites() {
   );
 }
 
-const styles = StyleSheet.create({
-  headerTitle: {
-    fontFamily: 'Urbanist_700Bold',
-  },
-  emptyTitle: {
-    fontFamily: 'Urbanist_700Bold',
-  },
-});

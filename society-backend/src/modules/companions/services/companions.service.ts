@@ -1,5 +1,11 @@
 import { DateUtils } from '@/common/utils/date.utils';
+import { StringUtils } from '@/common/utils/string.utils';
 import { PrismaService } from '@/prisma/prisma.service';
+import {
+  CachePatternsService,
+  CACHE_KEYS,
+  CACHE_TTL,
+} from '@/modules/cache/cache-patterns.service';
 import { BoostStatus, BoostTier, CompanionAvailability, Prisma, ServiceType, UserRole, VerificationStatus } from '@generated/client';
 import {
   BadRequestException,
@@ -51,7 +57,10 @@ const BOOST_PRICING: Record<BoostTierEnum, { durationHours: number; price: numbe
 export class CompanionsService {
   private readonly logger = new Logger(CompanionsService.name);
 
-  constructor(private readonly prisma: PrismaService) { }
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly cachePatterns: CachePatternsService,
+  ) {}
 
   /**
    * Browse companions with filters
@@ -67,7 +76,8 @@ export class CompanionsService {
       maxPrice,
       rating,
       verified,
-      // Location params are accepted but logged as not yet implemented
+      province,
+      // Lat/lng params are accepted for future GPS-based filtering
       latitude,
       longitude,
       radiusKm = 25,
@@ -75,15 +85,6 @@ export class CompanionsService {
       limit = 20,
       sort = 'popular',
     } = query;
-
-    // Log if location filtering is attempted but not yet available
-    if (latitude !== undefined && longitude !== undefined) {
-      this.logger.warn(
-        `Location-based filtering requested (lat: ${latitude}, lng: ${longitude}, radius: ${radiusKm}km) ` +
-        `but companion location data is not yet available in the database schema. ` +
-        `Add locationLat/locationLng fields to CompanionProfile to enable this feature.`
-      );
-    }
 
     // Get blocked user IDs if user is authenticated
     let blockedUserIds: string[] = [];
@@ -143,6 +144,11 @@ export class CompanionsService {
       }
     }
 
+    // Province-based location filtering
+    if (province) {
+      where.province = province;
+    }
+
     // Build orderBy
     let orderBy: Prisma.CompanionProfileOrderByWithRelationInput | Prisma.CompanionProfileOrderByWithRelationInput[] = {};
     switch (sort) {
@@ -186,11 +192,16 @@ export class CompanionsService {
               isVerified: true,
             },
           },
+          // Only fetch first 3 photos with minimal fields for list view
           photos: {
             orderBy: { position: 'asc' },
+            take: 3,
+            select: { url: true },
           },
+          // Only fetch serviceType for list view
           services: {
             where: { isEnabled: true },
+            select: { serviceType: true },
           },
         },
       }),
@@ -549,7 +560,7 @@ export class CompanionsService {
       bankAccounts: profile.bankAccounts.map((b) => ({
         id: b.id,
         bankName: b.bankName,
-        accountNumber: b.accountNumber.replace(/.(?=.{4})/g, '*'), // Mask account number
+        accountNumber: StringUtils.maskSensitiveData(b.accountNumber, 4),
         accountHolder: b.accountHolder,
         isPrimary: b.isPrimary,
         isVerified: b.isVerified,
@@ -591,36 +602,75 @@ export class CompanionsService {
       data: recurringData,
     });
 
-    // Handle exceptions if provided
+    // Handle exceptions if provided - batch fetch to avoid N+1
     if (dto.exceptions && dto.exceptions.length > 0) {
+      const exceptionDates = dto.exceptions.map((e) => new Date(e.date));
+
+      // Fetch all existing exceptions in a single query
+      const existingExceptions = await this.prisma.companionAvailability.findMany({
+        where: {
+          companionId: profile.id,
+          isRecurring: false,
+          specificDate: { in: exceptionDates },
+        },
+      });
+
+      // Create a map for quick lookup
+      const existingMap = new Map(
+        existingExceptions.map((e) => [e.specificDate?.toISOString().split('T')[0], e]),
+      );
+
+      // Separate into updates and creates
+      const toUpdate: { id: string; isAvailable: boolean }[] = [];
+      const toCreate: {
+        companionId: string;
+        dayOfWeek: number;
+        startTime: string;
+        endTime: string;
+        isRecurring: boolean;
+        specificDate: Date;
+        isAvailable: boolean;
+      }[] = [];
+
       for (const exception of dto.exceptions) {
-        // Find existing exception for this date
-        const existingException = await this.prisma.companionAvailability.findFirst({
-          where: {
+        const dateKey = new Date(exception.date).toISOString().split('T')[0];
+        const existing = existingMap.get(dateKey);
+
+        if (existing) {
+          toUpdate.push({ id: existing.id, isAvailable: exception.available });
+        } else {
+          toCreate.push({
             companionId: profile.id,
+            dayOfWeek: new Date(exception.date).getDay(),
+            startTime: '00:00',
+            endTime: '23:59',
             isRecurring: false,
             specificDate: new Date(exception.date),
-          },
-        });
-
-        if (existingException) {
-          await this.prisma.companionAvailability.update({
-            where: { id: existingException.id },
-            data: { isAvailable: exception.available },
-          });
-        } else {
-          await this.prisma.companionAvailability.create({
-            data: {
-              companionId: profile.id,
-              dayOfWeek: new Date(exception.date).getDay(),
-              startTime: '00:00',
-              endTime: '23:59',
-              isRecurring: false,
-              specificDate: new Date(exception.date),
-              isAvailable: exception.available,
-            },
+            isAvailable: exception.available,
           });
         }
+      }
+
+      // Batch update existing exceptions
+      // Note: Using Promise.all with individual updates because each exception
+      // has a different isAvailable value. Prisma's updateMany doesn't support
+      // different values per record. This approach sends updates in parallel.
+      if (toUpdate.length > 0) {
+        await Promise.all(
+          toUpdate.map((u) =>
+            this.prisma.companionAvailability.update({
+              where: { id: u.id },
+              data: { isAvailable: u.isAvailable },
+            }),
+          ),
+        );
+      }
+
+      // Batch create new exceptions
+      if (toCreate.length > 0) {
+        await this.prisma.companionAvailability.createMany({
+          data: toCreate,
+        });
       }
     }
 
@@ -1128,28 +1178,38 @@ export class CompanionsService {
   /**
    * Get companion IDs with active boosts, sorted by multiplier
    * Used internally to prioritize boosted profiles in search
+   * Cached for 5 minutes to reduce database load during high-traffic browse
    */
   private async getBoostedCompanionIds(): Promise<Map<string, number>> {
-    const activeBoosts = await this.prisma.profileBoost.findMany({
-      where: {
-        status: BoostStatus.ACTIVE,
-        expiresAt: { gt: new Date() },
-      },
-      select: {
-        companionId: true,
-        multiplier: true,
-      },
-      orderBy: { multiplier: 'desc' },
-    });
+    // Cache as array of [companionId, multiplier] pairs since Map isn't JSON serializable
+    const cached = await this.cachePatterns.getOrFetch<[string, number][]>(
+      CACHE_KEYS.boostedCompanions(),
+      CACHE_TTL.BOOSTED_COMPANIONS,
+      async () => {
+        const activeBoosts = await this.prisma.profileBoost.findMany({
+          where: {
+            status: BoostStatus.ACTIVE,
+            expiresAt: { gt: new Date() },
+          },
+          select: {
+            companionId: true,
+            multiplier: true,
+          },
+          orderBy: { multiplier: 'desc' },
+        });
 
-    const boostMap = new Map<string, number>();
-    for (const boost of activeBoosts) {
-      // Only keep the highest multiplier if a companion has multiple boosts
-      if (!boostMap.has(boost.companionId)) {
-        boostMap.set(boost.companionId, Number(boost.multiplier));
-      }
-    }
+        const boostMap = new Map<string, number>();
+        for (const boost of activeBoosts) {
+          // Only keep the highest multiplier if a companion has multiple boosts
+          if (!boostMap.has(boost.companionId)) {
+            boostMap.set(boost.companionId, Number(boost.multiplier));
+          }
+        }
 
-    return boostMap;
+        return Array.from(boostMap.entries());
+      },
+    );
+
+    return new Map(cached || []);
   }
 }

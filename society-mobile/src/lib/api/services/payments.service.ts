@@ -3,7 +3,7 @@ import type { PaymentStatus } from './bookings.service';
 // Re-export PaymentStatus from bookings.service.ts for consumers of payments.service
 export type { PaymentStatus } from './bookings.service';
 
-export type PaymentProvider = 'vnpay' | 'momo' | 'stripe' | 'bank_transfer';
+export type PaymentProvider = 'vnpay' | 'momo' | 'stripe' | 'bank_transfer' | 'wallet';
 
 export interface Payment {
   id: string;

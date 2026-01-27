@@ -63,7 +63,9 @@ export const ModelName = {
   Verification: 'Verification',
   PhotoVerification: 'PhotoVerification',
   Booking: 'Booking',
+  BookingCancellation: 'BookingCancellation',
   Payment: 'Payment',
+  PaymentStatusHistory: 'PaymentStatusHistory',
   Earning: 'Earning',
   BankAccount: 'BankAccount',
   Withdrawal: 'Withdrawal',
@@ -92,7 +94,15 @@ export const ModelName = {
   EmergencyEvent: 'EmergencyEvent',
   FavoriteCompanion: 'FavoriteCompanion',
   ProfileBoost: 'ProfileBoost',
-  Referral: 'Referral'
+  Referral: 'Referral',
+  Occasion: 'Occasion',
+  Holiday: 'Holiday',
+  OccasionInteraction: 'OccasionInteraction',
+  UserInteraction: 'UserInteraction',
+  RecommendationCache: 'RecommendationCache',
+  PaymentRequest: 'PaymentRequest',
+  WebhookLog: 'WebhookLog',
+  IdempotencyKey: 'IdempotencyKey'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -115,6 +125,9 @@ export const UserScalarFieldEnum = {
   id: 'id',
   zaloId: 'zaloId',
   phone: 'phone',
+  phoneHash: 'phoneHash',
+  isPhoneVerified: 'isPhoneVerified',
+  phoneVerifiedAt: 'phoneVerifiedAt',
   email: 'email',
   fullName: 'fullName',
   avatarUrl: 'avatarUrl',
@@ -124,6 +137,7 @@ export const UserScalarFieldEnum = {
   status: 'status',
   isVerified: 'isVerified',
   trustScore: 'trustScore',
+  deletedAt: 'deletedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   referredById: 'referredById'
@@ -181,6 +195,8 @@ export const CompanionProfileScalarFieldEnum = {
   bio: 'bio',
   heightCm: 'heightCm',
   languages: 'languages',
+  province: 'province',
+  district: 'district',
   hourlyRate: 'hourlyRate',
   halfDayRate: 'halfDayRate',
   fullDayRate: 'fullDayRate',
@@ -194,6 +210,7 @@ export const CompanionProfileScalarFieldEnum = {
   isHidden: 'isHidden',
   responseRate: 'responseRate',
   acceptanceRate: 'acceptanceRate',
+  deletedAt: 'deletedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -245,10 +262,13 @@ export type CompanionAvailabilityScalarFieldEnum = (typeof CompanionAvailability
 export const HirerProfileScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
+  province: 'province',
+  district: 'district',
   totalBookings: 'totalBookings',
   totalSpent: 'totalSpent',
   ratingAvg: 'ratingAvg',
   ratingCount: 'ratingCount',
+  deletedAt: 'deletedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -294,6 +314,7 @@ export const BookingScalarFieldEnum = {
   companionId: 'companionId',
   status: 'status',
   occasionType: 'occasionType',
+  occasionId: 'occasionId',
   startDatetime: 'startDatetime',
   endDatetime: 'endDatetime',
   durationHours: 'durationHours',
@@ -313,11 +334,28 @@ export const BookingScalarFieldEnum = {
   confirmedAt: 'confirmedAt',
   startedAt: 'startedAt',
   completedAt: 'completedAt',
+  deletedAt: 'deletedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
 export type BookingScalarFieldEnum = (typeof BookingScalarFieldEnum)[keyof typeof BookingScalarFieldEnum]
+
+
+export const BookingCancellationScalarFieldEnum = {
+  id: 'id',
+  bookingId: 'bookingId',
+  type: 'type',
+  emergencyType: 'emergencyType',
+  reason: 'reason',
+  proofDocumentUrl: 'proofDocumentUrl',
+  isVerified: 'isVerified',
+  cancelledById: 'cancelledById',
+  verifiedAt: 'verifiedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type BookingCancellationScalarFieldEnum = (typeof BookingCancellationScalarFieldEnum)[keyof typeof BookingCancellationScalarFieldEnum]
 
 
 export const PaymentScalarFieldEnum = {
@@ -337,6 +375,19 @@ export const PaymentScalarFieldEnum = {
 } as const
 
 export type PaymentScalarFieldEnum = (typeof PaymentScalarFieldEnum)[keyof typeof PaymentScalarFieldEnum]
+
+
+export const PaymentStatusHistoryScalarFieldEnum = {
+  id: 'id',
+  paymentId: 'paymentId',
+  fromStatus: 'fromStatus',
+  toStatus: 'toStatus',
+  reason: 'reason',
+  changedBy: 'changedBy',
+  createdAt: 'createdAt'
+} as const
+
+export type PaymentStatusHistoryScalarFieldEnum = (typeof PaymentStatusHistoryScalarFieldEnum)[keyof typeof PaymentStatusHistoryScalarFieldEnum]
 
 
 export const EarningScalarFieldEnum = {
@@ -391,6 +442,7 @@ export const ReviewScalarFieldEnum = {
   tags: 'tags',
   isVisible: 'isVisible',
   isDisputed: 'isDisputed',
+  deletedAt: 'deletedAt',
   createdAt: 'createdAt'
 } as const
 
@@ -417,6 +469,7 @@ export const MessageScalarFieldEnum = {
   content: 'content',
   messageType: 'messageType',
   isRead: 'isRead',
+  deletedAt: 'deletedAt',
   createdAt: 'createdAt'
 } as const
 
@@ -757,6 +810,133 @@ export const ReferralScalarFieldEnum = {
 } as const
 
 export type ReferralScalarFieldEnum = (typeof ReferralScalarFieldEnum)[keyof typeof ReferralScalarFieldEnum]
+
+
+export const OccasionScalarFieldEnum = {
+  id: 'id',
+  code: 'code',
+  emoji: 'emoji',
+  nameEn: 'nameEn',
+  nameVi: 'nameVi',
+  descriptionEn: 'descriptionEn',
+  descriptionVi: 'descriptionVi',
+  displayOrder: 'displayOrder',
+  isActive: 'isActive',
+  timeSlots: 'timeSlots',
+  dayTypes: 'dayTypes',
+  holidays: 'holidays',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type OccasionScalarFieldEnum = (typeof OccasionScalarFieldEnum)[keyof typeof OccasionScalarFieldEnum]
+
+
+export const HolidayScalarFieldEnum = {
+  id: 'id',
+  code: 'code',
+  nameEn: 'nameEn',
+  nameVi: 'nameVi',
+  startDate: 'startDate',
+  endDate: 'endDate',
+  isRecurring: 'isRecurring',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type HolidayScalarFieldEnum = (typeof HolidayScalarFieldEnum)[keyof typeof HolidayScalarFieldEnum]
+
+
+export const OccasionInteractionScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  occasionId: 'occasionId',
+  eventType: 'eventType',
+  sessionId: 'sessionId',
+  metadata: 'metadata',
+  createdAt: 'createdAt'
+} as const
+
+export type OccasionInteractionScalarFieldEnum = (typeof OccasionInteractionScalarFieldEnum)[keyof typeof OccasionInteractionScalarFieldEnum]
+
+
+export const UserInteractionScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  companionId: 'companionId',
+  eventType: 'eventType',
+  eventValue: 'eventValue',
+  dwellTimeMs: 'dwellTimeMs',
+  sessionId: 'sessionId',
+  metadata: 'metadata',
+  createdAt: 'createdAt'
+} as const
+
+export type UserInteractionScalarFieldEnum = (typeof UserInteractionScalarFieldEnum)[keyof typeof UserInteractionScalarFieldEnum]
+
+
+export const RecommendationCacheScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  companions: 'companions',
+  algorithmVer: 'algorithmVer',
+  expiresAt: 'expiresAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type RecommendationCacheScalarFieldEnum = (typeof RecommendationCacheScalarFieldEnum)[keyof typeof RecommendationCacheScalarFieldEnum]
+
+
+export const PaymentRequestScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  code: 'code',
+  type: 'type',
+  amount: 'amount',
+  status: 'status',
+  bookingId: 'bookingId',
+  sepayId: 'sepayId',
+  gateway: 'gateway',
+  referenceCode: 'referenceCode',
+  webhookLogId: 'webhookLogId',
+  expiresAt: 'expiresAt',
+  completedAt: 'completedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PaymentRequestScalarFieldEnum = (typeof PaymentRequestScalarFieldEnum)[keyof typeof PaymentRequestScalarFieldEnum]
+
+
+export const WebhookLogScalarFieldEnum = {
+  id: 'id',
+  idempotencyKey: 'idempotencyKey',
+  source: 'source',
+  endpoint: 'endpoint',
+  status: 'status',
+  response: 'response',
+  processedAt: 'processedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type WebhookLogScalarFieldEnum = (typeof WebhookLogScalarFieldEnum)[keyof typeof WebhookLogScalarFieldEnum]
+
+
+export const IdempotencyKeyScalarFieldEnum = {
+  id: 'id',
+  key: 'key',
+  userId: 'userId',
+  endpoint: 'endpoint',
+  requestHash: 'requestHash',
+  responseCode: 'responseCode',
+  responseBody: 'responseBody',
+  expiresAt: 'expiresAt',
+  createdAt: 'createdAt'
+} as const
+
+export type IdempotencyKeyScalarFieldEnum = (typeof IdempotencyKeyScalarFieldEnum)[keyof typeof IdempotencyKeyScalarFieldEnum]
 
 
 export const SortOrder = {

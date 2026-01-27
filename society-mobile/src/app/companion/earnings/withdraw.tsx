@@ -8,7 +8,6 @@ import {
   Alert,
   Pressable,
   ScrollView,
-  StyleSheet,
   TextInput,
 } from 'react-native';
 import { showMessage } from 'react-native-flash-message';
@@ -173,10 +172,7 @@ export default function WithdrawFunds() {
           <Pressable onPress={handleBack} testID="back-button">
             <ArrowLeft color={colors.midnight.DEFAULT} width={24} height={24} />
           </Pressable>
-          <Text
-            style={styles.headerTitle}
-            className="flex-1 text-xl text-midnight"
-          >
+          <Text className="font-urbanist-bold flex-1 text-xl text-midnight">
             {t('companion.withdraw.header')}
           </Text>
         </View>
@@ -203,7 +199,7 @@ export default function WithdrawFunds() {
               <Text className="text-sm text-white/80">
                 {t('companion.earnings.available_balance')}
               </Text>
-              <Text style={styles.balance} className="text-xl text-white">
+              <Text className="font-urbanist-bold text-xl text-white">
                 {formatVND(availableBalance, { symbolPosition: 'suffix' })}
               </Text>
             </View>
@@ -402,10 +398,7 @@ export default function WithdrawFunds() {
             <Text className="text-text-secondary">
               {t('companion.withdraw.you_will_receive')}
             </Text>
-            <Text
-              style={styles.receiveAmount}
-              className="text-lg text-midnight"
-            >
+            <Text className="font-urbanist-bold text-lg text-midnight">
               {formatVND(amountNum, { symbolPosition: 'suffix' })}
             </Text>
           </View>
@@ -423,15 +416,3 @@ export default function WithdrawFunds() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  headerTitle: {
-    fontFamily: 'Urbanist_700Bold',
-  },
-  balance: {
-    fontFamily: 'Urbanist_700Bold',
-  },
-  receiveAmount: {
-    fontFamily: 'Urbanist_700Bold',
-  },
-});

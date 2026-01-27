@@ -1,5 +1,6 @@
 import { Injectable, Logger, BadRequestException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { StringUtils } from '@/common/utils/string.utils';
 import { SmsPayload } from '../interfaces/notification.interface';
 import {
   isValidVietnamPhone,
@@ -69,7 +70,7 @@ export class SmsService {
    */
   formatPhoneNumber(phone: string): string {
     if (!isValidVietnamPhone(phone)) {
-      this.logger.warn(`Invalid Vietnam phone number: ${phone}`);
+      this.logger.warn(`Invalid Vietnam phone number: ${StringUtils.maskPhone(phone)}`);
       throw new BadRequestException('Invalid Vietnam phone number format');
     }
 

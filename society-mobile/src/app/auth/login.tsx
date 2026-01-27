@@ -1,65 +1,33 @@
 import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
-import { showMessage } from 'react-native-flash-message';
+import { ActivityIndicator, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button, colors, Text } from '@/components/ui';
-import { SocietyLogo } from '@/components/ui/icons';
-import { useAuth, useSyncUser } from '@/lib/hooks';
+import { HiremeLogo } from '@/components/ui/icons';
+import { useZaloLoginHandler } from '@/lib/hooks';
 
 export default function ZaloLoginScreen() {
   const router = useRouter();
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
-  const { signInWithZalo } = useAuth();
-  const { mutateAsync: syncUser } = useSyncUser();
-  const [isLoading, setIsLoading] = useState(false);
-
-  const handleZaloLogin = async () => {
-    setIsLoading(true);
-    try {
-      const response = await signInWithZalo();
-
-      // Sync user data to local store
-      try {
-        await syncUser();
-      } catch (syncError) {
-        console.warn('Failed to sync user data:', syncError);
-        // Continue anyway - app will handle missing user data
-      }
-
-      if (response.isNewUser) {
-        // New user - navigate to role selection
-        router.replace('/auth/select-role');
-      } else {
-        // Existing user - navigate to main app
-        router.replace('/(app)');
-      }
-    } catch (error) {
-      console.error('Zalo login error:', error);
-      showMessage({
-        message: t('common.error'),
-        description: t('auth.errors.login_failed'),
-        type: 'danger',
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const { handleLoginWithZalo, isLoading } = useZaloLoginHandler();
 
   const handleBack = () => {
     router.back();
   };
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
-      <View style={styles.content}>
+    <View
+      className="flex-1 bg-warmwhite"
+      style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}
+    >
+      <View className="flex-1 justify-center px-6">
         {/* Logo */}
-        <View style={styles.logoContainer}>
-          <View style={styles.logoCircle}>
-            <SocietyLogo color={colors.rose[400]} width={48} height={48} />
+        <View className="items-center">
+          <View className="size-20 items-center justify-center rounded-full bg-rose-50">
+            <HiremeLogo color={colors.rose[400]} width={48} height={48} />
           </View>
         </View>
 
@@ -72,9 +40,9 @@ export default function ZaloLoginScreen() {
         </Text>
 
         {/* Zalo Login Button */}
-        <View style={styles.buttonContainer}>
+        <View className="mt-8">
           <Button
-            onPress={handleZaloLogin}
+            onPress={handleLoginWithZalo}
             disabled={isLoading}
             className="w-full bg-[#0068ff]"
           >
@@ -101,7 +69,7 @@ export default function ZaloLoginScreen() {
       </View>
 
       {/* Footer */}
-      <View style={styles.footer}>
+      <View className="px-6 pb-4">
         <Text className="text-center text-xs text-gray-400">
           {t('auth.terms_agreement')}
         </Text>
@@ -109,33 +77,3 @@ export default function ZaloLoginScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.warmwhite.DEFAULT,
-  },
-  content: {
-    flex: 1,
-    justifyContent: 'center',
-    paddingHorizontal: 24,
-  },
-  logoContainer: {
-    alignItems: 'center',
-  },
-  logoCircle: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: colors.rose[50],
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  buttonContainer: {
-    marginTop: 32,
-  },
-  footer: {
-    paddingHorizontal: 24,
-    paddingBottom: 16,
-  },
-});

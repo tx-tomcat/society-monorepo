@@ -18,5 +18,3 @@ export function HiremeLogo({ width = 48, height = 48, color, style }: HiremeLogo
   );
 }
 
-/** @deprecated Use HiremeLogo instead */
-export const SocietyLogo = HiremeLogo;

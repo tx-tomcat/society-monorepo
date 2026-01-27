@@ -4,7 +4,7 @@ import { useRouter } from 'expo-router';
 import React from 'react';
 import type { SubmitHandler } from 'react-hook-form';
 import { useForm } from 'react-hook-form';
-import { Pressable, ScrollView, StyleSheet } from 'react-native';
+import { Pressable, ScrollView } from 'react-native';
 import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 import Svg, { Path } from 'react-native-svg';
 import * as z from 'zod';
@@ -79,10 +79,7 @@ export const LoginForm = ({ onSubmit = () => {} }: LoginFormProps) => {
 
             {/* Header */}
             <View className="mb-8 gap-2">
-              <Text
-                className="text-3xl font-bold leading-[1.4] text-midnight"
-                style={styles.title}
-              >
+              <Text className="font-urbanist-bold text-3xl leading-[1.4] tracking-normal text-midnight">
                 Forgot Your Password? 🔑
               </Text>
               <Text className="text-lg leading-[1.6] tracking-[0.2px] text-neutral-700">
@@ -124,10 +121,3 @@ export const LoginForm = ({ onSubmit = () => {} }: LoginFormProps) => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  title: {
-    fontFamily: 'Urbanist_700Bold',
-    letterSpacing: 0,
-  },
-});

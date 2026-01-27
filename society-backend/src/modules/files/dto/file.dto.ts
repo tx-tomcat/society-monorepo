@@ -1,3 +1,4 @@
+import { Type } from 'class-transformer';
 import {
   IsString,
   IsOptional,
@@ -50,6 +51,7 @@ export class GetUploadUrlDto {
   @IsString()
   contentType: string;
 
+  @Type(() => Number)
   @IsInt()
   @Min(1)
   @Max(50 * 1024 * 1024) // 50MB max
@@ -67,6 +69,7 @@ export class ProcessImageDto {
   sizes?: ImageSize[];
 
   @IsOptional()
+  @Type(() => Number)
   @IsInt()
   @Min(1)
   @Max(100)
@@ -84,16 +87,19 @@ export class FileFilterDto {
   category?: FileCategory;
 
   @IsOptional()
+  @Type(() => Boolean)
   @IsBoolean()
   isPublic?: boolean;
 
   @IsOptional()
+  @Type(() => Number)
   @IsInt()
   @Min(1)
   @Max(100)
   limit?: number;
 
   @IsOptional()
+  @Type(() => Number)
   @IsInt()
   @Min(0)
   offset?: number;

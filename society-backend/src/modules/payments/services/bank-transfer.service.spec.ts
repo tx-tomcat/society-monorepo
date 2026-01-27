@@ -8,9 +8,23 @@ import { PaymentStatus, EarningsStatus } from '@generated/client';
 describe('BankTransferService', () => {
   let service: BankTransferService;
   let prismaService: PrismaService;
-  let configService: ConfigService;
 
   const mockWebhookSecret = 'test-webhook-secret';
+
+  // Transaction mock that receives a callback and executes it with mock tx
+  const createMockTx = () => ({
+    webhookLog: {
+      findUnique: jest.fn(),
+      create: jest.fn(),
+      update: jest.fn(),
+    },
+    payment: {
+      updateMany: jest.fn(),
+    },
+    earning: {
+      upsert: jest.fn(),
+    },
+  });
 
   const mockPrismaService = {
     payment: {
@@ -18,11 +32,19 @@ describe('BankTransferService', () => {
       findMany: jest.fn(),
       findUnique: jest.fn(),
       update: jest.fn(),
+      updateMany: jest.fn(),
     },
     earning: {
       findUnique: jest.fn(),
       create: jest.fn(),
+      upsert: jest.fn(),
     },
+    webhookLog: {
+      findUnique: jest.fn(),
+      create: jest.fn(),
+      update: jest.fn(),
+    },
+    $transaction: jest.fn(),
   };
 
   const mockConfigService = {
@@ -44,7 +66,6 @@ describe('BankTransferService', () => {
 
     service = module.get<BankTransferService>(BankTransferService);
     prismaService = module.get<PrismaService>(PrismaService);
-    configService = module.get<ConfigService>(ConfigService);
 
     // Reset all mocks
     jest.clearAllMocks();
@@ -160,22 +181,31 @@ describe('BankTransferService', () => {
         },
       };
 
-      // First findFirst for payment lookup, second for duplicate check
-      mockPrismaService.payment.findFirst
-        .mockResolvedValueOnce(mockPayment) // Payment lookup
-        .mockResolvedValueOnce(null); // Duplicate check returns null (no duplicate)
-      mockPrismaService.payment.findUnique.mockResolvedValue(mockPayment);
-      mockPrismaService.payment.update.mockResolvedValue({ ...mockPayment, status: PaymentStatus.HELD });
-      mockPrismaService.earning.findUnique.mockResolvedValue(null);
-      mockPrismaService.earning.create.mockResolvedValue({});
+      // Mock finding the payment
+      mockPrismaService.payment.findFirst.mockResolvedValue(mockPayment);
+
+      // Mock transaction - simulates atomic operations
+      const mockTx = createMockTx();
+      mockTx.webhookLog.findUnique.mockResolvedValue(null); // No existing webhook log
+      mockTx.webhookLog.create.mockResolvedValue({ id: 'webhook-log-123' });
+      mockTx.payment.updateMany.mockResolvedValue({ count: 1 }); // Payment updated
+      mockTx.earning.upsert.mockResolvedValue({});
+      mockTx.webhookLog.update.mockResolvedValue({});
+
+      mockPrismaService.$transaction.mockImplementation(async (callback) => {
+        return callback(mockTx);
+      });
 
       const result = await service.processIncomingPayment(validPayload);
 
       expect(result.success).toBe(true);
       expect(result.paymentId).toBe('payment-123');
-      expect(mockPrismaService.payment.update).toHaveBeenCalledWith(
+      expect(mockTx.payment.updateMany).toHaveBeenCalledWith(
         expect.objectContaining({
-          where: { id: 'payment-123' },
+          where: {
+            id: 'payment-123',
+            status: PaymentStatus.PENDING,
+          },
           data: expect.objectContaining({
             status: PaymentStatus.HELD,
             providerTxnId: 'txn-001',
@@ -203,7 +233,7 @@ describe('BankTransferService', () => {
       expect(result.message).toBe('No matching pending payment found');
     });
 
-    it('should reject duplicate transactions', async () => {
+    it('should reject duplicate transactions via webhook log', async () => {
       const mockPayment = {
         id: 'payment-123',
         bookingId: 'booking-456',
@@ -212,19 +242,51 @@ describe('BankTransferService', () => {
         booking: { companionId: 'companion-789' },
       };
 
-      const mockExistingTxn = {
-        id: 'payment-old',
-        providerTxnId: 'txn-001',
-      };
+      mockPrismaService.payment.findFirst.mockResolvedValue(mockPayment);
 
-      mockPrismaService.payment.findFirst
-        .mockResolvedValueOnce(mockPayment) // First call for finding payment
-        .mockResolvedValueOnce(mockExistingTxn); // Second call for duplicate check
+      // Mock transaction - existing webhook log means duplicate
+      const mockTx = createMockTx();
+      mockTx.webhookLog.findUnique.mockResolvedValue({
+        id: 'existing-log',
+        response: { paymentId: 'payment-old' },
+      });
+
+      mockPrismaService.$transaction.mockImplementation(async (callback) => {
+        return callback(mockTx);
+      });
 
       const result = await service.processIncomingPayment(validPayload);
 
       expect(result.success).toBe(false);
       expect(result.message).toBe('Transaction already processed');
+    });
+
+    it('should reject when payment status already changed', async () => {
+      const mockPayment = {
+        id: 'payment-123',
+        bookingId: 'booking-456',
+        amount: 1000000,
+        status: PaymentStatus.PENDING,
+        booking: { companionId: 'companion-789' },
+      };
+
+      mockPrismaService.payment.findFirst.mockResolvedValue(mockPayment);
+
+      // Mock transaction - updateMany returns 0 meaning payment not in PENDING status
+      const mockTx = createMockTx();
+      mockTx.webhookLog.findUnique.mockResolvedValue(null);
+      mockTx.webhookLog.create.mockResolvedValue({ id: 'webhook-log-123' });
+      mockTx.payment.updateMany.mockResolvedValue({ count: 0 }); // No rows updated
+      mockTx.webhookLog.update.mockResolvedValue({});
+
+      mockPrismaService.$transaction.mockImplementation(async (callback) => {
+        return callback(mockTx);
+      });
+
+      const result = await service.processIncomingPayment(validPayload);
+
+      expect(result.success).toBe(false);
+      expect(result.message).toBe('Payment already processed or not in pending status');
     });
 
     it('should reject amount mismatch exceeding tolerance', async () => {
@@ -244,7 +306,7 @@ describe('BankTransferService', () => {
       expect(result.message).toContain('Amount mismatch');
     });
 
-    it('should create earnings record on successful payment', async () => {
+    it('should create earnings record on successful payment via upsert', async () => {
       const mockPayment = {
         id: 'payment-123',
         bookingId: 'booking-456',
@@ -255,19 +317,24 @@ describe('BankTransferService', () => {
         },
       };
 
-      // First findFirst for payment lookup, second for duplicate check
-      mockPrismaService.payment.findFirst
-        .mockResolvedValueOnce(mockPayment) // Payment lookup
-        .mockResolvedValueOnce(null); // Duplicate check returns null (no duplicate)
-      mockPrismaService.payment.findUnique.mockResolvedValue(mockPayment);
-      mockPrismaService.payment.update.mockResolvedValue({ ...mockPayment, status: PaymentStatus.HELD });
-      mockPrismaService.earning.findUnique.mockResolvedValue(null);
-      mockPrismaService.earning.create.mockResolvedValue({});
+      mockPrismaService.payment.findFirst.mockResolvedValue(mockPayment);
+
+      const mockTx = createMockTx();
+      mockTx.webhookLog.findUnique.mockResolvedValue(null);
+      mockTx.webhookLog.create.mockResolvedValue({ id: 'webhook-log-123' });
+      mockTx.payment.updateMany.mockResolvedValue({ count: 1 });
+      mockTx.earning.upsert.mockResolvedValue({});
+      mockTx.webhookLog.update.mockResolvedValue({});
+
+      mockPrismaService.$transaction.mockImplementation(async (callback) => {
+        return callback(mockTx);
+      });
 
       await service.processIncomingPayment(validPayload);
 
-      expect(mockPrismaService.earning.create).toHaveBeenCalledWith({
-        data: expect.objectContaining({
+      expect(mockTx.earning.upsert).toHaveBeenCalledWith({
+        where: { bookingId: 'booking-456' },
+        create: expect.objectContaining({
           companionId: 'companion-789',
           bookingId: 'booking-456',
           grossAmount: 1000000,
@@ -275,7 +342,30 @@ describe('BankTransferService', () => {
           netAmount: 820000, // 82%
           status: EarningsStatus.PENDING,
         }),
+        update: {},
       });
+    });
+
+    it('should handle concurrent webhook with P2002 error', async () => {
+      const mockPayment = {
+        id: 'payment-123',
+        bookingId: 'booking-456',
+        amount: 1000000,
+        status: PaymentStatus.PENDING,
+        booking: { companionId: 'companion-789' },
+      };
+
+      mockPrismaService.payment.findFirst.mockResolvedValue(mockPayment);
+
+      // Simulate P2002 unique constraint violation (concurrent webhook)
+      const uniqueError = new Error('Unique constraint violation');
+      (uniqueError as unknown as { code: string }).code = 'P2002';
+      mockPrismaService.$transaction.mockRejectedValue(uniqueError);
+
+      const result = await service.processIncomingPayment(validPayload);
+
+      expect(result.success).toBe(false);
+      expect(result.message).toBe('Transaction already being processed');
     });
   });
 

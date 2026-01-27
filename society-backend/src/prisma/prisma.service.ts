@@ -49,6 +49,7 @@ const CACHED_MODELS = [
   // Bookings & payments
   'booking',
   'payment',
+  'paymentRequest',
   'earning',
   'withdrawal',
   'bankAccount',
@@ -86,6 +87,15 @@ const CACHED_MODELS = [
   'supportTicketMessage',
   'featureFlag',
   'systemConfig',
+  // Recommendations
+  'userInteraction',
+  'recommendationCache',
+  // Occasions & Holidays
+  'occasion',
+  'holiday',
+  'occasionInteraction',
+  // Idempotency
+  'idempotencyKey',
 ] as const;
 
 type CachedModelName = (typeof CACHED_MODELS)[number];
@@ -476,6 +486,7 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
   // Bookings & payments
   declare booking: PrismaClient['booking'];
   declare payment: PrismaClient['payment'];
+  declare paymentRequest: PrismaClient['paymentRequest'];
   declare earning: PrismaClient['earning'];
   declare withdrawal: PrismaClient['withdrawal'];
   declare bankAccount: PrismaClient['bankAccount'];
@@ -513,4 +524,13 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
   declare supportTicketMessage: PrismaClient['supportTicketMessage'];
   declare featureFlag: PrismaClient['featureFlag'];
   declare systemConfig: PrismaClient['systemConfig'];
+  // Recommendations
+  declare userInteraction: PrismaClient['userInteraction'];
+  declare recommendationCache: PrismaClient['recommendationCache'];
+  // Occasions & Holidays
+  declare occasion: PrismaClient['occasion'];
+  declare holiday: PrismaClient['holiday'];
+  declare occasionInteraction: PrismaClient['occasionInteraction'];
+  // Idempotency
+  declare idempotencyKey: PrismaClient['idempotencyKey'];
 }

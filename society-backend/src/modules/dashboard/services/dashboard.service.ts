@@ -22,6 +22,7 @@ export class DashboardService {
 
   /**
    * Get companion dashboard data
+   * Optimized with parallel queries for better performance
    */
   async getDashboard(userId: string): Promise<DashboardResponse> {
     const companion = await this.prisma.companionProfile.findUnique({
@@ -36,38 +37,72 @@ export class DashboardService {
     today.setHours(0, 0, 0, 0);
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
+    const nextWeek = new Date(today);
+    nextWeek.setDate(nextWeek.getDate() + 7);
 
-    // Get today's bookings
-    const todaysBookings = await this.prisma.booking.findMany({
-      where: {
-        companionId: userId,
-        startDatetime: {
-          gte: today,
-          lt: tomorrow,
+    // Execute all independent queries in parallel
+    const [
+      todaysBookings,
+      completedTodayBookings,
+      upcomingBookingsData,
+      recentActivity,
+      stats,
+    ] = await Promise.all([
+      // Today's active/confirmed bookings
+      this.prisma.booking.findMany({
+        where: {
+          companionId: userId,
+          startDatetime: {
+            gte: today,
+            lt: tomorrow,
+          },
+          status: {
+            in: [BookingStatus.CONFIRMED, BookingStatus.ACTIVE],
+          },
         },
-        status: {
-          in: [BookingStatus.CONFIRMED, BookingStatus.ACTIVE],
+        include: {
+          hirer: true,
         },
-      },
-      include: {
-        hirer: true,
-      },
-      orderBy: { startDatetime: 'asc' },
-    });
+        orderBy: { startDatetime: 'asc' },
+      }),
+      // Today's completed bookings for earnings
+      this.prisma.booking.findMany({
+        where: {
+          companionId: userId,
+          completedAt: {
+            gte: today,
+            lt: tomorrow,
+          },
+          status: BookingStatus.COMPLETED,
+        },
+      }),
+      // Upcoming bookings (next 7 days)
+      this.prisma.booking.findMany({
+        where: {
+          companionId: userId,
+          startDatetime: {
+            gte: tomorrow,
+            lte: nextWeek,
+          },
+          status: {
+            in: [BookingStatus.CONFIRMED, BookingStatus.PENDING],
+          },
+        },
+        include: {
+          hirer: true,
+        },
+        orderBy: { startDatetime: 'asc' },
+        take: 5,
+      }),
+      // Recent activity
+      this.getRecentActivity(userId),
+      // Stats
+      this.getStats(userId, companion.id),
+    ]);
 
-    // Calculate today's earnings (from completed bookings)
-    const completedTodayBookings = await this.prisma.booking.findMany({
-      where: {
-        companionId: userId,
-        completedAt: {
-          gte: today,
-          lt: tomorrow,
-        },
-        status: BookingStatus.COMPLETED,
-      },
-    });
+    // Calculate today's earnings
     const todaysEarnings = completedTodayBookings.reduce(
-      (sum, b) => sum + b.basePrice, // Companion gets basePrice (totalPrice - platformFee)
+      (sum, b) => sum + b.basePrice,
       0,
     );
 
@@ -103,28 +138,6 @@ export class DashboardService {
       nextBooking: nextBookingInfo,
     };
 
-    // Get upcoming bookings (next 7 days)
-    const nextWeek = new Date(today);
-    nextWeek.setDate(nextWeek.getDate() + 7);
-
-    const upcomingBookingsData = await this.prisma.booking.findMany({
-      where: {
-        companionId: userId,
-        startDatetime: {
-          gte: tomorrow,
-          lte: nextWeek,
-        },
-        status: {
-          in: [BookingStatus.CONFIRMED, BookingStatus.PENDING],
-        },
-      },
-      include: {
-        hirer: true,
-      },
-      orderBy: { startDatetime: 'asc' },
-      take: 5,
-    });
-
     const upcomingBookings: UpcomingBooking[] = upcomingBookingsData.map((b) => ({
       id: b.id,
       startDatetime: b.startDatetime.toISOString(),
@@ -139,12 +152,6 @@ export class DashboardService {
       totalPrice: b.totalPrice,
     }));
 
-    // Get recent activity
-    const recentActivity = await this.getRecentActivity(userId);
-
-    // Get stats
-    const stats = await this.getStats(userId, companion.id);
-
     return {
       todaysSummary,
       upcomingBookings,
@@ -155,20 +162,40 @@ export class DashboardService {
 
   /**
    * Get recent activity
+   * Optimized with parallel queries
+   *
+   * IMPORTANT: All data is fetched in parallel upfront to avoid N+1 queries.
+   * If extending this method with additional data sources, ensure they are
+   * added to the Promise.all() array, not fetched inside the processing loops.
    */
   private async getRecentActivity(userId: string): Promise<ActivityItem[]> {
+    // Fetch bookings and reviews in parallel
+    const [recentBookings, recentReviews] = await Promise.all([
+      this.prisma.booking.findMany({
+        where: { companionId: userId },
+        orderBy: { updatedAt: 'desc' },
+        take: 10,
+        include: {
+          hirer: true,
+        },
+      }),
+      this.prisma.review.findMany({
+        where: {
+          booking: {
+            companionId: userId,
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+        take: 5,
+        include: {
+          reviewer: true,
+        },
+      }),
+    ]);
+
     const activities: ActivityItem[] = [];
 
-    // Get recent booking events
-    const recentBookings = await this.prisma.booking.findMany({
-      where: { companionId: userId },
-      orderBy: { updatedAt: 'desc' },
-      take: 10,
-      include: {
-        hirer: true,
-      },
-    });
-
+    // Process bookings
     for (const booking of recentBookings) {
       const hirerName = booking.hirer?.fullName || 'Anonymous';
 
@@ -195,26 +222,13 @@ export class DashboardService {
           type: 'booking_completed',
           title: 'Booking Completed',
           description: `Completed ${booking.occasionType.toLowerCase().replace('_', ' ')} with ${hirerName}`,
-          amount: booking.basePrice, // Companion earnings
+          amount: booking.basePrice,
           createdAt: booking.updatedAt.toISOString(),
         });
       }
     }
 
-    // Get recent reviews
-    const recentReviews = await this.prisma.review.findMany({
-      where: {
-        booking: {
-          companionId: userId,
-        },
-      },
-      orderBy: { createdAt: 'desc' },
-      take: 5,
-      include: {
-        reviewer: true,
-      },
-    });
-
+    // Process reviews
     for (const review of recentReviews) {
       activities.push({
         id: `rev-${review.id}`,

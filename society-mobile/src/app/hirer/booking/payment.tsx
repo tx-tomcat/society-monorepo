@@ -8,7 +8,6 @@ import {
   ActivityIndicator,
   Pressable,
   ScrollView,
-  StyleSheet,
 } from 'react-native';
 
 import {
@@ -33,72 +32,43 @@ import {
   ShieldCheck,
   Wallet,
 } from '@/components/ui/icons';
+import { getPhotoUrl } from '@/lib/api/services/companions.service';
 import {
   useCompanion,
   useCreateBooking,
   useCreateBookingPayment,
+  useWalletBalance,
 } from '@/lib/hooks';
 import { formatVND } from '@/lib/utils';
 
 type PaymentMethod = {
   id: string;
-  type: 'card' | 'bank' | 'wallet';
+  type: 'bank' | 'wallet' | 'luxe_wallet';
   name: string;
   last4?: string;
   icon: React.ComponentType<{ color: string; width: number; height: number }>;
   isDefault?: boolean;
+  balance?: number;
+  insufficientFunds?: boolean;
 };
 
-const DEFAULT_PAYMENT_METHODS: PaymentMethod[] = [
-  {
-    id: 'card',
-    type: 'card',
-    name: 'Credit/Debit Card',
-    icon: CreditCard,
-  },
+// Base payment methods (excluding Luxe Wallet which is added dynamically)
+const BASE_PAYMENT_METHODS: Omit<PaymentMethod, 'balance' | 'insufficientFunds'>[] = [
   {
     id: 'bank',
     type: 'bank',
-    name: 'Bank Transfer',
+    name: 'Bank Transfer (QR)',
     icon: Bank,
   },
-  {
-    id: 'momo',
-    type: 'wallet',
-    name: 'MoMo',
-    icon: Wallet,
-  },
-  {
-    id: 'zalopay',
-    type: 'wallet',
-    name: 'ZaloPay',
-    icon: Wallet,
-  },
 ];
-
-const PAYMENT_ICONS: Record<
-  string,
-  React.ComponentType<{ color: string; width: number; height: number }>
-> = {
-  card: CreditCard,
-  bank: Bank,
-  wallet: Wallet,
-};
-
-const OCCASION_LABELS: Record<string, string> = {
-  wedding: 'Wedding',
-  family: 'Family Event',
-  business: 'Business',
-  tet: 'Tết Celebration',
-  casual: 'Casual Outing',
-  party: 'Party',
-};
 
 export default function PaymentScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{
     companionId: string;
-    occasion: string;
+    occasionId: string;
+    occasionName: string;
+    occasionEmoji: string;
     date: string;
     time: string;
     duration: string;
@@ -114,20 +84,50 @@ export default function PaymentScreen() {
   const createBooking = useCreateBooking();
   const createPayment = useCreateBookingPayment();
 
+  // Wallet balance hook
+  const { data: walletData } = useWalletBalance();
+
   // Transform companion data from API Companion type
   const companion = React.useMemo(() => {
     if (!companionData) return null;
     const c = companionData;
     return {
       id: c.id,
-      name: c.user?.fullName || '',
-      image: c.user?.avatarUrl || c.photos?.[0]?.url || '',
+      name: c.displayName || '',
+      image: c.avatar || getPhotoUrl(c.photos?.[0]) || '',
       hourlyRate: c.hourlyRate || 0,
     };
   }, [companionData]);
 
-  // Use default payment methods since we don't have a payment methods API
-  const paymentMethods = DEFAULT_PAYMENT_METHODS;
+  // Calculate pricing (needed before paymentMethods)
+  const duration = parseInt(params.duration || '3', 10);
+  const subtotal = (companion?.hourlyRate || 0) * duration;
+  const serviceFee = Math.round(subtotal * 0.18); // 18% platform fee
+  const total = subtotal + serviceFee;
+
+  // Build payment methods list with Luxe Wallet at top if user has balance
+  const paymentMethods = React.useMemo(() => {
+    const walletBalance = walletData?.balance || 0;
+    const methods: PaymentMethod[] = [];
+
+    // Add Luxe Wallet as first option if user has any balance
+    if (walletBalance > 0) {
+      methods.push({
+        id: 'luxe_wallet',
+        type: 'luxe_wallet',
+        name: t('hirer.payment.luxe_wallet'),
+        icon: Wallet,
+        balance: walletBalance,
+        insufficientFunds: walletBalance < total,
+        isDefault: walletBalance >= total, // Default if sufficient funds
+      });
+    }
+
+    // Add other payment methods
+    methods.push(...BASE_PAYMENT_METHODS);
+
+    return methods;
+  }, [walletData?.balance, total, t]);
 
   const [selectedPaymentMethod, setSelectedPaymentMethod] =
     React.useState<string>('');
@@ -141,11 +141,6 @@ export default function PaymentScreen() {
       setSelectedPaymentMethod(defaultMethod.id);
     }
   }, [paymentMethods, selectedPaymentMethod]);
-
-  const duration = parseInt(params.duration || '3', 10);
-  const subtotal = (companion?.hourlyRate || 0) * duration;
-  const serviceFee = Math.round(subtotal * 0.18); // 18% platform fee
-  const total = subtotal + serviceFee;
 
   const isProcessing = createBooking.isPending || createPayment.isPending;
 
@@ -165,30 +160,11 @@ export default function PaymentScreen() {
       endDate.setHours(endDate.getHours() + duration);
       const endDatetime = endDate.toISOString();
 
-      // Map occasion to ServiceType
-      const occasionMap: Record<
-        string,
-        | 'FAMILY_INTRODUCTION'
-        | 'WEDDING_ATTENDANCE'
-        | 'TET_COMPANIONSHIP'
-        | 'BUSINESS_EVENT'
-        | 'CASUAL_OUTING'
-        | 'CLASS_REUNION'
-        | 'OTHER'
-      > = {
-        wedding: 'WEDDING_ATTENDANCE',
-        family: 'FAMILY_INTRODUCTION',
-        business: 'BUSINESS_EVENT',
-        tet: 'TET_COMPANIONSHIP',
-        casual: 'CASUAL_OUTING',
-        party: 'OTHER',
-      };
-
       // First create the booking
       const bookingResult = await createBooking.mutateAsync({
         companionId: params.companionId,
-        occasionType:
-          occasionMap[params.occasion || 'casual'] || 'CASUAL_OUTING',
+        // Only include occasionId if it's a valid non-empty string
+        ...(params.occasionId ? { occasionId: params.occasionId } : {}),
         startDatetime,
         endDatetime,
         locationAddress: params.location,
@@ -198,18 +174,16 @@ export default function PaymentScreen() {
       // Map payment method to provider
       const providerMap: Record<
         string,
-        'vnpay' | 'momo' | 'stripe' | 'bank_transfer'
+        'bank_transfer' | 'wallet'
       > = {
-        card: 'stripe',
+        luxe_wallet: 'wallet',
         bank: 'bank_transfer',
-        momo: 'momo',
-        zalopay: 'vnpay',
       };
 
       // Then create the payment
       await createPayment.mutateAsync({
         bookingId: bookingResult.id,
-        provider: providerMap[selectedPaymentMethod] || 'stripe',
+        provider: providerMap[selectedPaymentMethod] || 'bank_transfer',
       });
 
       // Navigate to confirmation screen
@@ -287,10 +261,7 @@ export default function PaymentScreen() {
           >
             <ArrowLeft color={colors.midnight.DEFAULT} width={24} height={24} />
           </Pressable>
-          <Text
-            style={styles.headerTitle}
-            className="flex-1 text-xl text-midnight"
-          >
+          <Text className="flex-1 font-urbanist-bold text-xl text-midnight">
             {t('hirer.payment.title')}
           </Text>
         </View>
@@ -304,10 +275,7 @@ export default function PaymentScreen() {
           transition={{ type: 'timing', duration: 400 }}
           className="mx-4 mt-4 rounded-2xl bg-white p-4"
         >
-          <Text
-            style={styles.sectionTitle}
-            className="mb-4 text-base text-midnight"
-          >
+          <Text className="mb-4 font-urbanist-semibold text-base text-midnight">
             {t('hirer.payment.booking_summary')}
           </Text>
 
@@ -319,14 +287,11 @@ export default function PaymentScreen() {
               contentFit="cover"
             />
             <View className="flex-1">
-              <Text
-                style={styles.companionName}
-                className="text-lg text-midnight"
-              >
+              <Text className="font-urbanist-semibold text-lg text-midnight">
                 {companion.name}
               </Text>
               <Badge
-                label={OCCASION_LABELS[params.occasion || 'casual']}
+                label={`${params.occasionEmoji || ''} ${params.occasionName || 'Occasion'}`}
                 variant="rose"
                 size="sm"
               />
@@ -389,66 +354,99 @@ export default function PaymentScreen() {
           transition={{ type: 'timing', duration: 400, delay: 100 }}
           className="mx-4 mt-4 rounded-2xl bg-white p-4"
         >
-          <Text
-            style={styles.sectionTitle}
-            className="mb-4 text-base text-midnight"
-          >
+          <Text className="mb-4 font-urbanist-semibold text-base text-midnight">
             {t('hirer.payment.payment_method')}
           </Text>
 
           <View className="gap-3">
             {paymentMethods.map((method) => {
               const isSelected = selectedPaymentMethod === method.id;
+              const isDisabled = method.insufficientFunds;
               const MethodIcon = method.icon;
+              const isLuxeWallet = method.type === 'luxe_wallet';
+
               return (
                 <Pressable
                   key={method.id}
-                  onPress={() => setSelectedPaymentMethod(method.id)}
-                  className={`flex-row items-center gap-3 rounded-xl border-2 p-4 ${
-                    isSelected
+                  onPress={() => !isDisabled && setSelectedPaymentMethod(method.id)}
+                  disabled={isDisabled}
+                  className={`flex-row items-center gap-3 rounded-xl border-2 p-4 ${isDisabled
+                    ? 'border-transparent bg-neutral-100 opacity-60'
+                    : isSelected
                       ? 'border-rose-400 bg-rose-400/5'
                       : 'border-transparent bg-neutral-50'
-                  }`}
+                    }`}
                 >
                   <View
-                    className={`size-10 items-center justify-center rounded-lg ${
-                      isSelected ? 'bg-rose-400' : 'bg-white'
-                    }`}
+                    className={`size-10 items-center justify-center rounded-lg ${isSelected && !isDisabled
+                      ? isLuxeWallet
+                        ? 'bg-lavender-400'
+                        : 'bg-rose-400'
+                      : isLuxeWallet
+                        ? 'bg-lavender-400/20'
+                        : 'bg-white'
+                      }`}
                   >
                     <MethodIcon
-                      color={isSelected ? '#FFFFFF' : colors.midnight.DEFAULT}
+                      color={
+                        isSelected && !isDisabled
+                          ? '#FFFFFF'
+                          : isLuxeWallet
+                            ? colors.lavender[400]
+                            : colors.midnight.DEFAULT
+                      }
                       width={20}
                       height={20}
                     />
                   </View>
                   <View className="flex-1">
-                    <Text className="font-medium text-midnight">
-                      {method.name}
-                    </Text>
+                    <View className="flex-row items-center gap-2">
+                      <Text
+                        className={`font-medium ${isDisabled ? 'text-text-tertiary' : 'text-midnight'}`}
+                      >
+                        {method.name}
+                      </Text>
+                      {isLuxeWallet && method.isDefault && !isDisabled && (
+                        <Badge
+                          label={t('hirer.payment.recommended')}
+                          variant="lavender"
+                          size="sm"
+                        />
+                      )}
+                    </View>
+                    {isLuxeWallet && method.balance !== undefined && (
+                      <Text
+                        className={`text-sm ${isDisabled ? 'text-danger-400' : 'text-text-secondary'}`}
+                      >
+                        {isDisabled
+                          ? t('hirer.payment.insufficient_balance', {
+                            balance: formatVND(method.balance, { symbolPosition: 'suffix' }),
+                          })
+                          : t('hirer.payment.wallet_balance', {
+                            balance: formatVND(method.balance, { symbolPosition: 'suffix' }),
+                          })}
+                      </Text>
+                    )}
                     {method.last4 && (
                       <Text className="text-sm text-text-tertiary">
                         •••• {method.last4}
                       </Text>
                     )}
                   </View>
-                  {method.isDefault && (
-                    <Badge
-                      label={t('hirer.payment.default')}
-                      variant="teal"
-                      size="sm"
-                    />
-                  )}
-                  <View
-                    className={`size-6 items-center justify-center rounded-full border-2 ${
-                      isSelected
-                        ? 'border-rose-400 bg-rose-400'
+                  {!isDisabled && (
+                    <View
+                      className={`size-6 items-center justify-center rounded-full border-2 ${isSelected
+                        ? isLuxeWallet
+                          ? 'border-lavender-400 bg-lavender-400'
+                          : 'border-rose-400 bg-rose-400'
                         : 'border-border bg-white'
-                    }`}
-                  >
-                    {isSelected && (
-                      <CheckCircle color="#FFFFFF" width={14} height={14} />
-                    )}
-                  </View>
+                        }`}
+                    >
+                      {isSelected && (
+                        <CheckCircle color="#FFFFFF" width={14} height={14} />
+                      )}
+                    </View>
+                  )}
                 </Pressable>
               );
             })}
@@ -469,10 +467,7 @@ export default function PaymentScreen() {
           transition={{ type: 'timing', duration: 400, delay: 150 }}
           className="mx-4 mt-4 rounded-2xl bg-white p-4"
         >
-          <Text
-            style={styles.sectionTitle}
-            className="mb-4 text-base text-midnight"
-          >
+          <Text className="mb-4 font-urbanist-semibold text-base text-midnight">
             {t('hirer.payment.price_breakdown')}
           </Text>
 
@@ -499,16 +494,10 @@ export default function PaymentScreen() {
             </View>
             <View className="border-t border-border-light pt-3">
               <View className="flex-row items-center justify-between">
-                <Text
-                  style={styles.totalLabel}
-                  className="text-lg text-midnight"
-                >
+                <Text className="font-urbanist-semibold text-lg text-midnight">
                   {t('hirer.payment.total')}
                 </Text>
-                <Text
-                  style={styles.totalAmount}
-                  className="text-2xl text-rose-400"
-                >
+                <Text className="font-urbanist-bold text-2xl text-rose-400">
                   {formatVND(total)}
                 </Text>
               </View>
@@ -526,10 +515,7 @@ export default function PaymentScreen() {
           <View className="flex-row items-center gap-3">
             <ShieldCheck color={colors.teal[400]} width={24} height={24} />
             <View className="flex-1">
-              <Text
-                style={styles.securityTitle}
-                className="text-sm text-teal-700"
-              >
+              <Text className="font-urbanist-semibold text-sm text-teal-700">
                 {t('hirer.payment.secure_payment')}
               </Text>
               <Text className="text-xs text-text-secondary">
@@ -551,11 +537,10 @@ export default function PaymentScreen() {
             className="flex-row items-start gap-3"
           >
             <View
-              className={`mt-1 size-5 items-center justify-center rounded border-2 ${
-                agreedToTerms
-                  ? 'border-rose-400 bg-rose-400'
-                  : 'border-border bg-white'
-              }`}
+              className={`mt-1 size-5 items-center justify-center rounded border-2 ${agreedToTerms
+                ? 'border-rose-400 bg-rose-400'
+                : 'border-border bg-white'
+                }`}
             >
               {agreedToTerms && (
                 <CheckCircle color="#FFFFFF" width={12} height={12} />
@@ -580,7 +565,7 @@ export default function PaymentScreen() {
             <Text className="text-text-secondary">
               {t('hirer.payment.total_to_pay')}
             </Text>
-            <Text style={styles.bottomTotal} className="text-xl text-midnight">
+            <Text className="font-urbanist-bold text-xl text-midnight">
               {formatVND(total)}
             </Text>
           </View>
@@ -601,27 +586,3 @@ export default function PaymentScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  headerTitle: {
-    fontFamily: 'Urbanist_700Bold',
-  },
-  sectionTitle: {
-    fontFamily: 'Urbanist_600SemiBold',
-  },
-  companionName: {
-    fontFamily: 'Urbanist_600SemiBold',
-  },
-  totalLabel: {
-    fontFamily: 'Urbanist_600SemiBold',
-  },
-  totalAmount: {
-    fontFamily: 'Urbanist_700Bold',
-  },
-  securityTitle: {
-    fontFamily: 'Urbanist_600SemiBold',
-  },
-  bottomTotal: {
-    fontFamily: 'Urbanist_700Bold',
-  },
-});

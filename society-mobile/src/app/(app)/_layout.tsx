@@ -1,53 +1,53 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
 
-import { TabBar } from '@/components/ui/tab-bar';
+import { HirerTabBar } from '@/components/ui/tab-bar';
 
-export default function TabLayout() {
+export default function HirerTabLayout() {
   return (
-    <Tabs tabBar={(props) => <TabBar {...props} />}>
+    <Tabs tabBar={(props) => <HirerTabBar {...props} />}>
       <Tabs.Screen
         name="index"
         options={{
+          title: 'Home',
+          headerShown: false,
+          tabBarButtonTestID: 'hirer-home-tab',
+        }}
+      />
+
+      <Tabs.Screen
+        name="for-you"
+        options={{
           title: 'For You',
           headerShown: false,
-          tabBarButtonTestID: 'for-you-tab',
+          tabBarButtonTestID: 'hirer-for-you-tab',
         }}
       />
 
       <Tabs.Screen
-        name="explore"
+        name="bookings"
         options={{
-          title: 'Explore',
+          title: 'Bookings',
           headerShown: false,
-          tabBarButtonTestID: 'explore-tab',
+          tabBarButtonTestID: 'hirer-bookings-tab',
         }}
       />
 
       <Tabs.Screen
-        name="chats"
+        name="chat"
         options={{
-          title: 'Chats',
+          title: 'Chat',
           headerShown: false,
-          tabBarButtonTestID: 'chats-tab',
+          tabBarButtonTestID: 'hirer-chat-tab',
         }}
       />
 
       <Tabs.Screen
-        name="creation"
-        options={{
-          title: 'My Creation',
-          headerShown: false,
-          tabBarButtonTestID: 'creation-tab',
-        }}
-      />
-
-      <Tabs.Screen
-        name="settings"
+        name="account"
         options={{
           title: 'Account',
           headerShown: false,
-          tabBarButtonTestID: 'account-tab',
+          tabBarButtonTestID: 'hirer-account-tab',
         }}
       />
     </Tabs>

@@ -1,5 +1,4 @@
 import React from 'react';
-import { StyleSheet } from 'react-native';
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -132,18 +131,12 @@ export function SplashScreen({
 
           {/* App Name */}
           <View className="items-center gap-2">
-            <Text
-              className="text-center text-5xl font-bold tracking-tight text-white"
-              style={styles.appName}
-            >
+            <Text className="text-center font-urbanist-bold text-5xl leading-[56px] tracking-tight text-white">
               {appName}
             </Text>
 
             {subtitle && (
-              <Text
-                className="text-center text-base font-semibold text-white/80"
-                style={styles.subtitle}
-              >
+              <Text className="text-center font-urbanist-semibold text-base tracking-[0.2px] text-white/80">
                 {subtitle}
               </Text>
             )}
@@ -160,15 +153,3 @@ export function SplashScreen({
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  appName: {
-    fontFamily: 'Urbanist_700Bold',
-    letterSpacing: 0,
-    lineHeight: 56,
-  },
-  subtitle: {
-    fontFamily: 'Urbanist_600SemiBold',
-    letterSpacing: 0.2,
-  },
-});

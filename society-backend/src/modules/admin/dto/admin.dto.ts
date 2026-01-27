@@ -1,3 +1,4 @@
+import { Type } from 'class-transformer';
 import {
     IsArray,
     IsBoolean,
@@ -25,16 +26,19 @@ export class UserSearchDto {
   role?: string;
 
   @IsOptional()
+  @Type(() => Boolean)
   @IsBoolean()
   verified?: boolean;
 
   @IsOptional()
+  @Type(() => Number)
   @IsInt()
   @Min(1)
   @Max(100)
   limit?: number;
 
   @IsOptional()
+  @Type(() => Number)
   @IsInt()
   @Min(0)
   offset?: number;

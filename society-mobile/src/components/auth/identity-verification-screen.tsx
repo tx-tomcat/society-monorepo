@@ -3,7 +3,7 @@ import { MotiView } from 'moti';
 import type { ComponentType } from 'react';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, ScrollView, StyleSheet } from 'react-native';
+import { Pressable, ScrollView } from 'react-native';
 
 import {
   Button,
@@ -144,10 +144,7 @@ export function IdentityVerificationScreen({
           >
             <ArrowLeft color={colors.midnight.DEFAULT} width={24} height={24} />
           </Pressable>
-          <Text
-            style={styles.headerTitle}
-            className="flex-1 text-xl text-midnight"
-          >
+          <Text className="flex-1 font-urbanist-bold text-xl text-midnight">
             {t('auth.verify_identity.header')}
           </Text>
         </View>
@@ -170,10 +167,7 @@ export function IdentityVerificationScreen({
           >
             <ShieldCheck color="#FFFFFF" width={32} height={32} />
           </View>
-          <Text
-            style={styles.progressTitle}
-            className="mb-1 text-xl text-midnight"
-          >
+          <Text className="mb-1 font-urbanist-bold text-xl text-midnight">
             {t(`auth.verify_identity.${userType}.title`)}
           </Text>
           <Text className="mb-4 text-center text-sm text-text-secondary">
@@ -407,12 +401,3 @@ export const hirerVerificationSteps: VerificationStepConfig[] = [
     required: true,
   },
 ];
-
-const styles = StyleSheet.create({
-  headerTitle: {
-    fontFamily: 'Urbanist_700Bold',
-  },
-  progressTitle: {
-    fontFamily: 'Urbanist_700Bold',
-  },
-});

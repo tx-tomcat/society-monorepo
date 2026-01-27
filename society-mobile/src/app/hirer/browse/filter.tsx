@@ -3,7 +3,7 @@ import { useRouter } from 'expo-router';
 import { MotiView } from 'moti';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, ScrollView, StyleSheet } from 'react-native';
+import { Pressable, ScrollView } from 'react-native';
 
 import {
   Badge,
@@ -148,7 +148,7 @@ export default function FilterScreen() {
           >
             <ArrowLeft color={colors.midnight.DEFAULT} width={24} height={24} />
           </Pressable>
-          <Text style={styles.headerTitle} className="text-xl text-midnight">
+          <Text className="font-urbanist-bold text-xl text-midnight">
             {t('hirer.filter.title')}
           </Text>
           <Pressable onPress={handleReset}>
@@ -169,10 +169,7 @@ export default function FilterScreen() {
         >
           <View className="mb-3 flex-row items-center gap-2">
             <Calendar color={colors.rose[400]} width={20} height={20} />
-            <Text
-              style={styles.sectionTitle}
-              className="text-base text-midnight"
-            >
+            <Text className="font-urbanist-semibold text-base text-midnight">
               {t('hirer.filter.occasion')}
             </Text>
           </View>
@@ -214,10 +211,7 @@ export default function FilterScreen() {
         >
           <View className="mb-3 flex-row items-center gap-2">
             <PriceTag color={colors.rose[400]} width={20} height={20} />
-            <Text
-              style={styles.sectionTitle}
-              className="text-base text-midnight"
-            >
+            <Text className="font-urbanist-semibold text-base text-midnight">
               {t('hirer.filter.price_range')}
             </Text>
           </View>
@@ -254,10 +248,7 @@ export default function FilterScreen() {
         >
           <View className="mb-3 flex-row items-center gap-2">
             <Star color={colors.yellow[400]} width={20} height={20} />
-            <Text
-              style={styles.sectionTitle}
-              className="text-base text-midnight"
-            >
+            <Text className="font-urbanist-semibold text-base text-midnight">
               {t('hirer.filter.minimum_rating')}
             </Text>
           </View>
@@ -305,10 +296,7 @@ export default function FilterScreen() {
         >
           <View className="mb-3 flex-row items-center gap-2">
             <MapPin color={colors.rose[400]} width={20} height={20} />
-            <Text
-              style={styles.sectionTitle}
-              className="text-base text-midnight"
-            >
+            <Text className="font-urbanist-semibold text-base text-midnight">
               {t('hirer.filter.location')}
             </Text>
           </View>
@@ -405,11 +393,3 @@ export default function FilterScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  headerTitle: {
-    fontFamily: 'Urbanist_700Bold',
-  },
-  sectionTitle: {
-    fontFamily: 'Urbanist_600SemiBold',
-  },
-});

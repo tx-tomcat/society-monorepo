@@ -15,6 +15,7 @@ import {
   CurrentUser,
   CurrentUserData,
 } from '../../../common/decorators/current-user.decorator';
+import { Public } from '../../../common/decorators/public.decorator';
 import { CompanionsService } from '../services/companions.service';
 import { VnpayService } from '../../payments/services/vnpay.service';
 import {
@@ -38,6 +39,7 @@ export class CompanionsController {
   /**
    * Browse companions with filters (Public, but filters blocked users if authenticated)
    */
+  @Public()
   @Get()
   async browseCompanions(
     @Query() query: BrowseCompanionsQueryDto,
@@ -49,6 +51,7 @@ export class CompanionsController {
   /**
    * Get companion profile by ID (Public)
    */
+  @Public()
   @Get(':companionId')
   async getCompanionProfile(
     @Param('companionId', ParseUUIDPipe) companionId: string,
@@ -59,6 +62,7 @@ export class CompanionsController {
   /**
    * Get companion availability for date range (Public)
    */
+  @Public()
   @Get(':companionId/availability')
   async getCompanionAvailability(
     @Param('companionId', ParseUUIDPipe) companionId: string,
@@ -74,6 +78,7 @@ export class CompanionsController {
   /**
    * Get companion reviews (Public)
    */
+  @Public()
   @Get(':companionId/reviews')
   async getCompanionReviews(
     @Param('companionId', ParseUUIDPipe) companionId: string,
@@ -169,6 +174,7 @@ export class CompanionsController {
   /**
    * Get boost pricing options (Public)
    */
+  @Public()
   @Get('boosts/pricing')
   async getBoostPricing() {
     return {

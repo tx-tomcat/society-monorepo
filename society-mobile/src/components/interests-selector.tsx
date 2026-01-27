@@ -1,6 +1,6 @@
 /* eslint-disable max-lines-per-function */
 import React from 'react';
-import { Modal, Pressable, ScrollView, StyleSheet } from 'react-native';
+import { Modal, Pressable, ScrollView } from 'react-native';
 
 import { Text, View } from '@/components/ui';
 import { X } from '@/components/ui/icons';
@@ -141,10 +141,7 @@ export function InterestsSelector({
             <X color="white" size={28} />
           </Pressable>
 
-          <Text
-            className="flex-1 text-center text-2xl font-bold leading-[1.4] text-offwhite"
-            style={styles.title}
-          >
+          <Text className="flex-1 text-center font-urbanist-bold text-2xl leading-[1.4] tracking-normal text-offwhite">
             Add Interests
           </Text>
 
@@ -189,10 +186,3 @@ export function InterestsSelector({
     </Modal>
   );
 }
-
-const styles = StyleSheet.create({
-  title: {
-    fontFamily: 'Urbanist_700Bold',
-    letterSpacing: 0,
-  },
-});

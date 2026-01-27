@@ -9,7 +9,6 @@ import {
   ActivityIndicator,
   Pressable,
   RefreshControl,
-  StyleSheet,
 } from 'react-native';
 
 import {
@@ -22,6 +21,7 @@ import {
 } from '@/components/ui';
 import { Calendar, Clock, MapPin } from '@/components/ui/icons';
 import type { BookingStatus as APIBookingStatus } from '@/lib/api/services/bookings.service';
+import { getPhotoUrl } from '@/lib/api/services/companions.service';
 import { useBookings } from '@/lib/hooks';
 
 type BookingStatus = 'pending' | 'confirmed' | 'completed' | 'cancelled';
@@ -44,16 +44,6 @@ const TABS = [
   { id: 'upcoming', labelKey: 'hirer.orders.tabs.upcoming' },
   { id: 'past', labelKey: 'hirer.orders.tabs.past' },
 ];
-
-const OCCASION_EMOJIS: Record<string, string> = {
-  dining: '🍽️',
-  coffee: '☕',
-  event: '🎉',
-  business: '💼',
-  travel: '✈️',
-  shopping: '🛍️',
-  casual: '👋',
-};
 
 const getStatusConfig = (status: BookingStatus) => {
   switch (status) {
@@ -105,8 +95,7 @@ function BookingCard({
         from={{ opacity: 0, translateY: 10 }}
         animate={{ opacity: 1, translateY: 0 }}
         transition={{ type: 'timing', duration: 400 }}
-        className="mx-4 mb-3 overflow-hidden rounded-2xl bg-white"
-        style={styles.card}
+        className="mx-4 mb-3 overflow-hidden rounded-2xl bg-white shadow-sm"
       >
         {/* Top row: Avatar, Name/Occasion, Badge */}
         <View className="flex-row items-center p-4 pb-3">
@@ -116,7 +105,7 @@ function BookingCard({
             contentFit="cover"
           />
           <View className="ml-3 flex-1">
-            <Text style={styles.companionName} className="text-sm text-midnight">
+            <Text className="font-urbanist-semibold text-sm text-midnight">
               {booking.companion.name}
             </Text>
             <Text className="mt-0.5 text-xs text-text-secondary">
@@ -124,13 +113,12 @@ function BookingCard({
             </Text>
           </View>
           <View
-            style={[
-              styles.badge,
-              { backgroundColor: statusConfig.bgColor },
-            ]}
+            className="rounded-xl px-2.5 py-1"
+            style={{ backgroundColor: statusConfig.bgColor }}
           >
             <Text
-              style={[styles.badgeText, { color: statusConfig.textColor }]}
+              className="text-[11px] font-semibold"
+              style={{ color: statusConfig.textColor }}
             >
               {statusConfig.label}
             </Text>
@@ -167,8 +155,8 @@ export default function MyBookings() {
 
   // Map local tab to API status
   const getApiStatus = (tab: string): APIBookingStatus | undefined => {
-    if (tab === 'upcoming') return 'confirmed';
-    if (tab === 'past') return 'completed';
+    if (tab === 'upcoming') return 'CONFIRMED';
+    if (tab === 'past') return 'COMPLETED';
     return undefined;
   };
 
@@ -183,43 +171,36 @@ export default function MyBookings() {
   // Map API status to local display status
   const mapStatus = (apiStatus: string): BookingStatus => {
     switch (apiStatus) {
-      case 'pending':
+      case 'PENDING':
         return 'pending';
-      case 'confirmed':
+      case 'CONFIRMED':
         return 'confirmed';
-      case 'active':
+      case 'ACTIVE':
         return 'confirmed';
-      case 'completed':
+      case 'COMPLETED':
         return 'completed';
-      case 'cancelled':
-      case 'disputed':
-      case 'expired':
+      case 'CANCELLED':
+      case 'DISPUTED':
+      case 'EXPIRED':
         return 'cancelled';
       default:
         return 'pending';
     }
   };
 
-  // Get occasion emoji
-  const getOccasionEmoji = (occasion: string): string => {
-    const key = occasion.toLowerCase().replace(/_/g, ' ').split(' ')[0];
-    return OCCASION_EMOJIS[key] || '👋';
-  };
-
   // Transform bookings data from API Booking type
   const bookings = React.useMemo(() => {
     if (!bookingsData?.bookings) return [];
     return bookingsData.bookings.map((b) => {
-      const occasionText = b.occasionType?.replace(/_/g, ' ') || 'Casual';
       return {
         id: b.id,
         companion: {
-          name: b.companion?.user?.fullName || '',
+          name: b.companion?.displayName || '',
           image:
-            b.companion?.user?.avatarUrl || b.companion?.photos?.[0]?.url || '',
+            b.companion?.avatar || getPhotoUrl(b.companion?.photos?.[0]) || '',
         },
-        occasion: occasionText.charAt(0).toUpperCase() + occasionText.slice(1),
-        occasionEmoji: getOccasionEmoji(occasionText),
+        occasion: b.occasion?.name || 'Casual',
+        occasionEmoji: b.occasion?.emoji || '👋',
         date: b.startDatetime
           ? new Date(b.startDatetime).toLocaleDateString('en-US', {
               month: 'short',
@@ -264,7 +245,7 @@ export default function MyBookings() {
       <SafeAreaView edges={['top']}>
         {/* Header - Left-aligned title, no back button */}
         <View className="bg-white px-4 pb-0 pt-2">
-          <Text style={styles.headerTitle} className="text-2xl text-midnight">
+          <Text className="font-urbanist-bold text-2xl text-midnight">
             {t('hirer.orders.header')}
           </Text>
         </View>
@@ -280,16 +261,14 @@ export default function MyBookings() {
                 className="flex-1"
               >
                 <View
-                  style={[
-                    styles.tab,
-                    isActive ? styles.tabActive : styles.tabInactive,
-                  ]}
+                  className={`items-center rounded-lg py-2 ${
+                    isActive ? 'bg-teal-400' : 'bg-neutral-100'
+                  }`}
                 >
                   <Text
-                    style={[
-                      styles.tabText,
-                      isActive ? styles.tabTextActive : styles.tabTextInactive,
-                    ]}
+                    className={`text-xs font-semibold ${
+                      isActive ? 'text-white' : 'text-text-secondary'
+                    }`}
                   >
                     {t(tab.labelKey)}
                   </Text>
@@ -334,48 +313,3 @@ export default function MyBookings() {
   );
 }
 
-const styles = StyleSheet.create({
-  headerTitle: {
-    fontFamily: 'Urbanist_700Bold',
-  },
-  card: {
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
-  },
-  tab: {
-    paddingVertical: 8,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  tabActive: {
-    backgroundColor: colors.teal[400],
-  },
-  tabInactive: {
-    backgroundColor: '#F0EEF2',
-  },
-  tabText: {
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  tabTextActive: {
-    color: 'white',
-  },
-  tabTextInactive: {
-    color: colors.text.secondary,
-  },
-  badge: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  badgeText: {
-    fontSize: 11,
-    fontWeight: '600',
-  },
-  companionName: {
-    fontFamily: 'Urbanist_600SemiBold',
-  },
-});

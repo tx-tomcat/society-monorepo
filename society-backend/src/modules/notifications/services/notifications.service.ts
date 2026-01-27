@@ -1,5 +1,5 @@
 import { NotificationType } from '@generated/client';
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, Logger, NotFoundException, Optional } from '@nestjs/common';
 import { PrismaService } from '../../../prisma/prisma.service';
 import {
   CreateNotificationDto,
@@ -8,9 +8,8 @@ import {
   UpdatePreferencesDto,
 } from '../dto/notification.dto';
 import { NotificationResult } from '../interfaces/notification.interface';
-import { EmailService } from './email.service';
-import { PushService } from './push.service';
-import { SmsService } from './sms.service';
+import { NotificationDeliveryService, UserWithSettings } from './notification-delivery.service';
+import { NotificationProducer } from '../../queue/producers/notification.producer';
 
 @Injectable()
 export class NotificationsService {
@@ -18,9 +17,9 @@ export class NotificationsService {
 
   constructor(
     private readonly prisma: PrismaService,
-    private readonly pushService: PushService,
-    private readonly emailService: EmailService,
-    private readonly smsService: SmsService,
+    private readonly deliveryService: NotificationDeliveryService,
+    @Optional() @Inject(NotificationProducer)
+    private readonly notificationProducer?: NotificationProducer,
   ) {}
 
   async create(dto: CreateNotificationDto): Promise<string> {
@@ -38,7 +37,15 @@ export class NotificationsService {
     return notification.id;
   }
 
-  async send(dto: SendNotificationDto): Promise<NotificationResult> {
+  /**
+   * Send notification with async delivery via queue (default) or synchronous delivery
+   * @param dto - Notification data
+   * @param options - Optional settings (useQueue defaults to true when queue is available)
+   */
+  async send(
+    dto: SendNotificationDto,
+    options?: { useQueue?: boolean },
+  ): Promise<NotificationResult> {
     // Create in-app notification
     const notification = await this.prisma.notification.create({
       data: {
@@ -58,6 +65,45 @@ export class NotificationsService {
       },
     };
 
+    // Determine if we should use queue (default: yes, if available)
+    const useQueue = options?.useQueue ?? !!this.notificationProducer;
+
+    if (useQueue && this.notificationProducer) {
+      // Queue the notification for async delivery - returns immediately
+      await this.notificationProducer.enqueue({
+        notificationId: notification.id,
+        userId: dto.userId,
+        type: dto.type,
+        channels: {
+          push: dto.sendPush,
+          email: dto.sendEmail,
+          sms: dto.sendSms,
+        },
+        payload: {
+          title: dto.title,
+          body: dto.body,
+          data: dto.data,
+          actionUrl: dto.actionUrl,
+        },
+      });
+
+      this.logger.debug(`Queued notification ${notification.id} for async delivery`);
+      return result;
+    }
+
+    // Synchronous delivery (fallback or explicit request)
+    return this.sendSync(dto, notification.id, result);
+  }
+
+  /**
+   * Send notification synchronously (blocking)
+   * Used as fallback when queue is unavailable or for testing
+   */
+  private async sendSync(
+    dto: SendNotificationDto,
+    notificationId: string,
+    result: NotificationResult,
+  ): Promise<NotificationResult> {
     // Get user settings
     const user = await this.prisma.user.findUnique({
       where: { id: dto.userId },
@@ -71,52 +117,41 @@ export class NotificationsService {
       return result;
     }
 
-    // Send push notification
-    if (dto.sendPush !== false && user.settings?.pushNotifications) {
-      for (const token of user.pushTokens) {
-        const pushResult = await this.pushService.sendToDevice({
-          token: token.token,
-          title: dto.title,
-          body: dto.body,
-          data: dto.data,
-        });
+    // Use shared delivery service
+    const deliveryResult = await this.deliveryService.deliverToChannels(
+      user as UserWithSettings,
+      {
+        push: dto.sendPush !== false,
+        email: dto.sendEmail,
+        sms: dto.sendSms,
+      },
+      {
+        title: dto.title,
+        body: dto.body,
+        data: dto.data,
+        actionUrl: dto.actionUrl,
+      },
+      notificationId,
+    );
 
-        result.channels.push = pushResult;
-
-        // Log delivery
-        await this.logDelivery(notification.id, 'push', pushResult.success, pushResult.error);
-
-        // Deactivate invalid tokens
-        if (!pushResult.success && pushResult.error?.includes('NotRegistered')) {
-          await this.prisma.pushToken.update({
-            where: { id: token.id },
-            data: { isActive: false },
-          });
-        }
-      }
+    // Map delivery results to NotificationResult format
+    if (deliveryResult.push) {
+      result.channels.push = {
+        success: deliveryResult.push.sent > 0,
+        error: deliveryResult.push.failed > 0 ? `${deliveryResult.push.failed} tokens failed` : undefined,
+      };
     }
-
-    // Send email notification
-    if (dto.sendEmail && user.settings?.emailNotifications && user.email) {
-      const emailResult = await this.emailService.send({
-        to: user.email,
-        subject: dto.title,
-        html: `<p>${dto.body}</p>${dto.actionUrl ? `<a href="${dto.actionUrl}">View</a>` : ''}`,
-      });
-
-      result.channels.email = emailResult;
-      await this.logDelivery(notification.id, 'email', emailResult.success, emailResult.error);
+    if (deliveryResult.email) {
+      result.channels.email = {
+        success: deliveryResult.email.success,
+        error: deliveryResult.email.error,
+      };
     }
-
-    // Send SMS notification
-    if (dto.sendSms && user.settings?.smsNotifications && user.phone) {
-      const smsResult = await this.smsService.send({
-        to: this.smsService.formatPhoneNumber(user.phone),
-        body: `${dto.title}: ${dto.body}`,
-      });
-
-      result.channels.sms = smsResult;
-      await this.logDelivery(notification.id, 'sms', smsResult.success, smsResult.error);
+    if (deliveryResult.sms) {
+      result.channels.sms = {
+        success: deliveryResult.sms.success,
+        error: deliveryResult.sms.error,
+      };
     }
 
     return result;
@@ -420,22 +455,6 @@ export class NotificationsService {
       actionUrl: '/profile',
       sendPush: true,
       sendEmail: true,
-    });
-  }
-
-  private async logDelivery(
-    notificationId: string,
-    channel: string,
-    success: boolean,
-    error?: string,
-  ) {
-    await this.prisma.notificationLog.create({
-      data: {
-        notificationId,
-        channel,
-        status: success ? 'delivered' : 'failed',
-        errorMessage: error,
-      },
     });
   }
 }

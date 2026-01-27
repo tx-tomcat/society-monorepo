@@ -9,9 +9,10 @@ import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate
 import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint.fabricEnabled
 import com.facebook.react.defaults.DefaultReactActivityDelegate
-import com.zing.zalo.zalosdk.oauth.ZaloSDK
 
 import expo.modules.ReactActivityDelegateWrapper
+
+import com.zing.zalo.zalosdk.oauth.ZaloSDK
 
 class MainActivity : ReactActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -46,12 +47,6 @@ class MainActivity : ReactActivity() {
           ){})
   }
 
-  // Zalo SDK callback handler
-  override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-    super.onActivityResult(requestCode, resultCode, data)
-    ZaloSDK.Instance.onActivityResult(this, requestCode, resultCode, data)
-  }
-
   /**
     * Align the back button behavior with Android S
     * where moving root activities to background instead of finishing activities.
@@ -69,5 +64,10 @@ class MainActivity : ReactActivity() {
       // Use the default back button implementation on Android S
       // because it's doing more than [Activity.moveTaskToBack] in fact.
       super.invokeDefaultOnBackPressed()
+  }
+
+  override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+    super.onActivityResult(requestCode, resultCode, data)
+    ZaloSDK.Instance.onActivityResult(this, requestCode, resultCode, data)
   }
 }

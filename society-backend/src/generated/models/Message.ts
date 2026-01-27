@@ -31,6 +31,7 @@ export type MessageMinAggregateOutputType = {
   content: string | null
   messageType: $Enums.MessageType | null
   isRead: boolean | null
+  deletedAt: Date | null
   createdAt: Date | null
 }
 
@@ -41,6 +42,7 @@ export type MessageMaxAggregateOutputType = {
   content: string | null
   messageType: $Enums.MessageType | null
   isRead: boolean | null
+  deletedAt: Date | null
   createdAt: Date | null
 }
 
@@ -51,6 +53,7 @@ export type MessageCountAggregateOutputType = {
   content: number
   messageType: number
   isRead: number
+  deletedAt: number
   createdAt: number
   _all: number
 }
@@ -63,6 +66,7 @@ export type MessageMinAggregateInputType = {
   content?: true
   messageType?: true
   isRead?: true
+  deletedAt?: true
   createdAt?: true
 }
 
@@ -73,6 +77,7 @@ export type MessageMaxAggregateInputType = {
   content?: true
   messageType?: true
   isRead?: true
+  deletedAt?: true
   createdAt?: true
 }
 
@@ -83,6 +88,7 @@ export type MessageCountAggregateInputType = {
   content?: true
   messageType?: true
   isRead?: true
+  deletedAt?: true
   createdAt?: true
   _all?: true
 }
@@ -166,6 +172,7 @@ export type MessageGroupByOutputType = {
   content: string
   messageType: $Enums.MessageType
   isRead: boolean
+  deletedAt: Date | null
   createdAt: Date
   _count: MessageCountAggregateOutputType | null
   _min: MessageMinAggregateOutputType | null
@@ -197,6 +204,7 @@ export type MessageWhereInput = {
   content?: Prisma.StringFilter<"Message"> | string
   messageType?: Prisma.EnumMessageTypeFilter<"Message"> | $Enums.MessageType
   isRead?: Prisma.BoolFilter<"Message"> | boolean
+  deletedAt?: Prisma.DateTimeNullableFilter<"Message"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Message"> | Date | string
   conversation?: Prisma.XOR<Prisma.ConversationScalarRelationFilter, Prisma.ConversationWhereInput>
   sender?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
@@ -209,6 +217,7 @@ export type MessageOrderByWithRelationInput = {
   content?: Prisma.SortOrder
   messageType?: Prisma.SortOrder
   isRead?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   conversation?: Prisma.ConversationOrderByWithRelationInput
   sender?: Prisma.UserOrderByWithRelationInput
@@ -224,6 +233,7 @@ export type MessageWhereUniqueInput = Prisma.AtLeast<{
   content?: Prisma.StringFilter<"Message"> | string
   messageType?: Prisma.EnumMessageTypeFilter<"Message"> | $Enums.MessageType
   isRead?: Prisma.BoolFilter<"Message"> | boolean
+  deletedAt?: Prisma.DateTimeNullableFilter<"Message"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Message"> | Date | string
   conversation?: Prisma.XOR<Prisma.ConversationScalarRelationFilter, Prisma.ConversationWhereInput>
   sender?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
@@ -236,6 +246,7 @@ export type MessageOrderByWithAggregationInput = {
   content?: Prisma.SortOrder
   messageType?: Prisma.SortOrder
   isRead?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   _count?: Prisma.MessageCountOrderByAggregateInput
   _max?: Prisma.MessageMaxOrderByAggregateInput
@@ -252,6 +263,7 @@ export type MessageScalarWhereWithAggregatesInput = {
   content?: Prisma.StringWithAggregatesFilter<"Message"> | string
   messageType?: Prisma.EnumMessageTypeWithAggregatesFilter<"Message"> | $Enums.MessageType
   isRead?: Prisma.BoolWithAggregatesFilter<"Message"> | boolean
+  deletedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Message"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Message"> | Date | string
 }
 
@@ -260,6 +272,7 @@ export type MessageCreateInput = {
   content: string
   messageType?: $Enums.MessageType
   isRead?: boolean
+  deletedAt?: Date | string | null
   createdAt?: Date | string
   conversation: Prisma.ConversationCreateNestedOneWithoutMessagesInput
   sender: Prisma.UserCreateNestedOneWithoutMessagesSentInput
@@ -272,6 +285,7 @@ export type MessageUncheckedCreateInput = {
   content: string
   messageType?: $Enums.MessageType
   isRead?: boolean
+  deletedAt?: Date | string | null
   createdAt?: Date | string
 }
 
@@ -280,6 +294,7 @@ export type MessageUpdateInput = {
   content?: Prisma.StringFieldUpdateOperationsInput | string
   messageType?: Prisma.EnumMessageTypeFieldUpdateOperationsInput | $Enums.MessageType
   isRead?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   conversation?: Prisma.ConversationUpdateOneRequiredWithoutMessagesNestedInput
   sender?: Prisma.UserUpdateOneRequiredWithoutMessagesSentNestedInput
@@ -292,6 +307,7 @@ export type MessageUncheckedUpdateInput = {
   content?: Prisma.StringFieldUpdateOperationsInput | string
   messageType?: Prisma.EnumMessageTypeFieldUpdateOperationsInput | $Enums.MessageType
   isRead?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -302,6 +318,7 @@ export type MessageCreateManyInput = {
   content: string
   messageType?: $Enums.MessageType
   isRead?: boolean
+  deletedAt?: Date | string | null
   createdAt?: Date | string
 }
 
@@ -310,6 +327,7 @@ export type MessageUpdateManyMutationInput = {
   content?: Prisma.StringFieldUpdateOperationsInput | string
   messageType?: Prisma.EnumMessageTypeFieldUpdateOperationsInput | $Enums.MessageType
   isRead?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -320,6 +338,7 @@ export type MessageUncheckedUpdateManyInput = {
   content?: Prisma.StringFieldUpdateOperationsInput | string
   messageType?: Prisma.EnumMessageTypeFieldUpdateOperationsInput | $Enums.MessageType
   isRead?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -340,6 +359,7 @@ export type MessageCountOrderByAggregateInput = {
   content?: Prisma.SortOrder
   messageType?: Prisma.SortOrder
   isRead?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -350,6 +370,7 @@ export type MessageMaxOrderByAggregateInput = {
   content?: Prisma.SortOrder
   messageType?: Prisma.SortOrder
   isRead?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -360,6 +381,7 @@ export type MessageMinOrderByAggregateInput = {
   content?: Prisma.SortOrder
   messageType?: Prisma.SortOrder
   isRead?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -456,6 +478,7 @@ export type MessageCreateWithoutSenderInput = {
   content: string
   messageType?: $Enums.MessageType
   isRead?: boolean
+  deletedAt?: Date | string | null
   createdAt?: Date | string
   conversation: Prisma.ConversationCreateNestedOneWithoutMessagesInput
 }
@@ -466,6 +489,7 @@ export type MessageUncheckedCreateWithoutSenderInput = {
   content: string
   messageType?: $Enums.MessageType
   isRead?: boolean
+  deletedAt?: Date | string | null
   createdAt?: Date | string
 }
 
@@ -505,6 +529,7 @@ export type MessageScalarWhereInput = {
   content?: Prisma.StringFilter<"Message"> | string
   messageType?: Prisma.EnumMessageTypeFilter<"Message"> | $Enums.MessageType
   isRead?: Prisma.BoolFilter<"Message"> | boolean
+  deletedAt?: Prisma.DateTimeNullableFilter<"Message"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Message"> | Date | string
 }
 
@@ -513,6 +538,7 @@ export type MessageCreateWithoutConversationInput = {
   content: string
   messageType?: $Enums.MessageType
   isRead?: boolean
+  deletedAt?: Date | string | null
   createdAt?: Date | string
   sender: Prisma.UserCreateNestedOneWithoutMessagesSentInput
 }
@@ -523,6 +549,7 @@ export type MessageUncheckedCreateWithoutConversationInput = {
   content: string
   messageType?: $Enums.MessageType
   isRead?: boolean
+  deletedAt?: Date | string | null
   createdAt?: Date | string
 }
 
@@ -558,6 +585,7 @@ export type MessageCreateManySenderInput = {
   content: string
   messageType?: $Enums.MessageType
   isRead?: boolean
+  deletedAt?: Date | string | null
   createdAt?: Date | string
 }
 
@@ -566,6 +594,7 @@ export type MessageUpdateWithoutSenderInput = {
   content?: Prisma.StringFieldUpdateOperationsInput | string
   messageType?: Prisma.EnumMessageTypeFieldUpdateOperationsInput | $Enums.MessageType
   isRead?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   conversation?: Prisma.ConversationUpdateOneRequiredWithoutMessagesNestedInput
 }
@@ -576,6 +605,7 @@ export type MessageUncheckedUpdateWithoutSenderInput = {
   content?: Prisma.StringFieldUpdateOperationsInput | string
   messageType?: Prisma.EnumMessageTypeFieldUpdateOperationsInput | $Enums.MessageType
   isRead?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -585,6 +615,7 @@ export type MessageUncheckedUpdateManyWithoutSenderInput = {
   content?: Prisma.StringFieldUpdateOperationsInput | string
   messageType?: Prisma.EnumMessageTypeFieldUpdateOperationsInput | $Enums.MessageType
   isRead?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -594,6 +625,7 @@ export type MessageCreateManyConversationInput = {
   content: string
   messageType?: $Enums.MessageType
   isRead?: boolean
+  deletedAt?: Date | string | null
   createdAt?: Date | string
 }
 
@@ -602,6 +634,7 @@ export type MessageUpdateWithoutConversationInput = {
   content?: Prisma.StringFieldUpdateOperationsInput | string
   messageType?: Prisma.EnumMessageTypeFieldUpdateOperationsInput | $Enums.MessageType
   isRead?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sender?: Prisma.UserUpdateOneRequiredWithoutMessagesSentNestedInput
 }
@@ -612,6 +645,7 @@ export type MessageUncheckedUpdateWithoutConversationInput = {
   content?: Prisma.StringFieldUpdateOperationsInput | string
   messageType?: Prisma.EnumMessageTypeFieldUpdateOperationsInput | $Enums.MessageType
   isRead?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -621,6 +655,7 @@ export type MessageUncheckedUpdateManyWithoutConversationInput = {
   content?: Prisma.StringFieldUpdateOperationsInput | string
   messageType?: Prisma.EnumMessageTypeFieldUpdateOperationsInput | $Enums.MessageType
   isRead?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -633,6 +668,7 @@ export type MessageSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   content?: boolean
   messageType?: boolean
   isRead?: boolean
+  deletedAt?: boolean
   createdAt?: boolean
   conversation?: boolean | Prisma.ConversationDefaultArgs<ExtArgs>
   sender?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -645,6 +681,7 @@ export type MessageSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   content?: boolean
   messageType?: boolean
   isRead?: boolean
+  deletedAt?: boolean
   createdAt?: boolean
   conversation?: boolean | Prisma.ConversationDefaultArgs<ExtArgs>
   sender?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -657,6 +694,7 @@ export type MessageSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   content?: boolean
   messageType?: boolean
   isRead?: boolean
+  deletedAt?: boolean
   createdAt?: boolean
   conversation?: boolean | Prisma.ConversationDefaultArgs<ExtArgs>
   sender?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -669,10 +707,11 @@ export type MessageSelectScalar = {
   content?: boolean
   messageType?: boolean
   isRead?: boolean
+  deletedAt?: boolean
   createdAt?: boolean
 }
 
-export type MessageOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "conversationId" | "senderId" | "content" | "messageType" | "isRead" | "createdAt", ExtArgs["result"]["message"]>
+export type MessageOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "conversationId" | "senderId" | "content" | "messageType" | "isRead" | "deletedAt" | "createdAt", ExtArgs["result"]["message"]>
 export type MessageInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   conversation?: boolean | Prisma.ConversationDefaultArgs<ExtArgs>
   sender?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -699,6 +738,7 @@ export type $MessagePayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     content: string
     messageType: $Enums.MessageType
     isRead: boolean
+    deletedAt: Date | null
     createdAt: Date
   }, ExtArgs["result"]["message"]>
   composites: {}
@@ -1131,6 +1171,7 @@ export interface MessageFieldRefs {
   readonly content: Prisma.FieldRef<"Message", 'String'>
   readonly messageType: Prisma.FieldRef<"Message", 'MessageType'>
   readonly isRead: Prisma.FieldRef<"Message", 'Boolean'>
+  readonly deletedAt: Prisma.FieldRef<"Message", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"Message", 'DateTime'>
 }
     

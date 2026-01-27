@@ -47,11 +47,6 @@ export class CreateUserDto {
 
 
 export class UpdateUserDto {
-  @IsOptional()
-  @IsString()
-  @MinLength(2)
-  @MaxLength(100)
-  fullName?: string;
 
   @IsOptional()
   @IsString()
@@ -84,6 +79,16 @@ export class UpdateUserDto {
   @IsString()
   @IsVietnamPhone()
   phone?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(10)
+  province?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(50)
+  district?: string;
 }
 
 export class CreateHirerProfileDto {
@@ -105,6 +110,16 @@ export class CreateCompanionProfileDto {
   @IsOptional()
   @IsString({ each: true })
   languages?: string[];
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(10)
+  province?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(50)
+  district?: string;
 
   @IsInt()
   @Min(100000) // Minimum 100,000 VND
@@ -136,6 +151,16 @@ export class UpdateCompanionProfileDto {
   @IsOptional()
   @IsString({ each: true })
   languages?: string[];
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(10)
+  province?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(50)
+  district?: string;
 
   @IsOptional()
   @IsInt()

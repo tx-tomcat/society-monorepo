@@ -4,13 +4,7 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { MotiView } from 'moti';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  ActivityIndicator,
-  Alert,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-} from 'react-native';
+import { ActivityIndicator, Alert, Pressable, ScrollView } from 'react-native';
 
 import {
   colors,
@@ -35,6 +29,7 @@ import {
 import {
   type Companion,
   companionsService,
+  getPrimaryPhotoUrl,
 } from '@/lib/api/services/companions.service';
 import { useAuth } from '@/lib/hooks/use-auth';
 
@@ -174,7 +169,7 @@ export default function CompanionAccountScreen() {
       <SafeAreaView edges={['top']}>
         {/* Header - Left-aligned title, no back button */}
         <View className="bg-white px-4 pb-0 pt-2">
-          <Text style={styles.headerTitle} className="text-2xl text-midnight">
+          <Text className="font-urbanist-bold text-2xl text-midnight">
             {t('companion.settings.account_title')}
           </Text>
         </View>
@@ -190,23 +185,21 @@ export default function CompanionAccountScreen() {
           from={{ opacity: 0, translateY: 10 }}
           animate={{ opacity: 1, translateY: 0 }}
           transition={{ type: 'timing', duration: 400 }}
-          className="mx-4 mt-4 items-center rounded-2xl bg-white p-5"
-          style={styles.card}
+          className="mx-4 mt-4 items-center rounded-2xl bg-white p-5 shadow-sm"
         >
           <Image
             source={{
               uri:
-                profile?.photos?.find((p) => p.isPrimary)?.url ||
-                profile?.photos?.[0]?.url ||
-                profile?.user?.avatarUrl ||
+                getPrimaryPhotoUrl(profile?.photos) ||
+                profile?.avatar ||
                 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400',
             }}
             className="size-24 rounded-full"
             contentFit="cover"
           />
           <View className="mt-3 flex-row items-center gap-1">
-            <Text style={styles.userName} className="text-lg text-midnight">
-              {profile?.user?.fullName || 'Companion'}
+            <Text className="font-urbanist-bold text-lg text-midnight">
+              {profile?.displayName || 'Companion'}
             </Text>
             {isVerified && (
               <VerifiedBadge color={colors.teal[400]} width={18} height={18} />
@@ -215,14 +208,14 @@ export default function CompanionAccountScreen() {
           <View className="mt-1 flex-row items-center gap-1">
             <Star color={colors.yellow[400]} width={14} height={14} />
             <Text className="text-xs text-text-secondary">
-              {profile?.ratingAvg?.toFixed(1) || '0.0'} · {profile?.totalBookings || 0} bookings
+              {profile?.rating?.toFixed(1) || '0.0'} · {profile?.completedBookings || 0} bookings
             </Text>
           </View>
           <Pressable
             onPress={handleViewProfile}
             className="mt-3 rounded-lg bg-lavender-400 px-4 py-2"
           >
-            <Text style={styles.buttonText} className="text-xs text-white">
+            <Text className="font-urbanist-semibold text-xs text-white">
               {t('companion.settings.view_public_profile')}
             </Text>
           </Pressable>
@@ -233,8 +226,7 @@ export default function CompanionAccountScreen() {
           from={{ opacity: 0, translateY: 10 }}
           animate={{ opacity: 1, translateY: 0 }}
           transition={{ type: 'timing', duration: 400, delay: 100 }}
-          className="mx-4 mt-4 rounded-2xl bg-white p-4"
-          style={styles.card}
+          className="mx-4 mt-4 rounded-2xl bg-white p-4 shadow-sm"
         >
           {MENU_ITEMS.map((item, index) => {
             // Update verification badge based on actual status
@@ -268,20 +260,18 @@ export default function CompanionAccountScreen() {
                 </Text>
                 {badge ? (
                   <View
-                    style={[
-                      styles.badge,
+                    className={`rounded-xl px-2.5 py-1 ${
                       badge.variant === 'verified'
-                        ? styles.badgeVerified
-                        : styles.badgeDefault,
-                    ]}
+                        ? 'bg-teal-400/10'
+                        : 'bg-yellow-400/10'
+                    }`}
                   >
                     <Text
-                      style={
+                      className={`text-xs font-semibold ${
                         badge.variant === 'verified'
-                          ? styles.badgeTextVerified
-                          : styles.badgeTextDefault
-                      }
-                      className="text-xs"
+                          ? 'text-teal-400'
+                          : 'text-yellow-500'
+                      }`}
                     >
                       {badge.label}
                     </Text>
@@ -299,8 +289,7 @@ export default function CompanionAccountScreen() {
           from={{ opacity: 0, translateY: 10 }}
           animate={{ opacity: 1, translateY: 0 }}
           transition={{ type: 'timing', duration: 400, delay: 200 }}
-          className="mx-4 mt-4 rounded-2xl bg-white p-4"
-          style={styles.card}
+          className="mx-4 mt-4 rounded-2xl bg-white p-4 shadow-sm"
         >
           <Pressable
             onPress={handleSwitchToHirer}
@@ -321,8 +310,7 @@ export default function CompanionAccountScreen() {
           from={{ opacity: 0, translateY: 10 }}
           animate={{ opacity: 1, translateY: 0 }}
           transition={{ type: 'timing', duration: 400, delay: 300 }}
-          className="mx-4 mt-4 rounded-2xl bg-white p-4"
-          style={styles.card}
+          className="mx-4 mt-4 rounded-2xl bg-white p-4 shadow-sm"
         >
           <Pressable
             onPress={handleLogout}
@@ -340,41 +328,3 @@ export default function CompanionAccountScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  headerTitle: {
-    fontFamily: 'Urbanist_700Bold',
-  },
-  userName: {
-    fontFamily: 'Urbanist_700Bold',
-  },
-  buttonText: {
-    fontFamily: 'Urbanist_600SemiBold',
-  },
-  card: {
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
-  },
-  badge: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  badgeVerified: {
-    backgroundColor: '#EDFCFB',
-  },
-  badgeDefault: {
-    backgroundColor: '#FFFBEB',
-  },
-  badgeTextVerified: {
-    color: '#46B9B1',
-    fontWeight: '600',
-  },
-  badgeTextDefault: {
-    color: '#E6C337',
-    fontWeight: '600',
-  },
-});

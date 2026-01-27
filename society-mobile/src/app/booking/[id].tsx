@@ -16,25 +16,12 @@ import {
   View,
 } from '@/components/ui';
 import { ArrowLeft, Clock, MapPin, ShieldCheck } from '@/components/ui/icons';
-import type { ServiceType } from '@/lib/api/services/companions.service';
-import { useCompanion, useCreateBooking } from '@/lib/hooks';
+import type { Occasion } from '@/lib/api/services/occasions.service';
+import { useCompanion, useCreateBooking, useOccasions } from '@/lib/hooks';
 import { formatVND } from '@/lib/utils';
 
 // Booking steps
 type BookingStep = 'details' | 'datetime' | 'payment';
-
-// Occasion types mapped to API ServiceType
-const occasionTypes: {
-  id: ServiceType;
-  label: string;
-}[] = [
-  { id: 'WEDDING_ATTENDANCE', label: 'Wedding' },
-  { id: 'FAMILY_INTRODUCTION', label: 'Family Event' },
-  { id: 'TET_COMPANIONSHIP', label: 'Tet Celebration' },
-  { id: 'BUSINESS_EVENT', label: 'Corporate' },
-  { id: 'CASUAL_OUTING', label: 'Coffee Date' },
-  { id: 'OTHER', label: 'Other' },
-];
 
 // Time slots
 const timeSlots = [
@@ -63,12 +50,18 @@ export default function BookingFlow() {
     isError: isCompanionError,
   } = useCompanion(id || '');
 
+  // Fetch contextual occasions from API
+  const {
+    data: occasionsData,
+    isLoading: isLoadingOccasions,
+  } = useOccasions();
+
   // Create booking mutation
   const createBooking = useCreateBooking();
 
   const [step, setStep] = React.useState<BookingStep>('details');
   const [selectedOccasion, setSelectedOccasion] =
-    React.useState<ServiceType | null>(null);
+    React.useState<Occasion | null>(null);
   const [selectedDate, setSelectedDate] = React.useState<Date | null>(null);
   const [selectedTime, setSelectedTime] = React.useState<string | null>(null);
   const [duration, setDuration] = React.useState(2); // hours
@@ -77,17 +70,21 @@ export default function BookingFlow() {
   // Get companion display data
   const companion = React.useMemo(() => {
     if (!companionData) return null;
-    const primaryPhoto = companionData.photos?.find((p) => p.isPrimary);
+    // Get first photo URL (photos can be objects or strings)
+    const photos = companionData.photos || [];
+    const primaryPhoto = photos.find((p) => typeof p !== 'string' && p.isPrimary);
+    const firstPhotoUrl = typeof photos[0] === 'string' ? photos[0] : photos[0]?.url;
+    const primaryPhotoUrl = primaryPhoto && typeof primaryPhoto !== 'string' ? primaryPhoto.url : undefined;
     return {
       id: companionData.id,
-      name: companionData.user?.fullName || 'Unknown',
+      name: companionData.displayName || 'Unknown',
       image:
-        primaryPhoto?.url ||
-        companionData.photos?.[0]?.url ||
-        companionData.user?.avatarUrl ||
+        primaryPhotoUrl ||
+        firstPhotoUrl ||
+        companionData.avatar ||
         'https://via.placeholder.com/400',
       pricePerHour: companionData.hourlyRate || 0,
-      isVerified: companionData.verificationStatus === 'verified',
+      isVerified: companionData.isVerified,
     };
   }, [companionData]);
 
@@ -125,7 +122,7 @@ export default function BookingFlow() {
       try {
         await createBooking.mutateAsync({
           companionId: id,
-          occasionType: selectedOccasion,
+          occasionId: selectedOccasion.id,
           startDatetime: startDatetime.toISOString(),
           endDatetime: endDatetime.toISOString(),
           locationAddress: location || 'To be confirmed',
@@ -197,15 +194,18 @@ export default function BookingFlow() {
   };
 
   // Loading state
-  if (isLoadingCompanion) {
+  if (isLoadingCompanion || isLoadingOccasions) {
     return (
       <View className="flex-1 items-center justify-center bg-warmwhite">
         <FocusAwareStatusBar />
         <ActivityIndicator size="large" color={colors.rose[400]} />
-        <Text className="mt-4 text-text-secondary">Loading companion...</Text>
+        <Text className="mt-4 text-text-secondary">Loading...</Text>
       </View>
     );
   }
+
+  // Get occasions from API response
+  const occasions = occasionsData?.occasions || [];
 
   // Error state
   if (isCompanionError || !companion) {
@@ -295,15 +295,15 @@ export default function BookingFlow() {
                 What is the occasion?
               </Text>
               <View className="flex-row flex-wrap gap-2">
-                {occasionTypes.map((occasion) => (
+                {occasions.map((occasion) => (
                   <Pressable
                     key={occasion.id}
-                    onPress={() => setSelectedOccasion(occasion.id)}
+                    onPress={() => setSelectedOccasion(occasion)}
                   >
                     <Badge
-                      label={occasion.label}
+                      label={`${occasion.emoji} ${occasion.name}`}
                       variant={
-                        selectedOccasion === occasion.id ? 'default' : 'outline'
+                        selectedOccasion?.id === occasion.id ? 'default' : 'outline'
                       }
                       size="lg"
                     />
@@ -449,10 +449,7 @@ export default function BookingFlow() {
                 <View className="flex-row justify-between">
                   <Text className="text-text-secondary">Occasion</Text>
                   <Text className="font-medium text-midnight">
-                    {
-                      occasionTypes.find((o) => o.id === selectedOccasion)
-                        ?.label
-                    }
+                    {selectedOccasion ? `${selectedOccasion.emoji} ${selectedOccasion.name}` : ''}
                   </Text>
                 </View>
                 <View className="flex-row justify-between">

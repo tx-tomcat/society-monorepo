@@ -4,7 +4,7 @@ import { useRouter } from 'expo-router';
 import { MotiView } from 'moti';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, ScrollView, StyleSheet, TextInput } from 'react-native';
+import { Pressable, ScrollView, TextInput } from 'react-native';
 
 import {
   Button,
@@ -89,10 +89,7 @@ export default function SetPricing() {
           <Pressable onPress={handleBack}>
             <ArrowLeft color={colors.midnight.DEFAULT} width={24} height={24} />
           </Pressable>
-          <Text
-            style={styles.headerTitle}
-            className="flex-1 text-xl text-midnight"
-          >
+          <Text className="font-urbanist-bold flex-1 text-xl text-midnight">
             {t('companion.onboard.set_pricing.header')}
           </Text>
           <Text className="text-sm text-text-tertiary">
@@ -274,7 +271,7 @@ export default function SetPricing() {
               {t('companion.onboard.set_pricing.estimated_monthly')}
             </Text>
           </View>
-          <Text style={styles.estimate} className="mt-2 text-3xl text-midnight">
+          <Text className="font-urbanist-bold mt-2 text-3xl text-midnight">
             {formatVND(estimatedMonthly)}
           </Text>
           <Text className="mt-1 text-xs text-text-secondary">
@@ -320,12 +317,3 @@ export default function SetPricing() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  headerTitle: {
-    fontFamily: 'Urbanist_700Bold',
-  },
-  estimate: {
-    fontFamily: 'Urbanist_700Bold',
-  },
-});

@@ -4,7 +4,7 @@ import { useRouter } from 'expo-router';
 import { MotiView } from 'moti';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Pressable, ScrollView, StyleSheet } from 'react-native';
+import { Alert, Pressable, ScrollView } from 'react-native';
 
 import {
   colors,
@@ -22,14 +22,15 @@ import {
   Edit,
   Heart,
   Help,
+  HiremeLogo,
   Language,
   Lock,
   Logout,
   Shield,
-  SocietyLogo,
   Star,
+  User
 } from '@/components/ui/icons';
-import { useAuth } from '@/lib/hooks';
+import { useAuth, useCurrentUser } from '@/lib/hooks';
 
 type SettingsItem = {
   id: string;
@@ -145,14 +146,6 @@ const SETTINGS_SECTIONS: { titleKey: string; items: SettingsItem[] }[] = [
   },
 ];
 
-const MOCK_USER = {
-  name: 'Nguyễn Văn An',
-  email: 'an.nguyen@gmail.com',
-  avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400',
-  memberSince: 'January 2024',
-  totalBookings: 12,
-};
-
 function SettingsMenuItem({
   item,
   onPress,
@@ -192,6 +185,8 @@ export default function HirerSettingsScreen() {
   const router = useRouter();
   const { t } = useTranslation();
   const { signOut } = useAuth();
+  const { data: userData } = useCurrentUser();
+  const user = userData?.user;
 
   const handleBack = React.useCallback(() => {
     router.back();
@@ -246,13 +241,10 @@ export default function HirerSettingsScreen() {
           >
             <ArrowLeft color={colors.midnight.DEFAULT} width={24} height={24} />
           </Pressable>
-          <Text
-            style={styles.headerTitle}
-            className="flex-1 text-xl text-midnight"
-          >
+          <Text className="flex-1 font-urbanist-bold text-xl text-midnight">
             {t('hirer.settings.title')}
           </Text>
-          <SocietyLogo color={colors.rose[400]} width={28} height={28} />
+          <HiremeLogo color={colors.rose[400]} width={28} height={28} />
         </View>
       </SafeAreaView>
 
@@ -265,25 +257,30 @@ export default function HirerSettingsScreen() {
           className="mx-4 mt-4 rounded-2xl bg-white p-5"
         >
           <View className="flex-row items-center gap-4">
-            <Image
-              source={{ uri: MOCK_USER.avatar }}
-              className="size-20 rounded-full"
-              contentFit="cover"
-            />
-            <View className="flex-1">
-              <Text style={styles.userName} className="text-xl text-midnight">
-                {MOCK_USER.name}
-              </Text>
-              <Text className="mt-1 text-sm text-text-secondary">
-                {MOCK_USER.email}
-              </Text>
-              <View className="mt-2 flex-row items-center gap-3">
-                <View className="rounded-full bg-lavender-400/10 px-3 py-1">
-                  <Text className="text-xs font-medium text-lavender-500">
-                    {MOCK_USER.totalBookings} {t('hirer.settings.bookings')}
-                  </Text>
-                </View>
+            {user?.avatarUrl ? (
+              <Image
+                source={{ uri: user.avatarUrl }}
+                className="size-20 rounded-full"
+                contentFit="cover"
+              />
+            ) : (
+              <View className="size-20 items-center justify-center rounded-full bg-rose-100">
+                <User color={colors.rose[400]} width={32} height={32} />
               </View>
+            )}
+            <View className="flex-1">
+              <Text className="font-urbanist-bold text-xl text-midnight">
+                {user?.fullName || t('hirer.settings.unnamed_user')}
+              </Text>
+              {user?.isVerified && (
+                <View className="mt-2 flex-row items-center gap-3">
+                  <View className="rounded-full bg-teal-400/10 px-3 py-1">
+                    <Text className="text-xs font-medium text-teal-500">
+                      {t('hirer.settings.verified')}
+                    </Text>
+                  </View>
+                </View>
+              )}
             </View>
           </View>
           <Pressable
@@ -311,10 +308,7 @@ export default function HirerSettingsScreen() {
             className="px-4 pt-6"
           >
             {section.titleKey && (
-              <Text
-                style={styles.sectionTitle}
-                className="mb-3 text-sm uppercase tracking-wider text-text-tertiary"
-              >
+              <Text className="mb-3 font-urbanist-semibold text-sm uppercase tracking-wider text-text-tertiary">
                 {t(section.titleKey)}
               </Text>
             )}
@@ -335,27 +329,12 @@ export default function HirerSettingsScreen() {
           transition={{ type: 'timing', duration: 400, delay: 400 }}
           className="items-center px-4 py-8"
         >
-          <SocietyLogo color={colors.neutral[300]} width={40} height={40} />
+          <HiremeLogo color={colors.neutral[300]} width={40} height={40} />
           <Text className="mt-3 text-sm text-text-tertiary">
             Hireme v1.0.0
-          </Text>
-          <Text className="mt-1 text-xs text-text-tertiary">
-            {t('hirer.settings.member_since')} {MOCK_USER.memberSince}
           </Text>
         </MotiView>
       </ScrollView>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  headerTitle: {
-    fontFamily: 'Urbanist_700Bold',
-  },
-  userName: {
-    fontFamily: 'Urbanist_700Bold',
-  },
-  sectionTitle: {
-    fontFamily: 'Urbanist_600SemiBold',
-  },
-});

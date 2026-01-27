@@ -1,8 +1,10 @@
 import { UserRole, UserStatus } from '@generated/client';
 import { ExecutionContext, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
 import { AuthGuard } from '@nestjs/passport';
 import { createHash } from 'crypto';
+import { IS_PUBLIC_KEY } from '../../common/decorators/public.decorator';
 import { CacheService } from '../../modules/cache/cache.service';
 import { PrismaService } from '../../prisma/prisma.service';
 
@@ -20,13 +22,12 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
   private readonly CACHE_PREFIX = 'auth:session:';
 
   constructor(
+    private reflector: Reflector,
     private prisma: PrismaService,
     private cacheService: CacheService,
     private jwtService: JwtService,
   ) {
     super();
-
-
   }
 
   /**
@@ -46,8 +47,23 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
   }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
+    // Check if route is marked as public
+    const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+
     const request = context.switchToHttp().getRequest();
     const token = this.extractToken(request);
+
+    // For public routes, allow access but still try to extract user if token present
+    if (isPublic) {
+      if (token) {
+        // Try to extract user info for optional auth (e.g., for tracking)
+        await this.tryExtractUser(request, token);
+      }
+      return true;
+    }
 
     if (!token) {
       return false;
@@ -103,8 +119,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
         status: dbUser.status,
       };
       await this.cacheService.set(cacheKey, userToCache, this.CACHE_TTL);
-      this.logger.debug(`Cached session for user: ${dbUser.zaloId}`);
-      this.logger.debug(`User: ${JSON.stringify(dbUser)}`);
+      this.logger.debug(`Cached session for user: ${dbUser.id} (role: ${dbUser.role})`);
 
       // 6. Add user to request
       request.user = {
@@ -160,5 +175,39 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
   private extractToken(request: { headers: { authorization?: string } }): string | undefined {
     const [type, token] = request.headers.authorization?.split(' ') ?? [];
     return type === 'Bearer' ? token : undefined;
+  }
+
+  /**
+   * Try to extract user info without failing (for optional auth on public routes)
+   */
+  private async tryExtractUser(request: { user?: unknown }, token: string): Promise<void> {
+    try {
+      const cacheKey = `${this.CACHE_PREFIX}${this.hashToken(token)}`;
+      const cachedUser = await this.cacheService.get<CachedUser>(cacheKey);
+
+      if (cachedUser && cachedUser.status !== UserStatus.SUSPENDED && cachedUser.status !== UserStatus.DELETED) {
+        request.user = {
+          id: cachedUser.id,
+          zaloId: cachedUser.zaloId,
+          sub: cachedUser.id,
+          role: cachedUser.role,
+          status: cachedUser.status,
+        };
+        return;
+      }
+
+      const dbUser = await this.verifySocietyJwt(token);
+      if (dbUser && dbUser.status !== UserStatus.SUSPENDED && dbUser.status !== UserStatus.DELETED) {
+        request.user = {
+          id: dbUser.id,
+          zaloId: dbUser.zaloId,
+          sub: dbUser.id,
+          role: dbUser.role,
+          status: dbUser.status,
+        };
+      }
+    } catch {
+      // Silently fail - this is optional auth
+    }
   }
 }

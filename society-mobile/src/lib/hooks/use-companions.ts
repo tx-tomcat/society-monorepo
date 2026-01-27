@@ -186,13 +186,14 @@ export function usePurchaseBoost() {
 }
 
 /**
- * React Query mutation hook to add a photo
+ * React Query mutation hook to add a photo by URL
  */
 export function useAddCompanionPhoto() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (file: FormData) => companionsService.addPhoto(file),
+    mutationFn: ({ url, isPrimary = false }: { url: string; isPrimary?: boolean }) =>
+      companionsService.addPhoto(url, isPrimary),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['companion', 'me'] });
     },

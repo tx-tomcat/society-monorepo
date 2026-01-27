@@ -1,5 +1,6 @@
 // Prisma Schema for Society - Companion Booking Platform
 // Based on Technical Documentation v2.0 - January 2026
+// Optimized for PostgreSQL performance
 // https://pris.ly/d/prisma-schema
 
 generator client {
@@ -73,9 +74,6 @@ enum PaymentStatus {
 }
 
 enum PaymentProvider {
-  VNPAY
-  MOMO
-  STRIPE
   BANK_TRANSFER
 }
 
@@ -173,25 +171,34 @@ enum AppealStatus {
   REJECTED
 }
 
+enum CancellationType {
+  REGULAR
+  EMERGENCY
+}
+
 // ============================================
 // USER & AUTHENTICATION
 // ============================================
 
 model User {
-  id          String     @id @default(uuid()) @db.Uuid
-  zaloId      String     @unique @map("zalo_id")
-  phone       String?
-  email       String?
-  fullName    String?    @map("full_name")
-  avatarUrl   String?    @map("avatar_url")
-  gender      Gender?
-  dateOfBirth DateTime?  @map("date_of_birth") @db.Date
-  role        UserRole?
-  status      UserStatus @default(PENDING)
-  isVerified  Boolean    @default(false) @map("is_verified")
-  trustScore  Int        @default(100) @map("trust_score")
-  createdAt   DateTime   @default(now()) @map("created_at")
-  updatedAt   DateTime   @updatedAt @map("updated_at")
+  id              String     @id @default(uuid()) @db.Uuid
+  zaloId          String     @unique @map("zalo_id")
+  phone           String?
+  phoneHash       String?    @unique @map("phone_hash")
+  isPhoneVerified Boolean    @default(false) @map("is_phone_verified")
+  phoneVerifiedAt DateTime?  @map("phone_verified_at")
+  email           String?
+  fullName        String?    @map("full_name")
+  avatarUrl       String?    @map("avatar_url")
+  gender          Gender?
+  dateOfBirth     DateTime?  @map("date_of_birth") @db.Date
+  role            UserRole?
+  status          UserStatus @default(PENDING)
+  isVerified      Boolean    @default(false) @map("is_verified")
+  trustScore      Int        @default(100) @map("trust_score")
+  deletedAt       DateTime?  @map("deleted_at") // Soft delete support
+  createdAt       DateTime   @default(now()) @map("created_at")
+  updatedAt       DateTime   @updatedAt @map("updated_at")
 
   // Relations
   settings UserSettings?
@@ -231,7 +238,8 @@ model User {
   pushTokens    PushToken[]
 
   // Earnings & Payments
-  payments Payment[]
+  payments        Payment[]
+  paymentRequests PaymentRequest[]
 
   // Moderation
   moderationQueue   ModerationQueue[]
@@ -268,11 +276,13 @@ model User {
   emergencyEvents     EmergencyEvent[]   @relation("UserEmergencies")
   resolvedEmergencies EmergencyEvent[]   @relation("ResolvedEmergencies")
 
+  // OPTIMIZED: Removed redundant @@index([zaloId]) - @unique already creates index
   @@index([phone])
+  @@index([phoneHash])
   @@index([email])
-  @@index([zaloId])
   @@index([role])
   @@index([status])
+  @@index([deletedAt]) // For soft delete queries
   @@map("users")
 }
 
@@ -307,6 +317,7 @@ model UserDevice {
   sessions   UserSession[]
   pushTokens PushToken[]
 
+  @@index([userId]) // ADDED: FK index
   @@map("user_devices")
 }
 
@@ -322,6 +333,8 @@ model UserSession {
   user   User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   device UserDevice? @relation(fields: [deviceId], references: [id])
 
+  @@index([userId]) // ADDED: FK index
+  @@index([deviceId]) // ADDED: FK index
   @@map("user_sessions")
 }
 
@@ -335,10 +348,12 @@ model CompanionProfile {
   bio                String?
   heightCm           Int?               @map("height_cm")
   languages          String[]           @default(["vi"])
+  province           String? // Vietnamese province/city code (e.g., "HCM", "HN")
+  district           String? // District within province (optional)
   hourlyRate         Int                @map("hourly_rate") // in VND
   halfDayRate        Int?               @map("half_day_rate")
   fullDayRate        Int?               @map("full_day_rate")
-  ratingAvg          Decimal            @default(0.0) @map("rating_avg") @db.Decimal(2, 1)
+  ratingAvg          Decimal            @default(0.0) @map("rating_avg") @db.Decimal(3, 2) // FIXED: Was (2,1), now allows 4.85
   ratingCount        Int                @default(0) @map("rating_count")
   totalBookings      Int                @default(0) @map("total_bookings")
   completedBookings  Int                @default(0) @map("completed_bookings")
@@ -348,6 +363,7 @@ model CompanionProfile {
   isHidden           Boolean            @default(false) @map("is_hidden")
   responseRate       Int                @default(100) @map("response_rate")
   acceptanceRate     Int                @default(100) @map("acceptance_rate")
+  deletedAt          DateTime?          @map("deleted_at") // Soft delete support
   createdAt          DateTime           @default(now()) @map("created_at")
   updatedAt          DateTime           @updatedAt @map("updated_at")
 
@@ -358,10 +374,16 @@ model CompanionProfile {
   bankAccounts BankAccount[]
   earnings     Earning[]
   boosts       ProfileBoost[]
+  withdrawals  Withdrawal[]            @relation("CompanionWithdrawals") // ADDED: Missing relation
 
   @@index([ratingAvg(sort: Desc)])
   @@index([hourlyRate])
   @@index([isActive, isHidden, verificationStatus])
+  // ADDED: Composite indexes for search queries
+  @@index([isActive, isHidden, verificationStatus, ratingAvg(sort: Desc)])
+  @@index([isActive, isHidden, hourlyRate])
+  @@index([isActive, isHidden, totalBookings(sort: Desc), ratingAvg(sort: Desc)])
+  @@index([province, isActive, isHidden, verificationStatus])
   @@map("companions")
 }
 
@@ -376,6 +398,7 @@ model CompanionPhoto {
 
   companion CompanionProfile @relation(fields: [companionId], references: [id], onDelete: Cascade)
 
+  @@index([companionId]) // ADDED: FK index
   @@map("companion_photos")
 }
 
@@ -391,6 +414,7 @@ model CompanionService {
   companion CompanionProfile @relation(fields: [companionId], references: [id], onDelete: Cascade)
 
   @@unique([companionId, serviceType])
+  @@index([companionId]) // ADDED: FK index (unique doesn't cover all query patterns)
   @@map("companion_services")
 }
 
@@ -408,6 +432,7 @@ model CompanionAvailability {
   companion CompanionProfile @relation(fields: [companionId], references: [id], onDelete: Cascade)
 
   @@index([companionId, dayOfWeek])
+  @@index([companionId]) // ADDED: FK index
   @@map("companion_availability")
 }
 
@@ -416,14 +441,17 @@ model CompanionAvailability {
 // ============================================
 
 model HirerProfile {
-  id            String   @id @default(uuid()) @db.Uuid
-  userId        String   @unique @map("user_id") @db.Uuid
-  totalBookings Int      @default(0) @map("total_bookings")
-  totalSpent    Int      @default(0) @map("total_spent") // in VND
-  ratingAvg     Decimal  @default(5.0) @map("rating_avg") @db.Decimal(2, 1)
-  ratingCount   Int      @default(0) @map("rating_count")
-  createdAt     DateTime @default(now()) @map("created_at")
-  updatedAt     DateTime @updatedAt @map("updated_at")
+  id            String    @id @default(uuid()) @db.Uuid
+  userId        String    @unique @map("user_id") @db.Uuid
+  province      String? // Vietnamese province/city code
+  district      String? // District within province (optional)
+  totalBookings Int       @default(0) @map("total_bookings")
+  totalSpent    Int       @default(0) @map("total_spent") // in VND
+  ratingAvg     Decimal   @default(5.0) @map("rating_avg") @db.Decimal(3, 2) // FIXED: Was (2,1)
+  ratingCount   Int       @default(0) @map("rating_count")
+  deletedAt     DateTime? @map("deleted_at") // Soft delete support
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -448,6 +476,8 @@ model Verification {
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([userId]) // ADDED: FK index
+  @@index([userId, type]) // ADDED: Composite for user verification lookups
   @@map("verifications")
 }
 
@@ -464,6 +494,7 @@ model PhotoVerification {
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([userId]) // ADDED: FK index
   @@map("photo_verifications")
 }
 
@@ -479,14 +510,15 @@ model Booking {
   status        BookingStatus @default(PENDING)
 
   // Booking Details
-  occasionType    ServiceType @map("occasion_type")
-  startDatetime   DateTime    @map("start_datetime")
-  endDatetime     DateTime    @map("end_datetime")
-  durationHours   Decimal     @map("duration_hours") @db.Decimal(4, 2)
-  locationAddress String      @map("location_address")
-  locationLat     Decimal?    @map("location_lat") @db.Decimal(10, 8)
-  locationLng     Decimal?    @map("location_lng") @db.Decimal(11, 8)
-  specialRequests String?     @map("special_requests")
+  occasionType    ServiceType? @map("occasion_type") // Deprecated: Use occasionId instead
+  occasionId      String?      @map("occasion_id")
+  startDatetime   DateTime     @map("start_datetime")
+  endDatetime     DateTime     @map("end_datetime")
+  durationHours   Decimal      @map("duration_hours") @db.Decimal(4, 2)
+  locationAddress String       @map("location_address")
+  locationLat     Decimal?     @map("location_lat") @db.Decimal(9, 6) // OPTIMIZED: Was (10,8), now ~10cm precision
+  locationLng     Decimal?     @map("location_lng") @db.Decimal(9, 6) // OPTIMIZED: Was (11,8)
+  specialRequests String?      @map("special_requests")
 
   // Pricing
   basePrice   Int @map("base_price") // in VND
@@ -497,7 +529,7 @@ model Booking {
   // Payment
   paymentStatus PaymentStatus @default(PENDING) @map("payment_status")
 
-  // Cancellation
+  // Cancellation - Use BookingCancellation for detailed info
   cancelledBy  String?   @map("cancelled_by") @db.Uuid
   cancelReason String?   @map("cancel_reason")
   cancelledAt  DateTime? @map("cancelled_at")
@@ -508,22 +540,53 @@ model Booking {
   startedAt        DateTime? @map("started_at")
   completedAt      DateTime? @map("completed_at")
 
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at") // Soft delete support
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
 
-  hirer        User          @relation("HirerBookings", fields: [hirerId], references: [id])
-  companion    User          @relation("CompanionBookings", fields: [companionId], references: [id])
-  payment      Payment?
-  reviews      Review[]
-  conversation Conversation?
-  earning      Earning?
+  hirer           User                 @relation("HirerBookings", fields: [hirerId], references: [id])
+  companion       User                 @relation("CompanionBookings", fields: [companionId], references: [id])
+  occasion        Occasion?            @relation(fields: [occasionId], references: [id])
+  payment         Payment?
+  reviews         Review[]
+  conversation    Conversation?
+  earning         Earning?
+  cancellation    BookingCancellation? // ADDED: Structured cancellation data
+  paymentRequests PaymentRequest[]
 
   @@index([hirerId])
   @@index([companionId])
   @@index([status])
   @@index([startDatetime])
   @@index([bookingNumber])
+  @@index([occasionId])
+  // ADDED: Composite indexes for common query patterns
+  @@index([hirerId, status])
+  @@index([companionId, status])
+  @@index([companionId, startDatetime])
+  @@index([status, requestExpiresAt]) // For expired request cleanup
+  @@index([status, createdAt(sort: Desc)]) // For admin views
   @@map("bookings")
+}
+
+// ADDED: New model for structured cancellation data
+model BookingCancellation {
+  id               String           @id @default(uuid()) @db.Uuid
+  bookingId        String           @unique @map("booking_id") @db.Uuid
+  type             CancellationType @default(REGULAR)
+  emergencyType    String?          @map("emergency_type") // MEDICAL, FAMILY, SAFETY, etc.
+  reason           String
+  proofDocumentUrl String?          @map("proof_document_url")
+  isVerified       Boolean          @default(false) @map("is_verified")
+  cancelledById    String           @map("cancelled_by") @db.Uuid
+  verifiedAt       DateTime?        @map("verified_at")
+  createdAt        DateTime         @default(now()) @map("created_at")
+
+  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  @@index([bookingId])
+  @@index([type])
+  @@map("booking_cancellations")
 }
 
 // ============================================
@@ -537,7 +600,7 @@ model Payment {
   amount           Int // in VND
   currency         String          @default("VND")
   provider         PaymentProvider
-  providerTxnId    String?         @map("provider_txn_id")
+  providerTxnId    String?         @unique @map("provider_txn_id")
   status           PaymentStatus   @default(PENDING)
   providerResponse Json?           @map("provider_response")
   paidAt           DateTime?       @map("paid_at")
@@ -545,11 +608,29 @@ model Payment {
   refundedAt       DateTime?       @map("refunded_at")
   createdAt        DateTime        @default(now()) @map("created_at")
 
-  booking Booking @relation(fields: [bookingId], references: [id])
-  user    User    @relation(fields: [userId], references: [id])
+  booking       Booking                @relation(fields: [bookingId], references: [id], onDelete: Restrict) // CHANGED: Restrict delete
+  user          User                   @relation(fields: [userId], references: [id])
+  statusHistory PaymentStatusHistory[] // ADDED: Audit trail
 
-  @@index([providerTxnId])
+  @@index([userId]) // ADDED: FK index
+  @@index([status]) // ADDED: For status filtering
   @@map("payments")
+}
+
+// ADDED: New model for payment status audit trail
+model PaymentStatusHistory {
+  id         String        @id @default(uuid()) @db.Uuid
+  paymentId  String        @map("payment_id") @db.Uuid
+  fromStatus PaymentStatus @map("from_status")
+  toStatus   PaymentStatus @map("to_status")
+  reason     String?
+  changedBy  String?       @map("changed_by") @db.Uuid
+  createdAt  DateTime      @default(now()) @map("created_at")
+
+  payment Payment @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+
+  @@index([paymentId, createdAt])
+  @@map("payment_status_history")
 }
 
 model Earning {
@@ -563,11 +644,12 @@ model Earning {
   releasedAt  DateTime?      @map("released_at")
   createdAt   DateTime       @default(now()) @map("created_at")
 
-  companion CompanionProfile @relation(fields: [companionId], references: [id])
-  booking   Booking          @relation(fields: [bookingId], references: [id])
+  companion CompanionProfile @relation(fields: [companionId], references: [id], onDelete: Restrict) // CHANGED: Restrict delete
+  booking   Booking          @relation(fields: [bookingId], references: [id], onDelete: Restrict) // CHANGED: Restrict delete
 
   @@index([companionId])
   @@index([status])
+  @@index([companionId, status]) // ADDED: Composite for earnings queries
   @@map("earnings")
 }
 
@@ -584,6 +666,7 @@ model BankAccount {
   companion   CompanionProfile @relation(fields: [companionId], references: [id], onDelete: Cascade)
   withdrawals Withdrawal[]
 
+  @@index([companionId]) // ADDED: FK index
   @@map("bank_accounts")
 }
 
@@ -596,8 +679,12 @@ model Withdrawal {
   requestedAt   DateTime         @default(now()) @map("requested_at")
   completedAt   DateTime?        @map("completed_at")
 
-  bankAccount BankAccount @relation(fields: [bankAccountId], references: [id])
+  companion   CompanionProfile @relation("CompanionWithdrawals", fields: [companionId], references: [id]) // ADDED: Missing relation
+  bankAccount BankAccount      @relation(fields: [bankAccountId], references: [id])
 
+  @@index([companionId]) // ADDED: FK index
+  @@index([bankAccountId]) // ADDED: FK index
+  @@index([status]) // ADDED: For status queries
   @@map("withdrawals")
 }
 
@@ -606,16 +693,17 @@ model Withdrawal {
 // ============================================
 
 model Review {
-  id         String   @id @default(uuid()) @db.Uuid
-  bookingId  String   @map("booking_id") @db.Uuid
-  reviewerId String   @map("reviewer_id") @db.Uuid
-  revieweeId String   @map("reviewee_id") @db.Uuid
+  id         String    @id @default(uuid()) @db.Uuid
+  bookingId  String    @map("booking_id") @db.Uuid
+  reviewerId String    @map("reviewer_id") @db.Uuid
+  revieweeId String    @map("reviewee_id") @db.Uuid
   rating     Int // 1-5
   comment    String?
-  tags       String[] @default([])
-  isVisible  Boolean  @default(true) @map("is_visible")
-  isDisputed Boolean  @default(false) @map("is_disputed")
-  createdAt  DateTime @default(now()) @map("created_at")
+  tags       String[]  @default([])
+  isVisible  Boolean   @default(true) @map("is_visible")
+  isDisputed Boolean   @default(false) @map("is_disputed")
+  deletedAt  DateTime? @map("deleted_at") // Soft delete for moderation
+  createdAt  DateTime  @default(now()) @map("created_at")
 
   booking  Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
   reviewer User    @relation("ReviewsGiven", fields: [reviewerId], references: [id])
@@ -623,6 +711,9 @@ model Review {
 
   @@unique([bookingId, reviewerId])
   @@index([revieweeId])
+  // ADDED: Composite indexes for review queries
+  @@index([revieweeId, isVisible])
+  @@index([revieweeId, isVisible, createdAt(sort: Desc)])
   @@map("reviews")
 }
 
@@ -644,6 +735,9 @@ model Conversation {
   companion User      @relation("CompanionConversations", fields: [companionId], references: [id])
   messages  Message[]
 
+  @@index([hirerId]) // ADDED: FK index
+  @@index([companionId]) // ADDED: FK index
+  @@index([hirerId, companionId]) // ADDED: For finding conversations between users
   @@map("conversations")
 }
 
@@ -654,13 +748,15 @@ model Message {
   content        String
   messageType    MessageType @default(TEXT) @map("message_type")
   isRead         Boolean     @default(false) @map("is_read")
+  deletedAt      DateTime?   @map("deleted_at") // Soft delete for compliance
   createdAt      DateTime    @default(now()) @map("created_at")
 
   conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   sender       User         @relation(fields: [senderId], references: [id])
 
-  @@index([conversationId])
+  // OPTIMIZED: Removed redundant @@index([conversationId]) - covered by composite
   @@index([conversationId, createdAt(sort: Desc)])
+  @@index([senderId]) // ADDED: FK index
   @@map("messages")
 }
 
@@ -679,6 +775,8 @@ model UserBlock {
   blocked User @relation("Blocked", fields: [blockedId], references: [id], onDelete: Cascade)
 
   @@unique([blockerId, blockedId])
+  @@index([blockerId]) // ADDED: FK index
+  @@index([blockedId]) // ADDED: FK index
   @@map("user_blocks")
 }
 
@@ -700,6 +798,8 @@ model Report {
 
   @@index([status])
   @@index([status, createdAt])
+  @@index([reporterId]) // ADDED: FK index
+  @@index([reportedId]) // ADDED: FK index
   @@map("reports")
 }
 
@@ -739,6 +839,12 @@ model Notification {
   user User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   logs NotificationLog[]
 
+  // ADDED: Critical indexes for notification queries
+  @@index([userId])
+  @@index([userId, isRead])
+  @@index([userId, isRead, createdAt(sort: Desc)])
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([type, createdAt])
   @@map("notifications")
 }
 
@@ -755,6 +861,9 @@ model PushToken {
   user   User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   device UserDevice? @relation(fields: [deviceId], references: [id])
 
+  @@index([userId]) // ADDED: FK index
+  @@index([deviceId]) // ADDED: FK index
+  @@index([userId, isActive]) // ADDED: For active token queries
   @@map("push_tokens")
 }
 
@@ -769,6 +878,7 @@ model NotificationLog {
 
   notification Notification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
 
+  @@index([notificationId]) // ADDED: FK index
   @@map("notification_logs")
 }
 
@@ -791,6 +901,9 @@ model ModerationQueue {
   user    User               @relation(fields: [userId], references: [id], onDelete: Cascade)
   actions ModerationAction[]
 
+  @@index([userId]) // ADDED: FK index
+  @@index([assignedTo]) // ADDED: FK index
+  @@index([status, priority(sort: Desc), createdAt]) // ADDED: For queue processing
   @@map("moderation_queue")
 }
 
@@ -806,6 +919,8 @@ model ModerationAction {
   queue     ModerationQueue @relation(fields: [queueId], references: [id], onDelete: Cascade)
   moderator User            @relation("Moderator", fields: [moderatorId], references: [id])
 
+  @@index([queueId]) // ADDED: FK index
+  @@index([moderatorId]) // ADDED: FK index
   @@map("moderation_actions")
 }
 
@@ -825,6 +940,8 @@ model UserSuspension {
   liftedBy    User?    @relation("LiftedBy", fields: [liftedById], references: [id])
   appeals     Appeal[]
 
+  @@index([userId]) // ADDED: FK index
+  @@index([suspendedById]) // ADDED: FK index
   @@map("user_suspensions")
 }
 
@@ -843,6 +960,9 @@ model Appeal {
   suspension UserSuspension? @relation(fields: [suspensionId], references: [id])
   reviewedBy User?           @relation("AppealReviewer", fields: [reviewedById], references: [id])
 
+  @@index([userId]) // ADDED: FK index
+  @@index([suspensionId]) // ADDED: FK index
+  @@index([status]) // ADDED: For status filtering
   @@map("appeals")
 }
 
@@ -866,6 +986,7 @@ model File {
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([userId]) // ADDED: FK index
   @@map("files")
 }
 
@@ -881,6 +1002,7 @@ model IpBlocklist {
   blockedUntil DateTime? @map("blocked_until")
   createdAt    DateTime  @default(now()) @map("created_at")
 
+  @@index([ipAddress]) // ADDED: For IP lookups
   @@map("ip_blocklist")
 }
 
@@ -896,6 +1018,12 @@ model SecurityEvent {
 
   user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
 
+  // ADDED: Critical indexes for security event queries
+  @@index([userId])
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([eventType, createdAt])
+  @@index([severity, createdAt])
+  @@index([ipAddress])
   @@map("security_events")
 }
 
@@ -932,6 +1060,9 @@ model AdminAuditLog {
 
   admin User @relation(fields: [adminId], references: [id])
 
+  @@index([adminId]) // ADDED: FK index
+  @@index([resourceType, resourceId]) // ADDED: For resource lookup
+  @@index([createdAt(sort: Desc)]) // ADDED: For recent logs
   @@map("admin_audit_logs")
 }
 
@@ -951,6 +1082,9 @@ model SupportTicket {
   assignee User?                  @relation("TicketAssignee", fields: [assignedTo], references: [id])
   messages SupportTicketMessage[]
 
+  @@index([userId]) // ADDED: FK index
+  @@index([assignedTo]) // ADDED: FK index
+  @@index([status, createdAt(sort: Desc)]) // ADDED: For ticket queue
   @@map("support_tickets")
 }
 
@@ -966,6 +1100,8 @@ model SupportTicketMessage {
   ticket SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
   sender User          @relation(fields: [senderId], references: [id])
 
+  @@index([ticketId]) // ADDED: FK index
+  @@index([senderId]) // ADDED: FK index
   @@map("support_ticket_messages")
 }
 
@@ -1013,8 +1149,8 @@ model EmergencyEvent {
   bookingId    String?              @map("booking_id") @db.Uuid
   alertType    String               @map("alert_type") // EMERGENCY, UNCOMFORTABLE, HARASSMENT, SAFETY_CONCERN
   status       EmergencyEventStatus @default(ACTIVE)
-  locationLat  Decimal?             @map("location_lat") @db.Decimal(10, 8)
-  locationLng  Decimal?             @map("location_lng") @db.Decimal(11, 8)
+  locationLat  Decimal?             @map("location_lat") @db.Decimal(9, 6) // OPTIMIZED: Was (10,8)
+  locationLng  Decimal?             @map("location_lng") @db.Decimal(9, 6) // OPTIMIZED: Was (11,8)
   message      String?
   triggeredAt  DateTime             @default(now()) @map("triggered_at")
   cancelledAt  DateTime?            @map("cancelled_at")
@@ -1086,6 +1222,8 @@ model ProfileBoost {
   @@index([companionId])
   @@index([status])
   @@index([expiresAt])
+  @@index([companionId, status, expiresAt]) // ADDED: For active boost lookups
+  @@index([status, expiresAt]) // ADDED: For expiration batch jobs
   @@map("profile_boosts")
 }
 
@@ -1107,4 +1245,212 @@ model Referral {
   referredUsers User[] @relation("ReferredUsers")
 
   @@map("referrals")
+}
+
+// ============================================
+// OCCASIONS & HOLIDAYS
+// ============================================
+
+model Occasion {
+  id            String  @id @default(cuid())
+  code          String  @unique
+  emoji         String
+  nameEn        String  @map("name_en")
+  nameVi        String  @map("name_vi")
+  descriptionEn String? @map("description_en")
+  descriptionVi String? @map("description_vi")
+  displayOrder  Int     @default(0) @map("display_order")
+  isActive      Boolean @default(true) @map("is_active")
+
+  // Context filters - empty array means "show anytime"
+  timeSlots String[] @default([]) @map("time_slots") // ["morning", "afternoon", "evening", "night"]
+  dayTypes  String[] @default([]) @map("day_types") // ["weekday", "weekend"]
+  holidays  String[] @default([]) @map("holidays") // ["tet", "christmas", "valentine"]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  bookings     Booking[]
+  interactions OccasionInteraction[]
+
+  @@index([isActive, displayOrder])
+  @@map("occasions")
+}
+
+model Holiday {
+  id          String   @id @default(cuid())
+  code        String   @unique
+  nameEn      String   @map("name_en")
+  nameVi      String   @map("name_vi")
+  startDate   DateTime @map("start_date")
+  endDate     DateTime @map("end_date")
+  isRecurring Boolean  @default(true) @map("is_recurring")
+  isActive    Boolean  @default(true) @map("is_active")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([startDate, endDate, isActive])
+  @@map("holidays")
+}
+
+// Occasion interaction events for tracking usage metrics
+enum OccasionEventType {
+  VIEW           // Occasion appeared in list
+  SELECT         // User selected this occasion
+  BOOKING_CREATED // Booking was created with this occasion
+}
+
+model OccasionInteraction {
+  id         String             @id @default(uuid()) @db.Uuid
+  userId     String?            @map("user_id") @db.Uuid // Nullable for anonymous tracking
+  occasionId String             @map("occasion_id")
+  eventType  OccasionEventType  @map("event_type")
+  sessionId  String?            @map("session_id")
+  metadata   Json               @default("{}")
+  createdAt  DateTime           @default(now()) @map("created_at")
+
+  occasion Occasion @relation(fields: [occasionId], references: [id], onDelete: Cascade)
+
+  @@index([occasionId, createdAt(sort: Desc)])
+  @@index([eventType, createdAt(sort: Desc)])
+  @@index([userId, createdAt(sort: Desc)])
+  @@map("occasion_interactions")
+}
+
+// ============================================
+// RECOMMENDATIONS
+// ============================================
+
+enum InteractionEventType {
+  VIEW // Profile card appeared in viewport
+  PROFILE_OPEN // Tapped to view full profile
+  BOOKMARK // Added to favorites
+  UNBOOKMARK // Removed from favorites
+  MESSAGE_SENT // Sent first message
+  BOOKING_STARTED // Entered booking flow
+  BOOKING_COMPLETED // Completed booking
+  BOOKING_CANCELLED // Cancelled booking
+}
+
+model UserInteraction {
+  id          String               @id @default(uuid()) @db.Uuid
+  userId      String               @map("user_id") @db.Uuid
+  companionId String               @map("companion_id") @db.Uuid
+  eventType   InteractionEventType @map("event_type")
+  eventValue  Decimal              @default(0) @map("event_value") @db.Decimal(4, 2) // Weighted score
+  dwellTimeMs Int?                 @map("dwell_time_ms") // Time spent viewing (for profile_open)
+  sessionId   String?              @map("session_id")
+  metadata    Json                 @default("{}")
+  createdAt   DateTime             @default(now()) @map("created_at")
+
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([companionId, createdAt(sort: Desc)])
+  @@index([userId, companionId, eventType])
+  @@map("user_interactions")
+}
+
+model RecommendationCache {
+  id           String   @id @default(uuid()) @db.Uuid
+  userId       String   @unique @map("user_id") @db.Uuid
+  companions   Json // Array of { companionId, score, reason }
+  algorithmVer String   @default("v1") @map("algorithm_ver")
+  expiresAt    DateTime @map("expires_at")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@index([expiresAt])
+  @@map("recommendation_cache")
+}
+
+// ============================================
+// PAYMENT REQUESTS (SePay Wallet Integration)
+// ============================================
+
+enum PaymentRequestType {
+  TOPUP
+  BOOKING
+}
+
+enum PaymentRequestStatus {
+  PENDING
+  COMPLETED
+  EXPIRED
+  FAILED
+}
+
+// Payment Request for SePay QR payments (wallet topups and direct booking payments)
+model PaymentRequest {
+  id     String               @id @default(uuid()) @db.Uuid
+  userId String               @map("user_id") @db.Uuid
+  code   String               @unique // HM-XXXXXXX format
+  type   PaymentRequestType
+  amount Int // Amount in VND
+  status PaymentRequestStatus @default(PENDING)
+
+  // For BOOKING type only
+  bookingId String? @map("booking_id") @db.Uuid
+
+  // SePay webhook data (populated on completion)
+  sepayId       Int?    @map("sepay_id")
+  gateway       String?
+  referenceCode String? @map("reference_code")
+
+  // Webhook idempotency tracking
+  webhookLogId String? @map("webhook_log_id") @db.Uuid
+
+  expiresAt   DateTime  @map("expires_at")
+  completedAt DateTime? @map("completed_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  booking    Booking?    @relation(fields: [bookingId], references: [id], onDelete: SetNull)
+  webhookLog WebhookLog? @relation(fields: [webhookLogId], references: [id])
+
+  @@index([userId])
+  @@index([code])
+  @@index([status, expiresAt])
+  @@map("payment_requests")
+}
+
+// ============================================
+// WEBHOOK IDEMPOTENCY (Prevents duplicate webhook processing)
+// ============================================
+
+model WebhookLog {
+  id             String   @id @default(uuid()) @db.Uuid
+  idempotencyKey String   @unique @map("idempotency_key")
+  source         String // "sepay", "bank_transfer", "stripe", etc.
+  endpoint       String // Webhook endpoint path
+  status         String   @default("processing") // "processing", "completed", "failed"
+  response       Json? // Response data for debugging
+  processedAt    DateTime @default(now()) @map("processed_at")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  paymentRequests PaymentRequest[]
+
+  @@index([source, createdAt(sort: Desc)])
+  @@map("webhook_logs")
+}
+
+// ============================================
+// IDEMPOTENCY (API Request Deduplication)
+// ============================================
+
+model IdempotencyKey {
+  id           String   @id @default(uuid()) @db.Uuid
+  key          String   @unique
+  userId       String   @map("user_id") @db.Uuid
+  endpoint     String // e.g., "POST /wallet/topup"
+  requestHash  String?  @map("request_hash") // Hash of request body
+  responseCode Int      @map("response_code")
+  responseBody Json     @map("response_body")
+  expiresAt    DateTime @map("expires_at")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@index([key])
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("idempotency_keys")
 }

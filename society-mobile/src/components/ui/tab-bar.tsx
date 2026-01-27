@@ -1,16 +1,15 @@
 /* eslint-disable max-lines-per-function */
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import React from 'react';
-import { Pressable, StyleSheet } from 'react-native';
-import Svg, { Circle, Path } from 'react-native-svg';
+import { Pressable } from 'react-native';
+import Svg, { Circle, Path, Rect } from 'react-native-svg';
 
 import { SafeAreaView, Text, View } from '@/components/ui';
 import colors from '@/components/ui/colors';
 
-// Hireme Tab Icons - Using new Rose Pink color palette
+// Tab Icon Components
 
-function HomeIcon({ focused }: { focused: boolean }) {
-  const color = focused ? colors.rose[400] : colors.text.tertiary;
+function HomeIcon({ focused, color }: { focused: boolean; color: string }) {
   return (
     <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
       <Path
@@ -25,30 +24,7 @@ function HomeIcon({ focused }: { focused: boolean }) {
   );
 }
 
-function SearchIcon({ focused }: { focused: boolean }) {
-  const color = focused ? colors.rose[400] : colors.text.tertiary;
-  return (
-    <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
-      <Circle
-        cx={11}
-        cy={11}
-        r={7}
-        fill={focused ? color : 'none'}
-        stroke={color}
-        strokeWidth={2}
-      />
-      <Path
-        d="M16 16L21 21"
-        stroke={color}
-        strokeWidth={2}
-        strokeLinecap="round"
-      />
-    </Svg>
-  );
-}
-
-function CalendarIcon({ focused }: { focused: boolean }) {
-  const color = focused ? colors.rose[400] : colors.text.tertiary;
+function CalendarIcon({ focused, color }: { focused: boolean; color: string }) {
   return (
     <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
       <Path
@@ -69,8 +45,7 @@ function CalendarIcon({ focused }: { focused: boolean }) {
   );
 }
 
-function ChatIcon({ focused }: { focused: boolean }) {
-  const color = focused ? colors.rose[400] : colors.text.tertiary;
+function ChatIcon({ focused, color }: { focused: boolean; color: string }) {
   return (
     <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
       <Path
@@ -88,8 +63,7 @@ function ChatIcon({ focused }: { focused: boolean }) {
   );
 }
 
-function ProfileIcon({ focused }: { focused: boolean }) {
-  const color = focused ? colors.rose[400] : colors.text.tertiary;
+function ProfileIcon({ focused, color }: { focused: boolean; color: string }) {
   return (
     <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
       <Circle
@@ -110,7 +84,103 @@ function ProfileIcon({ focused }: { focused: boolean }) {
   );
 }
 
-export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
+function RequestsIcon({ focused, color }: { focused: boolean; color: string }) {
+  return (
+    <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
+      <Rect
+        x={3}
+        y={4}
+        width={18}
+        height={16}
+        rx={2}
+        fill={focused ? color : 'none'}
+        stroke={color}
+        strokeWidth={2}
+      />
+      <Path
+        d="M7 9H17M7 13H13"
+        stroke={focused ? 'white' : color}
+        strokeWidth={2}
+        strokeLinecap="round"
+      />
+    </Svg>
+  );
+}
+
+function EarningsIcon({ focused, color }: { focused: boolean; color: string }) {
+  return (
+    <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
+      <Circle
+        cx={12}
+        cy={12}
+        r={9}
+        fill={focused ? color : 'none'}
+        stroke={color}
+        strokeWidth={2}
+      />
+      <Path
+        d="M12 7V17M9 9.5C9 8.67 9.9 8 11 8H13C14.1 8 15 8.67 15 9.5C15 10.33 14.1 11 13 11H11C9.9 11 9 11.67 9 12.5C9 13.33 9.9 14 11 14H13C14.1 14 15 14.67 15 15.5"
+        stroke={focused ? 'white' : color}
+        strokeWidth={2}
+        strokeLinecap="round"
+      />
+    </Svg>
+  );
+}
+
+function ForYouIcon({ focused, color }: { focused: boolean; color: string }) {
+  return (
+    <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
+      <Path
+        d="M12 21.35L10.55 20.03C5.4 15.36 2 12.28 2 8.5C2 5.42 4.42 3 7.5 3C9.24 3 10.91 3.81 12 5.09C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.42 22 8.5C22 12.28 18.6 15.36 13.45 20.04L12 21.35Z"
+        fill={focused ? color : 'none'}
+        stroke={color}
+        strokeWidth={2}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </Svg>
+  );
+}
+
+// Icon mapping by route name
+const iconMap: Record<string, React.FC<{ focused: boolean; color: string }>> = {
+  index: HomeIcon,
+  home: HomeIcon,
+  'for-you': ForYouIcon,
+  bookings: CalendarIcon,
+  requests: RequestsIcon,
+  schedule: CalendarIcon,
+  earnings: EarningsIcon,
+  chat: ChatIcon,
+  account: ProfileIcon,
+  settings: ProfileIcon,
+};
+
+// Label mapping by route name
+const labelMap: Record<string, string> = {
+  index: 'Home',
+  home: 'Home',
+  'for-you': 'For You',
+  bookings: 'Bookings',
+  requests: 'Requests',
+  schedule: 'Schedule',
+  earnings: 'Earnings',
+  chat: 'Chat',
+  account: 'Account',
+  settings: 'Account',
+};
+
+type TabBarProps = BottomTabBarProps & {
+  accentColor?: string;
+};
+
+export function TabBar({
+  state,
+  descriptors,
+  navigation,
+  accentColor = colors.rose[400],
+}: TabBarProps) {
   return (
     <SafeAreaView
       edges={['bottom']}
@@ -123,50 +193,14 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
       >
         {state.routes.map((route, index) => {
           const { options } = descriptors[route.key];
-          const label =
-            options.tabBarLabel !== undefined
-              ? options.tabBarLabel
-              : options.title !== undefined
-                ? options.title
-                : route.name;
-
           const isFocused = state.index === index;
+          const color = isFocused ? accentColor : colors.text.tertiary;
 
-          // Map route names to Hireme icons and labels
-          const getIcon = () => {
-            switch (route.name) {
-              case 'index':
-                return <HomeIcon focused={isFocused} />;
-              case 'explore':
-                return <SearchIcon focused={isFocused} />;
-              case 'chats':
-                return <ChatIcon focused={isFocused} />;
-              case 'creation':
-                return <CalendarIcon focused={isFocused} />;
-              case 'settings':
-                return <ProfileIcon focused={isFocused} />;
-              default:
-                return null;
-            }
-          };
+          // Get icon component
+          const IconComponent = iconMap[route.name] || HomeIcon;
 
-          // Hireme-specific labels
-          const getLabel = (): string => {
-            switch (route.name) {
-              case 'index':
-                return 'Home';
-              case 'explore':
-                return 'Search';
-              case 'chats':
-                return 'Chats';
-              case 'creation':
-                return 'Bookings';
-              case 'settings':
-                return 'Profile';
-              default:
-                return typeof label === 'string' ? label : route.name;
-            }
-          };
+          // Get label
+          const label = labelMap[route.name] || route.name;
 
           const onPress = () => {
             const event = navigation.emit({
@@ -199,16 +233,14 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
               className="flex-1 items-center justify-center py-2"
             >
               <View className="items-center gap-0.5">
-                {getIcon()}
+                <IconComponent focused={isFocused} color={color} />
                 <Text
-                  className="text-[10px] leading-[1.6] tracking-[0.2px]"
-                  style={
-                    isFocused
-                      ? { ...styles.labelFocused, color: colors.rose[400] }
-                      : { ...styles.label, color: colors.text.tertiary }
-                  }
+                  className={`text-[10px] leading-[1.6] tracking-[0.2px] ${
+                    isFocused ? 'font-urbanist-bold' : 'font-urbanist-medium'
+                  }`}
+                  style={{ color: isFocused ? color : colors.text.tertiary }}
                 >
-                  {getLabel()}
+                  {label}
                 </Text>
               </View>
             </Pressable>
@@ -219,13 +251,11 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   );
 }
 
-const styles = StyleSheet.create({
-  label: {
-    fontFamily: 'Urbanist_500Medium',
-    letterSpacing: 0.2,
-  },
-  labelFocused: {
-    fontFamily: 'Urbanist_700Bold',
-    letterSpacing: 0.2,
-  },
-});
+// Pre-configured tab bars for each role
+export function HirerTabBar(props: BottomTabBarProps) {
+  return <TabBar {...props} accentColor={colors.rose[400]} />;
+}
+
+export function CompanionTabBar(props: BottomTabBarProps) {
+  return <TabBar {...props} accentColor={colors.lavender[400]} />;
+}

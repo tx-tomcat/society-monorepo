@@ -1,36 +1,23 @@
-/* eslint-disable max-lines-per-function */
 import DateTimePicker from '@react-native-community/datetimepicker';
-import * as ImagePicker from 'expo-image-picker';
 import type { Href } from 'expo-router';
 import { useRouter } from 'expo-router';
 import { MotiView } from 'moti';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  Alert,
-  Pressable,
-  ScrollView,
-  StyleSheet
-} from 'react-native';
+import { Alert, Pressable, ScrollView } from 'react-native';
 import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 
 import {
   Button,
   colors,
   FocusAwareStatusBar,
-  Image,
   SafeAreaView,
   Text,
   View,
 } from '@/components/ui';
-import {
-  ArrowLeft,
-  Calendar,
-  Camera,
-  Check,
-  User,
-} from '@/components/ui/icons';
-import { useUpdateProfile, useUploadAvatar } from '@/lib/hooks';
+import { ArrowLeft, Calendar, Check, ChevronDown, MapPin, X } from '@/components/ui/icons';
+import { VIETNAM_PROVINCES, getProvinceName } from '@/lib/constants';
+import { usePhoneVerificationStatus, useUpdateProfile } from '@/lib/hooks';
 import { isAdult } from '@/lib/validation';
 
 type Gender = 'male' | 'female' | 'other';
@@ -47,40 +34,26 @@ export default function HirerOnboardingProfile() {
 
   // API hooks
   const updateProfile = useUpdateProfile();
-  const uploadAvatar = useUploadAvatar();
+  const { data: phoneStatus } = usePhoneVerificationStatus();
 
   // Form state
-  const [fullName, setFullName] = React.useState('');
   const [dateOfBirth, setDateOfBirth] = React.useState<Date | null>(null);
   const [showDatePicker, setShowDatePicker] = React.useState(false);
   const [gender, setGender] = React.useState<Gender | null>(null);
-  const [avatarUri, setAvatarUri] = React.useState<string | null>(null);
+  const [province, setProvince] = React.useState<string>('');
+  const [showProvincePicker, setShowProvincePicker] = React.useState(false);
 
   // Validation errors
   const [errors, setErrors] = React.useState<{
-    fullName?: string;
     dateOfBirth?: string;
     gender?: string;
+    province?: string;
   }>({});
   const [touched, setTouched] = React.useState<{
-    fullName?: boolean;
     dateOfBirth?: boolean;
     gender?: boolean;
+    province?: boolean;
   }>({});
-
-  // Validate individual fields
-  const validateName = React.useCallback(
-    (name: string): string | undefined => {
-      if (!name.trim())
-        return t('hirer.onboarding.profile.errors.name_required');
-      if (name.trim().length < 2) return t('auth.validation.name_min_length');
-      if (name.trim().length > 50) return t('auth.validation.name_max_length');
-      if (!/^[a-zA-ZÀ-ỹ\s'-]+$/.test(name.trim()))
-        return t('auth.validation.name_invalid');
-      return undefined;
-    },
-    [t]
-  );
 
   const validateDob = React.useCallback(
     (dob: Date | null): string | undefined => {
@@ -100,69 +73,38 @@ export default function HirerOnboardingProfile() {
     [t]
   );
 
+  const validateProvince = React.useCallback(
+    (p: string): string | undefined => {
+      if (!p) return t('location.province_required');
+      return undefined;
+    },
+    [t]
+  );
+
   // Update errors when form values change
   React.useEffect(() => {
     const newErrors: typeof errors = {};
-    if (touched.fullName) {
-      newErrors.fullName = validateName(fullName);
-    }
+
     if (touched.dateOfBirth) {
       newErrors.dateOfBirth = validateDob(dateOfBirth);
     }
     if (touched.gender) {
       newErrors.gender = validateGender(gender);
     }
+    if (touched.province) {
+      newErrors.province = validateProvince(province);
+    }
     setErrors(newErrors);
-  }, [
-    fullName,
-    dateOfBirth,
-    gender,
-    touched,
-    validateName,
-    validateDob,
-    validateGender,
-  ]);
+  }, [dateOfBirth, gender, province, touched, validateDob, validateGender, validateProvince]);
 
   // Overall form validity
   const isFormValid = React.useMemo(() => {
-    return (
-      !validateName(fullName) &&
-      !validateDob(dateOfBirth) &&
-      !validateGender(gender)
-    );
-  }, [
-    fullName,
-    dateOfBirth,
-    gender,
-    validateName,
-    validateDob,
-    validateGender,
-  ]);
+    return !validateDob(dateOfBirth) && !validateGender(gender) && !validateProvince(province);
+  }, [dateOfBirth, gender, province, validateDob, validateGender, validateProvince]);
 
   const handleBack = React.useCallback(() => {
     router.back();
   }, [router]);
-
-  const handlePickAvatar = React.useCallback(async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== 'granted') {
-      Alert.alert(
-        t('common.error'),
-        t('auth.verification.gallery_permission_required')
-      );
-      return;
-    }
-
-    const result = await ImagePicker.launchImageLibraryAsync({
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 0.8,
-    });
-
-    if (!result.canceled && result.assets[0]) {
-      setAvatarUri(result.assets[0].uri);
-    }
-  }, [t]);
 
   const handleDateChange = React.useCallback(
     (_event: unknown, selectedDate?: Date) => {
@@ -185,29 +127,25 @@ export default function HirerOnboardingProfile() {
 
   const handleContinue = React.useCallback(async () => {
     // Mark all fields as touched to show validation errors
-    setTouched({ fullName: true, dateOfBirth: true, gender: true });
+    setTouched({ dateOfBirth: true, gender: true, province: true });
 
-    if (!isFormValid || !dateOfBirth || !gender) return;
+    if (!isFormValid || !dateOfBirth || !gender || !province) return;
+
+    // Check phone verification - redirect if not verified
+    if (!phoneStatus?.isVerified) {
+      router.push('/phone-verification' as Href);
+      return;
+    }
 
     try {
       // Update the user profile with the provided information
       await updateProfile.mutateAsync({
-        fullName: fullName.trim(),
         dateOfBirth: dateOfBirth.toISOString().split('T')[0],
         gender,
+        province,
       });
 
-      // Upload avatar if selected
-      if (avatarUri) {
-        const formData = new FormData();
-        formData.append('file', {
-          uri: avatarUri,
-          type: 'image/jpeg',
-          name: 'avatar.jpg',
-        } as unknown as Blob);
-        await uploadAvatar.mutateAsync(formData);
-      }
-
+      console.log('Profile updated successfully');
       // Navigate to main hirer app after profile completion
       router.replace('/(app)' as Href);
     } catch (error) {
@@ -217,19 +155,9 @@ export default function HirerOnboardingProfile() {
         t('auth.onboarding.profile_creation_failed')
       );
     }
-  }, [
-    isFormValid,
-    dateOfBirth,
-    gender,
-    fullName,
-    avatarUri,
-    updateProfile,
-    uploadAvatar,
-    router,
-    t,
-  ]);
+  }, [isFormValid, dateOfBirth, gender, province, phoneStatus, updateProfile, router, t]);
 
-  const isLoading = updateProfile.isPending || uploadAvatar.isPending;
+  const isLoading = updateProfile.isPending;
 
   // Calculate max date (18 years ago)
   const maxDate = React.useMemo(() => {
@@ -247,10 +175,7 @@ export default function HirerOnboardingProfile() {
           <Pressable onPress={handleBack}>
             <ArrowLeft color={colors.midnight.DEFAULT} width={24} height={24} />
           </Pressable>
-          <Text
-            style={styles.headerTitle}
-            className="flex-1 text-xl text-black"
-          >
+          <Text className="flex-1 font-urbanist-bold text-xl text-black">
             {t('auth.onboarding.create_profile')}
           </Text>
         </View>
@@ -263,41 +188,11 @@ export default function HirerOnboardingProfile() {
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
-          {/* Avatar */}
-          <MotiView
-            from={{ opacity: 0, translateY: 20 }}
-            animate={{ opacity: 1, translateY: 0 }}
-            transition={{ type: 'timing', duration: 500 }}
-            className="mb-8 items-center"
-          >
-            <Pressable onPress={handlePickAvatar} className="relative">
-              {avatarUri ? (
-                <Image
-                  source={{ uri: avatarUri }}
-                  className="size-28 rounded-full"
-                  contentFit="cover"
-                />
-              ) : (
-                <View className="size-28 items-center justify-center rounded-full bg-softpink">
-                  <User color={colors.rose[400]} width={48} height={48} />
-                </View>
-              )}
-              <View className="absolute bottom-0 right-0 size-9 items-center justify-center rounded-full bg-rose-400">
-                <Camera color="#FFFFFF" width={18} height={18} />
-              </View>
-            </Pressable>
-            <Text className="mt-3 text-sm text-black">
-              {t('auth.onboarding.tap_to_add_photo')}
-            </Text>
-          </MotiView>
-
-
-
           {/* Date of Birth */}
           <MotiView
             from={{ opacity: 0, translateY: 20 }}
             animate={{ opacity: 1, translateY: 0 }}
-            transition={{ type: 'timing', duration: 500, delay: 200 }}
+            transition={{ type: 'timing', duration: 500 }}
             className="mb-4"
           >
             <Text className="mb-2 text-sm font-medium text-text-secondary">
@@ -319,9 +214,8 @@ export default function HirerOnboardingProfile() {
                 height={20}
               />
               <Text
-                className={`flex-1 pl-3 text-base ${dateOfBirth ? 'text-midnight' : 'text-text-tertiary'
+                className={`flex-1 pl-3 font-urbanist-medium text-base ${dateOfBirth ? 'text-midnight' : 'text-text-tertiary'
                   }`}
-                style={styles.input}
               >
                 {dateOfBirth
                   ? formatDate(dateOfBirth)
@@ -346,6 +240,7 @@ export default function HirerOnboardingProfile() {
               display="spinner"
               onChange={handleDateChange}
               maximumDate={maxDate}
+              themeVariant="light"
             />
           )}
 
@@ -353,8 +248,8 @@ export default function HirerOnboardingProfile() {
           <MotiView
             from={{ opacity: 0, translateY: 20 }}
             animate={{ opacity: 1, translateY: 0 }}
-            transition={{ type: 'timing', duration: 500, delay: 300 }}
-            className="mb-8"
+            transition={{ type: 'timing', duration: 500, delay: 100 }}
+            className="mb-4"
           >
             <Text className="mb-2 text-sm font-medium text-text-secondary">
               {t('hirer.onboarding.profile.gender')}
@@ -395,11 +290,96 @@ export default function HirerOnboardingProfile() {
             )}
           </MotiView>
 
+          {/* Location */}
+          <MotiView
+            from={{ opacity: 0, translateY: 20 }}
+            animate={{ opacity: 1, translateY: 0 }}
+            transition={{ type: 'timing', duration: 500, delay: 200 }}
+            className="mb-8"
+          >
+            <Text className="mb-2 text-sm font-medium text-text-secondary">
+              {t('location.province')}
+            </Text>
+            <Pressable
+              onPress={() => {
+                setShowProvincePicker(true);
+                setTouched((prev) => ({ ...prev, province: true }));
+              }}
+              className={`flex-row items-center rounded-xl border bg-white p-4 ${
+                errors.province ? 'border-red-400' : 'border-border-light'
+              }`}
+            >
+              <MapPin
+                color={errors.province ? colors.rose[400] : colors.text.tertiary}
+                width={20}
+                height={20}
+              />
+              <Text
+                className={`flex-1 pl-3 font-urbanist-medium text-base ${
+                  province ? 'text-midnight' : 'text-text-tertiary'
+                }`}
+              >
+                {province
+                  ? getProvinceName(province, 'vi')
+                  : t('location.select_province')}
+              </Text>
+              <ChevronDown color={colors.text.tertiary} width={20} height={20} />
+            </Pressable>
+            {errors.province && (
+              <Text className="mt-1 text-sm text-red-400">{errors.province}</Text>
+            )}
+          </MotiView>
+
+          {/* Province Picker Modal */}
+          {showProvincePicker && (
+            <View className="absolute inset-0 z-50 bg-black/50">
+              <Pressable
+                className="flex-1"
+                onPress={() => setShowProvincePicker(false)}
+              />
+              <View className="max-h-[70%] rounded-t-3xl bg-white">
+                <View className="flex-row items-center justify-between border-b border-border-light px-4 py-3">
+                  <Text className="text-lg font-semibold text-midnight">
+                    {t('location.select_province')}
+                  </Text>
+                  <Pressable onPress={() => setShowProvincePicker(false)}>
+                    <X color={colors.midnight.DEFAULT} width={24} height={24} />
+                  </Pressable>
+                </View>
+                <ScrollView className="p-4">
+                  {VIETNAM_PROVINCES.map((p) => (
+                    <Pressable
+                      key={p.code}
+                      onPress={() => {
+                        setProvince(p.code);
+                        setShowProvincePicker(false);
+                      }}
+                      className={`mb-2 rounded-xl border p-4 ${
+                        province === p.code
+                          ? 'border-rose-400 bg-softpink'
+                          : 'border-border-light bg-white'
+                      }`}
+                    >
+                      <Text
+                        className={`text-base ${
+                          province === p.code ? 'text-rose-400 font-semibold' : 'text-midnight'
+                        }`}
+                      >
+                        {p.name}
+                      </Text>
+                      <Text className="text-sm text-text-tertiary">{p.nameEn}</Text>
+                    </Pressable>
+                  ))}
+                </ScrollView>
+              </View>
+            </View>
+          )}
+
           {/* Continue Button */}
           <MotiView
             from={{ opacity: 0, translateY: 20 }}
             animate={{ opacity: 1, translateY: 0 }}
-            transition={{ type: 'timing', duration: 500, delay: 400 }}
+            transition={{ type: 'timing', duration: 500, delay: 200 }}
           >
             <Button
               label={t('common.continue')}
@@ -416,7 +396,7 @@ export default function HirerOnboardingProfile() {
           <MotiView
             from={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ type: 'timing', duration: 500, delay: 500 }}
+            transition={{ type: 'timing', duration: 500, delay: 300 }}
             className="mt-6"
           >
             <Text className="text-center text-xs leading-relaxed text-text-tertiary">
@@ -428,12 +408,3 @@ export default function HirerOnboardingProfile() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  headerTitle: {
-    fontFamily: 'Urbanist_700Bold',
-  },
-  input: {
-    fontFamily: 'Urbanist_500Medium',
-  },
-});

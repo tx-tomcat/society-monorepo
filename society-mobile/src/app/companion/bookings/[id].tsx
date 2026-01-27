@@ -10,7 +10,6 @@ import {
   Linking,
   Pressable,
   ScrollView,
-  StyleSheet,
 } from 'react-native';
 import { showMessage } from 'react-native-flash-message';
 
@@ -47,15 +46,15 @@ function getStatusBadge(status: BookingStatus): {
   variant: 'default' | 'teal' | 'lavender' | 'rose';
 } {
   switch (status) {
-    case 'confirmed':
+    case 'CONFIRMED':
       return { label: 'common.status.confirmed', variant: 'teal' };
-    case 'active':
+    case 'ACTIVE':
       return { label: 'common.status.active', variant: 'lavender' };
-    case 'pending':
+    case 'PENDING':
       return { label: 'common.status.pending', variant: 'default' };
-    case 'completed':
+    case 'COMPLETED':
       return { label: 'common.status.completed', variant: 'teal' };
-    case 'cancelled':
+    case 'CANCELLED':
       return { label: 'common.status.cancelled', variant: 'rose' };
     default:
       return { label: 'common.status.unknown', variant: 'default' };
@@ -150,8 +149,8 @@ export default function CompanionBookingDetail() {
   const handleCheckIn = React.useCallback(async () => {
     if (!booking) return;
     try {
-      await bookingsService.updateBookingStatus(booking.id, 'active');
-      setBooking((prev) => (prev ? { ...prev, status: 'active' } : null));
+      await bookingsService.updateBookingStatus(booking.id, 'ACTIVE');
+      setBooking((prev) => (prev ? { ...prev, status: 'ACTIVE' } : null));
       showMessage({
         message: t('companion.booking_detail.checked_in'),
         type: 'success',
@@ -179,7 +178,7 @@ export default function CompanionBookingDetail() {
             try {
               await bookingsService.completeBooking(booking.id);
               setBooking((prev) =>
-                prev ? { ...prev, status: 'completed' } : null
+                prev ? { ...prev, status: 'COMPLETED' } : null
               );
               showMessage({
                 message: t('companion.booking_detail.completed'),
@@ -243,10 +242,7 @@ export default function CompanionBookingDetail() {
           <Pressable onPress={handleBack}>
             <ArrowLeft color={colors.midnight.DEFAULT} width={24} height={24} />
           </Pressable>
-          <Text
-            style={styles.headerTitle}
-            className="flex-1 text-xl text-midnight"
-          >
+          <Text className="font-urbanist-bold flex-1 text-xl text-midnight">
             {t('companion.booking_detail.header')}
           </Text>
           <Badge
@@ -343,7 +339,7 @@ export default function CompanionBookingDetail() {
                   {t('companion.booking_detail.occasion')}
                 </Text>
                 <Text className="font-semibold text-midnight">
-                  {t(`companion.services.${booking.occasionType}`)}
+                  {booking.occasion ? `${booking.occasion.emoji} ${booking.occasion.name}` : t('common.occasion')}
                 </Text>
               </View>
             </View>
@@ -437,7 +433,7 @@ export default function CompanionBookingDetail() {
               <Text className="font-bold text-midnight">
                 {t('companion.booking_detail.you_will_earn')}
               </Text>
-              <Text style={styles.earnings} className="text-xl text-teal-400">
+              <Text className="font-urbanist-bold text-xl text-teal-400">
                 {formatVND(yourEarnings)}
               </Text>
             </View>
@@ -460,10 +456,7 @@ export default function CompanionBookingDetail() {
           <Text className="text-sm text-text-tertiary">
             {t('companion.booking_detail.booking_code')}
           </Text>
-          <Text
-            style={styles.bookingCode}
-            className="mt-1 text-2xl tracking-wider text-midnight"
-          >
+          <Text className="font-urbanist-bold mt-1 text-2xl tracking-wider text-midnight">
             {booking.bookingNumber}
           </Text>
           <Text className="mt-1 text-xs text-text-tertiary">
@@ -506,7 +499,7 @@ export default function CompanionBookingDetail() {
         className="border-t border-border-light bg-white"
       >
         <View className="flex-row gap-3 p-4">
-          {booking.status === 'confirmed' && (
+          {booking.status === 'CONFIRMED' && (
             <>
               <Button
                 label={t('companion.booking_detail.cancel_booking')}
@@ -524,7 +517,7 @@ export default function CompanionBookingDetail() {
               />
             </>
           )}
-          {booking.status === 'active' && (
+          {booking.status === 'ACTIVE' && (
             <Button
               label={t('companion.booking_detail.complete_booking')}
               onPress={handleComplete}
@@ -533,8 +526,8 @@ export default function CompanionBookingDetail() {
               className="flex-1 bg-teal-400"
             />
           )}
-          {(booking.status === 'completed' ||
-            booking.status === 'cancelled') && (
+          {(booking.status === 'COMPLETED' ||
+            booking.status === 'CANCELLED') && (
             <Button
               label={t('common.back')}
               onPress={handleBack}
@@ -548,15 +541,3 @@ export default function CompanionBookingDetail() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  headerTitle: {
-    fontFamily: 'Urbanist_700Bold',
-  },
-  earnings: {
-    fontFamily: 'Urbanist_700Bold',
-  },
-  bookingCode: {
-    fontFamily: 'Urbanist_700Bold',
-  },
-});

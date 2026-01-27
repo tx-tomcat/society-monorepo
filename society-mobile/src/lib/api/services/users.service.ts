@@ -8,6 +8,8 @@ export interface UpdateProfileData {
   avatarUrl?: string;
   gender?: string;
   dateOfBirth?: string;
+  province?: string;
+  district?: string;
 }
 
 /**

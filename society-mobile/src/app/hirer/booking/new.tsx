@@ -10,7 +10,6 @@ import {
   Platform,
   Pressable,
   ScrollView,
-  StyleSheet,
   TextInput,
 } from 'react-native';
 
@@ -37,6 +36,7 @@ import {
   VerifiedBadge,
   WeddingRings,
 } from '@/components/ui/icons';
+import { getPhotoUrl } from '@/lib/api/services/companions.service';
 import { useCompanion, useCompanionAvailability } from '@/lib/hooks';
 import { formatVND } from '@/lib/utils';
 
@@ -106,13 +106,13 @@ export default function BookingFormScreen() {
     const c = companionData;
     return {
       id: c.id,
-      name: c.user?.fullName || '',
-      image: c.user?.avatarUrl || c.photos?.[0]?.url || '',
-      rating: c.ratingAvg ?? 0,
-      reviewCount: c.ratingCount ?? 0,
+      name: c.displayName || '',
+      image: c.avatar || getPhotoUrl(c.photos?.[0]) || '',
+      rating: c.rating ?? 0,
+      reviewCount: c.reviewCount ?? 0,
       hourlyRate: c.hourlyRate || 0,
       location: c.languages?.join(', ') || '',
-      isVerified: c.user?.isVerified ?? c.verificationStatus === 'verified',
+      isVerified: c.isVerified ?? c.verificationStatus === 'verified',
     };
   }, [companionData]);
 
@@ -237,10 +237,7 @@ export default function BookingFormScreen() {
           >
             <ArrowLeft color={colors.midnight.DEFAULT} width={24} height={24} />
           </Pressable>
-          <Text
-            style={styles.headerTitle}
-            className="flex-1 text-xl text-midnight"
-          >
+          <Text className="flex-1 font-urbanist-bold text-xl text-midnight">
             {t('hirer.booking.title')}
           </Text>
         </View>
@@ -265,10 +262,7 @@ export default function BookingFormScreen() {
             />
             <View className="flex-1">
               <View className="flex-row items-center gap-1">
-                <Text
-                  style={styles.companionName}
-                  className="text-lg text-midnight"
-                >
+                <Text className="font-urbanist-semibold text-lg text-midnight">
                   {companion.name}
                 </Text>
                 {companion.isVerified && (
@@ -295,7 +289,7 @@ export default function BookingFormScreen() {
               </View>
             </View>
             <View className="items-end">
-              <Text style={styles.rate} className="text-lg text-rose-400">
+              <Text className="font-urbanist-bold text-lg text-rose-400">
                 {formatVND(companion.hourlyRate)}
               </Text>
               <Text className="text-xs text-text-tertiary">
@@ -311,10 +305,7 @@ export default function BookingFormScreen() {
             transition={{ type: 'timing', duration: 400, delay: 50 }}
             className="px-4 pt-6"
           >
-            <Text
-              style={styles.sectionTitle}
-              className="mb-3 text-base text-midnight"
-            >
+            <Text className="mb-3 font-urbanist-semibold text-base text-midnight">
               {t('hirer.booking.occasion')} *
             </Text>
             <View className="flex-row flex-wrap gap-2">
@@ -355,10 +346,7 @@ export default function BookingFormScreen() {
           >
             <View className="mb-3 flex-row items-center gap-2 px-4">
               <Calendar color={colors.rose[400]} width={20} height={20} />
-              <Text
-                style={styles.sectionTitle}
-                className="text-base text-midnight"
-              >
+              <Text className="font-urbanist-semibold text-base text-midnight">
                 {t('hirer.booking.select_date')} *
               </Text>
             </View>
@@ -385,8 +373,7 @@ export default function BookingFormScreen() {
                       {date.day}
                     </Text>
                     <Text
-                      style={styles.dateNumber}
-                      className={`text-xl ${isSelected ? 'text-white' : 'text-midnight'}`}
+                      className={`font-urbanist-bold text-xl ${isSelected ? 'text-white' : 'text-midnight'}`}
                     >
                       {date.date}
                     </Text>
@@ -410,10 +397,7 @@ export default function BookingFormScreen() {
           >
             <View className="mb-3 flex-row items-center gap-2">
               <Clock color={colors.rose[400]} width={20} height={20} />
-              <Text
-                style={styles.sectionTitle}
-                className="text-base text-midnight"
-              >
+              <Text className="font-urbanist-semibold text-base text-midnight">
                 {t('hirer.booking.select_time')} *
               </Text>
             </View>
@@ -454,10 +438,7 @@ export default function BookingFormScreen() {
             transition={{ type: 'timing', duration: 400, delay: 200 }}
             className="px-4 pt-6"
           >
-            <Text
-              style={styles.sectionTitle}
-              className="mb-3 text-base text-midnight"
-            >
+            <Text className="mb-3 font-urbanist-semibold text-base text-midnight">
               {t('hirer.booking.duration')}
             </Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
@@ -493,10 +474,7 @@ export default function BookingFormScreen() {
           >
             <View className="mb-3 flex-row items-center gap-2">
               <MapPin color={colors.rose[400]} width={20} height={20} />
-              <Text
-                style={styles.sectionTitle}
-                className="text-base text-midnight"
-              >
+              <Text className="font-urbanist-semibold text-base text-midnight">
                 {t('hirer.booking.location')} *
               </Text>
             </View>
@@ -506,7 +484,7 @@ export default function BookingFormScreen() {
                 onChangeText={setLocation}
                 placeholder={t('hirer.booking.location_placeholder')}
                 placeholderTextColor={colors.text.tertiary}
-                style={[styles.input, { color: colors.midnight.DEFAULT }]}
+                style={{ fontFamily: 'Urbanist_400Regular', color: colors.midnight.DEFAULT }}
                 className="px-4 py-3 text-base"
                 multiline={false}
               />
@@ -520,10 +498,7 @@ export default function BookingFormScreen() {
             transition={{ type: 'timing', duration: 400, delay: 300 }}
             className="px-4 pt-6"
           >
-            <Text
-              style={styles.sectionTitle}
-              className="mb-3 text-base text-midnight"
-            >
+            <Text className="mb-3 font-urbanist-semibold text-base text-midnight">
               {t('hirer.booking.notes')}
             </Text>
             <View className="rounded-xl bg-white p-1">
@@ -532,7 +507,7 @@ export default function BookingFormScreen() {
                 onChangeText={setNotes}
                 placeholder={t('hirer.booking.notes_placeholder')}
                 placeholderTextColor={colors.text.tertiary}
-                style={[styles.input, { color: colors.midnight.DEFAULT }]}
+                style={{ fontFamily: 'Urbanist_400Regular', color: colors.midnight.DEFAULT }}
                 className="min-h-[100px] px-4 py-3 text-base"
                 multiline
                 textAlignVertical="top"
@@ -565,16 +540,10 @@ export default function BookingFormScreen() {
             </View>
             <View className="mb-2 border-t border-lavender-400/20 pt-3">
               <View className="flex-row items-center justify-between">
-                <Text
-                  style={styles.totalLabel}
-                  className="text-base text-midnight"
-                >
+                <Text className="font-urbanist-semibold text-base text-midnight">
                   {t('hirer.booking.estimated_total')}
                 </Text>
-                <Text
-                  style={styles.totalAmount}
-                  className="text-xl text-rose-400"
-                >
+                <Text className="font-urbanist-bold text-xl text-rose-400">
                   {formatVND(totalAmount)}
                 </Text>
               </View>
@@ -598,7 +567,7 @@ export default function BookingFormScreen() {
             <Text className="text-xs text-text-tertiary">
               {t('hirer.booking.total')}
             </Text>
-            <Text style={styles.bottomTotal} className="text-xl text-midnight">
+            <Text className="font-urbanist-bold text-xl text-midnight">
               {formatVND(totalAmount)}
             </Text>
           </View>
@@ -614,33 +583,3 @@ export default function BookingFormScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  headerTitle: {
-    fontFamily: 'Urbanist_700Bold',
-  },
-  companionName: {
-    fontFamily: 'Urbanist_600SemiBold',
-  },
-  rate: {
-    fontFamily: 'Urbanist_700Bold',
-  },
-  sectionTitle: {
-    fontFamily: 'Urbanist_600SemiBold',
-  },
-  dateNumber: {
-    fontFamily: 'Urbanist_700Bold',
-  },
-  input: {
-    fontFamily: 'Urbanist_400Regular',
-  },
-  totalLabel: {
-    fontFamily: 'Urbanist_600SemiBold',
-  },
-  totalAmount: {
-    fontFamily: 'Urbanist_700Bold',
-  },
-  bottomTotal: {
-    fontFamily: 'Urbanist_700Bold',
-  },
-});

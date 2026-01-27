@@ -78,7 +78,7 @@ export class AdminService {
         status: u.status,
         fullName: u.fullName,
         isVerified: u.isVerified,
-        hasProfile: u.role === UserRole.COMPANION ? !!u.companionProfile : !!u.hirerProfile,
+        hasProfile: u.role === UserRole.COMPANION ? !!u.companionProfile : !!(u.gender && u.dateOfBirth),
         createdAt: u.createdAt,
         lastLoginAt: null,
       })),

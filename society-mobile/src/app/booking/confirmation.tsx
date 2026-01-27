@@ -11,16 +11,23 @@ import {
   View,
 } from '@/components/ui';
 import { Calendar, CheckCircle, Clock, MapPin } from '@/components/ui/icons';
+import { useCurrentUser } from '@/lib/hooks';
 
 export default function BookingConfirmation() {
   const router = useRouter();
+  const { data: userData } = useCurrentUser();
 
   const handleViewBooking = () => {
     router.push('/booking/active/1' as Href);
   };
 
   const handleBackToHome = () => {
-    router.push('/(app)' as Href);
+    // Navigate to role-specific dashboard
+    if (userData?.user?.role === 'COMPANION') {
+      router.push('/companion/(app)' as Href);
+    } else {
+      router.push('/(app)' as Href);
+    }
   };
 
   return (

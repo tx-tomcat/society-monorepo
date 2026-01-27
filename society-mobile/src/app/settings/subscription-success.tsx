@@ -1,9 +1,11 @@
+import type { Href } from 'expo-router';
 import { router } from 'expo-router';
 import React from 'react';
-import { Pressable, StyleSheet } from 'react-native';
+import { Pressable } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
 import { FocusAwareStatusBar, Text, View } from '@/components/ui';
+import { useCurrentUser } from '@/lib/hooks';
 
 function CrownIcon() {
   return (
@@ -74,10 +76,16 @@ const BENEFITS = [
 ];
 
 export default function SubscriptionSuccessScreen() {
+  const { data: userData } = useCurrentUser();
+
   const handleContinue = React.useCallback(() => {
-    // Navigate back to main app or settings
-    router.push('/(app)');
-  }, []);
+    // Navigate to role-specific dashboard
+    if (userData?.user?.role === 'COMPANION') {
+      router.push('/companion/(app)' as Href);
+    } else {
+      router.push('/(app)' as Href);
+    }
+  }, [userData]);
 
   return (
     <View className="flex-1 bg-neutral-900">
@@ -102,10 +110,7 @@ export default function SubscriptionSuccessScreen() {
 
       {/* Title */}
       <View className="mt-8 items-center px-6">
-        <Text
-          className="text-4xl font-bold leading-[1.2] text-offwhite"
-          style={styles.title}
-        >
+        <Text className="font-urbanist-bold text-4xl leading-[1.2] tracking-[0px] text-offwhite">
           Congratulations!
         </Text>
         <Text className="text-platinum mt-3 text-center text-lg leading-[1.6] tracking-[0.2px]">
@@ -115,10 +120,7 @@ export default function SubscriptionSuccessScreen() {
 
       {/* Benefits Section */}
       <View className="mt-12 px-6">
-        <Text
-          className="mb-6 text-2xl font-bold leading-[1.4] text-offwhite"
-          style={styles.benefitsTitle}
-        >
+        <Text className="mb-6 font-urbanist-bold text-2xl leading-[1.4] tracking-[0px] text-offwhite">
           Benefits Unlocked:
         </Text>
 
@@ -151,10 +153,7 @@ export default function SubscriptionSuccessScreen() {
           className="items-center justify-center rounded-full bg-primary-400 py-4"
           testID="continue-button"
         >
-          <Text
-            className="text-base font-bold leading-[1.6] tracking-[0.2px] text-midnight"
-            style={styles.buttonText}
-          >
+          <Text className="font-urbanist-bold text-base leading-[1.6] tracking-[0.2px] text-midnight">
             Start Exploring Premium Features
           </Text>
         </Pressable>
@@ -163,17 +162,3 @@ export default function SubscriptionSuccessScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  title: {
-    fontFamily: 'Urbanist_700Bold',
-    letterSpacing: 0,
-  },
-  benefitsTitle: {
-    fontFamily: 'Urbanist_700Bold',
-    letterSpacing: 0,
-  },
-  buttonText: {
-    fontFamily: 'Urbanist_700Bold',
-    letterSpacing: 0,
-  },
-});

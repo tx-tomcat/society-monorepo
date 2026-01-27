@@ -1,10 +1,10 @@
+import { Gender, UserRole } from '@generated/client';
 import {
   BadRequestException,
   Injectable,
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { Gender, UserRole } from '@generated/client';
 import { PrismaService } from '../../../prisma/prisma.service';
 import { UpdateCompanionProfileDto, UpdateUserDto } from '../dto/create-user.dto';
 
@@ -12,7 +12,7 @@ import { UpdateCompanionProfileDto, UpdateUserDto } from '../dto/create-user.dto
 export class ProfileService {
   private readonly logger = new Logger(ProfileService.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   async getProfile(userId: string) {
     const user = await this.prisma.user.findUnique({
@@ -20,9 +20,28 @@ export class ProfileService {
       include: {
         companionProfile: {
           include: {
-            photos: true,
-            services: true,
-            availability: true,
+            // Only fetch minimal photo data for profile display
+            photos: {
+              orderBy: { position: 'asc' },
+              select: { id: true, url: true, position: true },
+            },
+            // Only fetch enabled services with minimal fields
+            services: {
+              where: { isEnabled: true },
+              select: { serviceType: true, priceAdjustment: true },
+            },
+            // Availability is needed for scheduling - keep but select minimal fields
+            availability: {
+              select: {
+                id: true,
+                dayOfWeek: true,
+                startTime: true,
+                endTime: true,
+                isAvailable: true,
+                isRecurring: true,
+                specificDate: true,
+              },
+            },
           },
         },
         hirerProfile: true,
@@ -64,6 +83,7 @@ export class ProfileService {
   async updateUserProfile(userId: string, updateData: UpdateUserDto) {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
+      include: { hirerProfile: true },
     });
 
     if (!user) {
@@ -79,9 +99,6 @@ export class ProfileService {
       phone?: string;
     } = {};
 
-    if (updateData.fullName !== undefined) {
-      dataToUpdate.fullName = updateData.fullName;
-    }
     if (updateData.avatarUrl !== undefined) {
       dataToUpdate.avatarUrl = updateData.avatarUrl;
     }
@@ -97,6 +114,17 @@ export class ProfileService {
     }
     if (updateData.phone !== undefined) {
       dataToUpdate.phone = updateData.phone;
+    }
+
+    // Update hirer profile location if province/district provided
+    if (user.role === UserRole.HIRER && user.hirerProfile && (updateData.province !== undefined || updateData.district !== undefined)) {
+      await this.prisma.hirerProfile.update({
+        where: { userId },
+        data: {
+          ...(updateData.province !== undefined && { province: updateData.province }),
+          ...(updateData.district !== undefined && { district: updateData.district }),
+        },
+      });
     }
 
     const updatedUser = await this.prisma.user.update({
@@ -115,7 +143,6 @@ export class ProfileService {
         id: updatedUser.id,
         email: updatedUser.email,
         phone: updatedUser.phone,
-        fullName: updatedUser.fullName,
         avatarUrl: updatedUser.avatarUrl,
         gender: updatedUser.gender,
         dateOfBirth: updatedUser.dateOfBirth,
@@ -216,6 +243,8 @@ export class ProfileService {
         bio: updateData.bio,
         heightCm: updateData.heightCm,
         languages: updateData.languages,
+        province: updateData.province,
+        district: updateData.district,
         hourlyRate: updateData.hourlyRate,
         halfDayRate: updateData.halfDayRate,
         fullDayRate: updateData.fullDayRate,

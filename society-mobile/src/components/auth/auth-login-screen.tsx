@@ -1,7 +1,7 @@
 import { MotiView } from 'moti';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, ScrollView, StyleSheet, TextInput } from 'react-native';
+import { Pressable, ScrollView, TextInput } from 'react-native';
 import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 
 import {
@@ -17,8 +17,8 @@ import {
   ArrowLeft,
   Facebook,
   Google,
+  HiremeLogo,
   Mail,
-  SocietyLogo,
 } from '@/components/ui/icons';
 import { isValidEmail } from '@/lib/validation';
 
@@ -130,12 +130,9 @@ export function AuthLoginScreen({
             className="mb-8 items-center"
           >
             <View className={theme.logoContainerClass}>
-              <SocietyLogo color={theme.accentColor} width={40} height={40} />
+              <HiremeLogo color={theme.accentColor} width={40} height={40} />
             </View>
-            <Text
-              style={styles.title}
-              className="mb-2 text-center text-2xl text-midnight"
-            >
+            <Text className="mb-2 text-center font-urbanist-bold text-2xl text-midnight">
               {t(`auth.login.title`)}
             </Text>
             <Text className="text-center text-base text-text-secondary">
@@ -152,11 +149,10 @@ export function AuthLoginScreen({
           >
             <View>
               <View
-                className={`flex-row items-center rounded-xl border bg-white px-4 ${
-                  validationError || error
+                className={`flex-row items-center rounded-xl border bg-white px-4 ${validationError || error
                     ? 'border-red-400'
                     : 'border-border-light'
-                }`}
+                  }`}
               >
                 <Mail
                   color={
@@ -176,8 +172,8 @@ export function AuthLoginScreen({
                   autoCapitalize="none"
                   autoComplete="email"
                   testID={testID ? `${testID}-email-input` : undefined}
-                  className="flex-1 py-4 pl-3 text-base"
-                  style={[styles.input, { color: colors.midnight.DEFAULT }]}
+                  className="flex-1 py-4 pl-3 font-urbanist-medium text-base"
+                  style={{ color: colors.midnight.DEFAULT }}
                 />
               </View>
               {(validationError || error) && (
@@ -293,12 +289,3 @@ export function AuthLoginScreen({
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  title: {
-    fontFamily: 'Urbanist_700Bold',
-  },
-  input: {
-    fontFamily: 'Urbanist_500Medium',
-  },
-});

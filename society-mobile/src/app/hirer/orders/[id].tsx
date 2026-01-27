@@ -9,7 +9,6 @@ import {
   Alert,
   Pressable,
   ScrollView,
-  StyleSheet,
 } from 'react-native';
 
 import {
@@ -227,10 +226,7 @@ export default function BookingDetail() {
                 height={24}
               />
             </Pressable>
-            <Text
-              style={styles.headerTitle}
-              className="flex-1 text-xl text-midnight"
-            >
+            <Text className="flex-1 font-urbanist-bold text-xl text-midnight">
               {t('hirer.booking_detail.header')}
             </Text>
           </View>
@@ -255,10 +251,7 @@ export default function BookingDetail() {
           <Pressable onPress={handleBack}>
             <ArrowLeft color={colors.midnight.DEFAULT} width={24} height={24} />
           </Pressable>
-          <Text
-            style={styles.headerTitle}
-            className="flex-1 text-xl text-midnight"
-          >
+          <Text className="flex-1 font-urbanist-bold text-xl text-midnight">
             {t('hirer.booking_detail.header')}
           </Text>
           <Badge
@@ -514,8 +507,3 @@ export default function BookingDetail() {
   );
 }
 
-const styles = StyleSheet.create({
-  headerTitle: {
-    fontFamily: 'Urbanist_700Bold',
-  },
-});

@@ -2,11 +2,18 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { CompanionsService } from './companions.service';
 import { PrismaService } from '@/prisma/prisma.service';
+import { CachePatternsService } from '@/modules/cache/cache-patterns.service';
 import { BoostTierEnum } from '../dto/companion.dto';
 
 describe('CompanionsService', () => {
   let service: CompanionsService;
   let prisma: PrismaService;
+
+  const mockCachePatternsService = {
+    getOrFetch: jest.fn().mockImplementation((_key, _ttl, fetcher) => fetcher()),
+    invalidate: jest.fn().mockResolvedValue(undefined),
+    invalidatePattern: jest.fn().mockResolvedValue(undefined),
+  };
 
   const mockPrismaService = {
     companionProfile: {
@@ -61,6 +68,10 @@ describe('CompanionsService', () => {
         {
           provide: PrismaService,
           useValue: mockPrismaService,
+        },
+        {
+          provide: CachePatternsService,
+          useValue: mockCachePatternsService,
         },
       ],
     }).compile();
@@ -151,6 +162,21 @@ describe('CompanionsService', () => {
         expect.objectContaining({
           where: expect.objectContaining({
             hourlyRate: { gte: 300000, lte: 1000000 },
+          }),
+        }),
+      );
+    });
+
+    it('should filter by province', async () => {
+      mockPrismaService.companionProfile.findMany.mockResolvedValue([]);
+      mockPrismaService.companionProfile.count.mockResolvedValue(0);
+
+      await service.browseCompanions({ province: 'HCM' });
+
+      expect(mockPrismaService.companionProfile.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            province: 'HCM',
           }),
         }),
       );

@@ -9,6 +9,7 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { createClient, SupabaseClient, User as SupabaseUser } from '@supabase/supabase-js';
 import axios from 'axios';
+import { StringUtils } from '../common/utils/string.utils';
 import { CaptchaService } from '../modules/security/services/captcha.service';
 import { RateLimiterService } from '../modules/security/services/rate-limiter.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -123,7 +124,7 @@ export class AuthService {
     // Check OTP request rate limit (3 requests per 5 minutes)
     const rateLimitCheck = await this.rateLimiter.checkOtpRequestLimit(normalizedEmail);
     if (!rateLimitCheck.allowed) {
-      this.logger.warn(`OTP request rate limit exceeded for ${normalizedEmail}`);
+      this.logger.warn(`OTP request rate limit exceeded for ${StringUtils.maskEmail(normalizedEmail)}`);
       throw new BadRequestException({
         message: rateLimitCheck.message,
         error: 'RATE_LIMIT_EXCEEDED',
@@ -152,7 +153,7 @@ export class AuthService {
     // Record successful OTP request
     await this.rateLimiter.recordOtpRequest(normalizedEmail);
 
-    this.logger.log(`Magic link sent to ${normalizedEmail}`);
+    this.logger.log(`Magic link sent to ${StringUtils.maskEmail(normalizedEmail)}`);
 
     return {
       success: true,
@@ -195,7 +196,7 @@ export class AuthService {
     // Check OTP verification rate limit with progressive delays
     const rateLimitCheck = await this.rateLimiter.checkOtpVerifyLimit(normalizedEmail);
     if (!rateLimitCheck.allowed) {
-      this.logger.warn(`OTP verification rate limit exceeded for ${normalizedEmail}`);
+      this.logger.warn(`OTP verification rate limit exceeded for ${StringUtils.maskEmail(normalizedEmail)}`);
       throw new BadRequestException({
         message: rateLimitCheck.message,
         error: rateLimitCheck.lockedUntil ? 'ACCOUNT_LOCKED' : 'RATE_LIMIT_EXCEEDED',
@@ -218,7 +219,7 @@ export class AuthService {
       // Also record for brute force detection (CAPTCHA trigger)
       const bruteForceResult = await this.captchaService.recordFailedAttempt(normalizedEmail);
 
-      this.logger.error(`OTP verification error for ${normalizedEmail}: ${error?.message}`);
+      this.logger.error(`OTP verification error for ${StringUtils.maskEmail(normalizedEmail)}: ${error?.message}`);
 
       // Provide informative error response
       const captchaConfig = this.captchaService.getCaptchaConfig();
@@ -476,9 +477,11 @@ export class AuthService {
       const refreshToken = this.jwtService.sign(payload, { expiresIn: '30d' });
 
       // 4. Determine if user has completed their profile
+      // For COMPANION: requires a companionProfile record
+      // For HIRER: requires gender and dateOfBirth (hirerProfile has only optional fields)
       const hasProfile = dbUser.role === UserRole.COMPANION
         ? !!dbUser.companionProfile
-        : !!dbUser.hirerProfile;
+        : !!(dbUser.gender && dbUser.dateOfBirth);
 
       return {
         user: {
@@ -580,7 +583,7 @@ export class AuthService {
    */
   private async getZaloUserInfo(accessToken: string): Promise<ZaloUserInfo> {
     try {
-      this.logger.log(`Fetching Zalo user info with token: ${accessToken.substring(0, 20)}...`);
+      this.logger.log(`Fetching Zalo user info with token: ${StringUtils.maskToken(accessToken)}`);
 
       const response = await axios.get('https://graph.zalo.me/v2.0/me', {
         params: {
@@ -642,13 +645,15 @@ export class AuthService {
       const role = userType === 'companion' ? UserRole.COMPANION : UserRole.HIRER;
 
 
-      this.logger.log(`New user created: ${email} (${role})`);
+      this.logger.log(`New user created: ${StringUtils.maskEmail(email)} (${role})`);
     }
 
     // Determine if user has completed their profile
+    // For COMPANION: requires a companionProfile record
+    // For HIRER: requires gender and dateOfBirth (hirerProfile has only optional fields)
     const hasProfile = dbUser.role === UserRole.COMPANION
       ? !!dbUser.companionProfile
-      : !!dbUser.hirerProfile;
+      : !!(dbUser.gender && dbUser.dateOfBirth);
 
     return {
       user: {

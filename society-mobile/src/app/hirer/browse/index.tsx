@@ -9,7 +9,6 @@ import {
   Pressable,
   RefreshControl,
   ScrollView,
-  StyleSheet,
   TextInput,
 } from 'react-native';
 
@@ -17,24 +16,52 @@ import { CompanionCard, type CompanionData } from '@/components/companion-card';
 import {
   colors,
   FocusAwareStatusBar,
+  Image,
   SafeAreaView,
   Text,
   View,
 } from '@/components/ui';
-import { ArrowLeft, Filter, Search } from '@/components/ui/icons';
+import {
+  ArrowLeft,
+  CheckCircle,
+  Filter,
+  Heart,
+  Search,
+} from '@/components/ui/icons';
 import type { ServiceType } from '@/lib/api/services/companions.service';
+import { getPhotoUrl } from '@/lib/api/services/companions.service';
 import {
   useCompanions,
   useFavorites,
+  useRecommendationsTeaser,
   useToggleFavorite,
+  useTrackInteraction,
 } from '@/lib/hooks';
+import { useCompanion } from '@/lib/hooks/use-companions';
+import { formatVND } from '@/lib/utils';
 
 // Occasion filter chips matching wireframe
-const occasionFilters: { id: string; i18nKey: string; serviceType?: ServiceType }[] = [
+const occasionFilters: {
+  id: string;
+  i18nKey: string;
+  serviceType?: ServiceType;
+}[] = [
   { id: 'all', i18nKey: 'hirer.home.occasions.all' },
-  { id: 'dining', i18nKey: 'hirer.home.occasions.dining', serviceType: 'CASUAL_OUTING' },
-  { id: 'party', i18nKey: 'hirer.home.occasions.party', serviceType: 'CLASS_REUNION' },
-  { id: 'coffee', i18nKey: 'hirer.home.occasions.coffee', serviceType: 'CASUAL_OUTING' },
+  {
+    id: 'dining',
+    i18nKey: 'hirer.home.occasions.dining',
+    serviceType: 'CASUAL_OUTING',
+  },
+  {
+    id: 'party',
+    i18nKey: 'hirer.home.occasions.party',
+    serviceType: 'CLASS_REUNION',
+  },
+  {
+    id: 'coffee',
+    i18nKey: 'hirer.home.occasions.coffee',
+    serviceType: 'CASUAL_OUTING',
+  },
 ];
 
 export default function BrowseCompanions() {
@@ -66,7 +93,7 @@ export default function BrowseCompanions() {
   const toggleFavorite = useToggleFavorite();
 
   // Create a set of favorite companion IDs for quick lookup
-  const favoriteIds = React.useMemo(() => {
+  const _favoriteIds = React.useMemo(() => {
     if (!favoritesData?.favorites) return new Set<string>();
     return new Set(
       favoritesData.favorites.map((f: { companionId: string }) => f.companionId)
@@ -78,18 +105,18 @@ export default function BrowseCompanions() {
     if (!companionsData?.companions) return [];
     return companionsData.companions.map((c) => ({
       id: c.id,
-      name: c.user?.fullName || '',
+      name: c.displayName || '',
       age: 0,
       image:
-        c.photos?.[0]?.url ||
-        c.user?.avatarUrl ||
+        getPhotoUrl(c.photos?.[0]) ||
+        c.avatar ||
         'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400',
-      rating: c.ratingAvg || 0,
-      reviewCount: c.ratingCount || 0,
+      rating: c.rating || 0,
+      reviewCount: c.reviewCount || 0,
       location: c.languages?.join(', ') || t('hirer.home.default_location'),
       pricePerHour: c.hourlyRate || 0,
-      isVerified: c.user?.isVerified ?? c.verificationStatus === 'verified',
-      isOnline: c.isActive,
+      isVerified: c.isVerified ?? c.verificationStatus === 'verified',
+      isOnline: c.isActive ?? false,
       isPremium: c.isFeatured,
       specialties: c.services?.map((s) => s.type) || [],
     }));
@@ -128,7 +155,7 @@ export default function BrowseCompanions() {
     [router]
   );
 
-  const handleFavorite = React.useCallback(
+  const _handleFavorite = React.useCallback(
     (companionId: string) => {
       toggleFavorite.mutate(companionId);
     },
@@ -160,7 +187,7 @@ export default function BrowseCompanions() {
           <Pressable onPress={handleBack}>
             <ArrowLeft color={colors.midnight.DEFAULT} width={24} height={24} />
           </Pressable>
-          <Text style={styles.headerTitle} className="flex-1 text-center text-lg text-midnight">
+          <Text className="flex-1 text-center font-urbanist-semibold text-lg text-midnight">
             {t('hirer.browse.header')}
           </Text>
           <Pressable onPress={handleFilter}>
@@ -194,9 +221,7 @@ export default function BrowseCompanions() {
                   key={filter.id}
                   onPress={() => setSelectedFilter(filter.id)}
                   className={`rounded-full px-4 py-2 ${
-                    selectedFilter === filter.id
-                      ? 'bg-rose-400'
-                      : 'bg-softpink'
+                    selectedFilter === filter.id ? 'bg-rose-400' : 'bg-softpink'
                   }`}
                 >
                   <Text
@@ -215,6 +240,14 @@ export default function BrowseCompanions() {
         </View>
       </SafeAreaView>
 
+      {/* For You Teaser Section */}
+      {!isLoading && (
+        <ForYouTeaser
+          onCompanionPress={handleCompanionPress}
+          onSeeAll={() => router.push('/hirer/browse/for-you' as Href)}
+        />
+      )}
+
       {/* Loading State */}
       {isLoading && (
         <View className="flex-1 items-center justify-center">
@@ -228,7 +261,7 @@ export default function BrowseCompanions() {
           <View className="mb-4 size-20 items-center justify-center rounded-full bg-softpink">
             <Search color={colors.rose[400]} width={32} height={32} />
           </View>
-          <Text style={styles.emptyTitle} className="text-center text-lg text-midnight">
+          <Text className="text-center font-urbanist-bold text-lg text-midnight">
             {t('hirer.browse.no_results')}
           </Text>
           <Text className="mt-2 text-center text-text-secondary">
@@ -259,11 +292,136 @@ export default function BrowseCompanions() {
   );
 }
 
-const styles = StyleSheet.create({
-  headerTitle: {
-    fontFamily: 'Urbanist_600SemiBold',
-  },
-  emptyTitle: {
-    fontFamily: 'Urbanist_700Bold',
-  },
-});
+// Individual teaser item that fetches its own companion data
+function TeaserItem({
+  companionId,
+  onPress,
+}: {
+  companionId: string;
+  onPress: (companion: CompanionData) => void;
+}) {
+  const { data: companionData, isLoading } = useCompanion(companionId);
+
+  if (isLoading || !companionData) {
+    return (
+      <View className="w-32">
+        <View className="aspect-[3/4] items-center justify-center overflow-hidden rounded-xl bg-softpink">
+          <ActivityIndicator size="small" color={colors.teal[400]} />
+        </View>
+      </View>
+    );
+  }
+
+  // Get first photo URL (photos can be objects or strings)
+  const firstPhoto = companionData.photos?.[0];
+  const photoUrl = typeof firstPhoto === 'string' ? firstPhoto : firstPhoto?.url;
+
+  const companion: CompanionData = {
+    id: companionData.id,
+    name: companionData.displayName || '',
+    age: companionData.age || 0,
+    image:
+      photoUrl ||
+      companionData.avatar ||
+      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400',
+    rating: companionData.rating || 0,
+    reviewCount: companionData.reviewCount || 0,
+    location: companionData.languages?.join(', ') || '',
+    pricePerHour: companionData.hourlyRate || 0,
+    isVerified: companionData.isVerified,
+    isOnline: companionData.isActive ?? false,
+    isPremium: companionData.isFeatured,
+    specialties: [],
+  };
+
+  return (
+    <Pressable onPress={() => onPress(companion)} className="w-32">
+      <View className="aspect-[3/4] overflow-hidden rounded-xl">
+        <Image
+          source={{ uri: companion.image }}
+          className="size-full"
+          contentFit="cover"
+        />
+        {companion.isVerified && (
+          <View className="absolute right-1 top-1 rounded-full bg-teal-500 p-0.5">
+            <CheckCircle color="white" width={12} height={12} />
+          </View>
+        )}
+      </View>
+      <Text
+        className="mt-1 font-urbanist-medium text-sm text-midnight"
+        numberOfLines={1}
+      >
+        {companion.name}
+      </Text>
+      <Text className="text-xs text-text-secondary">
+        {formatVND(companion.pricePerHour)}/h
+      </Text>
+    </Pressable>
+  );
+}
+
+// For You teaser section component
+function ForYouTeaser({
+  onCompanionPress,
+  onSeeAll,
+}: {
+  onCompanionPress: (companion: CompanionData) => void;
+  onSeeAll: () => void;
+}) {
+  const { t } = useTranslation();
+  const { data, isLoading } = useRecommendationsTeaser(5);
+  const trackInteraction = useTrackInteraction();
+
+  const handlePress = React.useCallback(
+    (companion: CompanionData) => {
+      trackInteraction.mutate({
+        companionId: companion.id,
+        eventType: 'PROFILE_OPEN',
+      });
+      onCompanionPress(companion);
+    },
+    [trackInteraction, onCompanionPress]
+  );
+
+  // Don't render if loading or no recommendations
+  if (isLoading || !data?.companions?.length) return null;
+
+  return (
+    <View className="border-b border-border-light bg-white py-4">
+      <View className="flex-row items-center justify-between px-4">
+        <View className="flex-row items-center gap-1.5">
+          <Heart
+            color={colors.rose[400]}
+            width={16}
+            height={16}
+            fill={colors.rose[400]}
+          />
+          <Text className="font-urbanist-semibold text-base text-midnight">
+            {t('hirer.browse.for_you_section')}
+          </Text>
+        </View>
+        <Pressable onPress={onSeeAll}>
+          <Text className="text-sm font-medium text-teal-500">
+            {t('hirer.browse.see_all')}
+          </Text>
+        </Pressable>
+      </View>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        className="mt-3"
+        contentContainerStyle={{ paddingHorizontal: 16, gap: 12 }}
+      >
+        {data.companions.map((rec) => (
+          <TeaserItem
+            key={rec.companionId}
+            companionId={rec.companionId}
+            onPress={handlePress}
+          />
+        ))}
+      </ScrollView>
+    </View>
+  );
+}
+

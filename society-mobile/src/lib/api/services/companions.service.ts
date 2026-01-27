@@ -24,6 +24,13 @@ export interface CompanionService {
   isAvailable: boolean;
 }
 
+export interface CompanionServiceInput {
+  type: ServiceType;
+  description?: string;
+  priceAdjustment?: number;
+  isEnabled?: boolean;
+}
+
 export interface CompanionAvailability {
   dayOfWeek: number;
   startTime: string;
@@ -31,35 +38,109 @@ export interface CompanionAvailability {
   isAvailable: boolean;
 }
 
-export interface Companion {
-  id: string;
-  userId: string;
+export interface RecurringAvailabilitySlot {
+  dayOfWeek: number; // 0-6 (Sunday-Saturday)
+  startTime: string; // "09:00"
+  endTime: string; // "18:00"
+}
+
+export interface AvailabilityException {
+  date: string; // ISO date string
+  available: boolean;
+  reason?: string;
+}
+
+export interface UpdateAvailabilityInput {
+  recurring: RecurringAvailabilitySlot[];
+  exceptions?: AvailabilityException[];
+}
+
+/**
+ * Input for creating a companion profile during onboarding
+ */
+export interface CreateCompanionProfileInput {
   bio?: string;
   heightCm?: number;
   languages?: string[];
   hourlyRate: number;
   halfDayRate?: number;
   fullDayRate?: number;
-  ratingAvg: number;
-  ratingCount: number;
-  totalBookings: number;
-  completedBookings: number;
-  verificationStatus: VerificationStatus;
-  isFeatured: boolean;
-  isActive: boolean;
-  isHidden: boolean;
-  photos: CompanionPhoto[];
-  services: CompanionService[];
-  availability: CompanionAvailability[];
-  user: {
+}
+
+/**
+ * Response from creating a companion profile
+ */
+export interface CreateCompanionProfileResponse {
+  success: boolean;
+  data: {
     id: string;
-    fullName: string;
-    avatarUrl?: string;
-    gender?: string;
-    isVerified: boolean;
+    userId: string;
+    bio?: string;
+    heightCm?: number;
+    languages: string[];
+    hourlyRate: number;
+    halfDayRate?: number;
+    fullDayRate?: number;
+    isActive: boolean;
+    verificationStatus: VerificationStatus;
   };
-  createdAt: string;
-  updatedAt: string;
+}
+
+export interface Companion {
+  id: string;
+  userId: string;
+  displayName: string; // Name returned directly from API
+  age?: number | null;
+  bio?: string | null;
+  avatar?: string | null;
+  heightCm?: number | null;
+  gender?: string | null;
+  languages?: string[];
+  hourlyRate: number;
+  halfDayRate?: number | null;
+  fullDayRate?: number | null;
+  rating: number;
+  reviewCount: number;
+  responseRate?: number;
+  acceptanceRate?: number;
+  completedBookings?: number;
+  verificationStatus?: VerificationStatus;
+  isVerified: boolean;
+  isFeatured: boolean;
+  isActive?: boolean;
+  isHidden?: boolean;
+  photos: (CompanionPhoto | string)[];
+  services: CompanionService[];
+  availability?: CompanionAvailability[];
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+/**
+ * Type guard to check if a photo entry is a CompanionPhoto object
+ */
+export function isCompanionPhoto(photo: CompanionPhoto | string): photo is CompanionPhoto {
+  return typeof photo !== 'string' && 'url' in photo;
+}
+
+/**
+ * Get the URL from a photo entry (handles both string and object formats)
+ */
+export function getPhotoUrl(photo: CompanionPhoto | string | undefined): string | undefined {
+  if (!photo) return undefined;
+  return typeof photo === 'string' ? photo : photo.url;
+}
+
+/**
+ * Get the primary photo URL from a companion's photos array
+ */
+export function getPrimaryPhotoUrl(photos: (CompanionPhoto | string)[] | undefined): string | undefined {
+  if (!photos?.length) return undefined;
+  // Look for primary photo first (only in object format)
+  const primaryPhoto = photos.find((p) => isCompanionPhoto(p) && p.isPrimary);
+  if (primaryPhoto) return getPhotoUrl(primaryPhoto);
+  // Fall back to first photo
+  return getPhotoUrl(photos[0]);
 }
 
 export interface CompanionFilters {
@@ -133,6 +214,55 @@ export interface ActiveBoost {
  * Companions API Service
  */
 export const companionsService = {
+  // ============================================
+  // Onboarding Methods
+  // ============================================
+
+  /**
+   * Create a companion profile during onboarding
+   * This transforms the user into a companion
+   */
+  async createCompanionProfile(
+    data: CreateCompanionProfileInput
+  ): Promise<CreateCompanionProfileResponse> {
+    return apiClient.post('/users/companion-profile', data);
+  },
+
+  /**
+   * Add a photo to companion profile by URL
+   * Use this after uploading the image via filesService
+   */
+  async addPhotoByUrl(url: string, isPrimary = false): Promise<CompanionPhoto> {
+    return apiClient.post('/companions/me/photos', { url, isPrimary });
+  },
+
+  /**
+   * Update services offered (for onboarding)
+   * Maps occasion IDs to service types
+   */
+  async setServices(services: CompanionServiceInput[]): Promise<CompanionService[]> {
+    return apiClient.put('/companions/me/services', { services });
+  },
+
+  /**
+   * Set availability schedule (for onboarding)
+   * Uses recurring slots format expected by backend
+   */
+  async setAvailability(data: UpdateAvailabilityInput): Promise<{ success: boolean }> {
+    return apiClient.put('/companions/me/availability', data);
+  },
+
+  /**
+   * Complete onboarding - marks the user as fully onboarded
+   */
+  async completeOnboarding(): Promise<{ success: boolean }> {
+    return apiClient.post('/users/onboarding/complete', {});
+  },
+
+  // ============================================
+  // Browse/Discovery Methods
+  // ============================================
+
   /**
    * Browse companions with filters (public)
    */
@@ -196,20 +326,20 @@ export const companionsService = {
 
   /**
    * Update availability (authenticated)
+   * @deprecated Use setAvailability instead for recurring slots format
    */
   async updateAvailability(
-    availability: CompanionAvailability[]
-  ): Promise<CompanionAvailability[]> {
-    return apiClient.put('/companions/me/availability', { availability });
+    recurring: RecurringAvailabilitySlot[],
+    exceptions?: AvailabilityException[]
+  ): Promise<{ success: boolean }> {
+    return apiClient.put('/companions/me/availability', { recurring, exceptions });
   },
 
   /**
-   * Add photo to profile (authenticated)
+   * Add photo to profile by URL (authenticated)
    */
-  async addPhoto(file: FormData): Promise<CompanionPhoto> {
-    return apiClient.post('/companions/me/photos', file, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    });
+  async addPhoto(url: string, isPrimary = false): Promise<CompanionPhoto> {
+    return apiClient.post('/companions/me/photos', { url, isPrimary });
   },
 
   /**
@@ -222,7 +352,7 @@ export const companionsService = {
   /**
    * Update services offered (authenticated)
    */
-  async updateServices(services: CompanionService[]): Promise<CompanionService[]> {
+  async updateServices(services: CompanionServiceInput[]): Promise<CompanionService[]> {
     return apiClient.put('/companions/me/services', { services });
   },
 

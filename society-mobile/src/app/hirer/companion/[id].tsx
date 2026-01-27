@@ -42,6 +42,7 @@ import {
   VerifiedBadge,
   WeddingRings,
 } from '@/components/ui/icons';
+import { getPhotoUrl } from '@/lib/api/services/companions.service';
 import {
   useCompanion,
   useCompanionAvailability,
@@ -114,7 +115,7 @@ function ReviewCard({ review }: { review: Review }) {
           contentFit="cover"
         />
         <View className="flex-1">
-          <Text style={styles.reviewAuthor} className="text-sm text-midnight">
+          <Text className="font-urbanist-semibold text-sm text-midnight">
             {review.author}
           </Text>
           <Text className="text-xs text-text-tertiary">{review.date}</Text>
@@ -221,22 +222,22 @@ export default function CompanionProfileScreen() {
     const c = companionData;
     return {
       id: c.id,
-      name: c.user?.fullName || '',
+      name: c.displayName || '',
       age: 0, // Not available in API
       images:
-        c.photos?.map((p) => p.url) ||
-        (c.user?.avatarUrl ? [c.user.avatarUrl] : []),
-      rating: c.ratingAvg ?? 0,
-      reviewCount: c.ratingCount ?? 0,
+        c.photos?.map((p) => getPhotoUrl(p) || '').filter(Boolean) ||
+        (c.avatar ? [c.avatar] : []),
+      rating: c.rating ?? 0,
+      reviewCount: c.reviewCount ?? 0,
       hourlyRate: c.hourlyRate ?? 0,
       location: c.languages?.join(', ') || '',
-      isVerified: c.user?.isVerified ?? c.verificationStatus === 'verified',
-      isOnline: c.isActive,
+      isVerified: c.isVerified ?? c.verificationStatus === 'verified',
+      isOnline: c.isActive ?? false,
       bio: c.bio || '',
       responseTime: '< 30 min',
       completionRate:
-        c.totalBookings > 0
-          ? Math.round((c.completedBookings / c.totalBookings) * 100)
+        (c.completedBookings ?? 0) > 0
+          ? Math.round(((c.completedBookings ?? 0) / (c.completedBookings ?? 1)) * 100)
           : 0,
       languages: c.languages || [],
       specialties: c.services?.map((s) => s.type) || [],
@@ -420,7 +421,7 @@ export default function CompanionProfileScreen() {
             <View className="flex-row items-start justify-between">
               <View className="flex-1">
                 <View className="flex-row items-center gap-2">
-                  <Text style={styles.name} className="text-2xl text-midnight">
+                  <Text className="font-urbanist-bold text-2xl text-midnight">
                     {companion.name}, {companion.age}
                   </Text>
                   {companion.isVerified && (
@@ -451,7 +452,7 @@ export default function CompanionProfileScreen() {
             <View className="mt-4 flex-row items-center gap-4">
               <View className="flex-row items-center gap-1">
                 <Star color={colors.yellow[400]} width={18} height={18} />
-                <Text style={styles.rating} className="text-lg text-midnight">
+                <Text className="font-urbanist-bold text-lg text-midnight">
                   {companion.rating}
                 </Text>
                 <Text className="text-sm text-text-tertiary">
@@ -476,7 +477,7 @@ export default function CompanionProfileScreen() {
 
             {/* Price */}
             <View className="mt-4 flex-row items-baseline gap-1">
-              <Text style={styles.price} className="text-2xl text-rose-400">
+              <Text className="font-urbanist-bold text-2xl text-rose-400">
                 {formatVND(companion.hourlyRate)}
               </Text>
               <Text className="text-sm text-text-tertiary">
@@ -493,7 +494,7 @@ export default function CompanionProfileScreen() {
             className="mx-4 mt-6 rounded-2xl bg-white p-4"
           >
             <Text
-              style={styles.sectionTitle}
+              style={{ fontFamily: 'Urbanist_600SemiBold' }}
               className="mb-3 text-base text-midnight"
             >
               {t('hirer.companion.about')}
@@ -516,7 +517,7 @@ export default function CompanionProfileScreen() {
             className="mx-4 mt-4 rounded-2xl bg-white p-4"
           >
             <Text
-              style={styles.sectionTitle}
+              style={{ fontFamily: 'Urbanist_600SemiBold' }}
               className="mb-3 text-base text-midnight"
             >
               {t('hirer.companion.specialties')}
@@ -550,10 +551,7 @@ export default function CompanionProfileScreen() {
               <View className="flex-row items-center gap-3">
                 <ShieldCheck color={colors.teal[400]} width={28} height={28} />
                 <View className="flex-1">
-                  <Text
-                    style={styles.verifiedTitle}
-                    className="text-sm text-teal-700"
-                  >
+                  <Text className="font-urbanist-semibold text-sm text-teal-700">
                     {t('hirer.companion.verified_profile')}
                   </Text>
                   <Text className="text-xs text-text-secondary">
@@ -574,7 +572,7 @@ export default function CompanionProfileScreen() {
             <View className="mb-3 flex-row items-center gap-2">
               <Calendar color={colors.rose[400]} width={20} height={20} />
               <Text
-                style={styles.sectionTitle}
+                style={{ fontFamily: 'Urbanist_600SemiBold' }}
                 className="text-base text-midnight"
               >
                 {t('hirer.companion.availability')}
@@ -605,8 +603,7 @@ export default function CompanionProfileScreen() {
                       {date.day}
                     </Text>
                     <Text
-                      style={styles.dateNumber}
-                      className={`text-lg ${
+                      className={`font-urbanist-bold text-lg ${
                         isSelected ? 'text-white' : 'text-midnight'
                       }`}
                     >
@@ -664,7 +661,7 @@ export default function CompanionProfileScreen() {
               <View className="flex-row items-center gap-2">
                 <Star color={colors.yellow[400]} width={20} height={20} />
                 <Text
-                  style={styles.sectionTitle}
+                  style={{ fontFamily: 'Urbanist_600SemiBold' }}
                   className="text-base text-midnight"
                 >
                   {t('hirer.companion.reviews_title')}
@@ -733,26 +730,3 @@ export default function CompanionProfileScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  name: {
-    fontFamily: 'Urbanist_700Bold',
-  },
-  rating: {
-    fontFamily: 'Urbanist_700Bold',
-  },
-  price: {
-    fontFamily: 'Urbanist_700Bold',
-  },
-  sectionTitle: {
-    fontFamily: 'Urbanist_600SemiBold',
-  },
-  verifiedTitle: {
-    fontFamily: 'Urbanist_600SemiBold',
-  },
-  dateNumber: {
-    fontFamily: 'Urbanist_700Bold',
-  },
-  reviewAuthor: {
-    fontFamily: 'Urbanist_600SemiBold',
-  },
-});

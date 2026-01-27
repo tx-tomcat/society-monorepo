@@ -9,7 +9,6 @@ import {
   Pressable,
   RefreshControl,
   ScrollView,
-  StyleSheet,
 } from 'react-native';
 
 import {
@@ -172,10 +171,7 @@ export default function CompanionSchedule() {
           <Pressable onPress={handleBack}>
             <ArrowLeft color={colors.midnight.DEFAULT} width={24} height={24} />
           </Pressable>
-          <Text
-            style={styles.headerTitle}
-            className="flex-1 text-xl text-midnight"
-          >
+          <Text className="font-urbanist-bold flex-1 text-xl text-midnight">
             {t('companion.schedule.header')}
           </Text>
           <Pressable>
@@ -196,7 +192,7 @@ export default function CompanionSchedule() {
           <Pressable onPress={handlePrevWeek} className="p-2">
             <ArrowLeft color={colors.midnight.DEFAULT} width={20} height={20} />
           </Pressable>
-          <Text style={styles.monthTitle} className="text-lg text-midnight">
+          <Text className="font-urbanist-bold text-lg text-midnight">
             {selectedDate.toLocaleDateString('en-US', {
               month: 'long',
               year: 'numeric',
@@ -289,15 +285,15 @@ export default function CompanionSchedule() {
                 minute: '2-digit',
               });
               const statusVariant =
-                booking.status === 'confirmed'
+                booking.status === 'CONFIRMED'
                   ? 'teal'
-                  : booking.status === 'active'
+                  : booking.status === 'ACTIVE'
                     ? 'lavender'
                     : 'default';
               const statusLabel =
-                booking.status === 'confirmed'
+                booking.status === 'CONFIRMED'
                   ? t('common.status.confirmed')
-                  : booking.status === 'active'
+                  : booking.status === 'ACTIVE'
                     ? t('common.status.active')
                     : t('common.status.pending');
 
@@ -344,7 +340,7 @@ export default function CompanionSchedule() {
                             {booking.hirer.fullName}
                           </Text>
                           <Text className="text-sm text-rose-400">
-                            {t(`companion.services.${booking.occasionType}`)}
+                            {booking.occasion ? `${booking.occasion.emoji} ${booking.occasion.name}` : t('common.occasion')}
                           </Text>
                         </View>
                         <Badge
@@ -389,10 +385,7 @@ export default function CompanionSchedule() {
             <View className="size-16 items-center justify-center rounded-full bg-lavender-400/20">
               <Calendar color={colors.lavender[400]} width={32} height={32} />
             </View>
-            <Text
-              style={styles.emptyTitle}
-              className="mt-4 text-lg text-midnight"
-            >
+            <Text className="font-urbanist-bold mt-4 text-lg text-midnight">
               {t('companion.schedule.no_bookings')}
             </Text>
             <Text className="mt-1 text-center text-sm text-text-secondary">
@@ -404,15 +397,3 @@ export default function CompanionSchedule() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  headerTitle: {
-    fontFamily: 'Urbanist_700Bold',
-  },
-  monthTitle: {
-    fontFamily: 'Urbanist_700Bold',
-  },
-  emptyTitle: {
-    fontFamily: 'Urbanist_700Bold',
-  },
-});

@@ -43,6 +43,7 @@ export type ReviewMinAggregateOutputType = {
   comment: string | null
   isVisible: boolean | null
   isDisputed: boolean | null
+  deletedAt: Date | null
   createdAt: Date | null
 }
 
@@ -55,6 +56,7 @@ export type ReviewMaxAggregateOutputType = {
   comment: string | null
   isVisible: boolean | null
   isDisputed: boolean | null
+  deletedAt: Date | null
   createdAt: Date | null
 }
 
@@ -68,6 +70,7 @@ export type ReviewCountAggregateOutputType = {
   tags: number
   isVisible: number
   isDisputed: number
+  deletedAt: number
   createdAt: number
   _all: number
 }
@@ -90,6 +93,7 @@ export type ReviewMinAggregateInputType = {
   comment?: true
   isVisible?: true
   isDisputed?: true
+  deletedAt?: true
   createdAt?: true
 }
 
@@ -102,6 +106,7 @@ export type ReviewMaxAggregateInputType = {
   comment?: true
   isVisible?: true
   isDisputed?: true
+  deletedAt?: true
   createdAt?: true
 }
 
@@ -115,6 +120,7 @@ export type ReviewCountAggregateInputType = {
   tags?: true
   isVisible?: true
   isDisputed?: true
+  deletedAt?: true
   createdAt?: true
   _all?: true
 }
@@ -215,6 +221,7 @@ export type ReviewGroupByOutputType = {
   tags: string[]
   isVisible: boolean
   isDisputed: boolean
+  deletedAt: Date | null
   createdAt: Date
   _count: ReviewCountAggregateOutputType | null
   _avg: ReviewAvgAggregateOutputType | null
@@ -251,6 +258,7 @@ export type ReviewWhereInput = {
   tags?: Prisma.StringNullableListFilter<"Review">
   isVisible?: Prisma.BoolFilter<"Review"> | boolean
   isDisputed?: Prisma.BoolFilter<"Review"> | boolean
+  deletedAt?: Prisma.DateTimeNullableFilter<"Review"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Review"> | Date | string
   booking?: Prisma.XOR<Prisma.BookingScalarRelationFilter, Prisma.BookingWhereInput>
   reviewer?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
@@ -267,6 +275,7 @@ export type ReviewOrderByWithRelationInput = {
   tags?: Prisma.SortOrder
   isVisible?: Prisma.SortOrder
   isDisputed?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   booking?: Prisma.BookingOrderByWithRelationInput
   reviewer?: Prisma.UserOrderByWithRelationInput
@@ -287,6 +296,7 @@ export type ReviewWhereUniqueInput = Prisma.AtLeast<{
   tags?: Prisma.StringNullableListFilter<"Review">
   isVisible?: Prisma.BoolFilter<"Review"> | boolean
   isDisputed?: Prisma.BoolFilter<"Review"> | boolean
+  deletedAt?: Prisma.DateTimeNullableFilter<"Review"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Review"> | Date | string
   booking?: Prisma.XOR<Prisma.BookingScalarRelationFilter, Prisma.BookingWhereInput>
   reviewer?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
@@ -303,6 +313,7 @@ export type ReviewOrderByWithAggregationInput = {
   tags?: Prisma.SortOrder
   isVisible?: Prisma.SortOrder
   isDisputed?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   _count?: Prisma.ReviewCountOrderByAggregateInput
   _avg?: Prisma.ReviewAvgOrderByAggregateInput
@@ -324,6 +335,7 @@ export type ReviewScalarWhereWithAggregatesInput = {
   tags?: Prisma.StringNullableListFilter<"Review">
   isVisible?: Prisma.BoolWithAggregatesFilter<"Review"> | boolean
   isDisputed?: Prisma.BoolWithAggregatesFilter<"Review"> | boolean
+  deletedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Review"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Review"> | Date | string
 }
 
@@ -334,6 +346,7 @@ export type ReviewCreateInput = {
   tags?: Prisma.ReviewCreatetagsInput | string[]
   isVisible?: boolean
   isDisputed?: boolean
+  deletedAt?: Date | string | null
   createdAt?: Date | string
   booking: Prisma.BookingCreateNestedOneWithoutReviewsInput
   reviewer: Prisma.UserCreateNestedOneWithoutReviewsGivenInput
@@ -350,6 +363,7 @@ export type ReviewUncheckedCreateInput = {
   tags?: Prisma.ReviewCreatetagsInput | string[]
   isVisible?: boolean
   isDisputed?: boolean
+  deletedAt?: Date | string | null
   createdAt?: Date | string
 }
 
@@ -360,6 +374,7 @@ export type ReviewUpdateInput = {
   tags?: Prisma.ReviewUpdatetagsInput | string[]
   isVisible?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isDisputed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   booking?: Prisma.BookingUpdateOneRequiredWithoutReviewsNestedInput
   reviewer?: Prisma.UserUpdateOneRequiredWithoutReviewsGivenNestedInput
@@ -376,6 +391,7 @@ export type ReviewUncheckedUpdateInput = {
   tags?: Prisma.ReviewUpdatetagsInput | string[]
   isVisible?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isDisputed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -389,6 +405,7 @@ export type ReviewCreateManyInput = {
   tags?: Prisma.ReviewCreatetagsInput | string[]
   isVisible?: boolean
   isDisputed?: boolean
+  deletedAt?: Date | string | null
   createdAt?: Date | string
 }
 
@@ -399,6 +416,7 @@ export type ReviewUpdateManyMutationInput = {
   tags?: Prisma.ReviewUpdatetagsInput | string[]
   isVisible?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isDisputed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -412,6 +430,7 @@ export type ReviewUncheckedUpdateManyInput = {
   tags?: Prisma.ReviewUpdatetagsInput | string[]
   isVisible?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isDisputed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -440,6 +459,7 @@ export type ReviewCountOrderByAggregateInput = {
   tags?: Prisma.SortOrder
   isVisible?: Prisma.SortOrder
   isDisputed?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -456,6 +476,7 @@ export type ReviewMaxOrderByAggregateInput = {
   comment?: Prisma.SortOrder
   isVisible?: Prisma.SortOrder
   isDisputed?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -468,6 +489,7 @@ export type ReviewMinOrderByAggregateInput = {
   comment?: Prisma.SortOrder
   isVisible?: Prisma.SortOrder
   isDisputed?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -617,6 +639,7 @@ export type ReviewCreateWithoutReviewerInput = {
   tags?: Prisma.ReviewCreatetagsInput | string[]
   isVisible?: boolean
   isDisputed?: boolean
+  deletedAt?: Date | string | null
   createdAt?: Date | string
   booking: Prisma.BookingCreateNestedOneWithoutReviewsInput
   reviewee: Prisma.UserCreateNestedOneWithoutReviewsReceivedInput
@@ -631,6 +654,7 @@ export type ReviewUncheckedCreateWithoutReviewerInput = {
   tags?: Prisma.ReviewCreatetagsInput | string[]
   isVisible?: boolean
   isDisputed?: boolean
+  deletedAt?: Date | string | null
   createdAt?: Date | string
 }
 
@@ -651,6 +675,7 @@ export type ReviewCreateWithoutRevieweeInput = {
   tags?: Prisma.ReviewCreatetagsInput | string[]
   isVisible?: boolean
   isDisputed?: boolean
+  deletedAt?: Date | string | null
   createdAt?: Date | string
   booking: Prisma.BookingCreateNestedOneWithoutReviewsInput
   reviewer: Prisma.UserCreateNestedOneWithoutReviewsGivenInput
@@ -665,6 +690,7 @@ export type ReviewUncheckedCreateWithoutRevieweeInput = {
   tags?: Prisma.ReviewCreatetagsInput | string[]
   isVisible?: boolean
   isDisputed?: boolean
+  deletedAt?: Date | string | null
   createdAt?: Date | string
 }
 
@@ -707,6 +733,7 @@ export type ReviewScalarWhereInput = {
   tags?: Prisma.StringNullableListFilter<"Review">
   isVisible?: Prisma.BoolFilter<"Review"> | boolean
   isDisputed?: Prisma.BoolFilter<"Review"> | boolean
+  deletedAt?: Prisma.DateTimeNullableFilter<"Review"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Review"> | Date | string
 }
 
@@ -733,6 +760,7 @@ export type ReviewCreateWithoutBookingInput = {
   tags?: Prisma.ReviewCreatetagsInput | string[]
   isVisible?: boolean
   isDisputed?: boolean
+  deletedAt?: Date | string | null
   createdAt?: Date | string
   reviewer: Prisma.UserCreateNestedOneWithoutReviewsGivenInput
   reviewee: Prisma.UserCreateNestedOneWithoutReviewsReceivedInput
@@ -747,6 +775,7 @@ export type ReviewUncheckedCreateWithoutBookingInput = {
   tags?: Prisma.ReviewCreatetagsInput | string[]
   isVisible?: boolean
   isDisputed?: boolean
+  deletedAt?: Date | string | null
   createdAt?: Date | string
 }
 
@@ -785,6 +814,7 @@ export type ReviewCreateManyReviewerInput = {
   tags?: Prisma.ReviewCreatetagsInput | string[]
   isVisible?: boolean
   isDisputed?: boolean
+  deletedAt?: Date | string | null
   createdAt?: Date | string
 }
 
@@ -797,6 +827,7 @@ export type ReviewCreateManyRevieweeInput = {
   tags?: Prisma.ReviewCreatetagsInput | string[]
   isVisible?: boolean
   isDisputed?: boolean
+  deletedAt?: Date | string | null
   createdAt?: Date | string
 }
 
@@ -807,6 +838,7 @@ export type ReviewUpdateWithoutReviewerInput = {
   tags?: Prisma.ReviewUpdatetagsInput | string[]
   isVisible?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isDisputed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   booking?: Prisma.BookingUpdateOneRequiredWithoutReviewsNestedInput
   reviewee?: Prisma.UserUpdateOneRequiredWithoutReviewsReceivedNestedInput
@@ -821,6 +853,7 @@ export type ReviewUncheckedUpdateWithoutReviewerInput = {
   tags?: Prisma.ReviewUpdatetagsInput | string[]
   isVisible?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isDisputed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -833,6 +866,7 @@ export type ReviewUncheckedUpdateManyWithoutReviewerInput = {
   tags?: Prisma.ReviewUpdatetagsInput | string[]
   isVisible?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isDisputed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -843,6 +877,7 @@ export type ReviewUpdateWithoutRevieweeInput = {
   tags?: Prisma.ReviewUpdatetagsInput | string[]
   isVisible?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isDisputed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   booking?: Prisma.BookingUpdateOneRequiredWithoutReviewsNestedInput
   reviewer?: Prisma.UserUpdateOneRequiredWithoutReviewsGivenNestedInput
@@ -857,6 +892,7 @@ export type ReviewUncheckedUpdateWithoutRevieweeInput = {
   tags?: Prisma.ReviewUpdatetagsInput | string[]
   isVisible?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isDisputed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -869,6 +905,7 @@ export type ReviewUncheckedUpdateManyWithoutRevieweeInput = {
   tags?: Prisma.ReviewUpdatetagsInput | string[]
   isVisible?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isDisputed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -881,6 +918,7 @@ export type ReviewCreateManyBookingInput = {
   tags?: Prisma.ReviewCreatetagsInput | string[]
   isVisible?: boolean
   isDisputed?: boolean
+  deletedAt?: Date | string | null
   createdAt?: Date | string
 }
 
@@ -891,6 +929,7 @@ export type ReviewUpdateWithoutBookingInput = {
   tags?: Prisma.ReviewUpdatetagsInput | string[]
   isVisible?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isDisputed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   reviewer?: Prisma.UserUpdateOneRequiredWithoutReviewsGivenNestedInput
   reviewee?: Prisma.UserUpdateOneRequiredWithoutReviewsReceivedNestedInput
@@ -905,6 +944,7 @@ export type ReviewUncheckedUpdateWithoutBookingInput = {
   tags?: Prisma.ReviewUpdatetagsInput | string[]
   isVisible?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isDisputed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -917,6 +957,7 @@ export type ReviewUncheckedUpdateManyWithoutBookingInput = {
   tags?: Prisma.ReviewUpdatetagsInput | string[]
   isVisible?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isDisputed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -932,6 +973,7 @@ export type ReviewSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   tags?: boolean
   isVisible?: boolean
   isDisputed?: boolean
+  deletedAt?: boolean
   createdAt?: boolean
   booking?: boolean | Prisma.BookingDefaultArgs<ExtArgs>
   reviewer?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -948,6 +990,7 @@ export type ReviewSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   tags?: boolean
   isVisible?: boolean
   isDisputed?: boolean
+  deletedAt?: boolean
   createdAt?: boolean
   booking?: boolean | Prisma.BookingDefaultArgs<ExtArgs>
   reviewer?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -964,6 +1007,7 @@ export type ReviewSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   tags?: boolean
   isVisible?: boolean
   isDisputed?: boolean
+  deletedAt?: boolean
   createdAt?: boolean
   booking?: boolean | Prisma.BookingDefaultArgs<ExtArgs>
   reviewer?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -980,10 +1024,11 @@ export type ReviewSelectScalar = {
   tags?: boolean
   isVisible?: boolean
   isDisputed?: boolean
+  deletedAt?: boolean
   createdAt?: boolean
 }
 
-export type ReviewOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "bookingId" | "reviewerId" | "revieweeId" | "rating" | "comment" | "tags" | "isVisible" | "isDisputed" | "createdAt", ExtArgs["result"]["review"]>
+export type ReviewOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "bookingId" | "reviewerId" | "revieweeId" | "rating" | "comment" | "tags" | "isVisible" | "isDisputed" | "deletedAt" | "createdAt", ExtArgs["result"]["review"]>
 export type ReviewInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   booking?: boolean | Prisma.BookingDefaultArgs<ExtArgs>
   reviewer?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -1017,6 +1062,7 @@ export type $ReviewPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     tags: string[]
     isVisible: boolean
     isDisputed: boolean
+    deletedAt: Date | null
     createdAt: Date
   }, ExtArgs["result"]["review"]>
   composites: {}
@@ -1453,6 +1499,7 @@ export interface ReviewFieldRefs {
   readonly tags: Prisma.FieldRef<"Review", 'String[]'>
   readonly isVisible: Prisma.FieldRef<"Review", 'Boolean'>
   readonly isDisputed: Prisma.FieldRef<"Review", 'Boolean'>
+  readonly deletedAt: Prisma.FieldRef<"Review", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"Review", 'DateTime'>
 }
     

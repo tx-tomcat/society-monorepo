@@ -57,6 +57,8 @@ export type CompanionProfileMinAggregateOutputType = {
   userId: string | null
   bio: string | null
   heightCm: number | null
+  province: string | null
+  district: string | null
   hourlyRate: number | null
   halfDayRate: number | null
   fullDayRate: number | null
@@ -70,6 +72,7 @@ export type CompanionProfileMinAggregateOutputType = {
   isHidden: boolean | null
   responseRate: number | null
   acceptanceRate: number | null
+  deletedAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -79,6 +82,8 @@ export type CompanionProfileMaxAggregateOutputType = {
   userId: string | null
   bio: string | null
   heightCm: number | null
+  province: string | null
+  district: string | null
   hourlyRate: number | null
   halfDayRate: number | null
   fullDayRate: number | null
@@ -92,6 +97,7 @@ export type CompanionProfileMaxAggregateOutputType = {
   isHidden: boolean | null
   responseRate: number | null
   acceptanceRate: number | null
+  deletedAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -102,6 +108,8 @@ export type CompanionProfileCountAggregateOutputType = {
   bio: number
   heightCm: number
   languages: number
+  province: number
+  district: number
   hourlyRate: number
   halfDayRate: number
   fullDayRate: number
@@ -115,6 +123,7 @@ export type CompanionProfileCountAggregateOutputType = {
   isHidden: number
   responseRate: number
   acceptanceRate: number
+  deletedAt: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -152,6 +161,8 @@ export type CompanionProfileMinAggregateInputType = {
   userId?: true
   bio?: true
   heightCm?: true
+  province?: true
+  district?: true
   hourlyRate?: true
   halfDayRate?: true
   fullDayRate?: true
@@ -165,6 +176,7 @@ export type CompanionProfileMinAggregateInputType = {
   isHidden?: true
   responseRate?: true
   acceptanceRate?: true
+  deletedAt?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -174,6 +186,8 @@ export type CompanionProfileMaxAggregateInputType = {
   userId?: true
   bio?: true
   heightCm?: true
+  province?: true
+  district?: true
   hourlyRate?: true
   halfDayRate?: true
   fullDayRate?: true
@@ -187,6 +201,7 @@ export type CompanionProfileMaxAggregateInputType = {
   isHidden?: true
   responseRate?: true
   acceptanceRate?: true
+  deletedAt?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -197,6 +212,8 @@ export type CompanionProfileCountAggregateInputType = {
   bio?: true
   heightCm?: true
   languages?: true
+  province?: true
+  district?: true
   hourlyRate?: true
   halfDayRate?: true
   fullDayRate?: true
@@ -210,6 +227,7 @@ export type CompanionProfileCountAggregateInputType = {
   isHidden?: true
   responseRate?: true
   acceptanceRate?: true
+  deletedAt?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -307,6 +325,8 @@ export type CompanionProfileGroupByOutputType = {
   bio: string | null
   heightCm: number | null
   languages: string[]
+  province: string | null
+  district: string | null
   hourlyRate: number
   halfDayRate: number | null
   fullDayRate: number | null
@@ -320,6 +340,7 @@ export type CompanionProfileGroupByOutputType = {
   isHidden: boolean
   responseRate: number
   acceptanceRate: number
+  deletedAt: Date | null
   createdAt: Date
   updatedAt: Date
   _count: CompanionProfileCountAggregateOutputType | null
@@ -353,6 +374,8 @@ export type CompanionProfileWhereInput = {
   bio?: Prisma.StringNullableFilter<"CompanionProfile"> | string | null
   heightCm?: Prisma.IntNullableFilter<"CompanionProfile"> | number | null
   languages?: Prisma.StringNullableListFilter<"CompanionProfile">
+  province?: Prisma.StringNullableFilter<"CompanionProfile"> | string | null
+  district?: Prisma.StringNullableFilter<"CompanionProfile"> | string | null
   hourlyRate?: Prisma.IntFilter<"CompanionProfile"> | number
   halfDayRate?: Prisma.IntNullableFilter<"CompanionProfile"> | number | null
   fullDayRate?: Prisma.IntNullableFilter<"CompanionProfile"> | number | null
@@ -366,6 +389,7 @@ export type CompanionProfileWhereInput = {
   isHidden?: Prisma.BoolFilter<"CompanionProfile"> | boolean
   responseRate?: Prisma.IntFilter<"CompanionProfile"> | number
   acceptanceRate?: Prisma.IntFilter<"CompanionProfile"> | number
+  deletedAt?: Prisma.DateTimeNullableFilter<"CompanionProfile"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"CompanionProfile"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"CompanionProfile"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
@@ -375,6 +399,7 @@ export type CompanionProfileWhereInput = {
   bankAccounts?: Prisma.BankAccountListRelationFilter
   earnings?: Prisma.EarningListRelationFilter
   boosts?: Prisma.ProfileBoostListRelationFilter
+  withdrawals?: Prisma.WithdrawalListRelationFilter
 }
 
 export type CompanionProfileOrderByWithRelationInput = {
@@ -383,6 +408,8 @@ export type CompanionProfileOrderByWithRelationInput = {
   bio?: Prisma.SortOrderInput | Prisma.SortOrder
   heightCm?: Prisma.SortOrderInput | Prisma.SortOrder
   languages?: Prisma.SortOrder
+  province?: Prisma.SortOrderInput | Prisma.SortOrder
+  district?: Prisma.SortOrderInput | Prisma.SortOrder
   hourlyRate?: Prisma.SortOrder
   halfDayRate?: Prisma.SortOrderInput | Prisma.SortOrder
   fullDayRate?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -396,6 +423,7 @@ export type CompanionProfileOrderByWithRelationInput = {
   isHidden?: Prisma.SortOrder
   responseRate?: Prisma.SortOrder
   acceptanceRate?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
@@ -405,6 +433,7 @@ export type CompanionProfileOrderByWithRelationInput = {
   bankAccounts?: Prisma.BankAccountOrderByRelationAggregateInput
   earnings?: Prisma.EarningOrderByRelationAggregateInput
   boosts?: Prisma.ProfileBoostOrderByRelationAggregateInput
+  withdrawals?: Prisma.WithdrawalOrderByRelationAggregateInput
 }
 
 export type CompanionProfileWhereUniqueInput = Prisma.AtLeast<{
@@ -416,6 +445,8 @@ export type CompanionProfileWhereUniqueInput = Prisma.AtLeast<{
   bio?: Prisma.StringNullableFilter<"CompanionProfile"> | string | null
   heightCm?: Prisma.IntNullableFilter<"CompanionProfile"> | number | null
   languages?: Prisma.StringNullableListFilter<"CompanionProfile">
+  province?: Prisma.StringNullableFilter<"CompanionProfile"> | string | null
+  district?: Prisma.StringNullableFilter<"CompanionProfile"> | string | null
   hourlyRate?: Prisma.IntFilter<"CompanionProfile"> | number
   halfDayRate?: Prisma.IntNullableFilter<"CompanionProfile"> | number | null
   fullDayRate?: Prisma.IntNullableFilter<"CompanionProfile"> | number | null
@@ -429,6 +460,7 @@ export type CompanionProfileWhereUniqueInput = Prisma.AtLeast<{
   isHidden?: Prisma.BoolFilter<"CompanionProfile"> | boolean
   responseRate?: Prisma.IntFilter<"CompanionProfile"> | number
   acceptanceRate?: Prisma.IntFilter<"CompanionProfile"> | number
+  deletedAt?: Prisma.DateTimeNullableFilter<"CompanionProfile"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"CompanionProfile"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"CompanionProfile"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
@@ -438,6 +470,7 @@ export type CompanionProfileWhereUniqueInput = Prisma.AtLeast<{
   bankAccounts?: Prisma.BankAccountListRelationFilter
   earnings?: Prisma.EarningListRelationFilter
   boosts?: Prisma.ProfileBoostListRelationFilter
+  withdrawals?: Prisma.WithdrawalListRelationFilter
 }, "id" | "userId">
 
 export type CompanionProfileOrderByWithAggregationInput = {
@@ -446,6 +479,8 @@ export type CompanionProfileOrderByWithAggregationInput = {
   bio?: Prisma.SortOrderInput | Prisma.SortOrder
   heightCm?: Prisma.SortOrderInput | Prisma.SortOrder
   languages?: Prisma.SortOrder
+  province?: Prisma.SortOrderInput | Prisma.SortOrder
+  district?: Prisma.SortOrderInput | Prisma.SortOrder
   hourlyRate?: Prisma.SortOrder
   halfDayRate?: Prisma.SortOrderInput | Prisma.SortOrder
   fullDayRate?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -459,6 +494,7 @@ export type CompanionProfileOrderByWithAggregationInput = {
   isHidden?: Prisma.SortOrder
   responseRate?: Prisma.SortOrder
   acceptanceRate?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.CompanionProfileCountOrderByAggregateInput
@@ -477,6 +513,8 @@ export type CompanionProfileScalarWhereWithAggregatesInput = {
   bio?: Prisma.StringNullableWithAggregatesFilter<"CompanionProfile"> | string | null
   heightCm?: Prisma.IntNullableWithAggregatesFilter<"CompanionProfile"> | number | null
   languages?: Prisma.StringNullableListFilter<"CompanionProfile">
+  province?: Prisma.StringNullableWithAggregatesFilter<"CompanionProfile"> | string | null
+  district?: Prisma.StringNullableWithAggregatesFilter<"CompanionProfile"> | string | null
   hourlyRate?: Prisma.IntWithAggregatesFilter<"CompanionProfile"> | number
   halfDayRate?: Prisma.IntNullableWithAggregatesFilter<"CompanionProfile"> | number | null
   fullDayRate?: Prisma.IntNullableWithAggregatesFilter<"CompanionProfile"> | number | null
@@ -490,6 +528,7 @@ export type CompanionProfileScalarWhereWithAggregatesInput = {
   isHidden?: Prisma.BoolWithAggregatesFilter<"CompanionProfile"> | boolean
   responseRate?: Prisma.IntWithAggregatesFilter<"CompanionProfile"> | number
   acceptanceRate?: Prisma.IntWithAggregatesFilter<"CompanionProfile"> | number
+  deletedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"CompanionProfile"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"CompanionProfile"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"CompanionProfile"> | Date | string
 }
@@ -499,6 +538,8 @@ export type CompanionProfileCreateInput = {
   bio?: string | null
   heightCm?: number | null
   languages?: Prisma.CompanionProfileCreatelanguagesInput | string[]
+  province?: string | null
+  district?: string | null
   hourlyRate: number
   halfDayRate?: number | null
   fullDayRate?: number | null
@@ -512,6 +553,7 @@ export type CompanionProfileCreateInput = {
   isHidden?: boolean
   responseRate?: number
   acceptanceRate?: number
+  deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutCompanionProfileInput
@@ -521,6 +563,7 @@ export type CompanionProfileCreateInput = {
   bankAccounts?: Prisma.BankAccountCreateNestedManyWithoutCompanionInput
   earnings?: Prisma.EarningCreateNestedManyWithoutCompanionInput
   boosts?: Prisma.ProfileBoostCreateNestedManyWithoutCompanionInput
+  withdrawals?: Prisma.WithdrawalCreateNestedManyWithoutCompanionInput
 }
 
 export type CompanionProfileUncheckedCreateInput = {
@@ -529,6 +572,8 @@ export type CompanionProfileUncheckedCreateInput = {
   bio?: string | null
   heightCm?: number | null
   languages?: Prisma.CompanionProfileCreatelanguagesInput | string[]
+  province?: string | null
+  district?: string | null
   hourlyRate: number
   halfDayRate?: number | null
   fullDayRate?: number | null
@@ -542,6 +587,7 @@ export type CompanionProfileUncheckedCreateInput = {
   isHidden?: boolean
   responseRate?: number
   acceptanceRate?: number
+  deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   photos?: Prisma.CompanionPhotoUncheckedCreateNestedManyWithoutCompanionInput
@@ -550,6 +596,7 @@ export type CompanionProfileUncheckedCreateInput = {
   bankAccounts?: Prisma.BankAccountUncheckedCreateNestedManyWithoutCompanionInput
   earnings?: Prisma.EarningUncheckedCreateNestedManyWithoutCompanionInput
   boosts?: Prisma.ProfileBoostUncheckedCreateNestedManyWithoutCompanionInput
+  withdrawals?: Prisma.WithdrawalUncheckedCreateNestedManyWithoutCompanionInput
 }
 
 export type CompanionProfileUpdateInput = {
@@ -557,6 +604,8 @@ export type CompanionProfileUpdateInput = {
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   heightCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   languages?: Prisma.CompanionProfileUpdatelanguagesInput | string[]
+  province?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hourlyRate?: Prisma.IntFieldUpdateOperationsInput | number
   halfDayRate?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   fullDayRate?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -570,6 +619,7 @@ export type CompanionProfileUpdateInput = {
   isHidden?: Prisma.BoolFieldUpdateOperationsInput | boolean
   responseRate?: Prisma.IntFieldUpdateOperationsInput | number
   acceptanceRate?: Prisma.IntFieldUpdateOperationsInput | number
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutCompanionProfileNestedInput
@@ -579,6 +629,7 @@ export type CompanionProfileUpdateInput = {
   bankAccounts?: Prisma.BankAccountUpdateManyWithoutCompanionNestedInput
   earnings?: Prisma.EarningUpdateManyWithoutCompanionNestedInput
   boosts?: Prisma.ProfileBoostUpdateManyWithoutCompanionNestedInput
+  withdrawals?: Prisma.WithdrawalUpdateManyWithoutCompanionNestedInput
 }
 
 export type CompanionProfileUncheckedUpdateInput = {
@@ -587,6 +638,8 @@ export type CompanionProfileUncheckedUpdateInput = {
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   heightCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   languages?: Prisma.CompanionProfileUpdatelanguagesInput | string[]
+  province?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hourlyRate?: Prisma.IntFieldUpdateOperationsInput | number
   halfDayRate?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   fullDayRate?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -600,6 +653,7 @@ export type CompanionProfileUncheckedUpdateInput = {
   isHidden?: Prisma.BoolFieldUpdateOperationsInput | boolean
   responseRate?: Prisma.IntFieldUpdateOperationsInput | number
   acceptanceRate?: Prisma.IntFieldUpdateOperationsInput | number
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   photos?: Prisma.CompanionPhotoUncheckedUpdateManyWithoutCompanionNestedInput
@@ -608,6 +662,7 @@ export type CompanionProfileUncheckedUpdateInput = {
   bankAccounts?: Prisma.BankAccountUncheckedUpdateManyWithoutCompanionNestedInput
   earnings?: Prisma.EarningUncheckedUpdateManyWithoutCompanionNestedInput
   boosts?: Prisma.ProfileBoostUncheckedUpdateManyWithoutCompanionNestedInput
+  withdrawals?: Prisma.WithdrawalUncheckedUpdateManyWithoutCompanionNestedInput
 }
 
 export type CompanionProfileCreateManyInput = {
@@ -616,6 +671,8 @@ export type CompanionProfileCreateManyInput = {
   bio?: string | null
   heightCm?: number | null
   languages?: Prisma.CompanionProfileCreatelanguagesInput | string[]
+  province?: string | null
+  district?: string | null
   hourlyRate: number
   halfDayRate?: number | null
   fullDayRate?: number | null
@@ -629,6 +686,7 @@ export type CompanionProfileCreateManyInput = {
   isHidden?: boolean
   responseRate?: number
   acceptanceRate?: number
+  deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -638,6 +696,8 @@ export type CompanionProfileUpdateManyMutationInput = {
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   heightCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   languages?: Prisma.CompanionProfileUpdatelanguagesInput | string[]
+  province?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hourlyRate?: Prisma.IntFieldUpdateOperationsInput | number
   halfDayRate?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   fullDayRate?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -651,6 +711,7 @@ export type CompanionProfileUpdateManyMutationInput = {
   isHidden?: Prisma.BoolFieldUpdateOperationsInput | boolean
   responseRate?: Prisma.IntFieldUpdateOperationsInput | number
   acceptanceRate?: Prisma.IntFieldUpdateOperationsInput | number
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -661,6 +722,8 @@ export type CompanionProfileUncheckedUpdateManyInput = {
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   heightCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   languages?: Prisma.CompanionProfileUpdatelanguagesInput | string[]
+  province?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hourlyRate?: Prisma.IntFieldUpdateOperationsInput | number
   halfDayRate?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   fullDayRate?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -674,6 +737,7 @@ export type CompanionProfileUncheckedUpdateManyInput = {
   isHidden?: Prisma.BoolFieldUpdateOperationsInput | boolean
   responseRate?: Prisma.IntFieldUpdateOperationsInput | number
   acceptanceRate?: Prisma.IntFieldUpdateOperationsInput | number
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -697,6 +761,8 @@ export type CompanionProfileCountOrderByAggregateInput = {
   bio?: Prisma.SortOrder
   heightCm?: Prisma.SortOrder
   languages?: Prisma.SortOrder
+  province?: Prisma.SortOrder
+  district?: Prisma.SortOrder
   hourlyRate?: Prisma.SortOrder
   halfDayRate?: Prisma.SortOrder
   fullDayRate?: Prisma.SortOrder
@@ -710,6 +776,7 @@ export type CompanionProfileCountOrderByAggregateInput = {
   isHidden?: Prisma.SortOrder
   responseRate?: Prisma.SortOrder
   acceptanceRate?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -732,6 +799,8 @@ export type CompanionProfileMaxOrderByAggregateInput = {
   userId?: Prisma.SortOrder
   bio?: Prisma.SortOrder
   heightCm?: Prisma.SortOrder
+  province?: Prisma.SortOrder
+  district?: Prisma.SortOrder
   hourlyRate?: Prisma.SortOrder
   halfDayRate?: Prisma.SortOrder
   fullDayRate?: Prisma.SortOrder
@@ -745,6 +814,7 @@ export type CompanionProfileMaxOrderByAggregateInput = {
   isHidden?: Prisma.SortOrder
   responseRate?: Prisma.SortOrder
   acceptanceRate?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -754,6 +824,8 @@ export type CompanionProfileMinOrderByAggregateInput = {
   userId?: Prisma.SortOrder
   bio?: Prisma.SortOrder
   heightCm?: Prisma.SortOrder
+  province?: Prisma.SortOrder
+  district?: Prisma.SortOrder
   hourlyRate?: Prisma.SortOrder
   halfDayRate?: Prisma.SortOrder
   fullDayRate?: Prisma.SortOrder
@@ -767,6 +839,7 @@ export type CompanionProfileMinOrderByAggregateInput = {
   isHidden?: Prisma.SortOrder
   responseRate?: Prisma.SortOrder
   acceptanceRate?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -920,6 +993,20 @@ export type CompanionProfileUpdateOneRequiredWithoutBankAccountsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.CompanionProfileUpdateToOneWithWhereWithoutBankAccountsInput, Prisma.CompanionProfileUpdateWithoutBankAccountsInput>, Prisma.CompanionProfileUncheckedUpdateWithoutBankAccountsInput>
 }
 
+export type CompanionProfileCreateNestedOneWithoutWithdrawalsInput = {
+  create?: Prisma.XOR<Prisma.CompanionProfileCreateWithoutWithdrawalsInput, Prisma.CompanionProfileUncheckedCreateWithoutWithdrawalsInput>
+  connectOrCreate?: Prisma.CompanionProfileCreateOrConnectWithoutWithdrawalsInput
+  connect?: Prisma.CompanionProfileWhereUniqueInput
+}
+
+export type CompanionProfileUpdateOneRequiredWithoutWithdrawalsNestedInput = {
+  create?: Prisma.XOR<Prisma.CompanionProfileCreateWithoutWithdrawalsInput, Prisma.CompanionProfileUncheckedCreateWithoutWithdrawalsInput>
+  connectOrCreate?: Prisma.CompanionProfileCreateOrConnectWithoutWithdrawalsInput
+  upsert?: Prisma.CompanionProfileUpsertWithoutWithdrawalsInput
+  connect?: Prisma.CompanionProfileWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.CompanionProfileUpdateToOneWithWhereWithoutWithdrawalsInput, Prisma.CompanionProfileUpdateWithoutWithdrawalsInput>, Prisma.CompanionProfileUncheckedUpdateWithoutWithdrawalsInput>
+}
+
 export type CompanionProfileCreateNestedOneWithoutBoostsInput = {
   create?: Prisma.XOR<Prisma.CompanionProfileCreateWithoutBoostsInput, Prisma.CompanionProfileUncheckedCreateWithoutBoostsInput>
   connectOrCreate?: Prisma.CompanionProfileCreateOrConnectWithoutBoostsInput
@@ -939,6 +1026,8 @@ export type CompanionProfileCreateWithoutUserInput = {
   bio?: string | null
   heightCm?: number | null
   languages?: Prisma.CompanionProfileCreatelanguagesInput | string[]
+  province?: string | null
+  district?: string | null
   hourlyRate: number
   halfDayRate?: number | null
   fullDayRate?: number | null
@@ -952,6 +1041,7 @@ export type CompanionProfileCreateWithoutUserInput = {
   isHidden?: boolean
   responseRate?: number
   acceptanceRate?: number
+  deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   photos?: Prisma.CompanionPhotoCreateNestedManyWithoutCompanionInput
@@ -960,6 +1050,7 @@ export type CompanionProfileCreateWithoutUserInput = {
   bankAccounts?: Prisma.BankAccountCreateNestedManyWithoutCompanionInput
   earnings?: Prisma.EarningCreateNestedManyWithoutCompanionInput
   boosts?: Prisma.ProfileBoostCreateNestedManyWithoutCompanionInput
+  withdrawals?: Prisma.WithdrawalCreateNestedManyWithoutCompanionInput
 }
 
 export type CompanionProfileUncheckedCreateWithoutUserInput = {
@@ -967,6 +1058,8 @@ export type CompanionProfileUncheckedCreateWithoutUserInput = {
   bio?: string | null
   heightCm?: number | null
   languages?: Prisma.CompanionProfileCreatelanguagesInput | string[]
+  province?: string | null
+  district?: string | null
   hourlyRate: number
   halfDayRate?: number | null
   fullDayRate?: number | null
@@ -980,6 +1073,7 @@ export type CompanionProfileUncheckedCreateWithoutUserInput = {
   isHidden?: boolean
   responseRate?: number
   acceptanceRate?: number
+  deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   photos?: Prisma.CompanionPhotoUncheckedCreateNestedManyWithoutCompanionInput
@@ -988,6 +1082,7 @@ export type CompanionProfileUncheckedCreateWithoutUserInput = {
   bankAccounts?: Prisma.BankAccountUncheckedCreateNestedManyWithoutCompanionInput
   earnings?: Prisma.EarningUncheckedCreateNestedManyWithoutCompanionInput
   boosts?: Prisma.ProfileBoostUncheckedCreateNestedManyWithoutCompanionInput
+  withdrawals?: Prisma.WithdrawalUncheckedCreateNestedManyWithoutCompanionInput
 }
 
 export type CompanionProfileCreateOrConnectWithoutUserInput = {
@@ -1011,6 +1106,8 @@ export type CompanionProfileUpdateWithoutUserInput = {
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   heightCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   languages?: Prisma.CompanionProfileUpdatelanguagesInput | string[]
+  province?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hourlyRate?: Prisma.IntFieldUpdateOperationsInput | number
   halfDayRate?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   fullDayRate?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1024,6 +1121,7 @@ export type CompanionProfileUpdateWithoutUserInput = {
   isHidden?: Prisma.BoolFieldUpdateOperationsInput | boolean
   responseRate?: Prisma.IntFieldUpdateOperationsInput | number
   acceptanceRate?: Prisma.IntFieldUpdateOperationsInput | number
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   photos?: Prisma.CompanionPhotoUpdateManyWithoutCompanionNestedInput
@@ -1032,6 +1130,7 @@ export type CompanionProfileUpdateWithoutUserInput = {
   bankAccounts?: Prisma.BankAccountUpdateManyWithoutCompanionNestedInput
   earnings?: Prisma.EarningUpdateManyWithoutCompanionNestedInput
   boosts?: Prisma.ProfileBoostUpdateManyWithoutCompanionNestedInput
+  withdrawals?: Prisma.WithdrawalUpdateManyWithoutCompanionNestedInput
 }
 
 export type CompanionProfileUncheckedUpdateWithoutUserInput = {
@@ -1039,6 +1138,8 @@ export type CompanionProfileUncheckedUpdateWithoutUserInput = {
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   heightCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   languages?: Prisma.CompanionProfileUpdatelanguagesInput | string[]
+  province?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hourlyRate?: Prisma.IntFieldUpdateOperationsInput | number
   halfDayRate?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   fullDayRate?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1052,6 +1153,7 @@ export type CompanionProfileUncheckedUpdateWithoutUserInput = {
   isHidden?: Prisma.BoolFieldUpdateOperationsInput | boolean
   responseRate?: Prisma.IntFieldUpdateOperationsInput | number
   acceptanceRate?: Prisma.IntFieldUpdateOperationsInput | number
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   photos?: Prisma.CompanionPhotoUncheckedUpdateManyWithoutCompanionNestedInput
@@ -1060,6 +1162,7 @@ export type CompanionProfileUncheckedUpdateWithoutUserInput = {
   bankAccounts?: Prisma.BankAccountUncheckedUpdateManyWithoutCompanionNestedInput
   earnings?: Prisma.EarningUncheckedUpdateManyWithoutCompanionNestedInput
   boosts?: Prisma.ProfileBoostUncheckedUpdateManyWithoutCompanionNestedInput
+  withdrawals?: Prisma.WithdrawalUncheckedUpdateManyWithoutCompanionNestedInput
 }
 
 export type CompanionProfileCreateWithoutPhotosInput = {
@@ -1067,6 +1170,8 @@ export type CompanionProfileCreateWithoutPhotosInput = {
   bio?: string | null
   heightCm?: number | null
   languages?: Prisma.CompanionProfileCreatelanguagesInput | string[]
+  province?: string | null
+  district?: string | null
   hourlyRate: number
   halfDayRate?: number | null
   fullDayRate?: number | null
@@ -1080,6 +1185,7 @@ export type CompanionProfileCreateWithoutPhotosInput = {
   isHidden?: boolean
   responseRate?: number
   acceptanceRate?: number
+  deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutCompanionProfileInput
@@ -1088,6 +1194,7 @@ export type CompanionProfileCreateWithoutPhotosInput = {
   bankAccounts?: Prisma.BankAccountCreateNestedManyWithoutCompanionInput
   earnings?: Prisma.EarningCreateNestedManyWithoutCompanionInput
   boosts?: Prisma.ProfileBoostCreateNestedManyWithoutCompanionInput
+  withdrawals?: Prisma.WithdrawalCreateNestedManyWithoutCompanionInput
 }
 
 export type CompanionProfileUncheckedCreateWithoutPhotosInput = {
@@ -1096,6 +1203,8 @@ export type CompanionProfileUncheckedCreateWithoutPhotosInput = {
   bio?: string | null
   heightCm?: number | null
   languages?: Prisma.CompanionProfileCreatelanguagesInput | string[]
+  province?: string | null
+  district?: string | null
   hourlyRate: number
   halfDayRate?: number | null
   fullDayRate?: number | null
@@ -1109,6 +1218,7 @@ export type CompanionProfileUncheckedCreateWithoutPhotosInput = {
   isHidden?: boolean
   responseRate?: number
   acceptanceRate?: number
+  deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   services?: Prisma.CompanionServiceUncheckedCreateNestedManyWithoutCompanionInput
@@ -1116,6 +1226,7 @@ export type CompanionProfileUncheckedCreateWithoutPhotosInput = {
   bankAccounts?: Prisma.BankAccountUncheckedCreateNestedManyWithoutCompanionInput
   earnings?: Prisma.EarningUncheckedCreateNestedManyWithoutCompanionInput
   boosts?: Prisma.ProfileBoostUncheckedCreateNestedManyWithoutCompanionInput
+  withdrawals?: Prisma.WithdrawalUncheckedCreateNestedManyWithoutCompanionInput
 }
 
 export type CompanionProfileCreateOrConnectWithoutPhotosInput = {
@@ -1139,6 +1250,8 @@ export type CompanionProfileUpdateWithoutPhotosInput = {
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   heightCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   languages?: Prisma.CompanionProfileUpdatelanguagesInput | string[]
+  province?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hourlyRate?: Prisma.IntFieldUpdateOperationsInput | number
   halfDayRate?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   fullDayRate?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1152,6 +1265,7 @@ export type CompanionProfileUpdateWithoutPhotosInput = {
   isHidden?: Prisma.BoolFieldUpdateOperationsInput | boolean
   responseRate?: Prisma.IntFieldUpdateOperationsInput | number
   acceptanceRate?: Prisma.IntFieldUpdateOperationsInput | number
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutCompanionProfileNestedInput
@@ -1160,6 +1274,7 @@ export type CompanionProfileUpdateWithoutPhotosInput = {
   bankAccounts?: Prisma.BankAccountUpdateManyWithoutCompanionNestedInput
   earnings?: Prisma.EarningUpdateManyWithoutCompanionNestedInput
   boosts?: Prisma.ProfileBoostUpdateManyWithoutCompanionNestedInput
+  withdrawals?: Prisma.WithdrawalUpdateManyWithoutCompanionNestedInput
 }
 
 export type CompanionProfileUncheckedUpdateWithoutPhotosInput = {
@@ -1168,6 +1283,8 @@ export type CompanionProfileUncheckedUpdateWithoutPhotosInput = {
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   heightCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   languages?: Prisma.CompanionProfileUpdatelanguagesInput | string[]
+  province?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hourlyRate?: Prisma.IntFieldUpdateOperationsInput | number
   halfDayRate?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   fullDayRate?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1181,6 +1298,7 @@ export type CompanionProfileUncheckedUpdateWithoutPhotosInput = {
   isHidden?: Prisma.BoolFieldUpdateOperationsInput | boolean
   responseRate?: Prisma.IntFieldUpdateOperationsInput | number
   acceptanceRate?: Prisma.IntFieldUpdateOperationsInput | number
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   services?: Prisma.CompanionServiceUncheckedUpdateManyWithoutCompanionNestedInput
@@ -1188,6 +1306,7 @@ export type CompanionProfileUncheckedUpdateWithoutPhotosInput = {
   bankAccounts?: Prisma.BankAccountUncheckedUpdateManyWithoutCompanionNestedInput
   earnings?: Prisma.EarningUncheckedUpdateManyWithoutCompanionNestedInput
   boosts?: Prisma.ProfileBoostUncheckedUpdateManyWithoutCompanionNestedInput
+  withdrawals?: Prisma.WithdrawalUncheckedUpdateManyWithoutCompanionNestedInput
 }
 
 export type CompanionProfileCreateWithoutServicesInput = {
@@ -1195,6 +1314,8 @@ export type CompanionProfileCreateWithoutServicesInput = {
   bio?: string | null
   heightCm?: number | null
   languages?: Prisma.CompanionProfileCreatelanguagesInput | string[]
+  province?: string | null
+  district?: string | null
   hourlyRate: number
   halfDayRate?: number | null
   fullDayRate?: number | null
@@ -1208,6 +1329,7 @@ export type CompanionProfileCreateWithoutServicesInput = {
   isHidden?: boolean
   responseRate?: number
   acceptanceRate?: number
+  deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutCompanionProfileInput
@@ -1216,6 +1338,7 @@ export type CompanionProfileCreateWithoutServicesInput = {
   bankAccounts?: Prisma.BankAccountCreateNestedManyWithoutCompanionInput
   earnings?: Prisma.EarningCreateNestedManyWithoutCompanionInput
   boosts?: Prisma.ProfileBoostCreateNestedManyWithoutCompanionInput
+  withdrawals?: Prisma.WithdrawalCreateNestedManyWithoutCompanionInput
 }
 
 export type CompanionProfileUncheckedCreateWithoutServicesInput = {
@@ -1224,6 +1347,8 @@ export type CompanionProfileUncheckedCreateWithoutServicesInput = {
   bio?: string | null
   heightCm?: number | null
   languages?: Prisma.CompanionProfileCreatelanguagesInput | string[]
+  province?: string | null
+  district?: string | null
   hourlyRate: number
   halfDayRate?: number | null
   fullDayRate?: number | null
@@ -1237,6 +1362,7 @@ export type CompanionProfileUncheckedCreateWithoutServicesInput = {
   isHidden?: boolean
   responseRate?: number
   acceptanceRate?: number
+  deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   photos?: Prisma.CompanionPhotoUncheckedCreateNestedManyWithoutCompanionInput
@@ -1244,6 +1370,7 @@ export type CompanionProfileUncheckedCreateWithoutServicesInput = {
   bankAccounts?: Prisma.BankAccountUncheckedCreateNestedManyWithoutCompanionInput
   earnings?: Prisma.EarningUncheckedCreateNestedManyWithoutCompanionInput
   boosts?: Prisma.ProfileBoostUncheckedCreateNestedManyWithoutCompanionInput
+  withdrawals?: Prisma.WithdrawalUncheckedCreateNestedManyWithoutCompanionInput
 }
 
 export type CompanionProfileCreateOrConnectWithoutServicesInput = {
@@ -1267,6 +1394,8 @@ export type CompanionProfileUpdateWithoutServicesInput = {
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   heightCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   languages?: Prisma.CompanionProfileUpdatelanguagesInput | string[]
+  province?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hourlyRate?: Prisma.IntFieldUpdateOperationsInput | number
   halfDayRate?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   fullDayRate?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1280,6 +1409,7 @@ export type CompanionProfileUpdateWithoutServicesInput = {
   isHidden?: Prisma.BoolFieldUpdateOperationsInput | boolean
   responseRate?: Prisma.IntFieldUpdateOperationsInput | number
   acceptanceRate?: Prisma.IntFieldUpdateOperationsInput | number
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutCompanionProfileNestedInput
@@ -1288,6 +1418,7 @@ export type CompanionProfileUpdateWithoutServicesInput = {
   bankAccounts?: Prisma.BankAccountUpdateManyWithoutCompanionNestedInput
   earnings?: Prisma.EarningUpdateManyWithoutCompanionNestedInput
   boosts?: Prisma.ProfileBoostUpdateManyWithoutCompanionNestedInput
+  withdrawals?: Prisma.WithdrawalUpdateManyWithoutCompanionNestedInput
 }
 
 export type CompanionProfileUncheckedUpdateWithoutServicesInput = {
@@ -1296,6 +1427,8 @@ export type CompanionProfileUncheckedUpdateWithoutServicesInput = {
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   heightCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   languages?: Prisma.CompanionProfileUpdatelanguagesInput | string[]
+  province?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hourlyRate?: Prisma.IntFieldUpdateOperationsInput | number
   halfDayRate?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   fullDayRate?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1309,6 +1442,7 @@ export type CompanionProfileUncheckedUpdateWithoutServicesInput = {
   isHidden?: Prisma.BoolFieldUpdateOperationsInput | boolean
   responseRate?: Prisma.IntFieldUpdateOperationsInput | number
   acceptanceRate?: Prisma.IntFieldUpdateOperationsInput | number
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   photos?: Prisma.CompanionPhotoUncheckedUpdateManyWithoutCompanionNestedInput
@@ -1316,6 +1450,7 @@ export type CompanionProfileUncheckedUpdateWithoutServicesInput = {
   bankAccounts?: Prisma.BankAccountUncheckedUpdateManyWithoutCompanionNestedInput
   earnings?: Prisma.EarningUncheckedUpdateManyWithoutCompanionNestedInput
   boosts?: Prisma.ProfileBoostUncheckedUpdateManyWithoutCompanionNestedInput
+  withdrawals?: Prisma.WithdrawalUncheckedUpdateManyWithoutCompanionNestedInput
 }
 
 export type CompanionProfileCreateWithoutAvailabilityInput = {
@@ -1323,6 +1458,8 @@ export type CompanionProfileCreateWithoutAvailabilityInput = {
   bio?: string | null
   heightCm?: number | null
   languages?: Prisma.CompanionProfileCreatelanguagesInput | string[]
+  province?: string | null
+  district?: string | null
   hourlyRate: number
   halfDayRate?: number | null
   fullDayRate?: number | null
@@ -1336,6 +1473,7 @@ export type CompanionProfileCreateWithoutAvailabilityInput = {
   isHidden?: boolean
   responseRate?: number
   acceptanceRate?: number
+  deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutCompanionProfileInput
@@ -1344,6 +1482,7 @@ export type CompanionProfileCreateWithoutAvailabilityInput = {
   bankAccounts?: Prisma.BankAccountCreateNestedManyWithoutCompanionInput
   earnings?: Prisma.EarningCreateNestedManyWithoutCompanionInput
   boosts?: Prisma.ProfileBoostCreateNestedManyWithoutCompanionInput
+  withdrawals?: Prisma.WithdrawalCreateNestedManyWithoutCompanionInput
 }
 
 export type CompanionProfileUncheckedCreateWithoutAvailabilityInput = {
@@ -1352,6 +1491,8 @@ export type CompanionProfileUncheckedCreateWithoutAvailabilityInput = {
   bio?: string | null
   heightCm?: number | null
   languages?: Prisma.CompanionProfileCreatelanguagesInput | string[]
+  province?: string | null
+  district?: string | null
   hourlyRate: number
   halfDayRate?: number | null
   fullDayRate?: number | null
@@ -1365,6 +1506,7 @@ export type CompanionProfileUncheckedCreateWithoutAvailabilityInput = {
   isHidden?: boolean
   responseRate?: number
   acceptanceRate?: number
+  deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   photos?: Prisma.CompanionPhotoUncheckedCreateNestedManyWithoutCompanionInput
@@ -1372,6 +1514,7 @@ export type CompanionProfileUncheckedCreateWithoutAvailabilityInput = {
   bankAccounts?: Prisma.BankAccountUncheckedCreateNestedManyWithoutCompanionInput
   earnings?: Prisma.EarningUncheckedCreateNestedManyWithoutCompanionInput
   boosts?: Prisma.ProfileBoostUncheckedCreateNestedManyWithoutCompanionInput
+  withdrawals?: Prisma.WithdrawalUncheckedCreateNestedManyWithoutCompanionInput
 }
 
 export type CompanionProfileCreateOrConnectWithoutAvailabilityInput = {
@@ -1395,6 +1538,8 @@ export type CompanionProfileUpdateWithoutAvailabilityInput = {
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   heightCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   languages?: Prisma.CompanionProfileUpdatelanguagesInput | string[]
+  province?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hourlyRate?: Prisma.IntFieldUpdateOperationsInput | number
   halfDayRate?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   fullDayRate?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1408,6 +1553,7 @@ export type CompanionProfileUpdateWithoutAvailabilityInput = {
   isHidden?: Prisma.BoolFieldUpdateOperationsInput | boolean
   responseRate?: Prisma.IntFieldUpdateOperationsInput | number
   acceptanceRate?: Prisma.IntFieldUpdateOperationsInput | number
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutCompanionProfileNestedInput
@@ -1416,6 +1562,7 @@ export type CompanionProfileUpdateWithoutAvailabilityInput = {
   bankAccounts?: Prisma.BankAccountUpdateManyWithoutCompanionNestedInput
   earnings?: Prisma.EarningUpdateManyWithoutCompanionNestedInput
   boosts?: Prisma.ProfileBoostUpdateManyWithoutCompanionNestedInput
+  withdrawals?: Prisma.WithdrawalUpdateManyWithoutCompanionNestedInput
 }
 
 export type CompanionProfileUncheckedUpdateWithoutAvailabilityInput = {
@@ -1424,6 +1571,8 @@ export type CompanionProfileUncheckedUpdateWithoutAvailabilityInput = {
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   heightCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   languages?: Prisma.CompanionProfileUpdatelanguagesInput | string[]
+  province?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hourlyRate?: Prisma.IntFieldUpdateOperationsInput | number
   halfDayRate?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   fullDayRate?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1437,6 +1586,7 @@ export type CompanionProfileUncheckedUpdateWithoutAvailabilityInput = {
   isHidden?: Prisma.BoolFieldUpdateOperationsInput | boolean
   responseRate?: Prisma.IntFieldUpdateOperationsInput | number
   acceptanceRate?: Prisma.IntFieldUpdateOperationsInput | number
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   photos?: Prisma.CompanionPhotoUncheckedUpdateManyWithoutCompanionNestedInput
@@ -1444,6 +1594,7 @@ export type CompanionProfileUncheckedUpdateWithoutAvailabilityInput = {
   bankAccounts?: Prisma.BankAccountUncheckedUpdateManyWithoutCompanionNestedInput
   earnings?: Prisma.EarningUncheckedUpdateManyWithoutCompanionNestedInput
   boosts?: Prisma.ProfileBoostUncheckedUpdateManyWithoutCompanionNestedInput
+  withdrawals?: Prisma.WithdrawalUncheckedUpdateManyWithoutCompanionNestedInput
 }
 
 export type CompanionProfileCreateWithoutEarningsInput = {
@@ -1451,6 +1602,8 @@ export type CompanionProfileCreateWithoutEarningsInput = {
   bio?: string | null
   heightCm?: number | null
   languages?: Prisma.CompanionProfileCreatelanguagesInput | string[]
+  province?: string | null
+  district?: string | null
   hourlyRate: number
   halfDayRate?: number | null
   fullDayRate?: number | null
@@ -1464,6 +1617,7 @@ export type CompanionProfileCreateWithoutEarningsInput = {
   isHidden?: boolean
   responseRate?: number
   acceptanceRate?: number
+  deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutCompanionProfileInput
@@ -1472,6 +1626,7 @@ export type CompanionProfileCreateWithoutEarningsInput = {
   availability?: Prisma.CompanionAvailabilityCreateNestedManyWithoutCompanionInput
   bankAccounts?: Prisma.BankAccountCreateNestedManyWithoutCompanionInput
   boosts?: Prisma.ProfileBoostCreateNestedManyWithoutCompanionInput
+  withdrawals?: Prisma.WithdrawalCreateNestedManyWithoutCompanionInput
 }
 
 export type CompanionProfileUncheckedCreateWithoutEarningsInput = {
@@ -1480,6 +1635,8 @@ export type CompanionProfileUncheckedCreateWithoutEarningsInput = {
   bio?: string | null
   heightCm?: number | null
   languages?: Prisma.CompanionProfileCreatelanguagesInput | string[]
+  province?: string | null
+  district?: string | null
   hourlyRate: number
   halfDayRate?: number | null
   fullDayRate?: number | null
@@ -1493,6 +1650,7 @@ export type CompanionProfileUncheckedCreateWithoutEarningsInput = {
   isHidden?: boolean
   responseRate?: number
   acceptanceRate?: number
+  deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   photos?: Prisma.CompanionPhotoUncheckedCreateNestedManyWithoutCompanionInput
@@ -1500,6 +1658,7 @@ export type CompanionProfileUncheckedCreateWithoutEarningsInput = {
   availability?: Prisma.CompanionAvailabilityUncheckedCreateNestedManyWithoutCompanionInput
   bankAccounts?: Prisma.BankAccountUncheckedCreateNestedManyWithoutCompanionInput
   boosts?: Prisma.ProfileBoostUncheckedCreateNestedManyWithoutCompanionInput
+  withdrawals?: Prisma.WithdrawalUncheckedCreateNestedManyWithoutCompanionInput
 }
 
 export type CompanionProfileCreateOrConnectWithoutEarningsInput = {
@@ -1523,6 +1682,8 @@ export type CompanionProfileUpdateWithoutEarningsInput = {
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   heightCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   languages?: Prisma.CompanionProfileUpdatelanguagesInput | string[]
+  province?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hourlyRate?: Prisma.IntFieldUpdateOperationsInput | number
   halfDayRate?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   fullDayRate?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1536,6 +1697,7 @@ export type CompanionProfileUpdateWithoutEarningsInput = {
   isHidden?: Prisma.BoolFieldUpdateOperationsInput | boolean
   responseRate?: Prisma.IntFieldUpdateOperationsInput | number
   acceptanceRate?: Prisma.IntFieldUpdateOperationsInput | number
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutCompanionProfileNestedInput
@@ -1544,6 +1706,7 @@ export type CompanionProfileUpdateWithoutEarningsInput = {
   availability?: Prisma.CompanionAvailabilityUpdateManyWithoutCompanionNestedInput
   bankAccounts?: Prisma.BankAccountUpdateManyWithoutCompanionNestedInput
   boosts?: Prisma.ProfileBoostUpdateManyWithoutCompanionNestedInput
+  withdrawals?: Prisma.WithdrawalUpdateManyWithoutCompanionNestedInput
 }
 
 export type CompanionProfileUncheckedUpdateWithoutEarningsInput = {
@@ -1552,6 +1715,8 @@ export type CompanionProfileUncheckedUpdateWithoutEarningsInput = {
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   heightCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   languages?: Prisma.CompanionProfileUpdatelanguagesInput | string[]
+  province?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hourlyRate?: Prisma.IntFieldUpdateOperationsInput | number
   halfDayRate?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   fullDayRate?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1565,6 +1730,7 @@ export type CompanionProfileUncheckedUpdateWithoutEarningsInput = {
   isHidden?: Prisma.BoolFieldUpdateOperationsInput | boolean
   responseRate?: Prisma.IntFieldUpdateOperationsInput | number
   acceptanceRate?: Prisma.IntFieldUpdateOperationsInput | number
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   photos?: Prisma.CompanionPhotoUncheckedUpdateManyWithoutCompanionNestedInput
@@ -1572,6 +1738,7 @@ export type CompanionProfileUncheckedUpdateWithoutEarningsInput = {
   availability?: Prisma.CompanionAvailabilityUncheckedUpdateManyWithoutCompanionNestedInput
   bankAccounts?: Prisma.BankAccountUncheckedUpdateManyWithoutCompanionNestedInput
   boosts?: Prisma.ProfileBoostUncheckedUpdateManyWithoutCompanionNestedInput
+  withdrawals?: Prisma.WithdrawalUncheckedUpdateManyWithoutCompanionNestedInput
 }
 
 export type CompanionProfileCreateWithoutBankAccountsInput = {
@@ -1579,6 +1746,8 @@ export type CompanionProfileCreateWithoutBankAccountsInput = {
   bio?: string | null
   heightCm?: number | null
   languages?: Prisma.CompanionProfileCreatelanguagesInput | string[]
+  province?: string | null
+  district?: string | null
   hourlyRate: number
   halfDayRate?: number | null
   fullDayRate?: number | null
@@ -1592,6 +1761,7 @@ export type CompanionProfileCreateWithoutBankAccountsInput = {
   isHidden?: boolean
   responseRate?: number
   acceptanceRate?: number
+  deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutCompanionProfileInput
@@ -1600,6 +1770,7 @@ export type CompanionProfileCreateWithoutBankAccountsInput = {
   availability?: Prisma.CompanionAvailabilityCreateNestedManyWithoutCompanionInput
   earnings?: Prisma.EarningCreateNestedManyWithoutCompanionInput
   boosts?: Prisma.ProfileBoostCreateNestedManyWithoutCompanionInput
+  withdrawals?: Prisma.WithdrawalCreateNestedManyWithoutCompanionInput
 }
 
 export type CompanionProfileUncheckedCreateWithoutBankAccountsInput = {
@@ -1608,6 +1779,8 @@ export type CompanionProfileUncheckedCreateWithoutBankAccountsInput = {
   bio?: string | null
   heightCm?: number | null
   languages?: Prisma.CompanionProfileCreatelanguagesInput | string[]
+  province?: string | null
+  district?: string | null
   hourlyRate: number
   halfDayRate?: number | null
   fullDayRate?: number | null
@@ -1621,6 +1794,7 @@ export type CompanionProfileUncheckedCreateWithoutBankAccountsInput = {
   isHidden?: boolean
   responseRate?: number
   acceptanceRate?: number
+  deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   photos?: Prisma.CompanionPhotoUncheckedCreateNestedManyWithoutCompanionInput
@@ -1628,6 +1802,7 @@ export type CompanionProfileUncheckedCreateWithoutBankAccountsInput = {
   availability?: Prisma.CompanionAvailabilityUncheckedCreateNestedManyWithoutCompanionInput
   earnings?: Prisma.EarningUncheckedCreateNestedManyWithoutCompanionInput
   boosts?: Prisma.ProfileBoostUncheckedCreateNestedManyWithoutCompanionInput
+  withdrawals?: Prisma.WithdrawalUncheckedCreateNestedManyWithoutCompanionInput
 }
 
 export type CompanionProfileCreateOrConnectWithoutBankAccountsInput = {
@@ -1651,6 +1826,8 @@ export type CompanionProfileUpdateWithoutBankAccountsInput = {
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   heightCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   languages?: Prisma.CompanionProfileUpdatelanguagesInput | string[]
+  province?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hourlyRate?: Prisma.IntFieldUpdateOperationsInput | number
   halfDayRate?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   fullDayRate?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1664,6 +1841,7 @@ export type CompanionProfileUpdateWithoutBankAccountsInput = {
   isHidden?: Prisma.BoolFieldUpdateOperationsInput | boolean
   responseRate?: Prisma.IntFieldUpdateOperationsInput | number
   acceptanceRate?: Prisma.IntFieldUpdateOperationsInput | number
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutCompanionProfileNestedInput
@@ -1672,6 +1850,7 @@ export type CompanionProfileUpdateWithoutBankAccountsInput = {
   availability?: Prisma.CompanionAvailabilityUpdateManyWithoutCompanionNestedInput
   earnings?: Prisma.EarningUpdateManyWithoutCompanionNestedInput
   boosts?: Prisma.ProfileBoostUpdateManyWithoutCompanionNestedInput
+  withdrawals?: Prisma.WithdrawalUpdateManyWithoutCompanionNestedInput
 }
 
 export type CompanionProfileUncheckedUpdateWithoutBankAccountsInput = {
@@ -1680,6 +1859,8 @@ export type CompanionProfileUncheckedUpdateWithoutBankAccountsInput = {
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   heightCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   languages?: Prisma.CompanionProfileUpdatelanguagesInput | string[]
+  province?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hourlyRate?: Prisma.IntFieldUpdateOperationsInput | number
   halfDayRate?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   fullDayRate?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1693,11 +1874,157 @@ export type CompanionProfileUncheckedUpdateWithoutBankAccountsInput = {
   isHidden?: Prisma.BoolFieldUpdateOperationsInput | boolean
   responseRate?: Prisma.IntFieldUpdateOperationsInput | number
   acceptanceRate?: Prisma.IntFieldUpdateOperationsInput | number
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   photos?: Prisma.CompanionPhotoUncheckedUpdateManyWithoutCompanionNestedInput
   services?: Prisma.CompanionServiceUncheckedUpdateManyWithoutCompanionNestedInput
   availability?: Prisma.CompanionAvailabilityUncheckedUpdateManyWithoutCompanionNestedInput
+  earnings?: Prisma.EarningUncheckedUpdateManyWithoutCompanionNestedInput
+  boosts?: Prisma.ProfileBoostUncheckedUpdateManyWithoutCompanionNestedInput
+  withdrawals?: Prisma.WithdrawalUncheckedUpdateManyWithoutCompanionNestedInput
+}
+
+export type CompanionProfileCreateWithoutWithdrawalsInput = {
+  id?: string
+  bio?: string | null
+  heightCm?: number | null
+  languages?: Prisma.CompanionProfileCreatelanguagesInput | string[]
+  province?: string | null
+  district?: string | null
+  hourlyRate: number
+  halfDayRate?: number | null
+  fullDayRate?: number | null
+  ratingAvg?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  ratingCount?: number
+  totalBookings?: number
+  completedBookings?: number
+  verificationStatus?: $Enums.VerificationStatus
+  isFeatured?: boolean
+  isActive?: boolean
+  isHidden?: boolean
+  responseRate?: number
+  acceptanceRate?: number
+  deletedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  user: Prisma.UserCreateNestedOneWithoutCompanionProfileInput
+  photos?: Prisma.CompanionPhotoCreateNestedManyWithoutCompanionInput
+  services?: Prisma.CompanionServiceCreateNestedManyWithoutCompanionInput
+  availability?: Prisma.CompanionAvailabilityCreateNestedManyWithoutCompanionInput
+  bankAccounts?: Prisma.BankAccountCreateNestedManyWithoutCompanionInput
+  earnings?: Prisma.EarningCreateNestedManyWithoutCompanionInput
+  boosts?: Prisma.ProfileBoostCreateNestedManyWithoutCompanionInput
+}
+
+export type CompanionProfileUncheckedCreateWithoutWithdrawalsInput = {
+  id?: string
+  userId: string
+  bio?: string | null
+  heightCm?: number | null
+  languages?: Prisma.CompanionProfileCreatelanguagesInput | string[]
+  province?: string | null
+  district?: string | null
+  hourlyRate: number
+  halfDayRate?: number | null
+  fullDayRate?: number | null
+  ratingAvg?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  ratingCount?: number
+  totalBookings?: number
+  completedBookings?: number
+  verificationStatus?: $Enums.VerificationStatus
+  isFeatured?: boolean
+  isActive?: boolean
+  isHidden?: boolean
+  responseRate?: number
+  acceptanceRate?: number
+  deletedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  photos?: Prisma.CompanionPhotoUncheckedCreateNestedManyWithoutCompanionInput
+  services?: Prisma.CompanionServiceUncheckedCreateNestedManyWithoutCompanionInput
+  availability?: Prisma.CompanionAvailabilityUncheckedCreateNestedManyWithoutCompanionInput
+  bankAccounts?: Prisma.BankAccountUncheckedCreateNestedManyWithoutCompanionInput
+  earnings?: Prisma.EarningUncheckedCreateNestedManyWithoutCompanionInput
+  boosts?: Prisma.ProfileBoostUncheckedCreateNestedManyWithoutCompanionInput
+}
+
+export type CompanionProfileCreateOrConnectWithoutWithdrawalsInput = {
+  where: Prisma.CompanionProfileWhereUniqueInput
+  create: Prisma.XOR<Prisma.CompanionProfileCreateWithoutWithdrawalsInput, Prisma.CompanionProfileUncheckedCreateWithoutWithdrawalsInput>
+}
+
+export type CompanionProfileUpsertWithoutWithdrawalsInput = {
+  update: Prisma.XOR<Prisma.CompanionProfileUpdateWithoutWithdrawalsInput, Prisma.CompanionProfileUncheckedUpdateWithoutWithdrawalsInput>
+  create: Prisma.XOR<Prisma.CompanionProfileCreateWithoutWithdrawalsInput, Prisma.CompanionProfileUncheckedCreateWithoutWithdrawalsInput>
+  where?: Prisma.CompanionProfileWhereInput
+}
+
+export type CompanionProfileUpdateToOneWithWhereWithoutWithdrawalsInput = {
+  where?: Prisma.CompanionProfileWhereInput
+  data: Prisma.XOR<Prisma.CompanionProfileUpdateWithoutWithdrawalsInput, Prisma.CompanionProfileUncheckedUpdateWithoutWithdrawalsInput>
+}
+
+export type CompanionProfileUpdateWithoutWithdrawalsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  heightCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  languages?: Prisma.CompanionProfileUpdatelanguagesInput | string[]
+  province?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hourlyRate?: Prisma.IntFieldUpdateOperationsInput | number
+  halfDayRate?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  fullDayRate?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  ratingAvg?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  ratingCount?: Prisma.IntFieldUpdateOperationsInput | number
+  totalBookings?: Prisma.IntFieldUpdateOperationsInput | number
+  completedBookings?: Prisma.IntFieldUpdateOperationsInput | number
+  verificationStatus?: Prisma.EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
+  isFeatured?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isHidden?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  responseRate?: Prisma.IntFieldUpdateOperationsInput | number
+  acceptanceRate?: Prisma.IntFieldUpdateOperationsInput | number
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  user?: Prisma.UserUpdateOneRequiredWithoutCompanionProfileNestedInput
+  photos?: Prisma.CompanionPhotoUpdateManyWithoutCompanionNestedInput
+  services?: Prisma.CompanionServiceUpdateManyWithoutCompanionNestedInput
+  availability?: Prisma.CompanionAvailabilityUpdateManyWithoutCompanionNestedInput
+  bankAccounts?: Prisma.BankAccountUpdateManyWithoutCompanionNestedInput
+  earnings?: Prisma.EarningUpdateManyWithoutCompanionNestedInput
+  boosts?: Prisma.ProfileBoostUpdateManyWithoutCompanionNestedInput
+}
+
+export type CompanionProfileUncheckedUpdateWithoutWithdrawalsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  heightCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  languages?: Prisma.CompanionProfileUpdatelanguagesInput | string[]
+  province?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hourlyRate?: Prisma.IntFieldUpdateOperationsInput | number
+  halfDayRate?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  fullDayRate?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  ratingAvg?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  ratingCount?: Prisma.IntFieldUpdateOperationsInput | number
+  totalBookings?: Prisma.IntFieldUpdateOperationsInput | number
+  completedBookings?: Prisma.IntFieldUpdateOperationsInput | number
+  verificationStatus?: Prisma.EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
+  isFeatured?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isHidden?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  responseRate?: Prisma.IntFieldUpdateOperationsInput | number
+  acceptanceRate?: Prisma.IntFieldUpdateOperationsInput | number
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  photos?: Prisma.CompanionPhotoUncheckedUpdateManyWithoutCompanionNestedInput
+  services?: Prisma.CompanionServiceUncheckedUpdateManyWithoutCompanionNestedInput
+  availability?: Prisma.CompanionAvailabilityUncheckedUpdateManyWithoutCompanionNestedInput
+  bankAccounts?: Prisma.BankAccountUncheckedUpdateManyWithoutCompanionNestedInput
   earnings?: Prisma.EarningUncheckedUpdateManyWithoutCompanionNestedInput
   boosts?: Prisma.ProfileBoostUncheckedUpdateManyWithoutCompanionNestedInput
 }
@@ -1707,6 +2034,8 @@ export type CompanionProfileCreateWithoutBoostsInput = {
   bio?: string | null
   heightCm?: number | null
   languages?: Prisma.CompanionProfileCreatelanguagesInput | string[]
+  province?: string | null
+  district?: string | null
   hourlyRate: number
   halfDayRate?: number | null
   fullDayRate?: number | null
@@ -1720,6 +2049,7 @@ export type CompanionProfileCreateWithoutBoostsInput = {
   isHidden?: boolean
   responseRate?: number
   acceptanceRate?: number
+  deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutCompanionProfileInput
@@ -1728,6 +2058,7 @@ export type CompanionProfileCreateWithoutBoostsInput = {
   availability?: Prisma.CompanionAvailabilityCreateNestedManyWithoutCompanionInput
   bankAccounts?: Prisma.BankAccountCreateNestedManyWithoutCompanionInput
   earnings?: Prisma.EarningCreateNestedManyWithoutCompanionInput
+  withdrawals?: Prisma.WithdrawalCreateNestedManyWithoutCompanionInput
 }
 
 export type CompanionProfileUncheckedCreateWithoutBoostsInput = {
@@ -1736,6 +2067,8 @@ export type CompanionProfileUncheckedCreateWithoutBoostsInput = {
   bio?: string | null
   heightCm?: number | null
   languages?: Prisma.CompanionProfileCreatelanguagesInput | string[]
+  province?: string | null
+  district?: string | null
   hourlyRate: number
   halfDayRate?: number | null
   fullDayRate?: number | null
@@ -1749,6 +2082,7 @@ export type CompanionProfileUncheckedCreateWithoutBoostsInput = {
   isHidden?: boolean
   responseRate?: number
   acceptanceRate?: number
+  deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   photos?: Prisma.CompanionPhotoUncheckedCreateNestedManyWithoutCompanionInput
@@ -1756,6 +2090,7 @@ export type CompanionProfileUncheckedCreateWithoutBoostsInput = {
   availability?: Prisma.CompanionAvailabilityUncheckedCreateNestedManyWithoutCompanionInput
   bankAccounts?: Prisma.BankAccountUncheckedCreateNestedManyWithoutCompanionInput
   earnings?: Prisma.EarningUncheckedCreateNestedManyWithoutCompanionInput
+  withdrawals?: Prisma.WithdrawalUncheckedCreateNestedManyWithoutCompanionInput
 }
 
 export type CompanionProfileCreateOrConnectWithoutBoostsInput = {
@@ -1779,6 +2114,8 @@ export type CompanionProfileUpdateWithoutBoostsInput = {
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   heightCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   languages?: Prisma.CompanionProfileUpdatelanguagesInput | string[]
+  province?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hourlyRate?: Prisma.IntFieldUpdateOperationsInput | number
   halfDayRate?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   fullDayRate?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1792,6 +2129,7 @@ export type CompanionProfileUpdateWithoutBoostsInput = {
   isHidden?: Prisma.BoolFieldUpdateOperationsInput | boolean
   responseRate?: Prisma.IntFieldUpdateOperationsInput | number
   acceptanceRate?: Prisma.IntFieldUpdateOperationsInput | number
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutCompanionProfileNestedInput
@@ -1800,6 +2138,7 @@ export type CompanionProfileUpdateWithoutBoostsInput = {
   availability?: Prisma.CompanionAvailabilityUpdateManyWithoutCompanionNestedInput
   bankAccounts?: Prisma.BankAccountUpdateManyWithoutCompanionNestedInput
   earnings?: Prisma.EarningUpdateManyWithoutCompanionNestedInput
+  withdrawals?: Prisma.WithdrawalUpdateManyWithoutCompanionNestedInput
 }
 
 export type CompanionProfileUncheckedUpdateWithoutBoostsInput = {
@@ -1808,6 +2147,8 @@ export type CompanionProfileUncheckedUpdateWithoutBoostsInput = {
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   heightCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   languages?: Prisma.CompanionProfileUpdatelanguagesInput | string[]
+  province?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  district?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hourlyRate?: Prisma.IntFieldUpdateOperationsInput | number
   halfDayRate?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   fullDayRate?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1821,6 +2162,7 @@ export type CompanionProfileUncheckedUpdateWithoutBoostsInput = {
   isHidden?: Prisma.BoolFieldUpdateOperationsInput | boolean
   responseRate?: Prisma.IntFieldUpdateOperationsInput | number
   acceptanceRate?: Prisma.IntFieldUpdateOperationsInput | number
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   photos?: Prisma.CompanionPhotoUncheckedUpdateManyWithoutCompanionNestedInput
@@ -1828,6 +2170,7 @@ export type CompanionProfileUncheckedUpdateWithoutBoostsInput = {
   availability?: Prisma.CompanionAvailabilityUncheckedUpdateManyWithoutCompanionNestedInput
   bankAccounts?: Prisma.BankAccountUncheckedUpdateManyWithoutCompanionNestedInput
   earnings?: Prisma.EarningUncheckedUpdateManyWithoutCompanionNestedInput
+  withdrawals?: Prisma.WithdrawalUncheckedUpdateManyWithoutCompanionNestedInput
 }
 
 
@@ -1842,6 +2185,7 @@ export type CompanionProfileCountOutputType = {
   bankAccounts: number
   earnings: number
   boosts: number
+  withdrawals: number
 }
 
 export type CompanionProfileCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1851,6 +2195,7 @@ export type CompanionProfileCountOutputTypeSelect<ExtArgs extends runtime.Types.
   bankAccounts?: boolean | CompanionProfileCountOutputTypeCountBankAccountsArgs
   earnings?: boolean | CompanionProfileCountOutputTypeCountEarningsArgs
   boosts?: boolean | CompanionProfileCountOutputTypeCountBoostsArgs
+  withdrawals?: boolean | CompanionProfileCountOutputTypeCountWithdrawalsArgs
 }
 
 /**
@@ -1905,6 +2250,13 @@ export type CompanionProfileCountOutputTypeCountBoostsArgs<ExtArgs extends runti
   where?: Prisma.ProfileBoostWhereInput
 }
 
+/**
+ * CompanionProfileCountOutputType without action
+ */
+export type CompanionProfileCountOutputTypeCountWithdrawalsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.WithdrawalWhereInput
+}
+
 
 export type CompanionProfileSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1912,6 +2264,8 @@ export type CompanionProfileSelect<ExtArgs extends runtime.Types.Extensions.Inte
   bio?: boolean
   heightCm?: boolean
   languages?: boolean
+  province?: boolean
+  district?: boolean
   hourlyRate?: boolean
   halfDayRate?: boolean
   fullDayRate?: boolean
@@ -1925,6 +2279,7 @@ export type CompanionProfileSelect<ExtArgs extends runtime.Types.Extensions.Inte
   isHidden?: boolean
   responseRate?: boolean
   acceptanceRate?: boolean
+  deletedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -1934,6 +2289,7 @@ export type CompanionProfileSelect<ExtArgs extends runtime.Types.Extensions.Inte
   bankAccounts?: boolean | Prisma.CompanionProfile$bankAccountsArgs<ExtArgs>
   earnings?: boolean | Prisma.CompanionProfile$earningsArgs<ExtArgs>
   boosts?: boolean | Prisma.CompanionProfile$boostsArgs<ExtArgs>
+  withdrawals?: boolean | Prisma.CompanionProfile$withdrawalsArgs<ExtArgs>
   _count?: boolean | Prisma.CompanionProfileCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["companionProfile"]>
 
@@ -1943,6 +2299,8 @@ export type CompanionProfileSelectCreateManyAndReturn<ExtArgs extends runtime.Ty
   bio?: boolean
   heightCm?: boolean
   languages?: boolean
+  province?: boolean
+  district?: boolean
   hourlyRate?: boolean
   halfDayRate?: boolean
   fullDayRate?: boolean
@@ -1956,6 +2314,7 @@ export type CompanionProfileSelectCreateManyAndReturn<ExtArgs extends runtime.Ty
   isHidden?: boolean
   responseRate?: boolean
   acceptanceRate?: boolean
+  deletedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -1967,6 +2326,8 @@ export type CompanionProfileSelectUpdateManyAndReturn<ExtArgs extends runtime.Ty
   bio?: boolean
   heightCm?: boolean
   languages?: boolean
+  province?: boolean
+  district?: boolean
   hourlyRate?: boolean
   halfDayRate?: boolean
   fullDayRate?: boolean
@@ -1980,6 +2341,7 @@ export type CompanionProfileSelectUpdateManyAndReturn<ExtArgs extends runtime.Ty
   isHidden?: boolean
   responseRate?: boolean
   acceptanceRate?: boolean
+  deletedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -1991,6 +2353,8 @@ export type CompanionProfileSelectScalar = {
   bio?: boolean
   heightCm?: boolean
   languages?: boolean
+  province?: boolean
+  district?: boolean
   hourlyRate?: boolean
   halfDayRate?: boolean
   fullDayRate?: boolean
@@ -2004,11 +2368,12 @@ export type CompanionProfileSelectScalar = {
   isHidden?: boolean
   responseRate?: boolean
   acceptanceRate?: boolean
+  deletedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type CompanionProfileOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "bio" | "heightCm" | "languages" | "hourlyRate" | "halfDayRate" | "fullDayRate" | "ratingAvg" | "ratingCount" | "totalBookings" | "completedBookings" | "verificationStatus" | "isFeatured" | "isActive" | "isHidden" | "responseRate" | "acceptanceRate" | "createdAt" | "updatedAt", ExtArgs["result"]["companionProfile"]>
+export type CompanionProfileOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "bio" | "heightCm" | "languages" | "province" | "district" | "hourlyRate" | "halfDayRate" | "fullDayRate" | "ratingAvg" | "ratingCount" | "totalBookings" | "completedBookings" | "verificationStatus" | "isFeatured" | "isActive" | "isHidden" | "responseRate" | "acceptanceRate" | "deletedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["companionProfile"]>
 export type CompanionProfileInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   photos?: boolean | Prisma.CompanionProfile$photosArgs<ExtArgs>
@@ -2017,6 +2382,7 @@ export type CompanionProfileInclude<ExtArgs extends runtime.Types.Extensions.Int
   bankAccounts?: boolean | Prisma.CompanionProfile$bankAccountsArgs<ExtArgs>
   earnings?: boolean | Prisma.CompanionProfile$earningsArgs<ExtArgs>
   boosts?: boolean | Prisma.CompanionProfile$boostsArgs<ExtArgs>
+  withdrawals?: boolean | Prisma.CompanionProfile$withdrawalsArgs<ExtArgs>
   _count?: boolean | Prisma.CompanionProfileCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type CompanionProfileIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2036,6 +2402,7 @@ export type $CompanionProfilePayload<ExtArgs extends runtime.Types.Extensions.In
     bankAccounts: Prisma.$BankAccountPayload<ExtArgs>[]
     earnings: Prisma.$EarningPayload<ExtArgs>[]
     boosts: Prisma.$ProfileBoostPayload<ExtArgs>[]
+    withdrawals: Prisma.$WithdrawalPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -2043,6 +2410,8 @@ export type $CompanionProfilePayload<ExtArgs extends runtime.Types.Extensions.In
     bio: string | null
     heightCm: number | null
     languages: string[]
+    province: string | null
+    district: string | null
     hourlyRate: number
     halfDayRate: number | null
     fullDayRate: number | null
@@ -2056,6 +2425,7 @@ export type $CompanionProfilePayload<ExtArgs extends runtime.Types.Extensions.In
     isHidden: boolean
     responseRate: number
     acceptanceRate: number
+    deletedAt: Date | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["companionProfile"]>
@@ -2459,6 +2829,7 @@ export interface Prisma__CompanionProfileClient<T, Null = never, ExtArgs extends
   bankAccounts<T extends Prisma.CompanionProfile$bankAccountsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.CompanionProfile$bankAccountsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BankAccountPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   earnings<T extends Prisma.CompanionProfile$earningsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.CompanionProfile$earningsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EarningPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   boosts<T extends Prisma.CompanionProfile$boostsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.CompanionProfile$boostsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProfileBoostPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  withdrawals<T extends Prisma.CompanionProfile$withdrawalsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.CompanionProfile$withdrawalsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$WithdrawalPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2493,6 +2864,8 @@ export interface CompanionProfileFieldRefs {
   readonly bio: Prisma.FieldRef<"CompanionProfile", 'String'>
   readonly heightCm: Prisma.FieldRef<"CompanionProfile", 'Int'>
   readonly languages: Prisma.FieldRef<"CompanionProfile", 'String[]'>
+  readonly province: Prisma.FieldRef<"CompanionProfile", 'String'>
+  readonly district: Prisma.FieldRef<"CompanionProfile", 'String'>
   readonly hourlyRate: Prisma.FieldRef<"CompanionProfile", 'Int'>
   readonly halfDayRate: Prisma.FieldRef<"CompanionProfile", 'Int'>
   readonly fullDayRate: Prisma.FieldRef<"CompanionProfile", 'Int'>
@@ -2506,6 +2879,7 @@ export interface CompanionProfileFieldRefs {
   readonly isHidden: Prisma.FieldRef<"CompanionProfile", 'Boolean'>
   readonly responseRate: Prisma.FieldRef<"CompanionProfile", 'Int'>
   readonly acceptanceRate: Prisma.FieldRef<"CompanionProfile", 'Int'>
+  readonly deletedAt: Prisma.FieldRef<"CompanionProfile", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"CompanionProfile", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"CompanionProfile", 'DateTime'>
 }
@@ -3045,6 +3419,30 @@ export type CompanionProfile$boostsArgs<ExtArgs extends runtime.Types.Extensions
   take?: number
   skip?: number
   distinct?: Prisma.ProfileBoostScalarFieldEnum | Prisma.ProfileBoostScalarFieldEnum[]
+}
+
+/**
+ * CompanionProfile.withdrawals
+ */
+export type CompanionProfile$withdrawalsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Withdrawal
+   */
+  select?: Prisma.WithdrawalSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Withdrawal
+   */
+  omit?: Prisma.WithdrawalOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.WithdrawalInclude<ExtArgs> | null
+  where?: Prisma.WithdrawalWhereInput
+  orderBy?: Prisma.WithdrawalOrderByWithRelationInput | Prisma.WithdrawalOrderByWithRelationInput[]
+  cursor?: Prisma.WithdrawalWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.WithdrawalScalarFieldEnum | Prisma.WithdrawalScalarFieldEnum[]
 }
 
 /**

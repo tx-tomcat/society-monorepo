@@ -2,7 +2,7 @@
 import { MotiView } from 'moti';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, StyleSheet, TextInput } from 'react-native';
+import { Pressable, TextInput } from 'react-native';
 
 import {
   Button,
@@ -159,10 +159,7 @@ export function OTPVerificationScreen({
           >
             <Mail color={theme.accentColor} width={36} height={36} />
           </View>
-          <Text
-            style={styles.title}
-            className="mb-2 text-center text-2xl text-midnight"
-          >
+          <Text className="mb-2 text-center font-urbanist-bold text-2xl text-midnight">
             {t('auth.otp.title')}
           </Text>
           <Text className="text-center text-base text-text-secondary">
@@ -202,15 +199,12 @@ export function OTPVerificationScreen({
                 onKeyPress={(e) => handleKeyPress(e, index)}
                 keyboardType="number-pad"
                 maxLength={1}
-                className={`size-14 rounded-xl border-2 text-center text-2xl font-bold ${
+                className={`size-14 rounded-xl border-2 text-center font-urbanist-bold text-2xl ${
                   digit
                     ? `${theme.accentBorderClass} ${theme.accentInputBgClass}`
                     : 'border-border-light bg-white'
                 }`}
-                style={[
-                  styles.otpInput,
-                  { color: digit ? colors.midnight.DEFAULT : colors.text.tertiary },
-                ]}
+                style={{ color: digit ? colors.midnight.DEFAULT : colors.text.tertiary }}
               />
             </MotiView>
           ))}
@@ -283,12 +277,3 @@ export function OTPVerificationScreen({
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  title: {
-    fontFamily: 'Urbanist_700Bold',
-  },
-  otpInput: {
-    fontFamily: 'Urbanist_700Bold',
-  },
-});

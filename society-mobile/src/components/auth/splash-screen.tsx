@@ -17,8 +17,8 @@ import {
   Chart,
   Crown,
   Heart,
+  HiremeLogo,
   ShieldCheck,
-  SocietyLogo,
   Star,
   Wallet,
   Zalo,
@@ -188,7 +188,7 @@ export function SplashScreen({
           className="flex-row items-center justify-center gap-3 px-6 pt-4"
         >
           <View className="size-14 items-center justify-center rounded-2xl bg-white/10">
-            <SocietyLogo color={theme.logoColor} width={32} height={32} />
+            <HiremeLogo color={theme.logoColor} width={32} height={32} />
           </View>
           <Text className="font-urbanist-bold text-2xl tracking-wide text-white">
             Hireme

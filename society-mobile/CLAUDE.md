@@ -560,6 +560,7 @@ modal.dismiss();
 8. **Don't create classes** - Use functional components and hooks only
 9. **Don't use enums** - Use `const` objects with `as const` instead
 10. **Don't commit directly to main** - Pre-commit hook blocks (unless `SKIP_BRANCH_PROTECTION=1`)
+11. **Don't use StyleSheet.create()** - Always use Tailwind CSS (NativeWind) classes via `className` prop for all styling
 
 ## Code Generation Guidelines
 
@@ -573,7 +574,7 @@ When generating new code:
 6. **Imports**: Use `@/` alias, inline type imports, follow auto-sort order
 7. **Testing**: Add `testID` props, write tests for complex logic, use custom render
 8. **i18n**: Use `translate()` with type-safe `TxKeyPath` for all user-facing text
-9. **Styling**: Use defined colors/fonts from Tailwind config, support dark mode
+9. **Styling**: **Always use Tailwind CSS (NativeWind) classes** - never use StyleSheet.create(). Use `className` props for all styling. Use defined colors/fonts from Tailwind config, support dark mode
 10. **Errors**: Use `showError()` for API errors, provide user-friendly messages
 
 When in doubt, refer to existing patterns in `src/components/ui/button.tsx` (component structure), `src/api/posts/` (API pattern), and `src/app/(app)/_layout.tsx` (navigation/auth pattern).

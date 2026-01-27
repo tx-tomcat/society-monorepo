@@ -5,7 +5,7 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { MotiView } from 'moti';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Pressable, RefreshControl, StyleSheet } from 'react-native';
+import { Alert, Pressable, RefreshControl } from 'react-native';
 import { showMessage } from 'react-native-flash-message';
 
 import {
@@ -100,7 +100,7 @@ function RequestCard({
       {/* Booking Details */}
       <View className="mt-4 rounded-xl bg-softpink p-3">
         <Text className="font-semibold text-rose-400">
-          {t(`companion.services.${request.occasionType}`)}
+          {request.occasion ? `${request.occasion.emoji} ${request.occasion.name}` : t('common.occasion')}
         </Text>
         <View className="mt-2 gap-2">
           <View className="flex-row items-center gap-2">
@@ -136,7 +136,7 @@ function RequestCard({
         <Text className="text-sm text-text-tertiary">
           {t('companion.requests.your_earnings')}
         </Text>
-        <Text style={styles.earnings} className="text-xl text-teal-400">
+        <Text className="font-urbanist-bold text-xl text-teal-400">
           {formatVND(yourEarnings)}
         </Text>
       </View>
@@ -176,7 +176,7 @@ export default function BookingRequests() {
   const fetchRequests = React.useCallback(async () => {
     try {
       const data = await bookingsService.getBookingRequests();
-      setRequests(data);
+      setRequests(data.requests || []);
     } catch (error) {
       console.error('Failed to fetch booking requests:', error);
     } finally {
@@ -303,10 +303,7 @@ export default function BookingRequests() {
           <Pressable onPress={handleBack}>
             <ArrowLeft color={colors.midnight.DEFAULT} width={24} height={24} />
           </Pressable>
-          <Text
-            style={styles.headerTitle}
-            className="flex-1 text-xl text-midnight"
-          >
+          <Text className="font-urbanist-bold flex-1 text-xl text-midnight">
             {t('companion.requests.header')}
           </Text>
           <Badge label={`${requests.length}`} variant="default" size="sm" />
@@ -333,10 +330,7 @@ export default function BookingRequests() {
           <View className="size-20 items-center justify-center rounded-full bg-lavender-400/20">
             <Calendar color={colors.lavender[400]} width={40} height={40} />
           </View>
-          <Text
-            style={styles.emptyTitle}
-            className="mt-4 text-xl text-midnight"
-          >
+          <Text className="font-urbanist-bold mt-4 text-xl text-midnight">
             {t('companion.requests.no_requests')}
           </Text>
           <Text className="mt-2 text-center text-text-secondary">
@@ -347,15 +341,3 @@ export default function BookingRequests() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  headerTitle: {
-    fontFamily: 'Urbanist_700Bold',
-  },
-  earnings: {
-    fontFamily: 'Urbanist_700Bold',
-  },
-  emptyTitle: {
-    fontFamily: 'Urbanist_700Bold',
-  },
-});

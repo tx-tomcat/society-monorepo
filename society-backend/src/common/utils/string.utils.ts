@@ -15,6 +15,35 @@ export class StringUtils {
   }
 
   /**
+   * Mask email for logging (shows first 2 chars and domain)
+   * Example: john.doe@gmail.com -> jo***@gmail.com
+   */
+  static maskEmail(email: string): string {
+    if (!email || !email.includes('@')) return '***';
+    const [local, domain] = email.split('@');
+    if (local.length <= 2) return `${local}***@${domain}`;
+    return `${local.slice(0, 2)}***@${domain}`;
+  }
+
+  /**
+   * Mask phone number for logging (shows last 4 digits)
+   * Example: 0912345678 -> ******5678
+   */
+  static maskPhone(phone: string): string {
+    if (!phone || phone.length < 4) return '***';
+    return '*'.repeat(phone.length - 4) + phone.slice(-4);
+  }
+
+  /**
+   * Mask token for logging (shows first 8 chars)
+   * Example: abc123def456... -> abc123de...
+   */
+  static maskToken(token: string): string {
+    if (!token || token.length <= 8) return '***';
+    return `${token.slice(0, 8)}...`;
+  }
+
+  /**
    * Generate a unique code with prefix
    */
   static generateCode(prefix: string, length: number = 6): string {

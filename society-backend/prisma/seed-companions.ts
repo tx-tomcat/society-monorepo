@@ -94,6 +94,15 @@ function pickRandom<T>(arr: T[], count: number): T[] {
   return shuffled.slice(0, count);
 }
 
+// Vietnamese provinces for seed data (weighted towards major cities)
+const provinces = [
+  'HCM', 'HCM', 'HCM', 'HCM', 'HCM', 'HCM', 'HCM', // 7 in HCM (most)
+  'HN', 'HN', 'HN', 'HN', // 4 in Hanoi
+  'DN', 'DN', // 2 in Da Nang
+  'CT', // 1 in Can Tho
+  'HP', // 1 in Hai Phong
+];
+
 async function main() {
   console.log('🌱 Seeding mock companions...\n');
 
@@ -124,10 +133,17 @@ async function main() {
       .replace(/\s+/g, '.');
     const email = `${emailName}${i + 1}@example.com`;
 
+    // Generate unique zaloId for seeding (required field)
+    const zaloId = `seed_companion_${i + 1}_${Date.now()}`;
+    // Generate phone number
+    const phone = `+8490${String(1000000 + i).slice(-7)}`;
+
     try {
       // Create user with companion profile
       const user = await prisma.user.create({
         data: {
+          zaloId,
+          phone,
           email,
           fullName: name,
           gender,
@@ -142,6 +158,7 @@ async function main() {
               bio: bios[i % bios.length],
               heightCm: generateHeight(gender),
               languages: Math.random() > 0.5 ? ['vi', 'en'] : ['vi'],
+              province: provinces[i % provinces.length], // Location
               hourlyRate,
               halfDayRate: Math.floor(hourlyRate * 4 * 0.9), // 10% discount
               fullDayRate: Math.floor(hourlyRate * 8 * 0.8), // 20% discount
@@ -149,7 +166,7 @@ async function main() {
               ratingCount,
               totalBookings,
               completedBookings,
-              verificationStatus: Math.random() > 0.2 ? 'VERIFIED' : 'PENDING',
+              verificationStatus: 'VERIFIED', // All seed companions are verified for testing
               isFeatured: Math.random() > 0.7, // 30% featured
               isActive: true,
               isHidden: false,
@@ -226,6 +243,7 @@ async function main() {
 
       created++;
       console.log(`✓ Created companion: ${name} (${email})`);
+      console.log(`  - Location: ${provinces[i % provinces.length]}`);
       console.log(`  - Hourly rate: ${hourlyRate.toLocaleString()}đ`);
       console.log(`  - Rating: ${ratingAvg} (${ratingCount} reviews)`);
       console.log(`  - Photos: ${photoCount}, Services: ${serviceCount}`);

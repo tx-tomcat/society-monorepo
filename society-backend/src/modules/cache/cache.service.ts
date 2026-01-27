@@ -1,15 +1,48 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  OnModuleInit,
+  OnModuleDestroy,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import Redis from 'ioredis';
 
 @Injectable()
-export class CacheService implements OnModuleInit {
+export class CacheService implements OnModuleInit, OnModuleDestroy {
   private redis: Redis | null = null;
   private readonly logger = new Logger(CacheService.name);
   private readonly DEFAULT_TTL = 300; // 5 minutes
   private isConnected = false;
 
-  constructor(private configService: ConfigService) { }
+  constructor(private configService: ConfigService) {}
+
+  async onModuleDestroy() {
+    await this.cleanup();
+  }
+
+  /**
+   * Clean up Redis connection and event listeners
+   * Prevents memory leaks from orphaned event listeners
+   */
+  private async cleanup(): Promise<void> {
+    if (this.redis) {
+      try {
+        // Remove all event listeners before disconnecting
+        this.redis.removeAllListeners();
+        await this.redis.quit();
+        this.logger.log('Redis connection closed gracefully');
+      } catch (error) {
+        this.logger.warn(
+          `Error during Redis cleanup: ${(error as Error).message}`,
+        );
+        // Force disconnect if quit fails
+        this.redis.disconnect();
+      } finally {
+        this.redis = null;
+        this.isConnected = false;
+      }
+    }
+  }
 
   async onModuleInit() {
     await this.initializeRedisConnection();

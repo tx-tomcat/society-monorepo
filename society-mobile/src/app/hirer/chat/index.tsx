@@ -9,7 +9,6 @@ import {
   FlatList,
   Pressable,
   RefreshControl,
-  StyleSheet,
 } from 'react-native';
 
 import {
@@ -146,10 +145,7 @@ function EmptyState() {
       <View className="mb-4 size-20 items-center justify-center rounded-full bg-softpink">
         <MessageCircle color={colors.rose[400]} width={40} height={40} />
       </View>
-      <Text
-        style={styles.emptyTitle}
-        className="mb-2 text-center text-lg text-midnight"
-      >
+      <Text className="mb-2 text-center font-urbanist-bold text-lg text-midnight">
         {t('hirer.chat.empty_title')}
       </Text>
       <Text className="text-center text-sm text-text-secondary">
@@ -231,10 +227,7 @@ export default function ChatList() {
           <Pressable onPress={handleBack}>
             <ArrowLeft color={colors.midnight.DEFAULT} width={24} height={24} />
           </Pressable>
-          <Text
-            style={styles.headerTitle}
-            className="flex-1 text-xl text-midnight"
-          >
+          <Text className="flex-1 font-urbanist-bold text-xl text-midnight">
             {t('hirer.chat.header')}
           </Text>
           <Pressable onPress={handleSearch}>
@@ -264,12 +257,3 @@ export default function ChatList() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  headerTitle: {
-    fontFamily: 'Urbanist_700Bold',
-  },
-  emptyTitle: {
-    fontFamily: 'Urbanist_700Bold',
-  },
-});

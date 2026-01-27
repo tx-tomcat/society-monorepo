@@ -9,7 +9,6 @@ import {
   Pressable,
   RefreshControl,
   ScrollView,
-  StyleSheet,
 } from 'react-native';
 
 import {
@@ -147,10 +146,7 @@ export default function EarningsOverview() {
           <Pressable onPress={handleBack} testID="back-button">
             <ArrowLeft color={colors.midnight.DEFAULT} width={24} height={24} />
           </Pressable>
-          <Text
-            style={styles.headerTitle}
-            className="flex-1 text-xl text-midnight"
-          >
+          <Text className="font-urbanist-bold flex-1 text-xl text-midnight">
             {t('companion.earnings.header')}
           </Text>
         </View>
@@ -178,7 +174,7 @@ export default function EarningsOverview() {
               <Text className="text-sm text-white/80">
                 {t('companion.earnings.available_balance')}
               </Text>
-              <Text style={styles.balance} className="text-3xl text-white">
+              <Text className="font-urbanist-bold text-3xl text-white">
                 {formatVND(overview?.availableBalance || 0, {
                   symbolPosition: 'suffix',
                 })}
@@ -262,7 +258,7 @@ export default function EarningsOverview() {
               </View>
             )}
           </View>
-          <Text style={styles.earnings} className="mt-2 text-3xl text-midnight">
+          <Text className="font-urbanist-bold mt-2 text-3xl text-midnight">
             {formatVND(periodEarnings.amount, { symbolPosition: 'suffix' })}
           </Text>
           <Text className="mt-1 text-sm text-text-secondary">
@@ -281,7 +277,7 @@ export default function EarningsOverview() {
           className="mx-4 mb-4"
         >
           <View className="mb-3 flex-row items-center justify-between">
-            <Text style={styles.sectionTitle} className="text-lg text-midnight">
+            <Text className="font-urbanist-bold text-lg text-midnight">
               {t('companion.earnings.recent_transactions')}
             </Text>
             <Pressable
@@ -374,18 +370,3 @@ export default function EarningsOverview() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  headerTitle: {
-    fontFamily: 'Urbanist_700Bold',
-  },
-  balance: {
-    fontFamily: 'Urbanist_700Bold',
-  },
-  earnings: {
-    fontFamily: 'Urbanist_700Bold',
-  },
-  sectionTitle: {
-    fontFamily: 'Urbanist_700Bold',
-  },
-});

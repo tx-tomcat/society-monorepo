@@ -49,6 +49,10 @@ export interface CompanionOnboardingState {
   photos: string[]; // URLs of uploaded photos
   photoFiles: string[]; // Local URIs before upload
 
+  // Location data
+  province: string; // Province code (e.g., "HCM")
+  district: string; // District within province (optional)
+
   // Services data
   selectedServices: string[]; // occasion IDs
 
@@ -88,6 +92,7 @@ export interface CompanionOnboardingState {
     photos?: string[];
     photoFiles?: string[];
   }) => void;
+  setLocationData: (data: { province?: string; district?: string }) => void;
   setServicesData: (services: string[]) => void;
   setPricingData: (data: {
     hourlyRate: number;
@@ -133,6 +138,8 @@ const initialState = {
   bio: '',
   photos: [],
   photoFiles: [],
+  province: '',
+  district: '',
   selectedServices: [],
   hourlyRate: 500000,
   minimumHours: 2,
@@ -170,6 +177,12 @@ const _useCompanionOnboarding = create<CompanionOnboardingState>()(
           bio: data.bio ?? state.bio,
           photos: data.photos ?? state.photos,
           photoFiles: data.photoFiles ?? state.photoFiles,
+        })),
+
+      setLocationData: (data) =>
+        set((state) => ({
+          province: data.province ?? state.province,
+          district: data.district ?? state.district,
         })),
 
       setServicesData: (services) => set({ selectedServices: services }),

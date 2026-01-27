@@ -4,7 +4,7 @@ import { useRouter } from 'expo-router';
 import { MotiView } from 'moti';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, ScrollView, StyleSheet } from 'react-native';
+import { Pressable, ScrollView } from 'react-native';
 import { showMessage } from 'react-native-flash-message';
 
 import {
@@ -16,9 +16,11 @@ import {
   View,
 } from '@/components/ui';
 import { ArrowLeft, Calendar, CheckCircle, Clock } from '@/components/ui/icons';
-import { companionsService } from '@/lib/api/services/companions.service';
+import type { ServiceType } from '@/lib/api/services/companions.service';
+import { useSubmitCompanionOnboarding } from '@/lib/hooks/use-companion-onboarding';
 import {
   type DayOfWeek as DayOfWeekStore,
+  SERVICE_TYPE_MAP,
   type TimeSlot as TimeSlotStore,
   useCompanionOnboarding,
 } from '@/lib/stores';
@@ -92,22 +94,22 @@ const TIME_SLOTS: {
 export default function SetAvailability() {
   const router = useRouter();
   const { t } = useTranslation();
-  const [isSubmitting, setIsSubmitting] = React.useState(false);
+
+  // Submission mutation
+  const submitOnboarding = useSubmitCompanionOnboarding();
 
   // Get data from store
   const storedSelectedDays = useCompanionOnboarding.use.selectedDays();
   const storedSelectedSlots = useCompanionOnboarding.use.selectedSlots();
   const storedAdvanceNotice = useCompanionOnboarding.use.advanceNoticeHours();
   const setAvailabilityData = useCompanionOnboarding.use.setAvailabilityData();
-  const getAvailabilitySlots =
-    useCompanionOnboarding.use.getAvailabilitySlots();
-  const getServiceTypes = useCompanionOnboarding.use.getServiceTypes();
   const markStepComplete = useCompanionOnboarding.use.markStepComplete();
   const reset = useCompanionOnboarding.use.reset();
 
   // Profile data for submission
-  const displayName = useCompanionOnboarding.use.displayName();
   const bio = useCompanionOnboarding.use.bio();
+  const photoFiles = useCompanionOnboarding.use.photoFiles();
+  const selectedServices = useCompanionOnboarding.use.selectedServices();
   const hourlyRate = useCompanionOnboarding.use.hourlyRate();
   const halfDayRate = useCompanionOnboarding((state) => state.halfDayRate);
   const fullDayRate = useCompanionOnboarding((state) => state.fullDayRate);
@@ -140,8 +142,56 @@ export default function SetAvailability() {
     );
   }, []);
 
+  // Convert day/slot selections to recurring availability format
+  const buildAvailabilitySlots = React.useCallback(() => {
+    const dayToNumber: Record<DayOfWeekStore, number> = {
+      sun: 0,
+      mon: 1,
+      tue: 2,
+      wed: 3,
+      thu: 4,
+      fri: 5,
+      sat: 6,
+    };
+
+    const slotTimes: Record<TimeSlotStore, { start: string; end: string }> = {
+      morning: { start: '08:00', end: '12:00' },
+      afternoon: { start: '12:00', end: '17:00' },
+      evening: { start: '17:00', end: '22:00' },
+    };
+
+    const slots: Array<{
+      dayOfWeek: number;
+      startTime: string;
+      endTime: string;
+    }> = [];
+
+    selectedDays.forEach((day) => {
+      selectedSlots.forEach((slot) => {
+        slots.push({
+          dayOfWeek: dayToNumber[day],
+          startTime: slotTimes[slot].start,
+          endTime: slotTimes[slot].end,
+        });
+      });
+    });
+
+    return slots;
+  }, [selectedDays, selectedSlots]);
+
+  // Convert occasion IDs to service types
+  const buildServices = React.useCallback(() => {
+    return selectedServices
+      .map((id) => SERVICE_TYPE_MAP[id])
+      .filter(Boolean)
+      .map((type) => ({
+        type: type as ServiceType,
+        isEnabled: true,
+      }));
+  }, [selectedServices]);
+
   const handleComplete = React.useCallback(async () => {
-    if (isSubmitting) return;
+    if (submitOnboarding.isPending) return;
 
     // Save availability to store first
     setAvailabilityData({
@@ -150,38 +200,23 @@ export default function SetAvailability() {
       advanceNoticeHours: parseInt(advanceNotice, 10) || 24,
     });
 
-    setIsSubmitting(true);
-
     try {
-      // Get the computed availability slots and service types
-      const availabilitySlots = getAvailabilitySlots();
-      const serviceTypes = getServiceTypes();
+      // Build all the data for submission
+      const availabilitySlots = buildAvailabilitySlots();
+      const services = buildServices();
 
-      // Update profile
-      await companionsService.updateMyProfile({
-        bio,
-        hourlyRate,
-        halfDayRate,
-        fullDayRate,
+      // Submit all onboarding data
+      await submitOnboarding.mutateAsync({
+        localPhotoUris: photoFiles,
+        profile: {
+          bio,
+          hourlyRate,
+          halfDayRate,
+          fullDayRate,
+        },
+        services,
+        availability: availabilitySlots,
       });
-
-      // Update availability
-      await companionsService.updateAvailability(availabilitySlots);
-
-      // Update services
-      await companionsService.updateServices(
-        serviceTypes.map((type) => ({
-          type: type as
-            | 'FAMILY_INTRODUCTION'
-            | 'WEDDING_ATTENDANCE'
-            | 'TET_COMPANIONSHIP'
-            | 'BUSINESS_EVENT'
-            | 'CASUAL_OUTING'
-            | 'CLASS_REUNION'
-            | 'OTHER',
-          isAvailable: true,
-        }))
-      );
 
       markStepComplete('set-availability');
       markStepComplete('complete');
@@ -207,17 +242,16 @@ export default function SetAvailability() {
         ),
         type: 'danger',
       });
-    } finally {
-      setIsSubmitting(false);
     }
   }, [
-    isSubmitting,
+    submitOnboarding,
     selectedDays,
     selectedSlots,
     advanceNotice,
     setAvailabilityData,
-    getAvailabilitySlots,
-    getServiceTypes,
+    buildAvailabilitySlots,
+    buildServices,
+    photoFiles,
     bio,
     hourlyRate,
     halfDayRate,
@@ -243,10 +277,7 @@ export default function SetAvailability() {
           <Pressable onPress={handleBack}>
             <ArrowLeft color={colors.midnight.DEFAULT} width={24} height={24} />
           </Pressable>
-          <Text
-            style={styles.headerTitle}
-            className="flex-1 text-xl text-midnight"
-          >
+          <Text className="font-urbanist-bold flex-1 text-xl text-midnight">
             {t('companion.onboard.set_availability.header')}
           </Text>
           <Text className="text-sm text-text-tertiary">
@@ -461,9 +492,3 @@ export default function SetAvailability() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  headerTitle: {
-    fontFamily: 'Urbanist_700Bold',
-  },
-});

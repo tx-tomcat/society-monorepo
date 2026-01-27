@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { APP_INTERCEPTOR } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
 import { AppController } from './app.controller';
@@ -6,6 +7,8 @@ import { AuthModule } from './auth/auth.module';
 import { CacheModule } from './modules/cache/cache.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { SupabaseModule } from './supabase/supabase.module';
+import { IdempotentInterceptor } from './common/interceptors/idempotent.interceptor';
+import { IdempotencyService } from './common/services/idempotency.service';
 
 // Core modules
 import { AdminModule } from './modules/admin/admin.module';
@@ -19,6 +22,8 @@ import { ReferralModule } from './modules/referral/referral.module';
 import { SecurityModule } from './modules/security/security.module';
 import { UsersModule } from './modules/users/users.module';
 import { VerificationModule } from './modules/verification/verification.module';
+import { SmsModule } from './modules/sms/sms.module';
+import { PhoneVerificationModule } from './modules/phone-verification/phone-verification.module';
 
 // Companion Booking System modules
 import { BookingsModule } from './modules/bookings/bookings.module';
@@ -26,7 +31,11 @@ import { CompanionsModule } from './modules/companions/companions.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { EarningsModule } from './modules/earnings/earnings.module';
 import { FavoritesModule } from './modules/favorites/favorites.module';
+import { OccasionsModule } from './modules/occasions/occasions.module';
+import { RecommendationsModule } from './modules/recommendations/recommendations.module';
 import { SafetyModule } from './modules/safety/safety.module';
+import { WalletModule } from './modules/wallet/wallet.module';
+import { QueueModule } from './modules/queue/queue.module';
 
 @Module({
   imports: [
@@ -102,6 +111,8 @@ import { SafetyModule } from './modules/safety/safety.module';
     PrismaModule,
     ScheduleModule.forRoot(),
     CacheModule,
+    QueueModule,
+    SmsModule,
 
     // Auth
     AuthModule,
@@ -119,6 +130,7 @@ import { SafetyModule } from './modules/safety/safety.module';
     FilesModule,
     SecurityModule,
     ReferralModule,
+    PhoneVerificationModule,
 
     // Companion Booking System
     CompanionsModule,
@@ -126,8 +138,19 @@ import { SafetyModule } from './modules/safety/safety.module';
     DashboardModule,
     EarningsModule,
     FavoritesModule,
+    OccasionsModule,
+    RecommendationsModule,
     SafetyModule,
+    WalletModule,
   ],
   controllers: [AppController],
+  providers: [
+    // Global idempotency support for mutation endpoints
+    IdempotencyService,
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: IdempotentInterceptor,
+    },
+  ],
 })
 export class AppModule { } 

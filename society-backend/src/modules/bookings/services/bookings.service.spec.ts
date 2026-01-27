@@ -4,7 +4,8 @@ import { ConfigService } from '@nestjs/config';
 import { BookingsService } from './bookings.service';
 import { PrismaService } from '@/prisma/prisma.service';
 import { ContentReviewService } from '@/modules/moderation/services/content-review.service';
-import { ServiceType, BookingStatus, PaymentStatus } from '@generated/client';
+import { OccasionTrackingService } from '@/modules/occasions/services/occasion-tracking.service';
+import { BookingStatus, PaymentStatus } from '@generated/client';
 import { CreateBookingDto } from '../dto/booking.dto';
 
 // Mock Supabase client
@@ -46,6 +47,7 @@ describe('BookingsService', () => {
     review: {
       create: jest.fn(),
       findMany: jest.fn(),
+      aggregate: jest.fn(),
     },
     // Transaction mock - executes the callback with transaction-wrapped prisma methods
     $transaction: jest.fn().mockImplementation(async (callback) => {
@@ -78,6 +80,12 @@ describe('BookingsService', () => {
     }),
   };
 
+  const mockOccasionTrackingService = {
+    trackBookingCreated: jest.fn().mockResolvedValue(undefined),
+    trackInteraction: jest.fn().mockResolvedValue(undefined),
+    trackBatch: jest.fn().mockResolvedValue(undefined),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -94,6 +102,10 @@ describe('BookingsService', () => {
           provide: ConfigService,
           useValue: mockConfigService,
         },
+        {
+          provide: OccasionTrackingService,
+          useValue: mockOccasionTrackingService,
+        },
       ],
     }).compile();
 
@@ -109,7 +121,7 @@ describe('BookingsService', () => {
   describe('createBooking', () => {
     const createBookingDto: CreateBookingDto = {
       companionId: 'user-comp-1',
-      occasionType: ServiceType.CASUAL_OUTING,
+      occasionId: 'occasion-casual-outing',
       startDatetime: '2025-02-01T18:00:00.000Z',
       endDatetime: '2025-02-01T21:00:00.000Z',
       locationAddress: 'Restaurant ABC, District 1, HCMC',
@@ -216,7 +228,12 @@ describe('BookingsService', () => {
           id: 'booking-1',
           bookingNumber: 'SOC-2025-0001',
           status: BookingStatus.CONFIRMED,
-          occasionType: ServiceType.CASUAL_OUTING,
+          occasion: {
+            id: 'occasion-casual-outing',
+            code: 'casual_outing',
+            emoji: '🍽️',
+            nameEn: 'Casual Outing',
+          },
           startDatetime: new Date('2025-02-01T18:00:00.000Z'),
           endDatetime: new Date('2025-02-01T21:00:00.000Z'),
           durationHours: 3,
@@ -252,7 +269,12 @@ describe('BookingsService', () => {
           id: 'booking-1',
           bookingNumber: 'SOC-2025-0001',
           status: BookingStatus.CONFIRMED,
-          occasionType: ServiceType.FAMILY_INTRODUCTION,
+          occasion: {
+            id: 'occasion-family-intro',
+            code: 'family_introduction',
+            emoji: '👨‍👩‍👧',
+            nameEn: 'Family Introduction',
+          },
           startDatetime: new Date('2025-02-01T10:00:00.000Z'),
           endDatetime: new Date('2025-02-01T14:00:00.000Z'),
           durationHours: 4,
@@ -290,7 +312,7 @@ describe('BookingsService', () => {
         hirerId: 'user-1',
         companionId: 'user-2',
         status: BookingStatus.ACTIVE, // ACTIVE always reveals phone
-        occasionType: ServiceType.CASUAL_OUTING,
+        occasion: { id: 'occasion-casual', code: 'casual_outing', emoji: '🍽️', nameEn: 'Casual Outing' },
         startDatetime,
         endDatetime,
         durationHours: 3,
@@ -367,7 +389,7 @@ describe('BookingsService', () => {
         hirerId: 'user-1',
         companionId: 'user-2',
         status: BookingStatus.CONFIRMED,
-        occasionType: ServiceType.CASUAL_OUTING,
+        occasion: { id: 'occasion-casual', code: 'casual_outing', emoji: '🍽️', nameEn: 'Casual Outing' },
         startDatetime,
         endDatetime,
         durationHours: 3,
@@ -426,7 +448,7 @@ describe('BookingsService', () => {
         hirerId: 'user-1',
         companionId: 'user-2',
         status: BookingStatus.ACTIVE,
-        occasionType: ServiceType.CASUAL_OUTING,
+        occasion: { id: 'occasion-casual', code: 'casual_outing', emoji: '🍽️', nameEn: 'Casual Outing' },
         startDatetime,
         endDatetime,
         durationHours: 3,
@@ -484,7 +506,7 @@ describe('BookingsService', () => {
         hirerId: 'user-1',
         companionId: 'user-2',
         status: BookingStatus.COMPLETED,
-        occasionType: ServiceType.CASUAL_OUTING,
+        occasion: { id: 'occasion-casual', code: 'casual_outing', emoji: '🍽️', nameEn: 'Casual Outing' },
         startDatetime,
         endDatetime,
         durationHours: 3,
@@ -542,7 +564,7 @@ describe('BookingsService', () => {
         hirerId: 'user-1',
         companionId: 'user-2',
         status: BookingStatus.PENDING,
-        occasionType: ServiceType.CASUAL_OUTING,
+        occasion: { id: 'occasion-casual', code: 'casual_outing', emoji: '🍽️', nameEn: 'Casual Outing' },
         startDatetime,
         endDatetime,
         durationHours: 3,
@@ -667,7 +689,7 @@ describe('BookingsService', () => {
         {
           id: 'booking-1',
           bookingNumber: 'SOC-2025-0001',
-          occasionType: ServiceType.WEDDING_ATTENDANCE,
+          occasion: { id: 'occasion-wedding', code: 'wedding_attendance', emoji: '💒', nameEn: 'Wedding Attendance' },
           startDatetime: new Date('2025-02-15T08:00:00.000Z'),
           endDatetime: new Date('2025-02-15T16:00:00.000Z'),
           durationHours: 8,
@@ -690,7 +712,7 @@ describe('BookingsService', () => {
       const result = await service.getBookingRequests('user-comp-1');
 
       expect(result.requests).toHaveLength(1);
-      expect(result.requests[0].occasionType).toBe(ServiceType.WEDDING_ATTENDANCE);
+      expect(result.requests[0].occasion?.code).toBe('wedding_attendance');
     });
   });
 
@@ -715,11 +737,10 @@ describe('BookingsService', () => {
         comment: 'Great experience',
         tags: ['friendly', 'punctual'],
       });
-      mockPrismaService.review.findMany.mockResolvedValue([
-        { rating: 5 },
-        { rating: 4 },
-        { rating: 5 },
-      ]);
+      mockPrismaService.review.aggregate.mockResolvedValue({
+        _count: { rating: 11 },
+        _avg: { rating: 4.55 },
+      });
       mockPrismaService.companionProfile.update.mockResolvedValue({});
 
       const result = await service.submitReview('booking-1', 'user-1', {
@@ -841,7 +862,10 @@ describe('BookingsService', () => {
         comment: 'Great experience, very professional',
         tags: ['professional'],
       });
-      mockPrismaService.review.findMany.mockResolvedValue([{ rating: 5 }]);
+      mockPrismaService.review.aggregate.mockResolvedValue({
+        _count: { rating: 11 },
+        _avg: { rating: 4.95 },
+      });
       mockPrismaService.companionProfile.update.mockResolvedValue({});
 
       const result = await service.submitReview('booking-1', 'user-1', {

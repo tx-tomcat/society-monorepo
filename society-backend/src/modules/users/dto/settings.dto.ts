@@ -1,3 +1,4 @@
+import { Type } from 'class-transformer';
 import {
   IsString,
   IsOptional,
@@ -41,18 +42,21 @@ export class UpdateSettingsDto {
   discoveryEnabled?: boolean;
 
   @IsOptional()
+  @Type(() => Number)
   @IsInt()
   @Min(18)
   @Max(100)
   ageRangeMin?: number;
 
   @IsOptional()
+  @Type(() => Number)
   @IsInt()
   @Min(18)
   @Max(100)
   ageRangeMax?: number;
 
   @IsOptional()
+  @Type(() => Number)
   @IsInt()
   @Min(1)
   @Max(500)

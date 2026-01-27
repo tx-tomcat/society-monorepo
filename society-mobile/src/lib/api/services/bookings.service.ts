@@ -1,14 +1,15 @@
 import { apiClient } from '../client';
-import type { Companion, ServiceType } from './companions.service';
+import type { Companion } from './companions.service';
+import type { Occasion } from './occasions.service';
 
 export type BookingStatus =
-  | 'pending'
-  | 'confirmed'
-  | 'active'
-  | 'completed'
-  | 'cancelled'
-  | 'disputed'
-  | 'expired';
+  | 'PENDING'
+  | 'CONFIRMED'
+  | 'ACTIVE'
+  | 'COMPLETED'
+  | 'CANCELLED'
+  | 'DISPUTED'
+  | 'EXPIRED';
 
 export type PaymentStatus =
   | 'pending'
@@ -34,7 +35,8 @@ export interface Booking {
   hirerId: string;
   companionId: string;
   status: BookingStatus;
-  occasionType: ServiceType;
+  occasionId?: string;
+  occasion?: Occasion;
   startDatetime: string;
   endDatetime: string;
   durationHours: number;
@@ -64,7 +66,7 @@ export interface Booking {
 
 export interface CreateBookingData {
   companionId: string;
-  occasionType: ServiceType;
+  occasionId?: string; // Optional - may not be selected
   startDatetime: string;
   endDatetime: string;
   locationAddress: string;
@@ -75,9 +77,12 @@ export interface CreateBookingData {
 
 export interface BookingListResponse {
   bookings: Booking[];
-  total: number;
-  page: number;
-  limit: number;
+  pagination: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
 }
 
 export interface BookingReview {
@@ -149,7 +154,7 @@ export const bookingsService = {
   /**
    * Get pending booking requests (companion)
    */
-  async getBookingRequests(): Promise<Booking[]> {
+  async getBookingRequests(): Promise<{ requests: Booking[]; nextCursor: string | null }> {
     return apiClient.get('/bookings/companion/requests');
   },
 
@@ -187,7 +192,7 @@ export const bookingsService = {
    */
   async acceptBooking(bookingId: string): Promise<Booking> {
     return apiClient.put(`/bookings/${bookingId}/status`, {
-      status: 'confirmed',
+      status: 'CONFIRMED',
     });
   },
 
@@ -203,7 +208,7 @@ export const bookingsService = {
    */
   async cancelBooking(bookingId: string, reason?: string): Promise<Booking> {
     return apiClient.put(`/bookings/${bookingId}/status`, {
-      status: 'cancelled',
+      status: 'CANCELLED',
       reason,
     });
   },
@@ -213,7 +218,7 @@ export const bookingsService = {
    */
   async completeBooking(bookingId: string): Promise<Booking> {
     return apiClient.put(`/bookings/${bookingId}/status`, {
-      status: 'completed',
+      status: 'COMPLETED',
     });
   },
 

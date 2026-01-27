@@ -1,7 +1,7 @@
 /* eslint-disable max-lines-per-function */
 import { router } from 'expo-router';
 import React from 'react';
-import { Pressable, StyleSheet } from 'react-native';
+import { Pressable } from 'react-native';
 
 import {
   colors,
@@ -58,10 +58,7 @@ export default function PersonalInfo() {
           </Pressable>
 
           {/* Title */}
-          <Text
-            className="flex-1 text-center text-2xl font-bold leading-[1.4] text-offwhite"
-            style={styles.headerTitle}
-          >
+          <Text className="flex-1 text-center font-urbanist-bold text-2xl leading-[1.4] tracking-[0px] text-offwhite">
             Personal Info
           </Text>
 
@@ -93,15 +90,12 @@ export default function PersonalInfo() {
 
         {/* Full Name */}
         <View className="gap-2">
-          <Text
-            className="text-lg font-semibold leading-[1.6] tracking-[0.2px] text-offwhite"
-            style={styles.label}
-          >
+          <Text className="font-urbanist-semibold text-lg leading-[1.6] tracking-[0.2px] text-offwhite">
             Full Name
           </Text>
           <View className="rounded-[10px] border border-neutral-700 bg-neutral-800 px-5 py-[18px]">
             <Input
-              style={styles.textInput}
+              className="flex-1 p-0 font-urbanist-semibold text-lg leading-[1.6] tracking-[0.2px] text-offwhite"
               value={fullName}
               onChangeText={setFullName}
               placeholder="Full Name"
@@ -113,16 +107,13 @@ export default function PersonalInfo() {
 
         {/* Email */}
         <View className="gap-2">
-          <Text
-            className="text-lg font-semibold leading-[1.6] tracking-[0.2px] text-offwhite"
-            style={styles.label}
-          >
+          <Text className="font-urbanist-semibold text-lg leading-[1.6] tracking-[0.2px] text-offwhite">
             Email
           </Text>
           <View className="flex-row items-center gap-3 rounded-[10px] border border-neutral-700 bg-neutral-800 px-5 py-[18px]">
             <Mail color={colors.offwhite.DEFAULT} size={20} />
             <Input
-              style={styles.textInput}
+              className="flex-1 p-0 font-urbanist-semibold text-lg leading-[1.6] tracking-[0.2px] text-offwhite"
               value={email}
               onChangeText={setEmail}
               placeholder="Email"
@@ -136,17 +127,14 @@ export default function PersonalInfo() {
 
         {/* Phone Number */}
         <View className="gap-2">
-          <Text
-            className="text-lg font-semibold leading-[1.6] tracking-[0.2px] text-offwhite"
-            style={styles.label}
-          >
+          <Text className="font-urbanist-semibold text-lg leading-[1.6] tracking-[0.2px] text-offwhite">
             Phone Number
           </Text>
           <View className="flex-row items-center gap-3 rounded-[10px] border border-neutral-700 bg-neutral-800 px-5 py-[18px]">
             <Text className="text-lg font-semibold">🇺🇸</Text>
             <CaretDown />
             <Input
-              style={styles.textInput}
+              className="flex-1 p-0 font-urbanist-semibold text-lg leading-[1.6] tracking-[0.2px] text-offwhite"
               value={phone}
               onChangeText={setPhone}
               placeholder="Phone Number"
@@ -159,20 +147,14 @@ export default function PersonalInfo() {
 
         {/* Gender */}
         <View className="gap-2">
-          <Text
-            className="text-lg font-semibold leading-[1.6] tracking-[0.2px] text-offwhite"
-            style={styles.label}
-          >
+          <Text className="font-urbanist-semibold text-lg leading-[1.6] tracking-[0.2px] text-offwhite">
             Gender
           </Text>
           <Pressable
             className="flex-row items-center justify-between rounded-[10px] border border-neutral-700 bg-neutral-800 px-5 py-[18px]"
             testID="gender-dropdown"
           >
-            <Text
-              className="flex-1 text-lg font-semibold leading-[1.6] tracking-[0.2px] text-offwhite"
-              style={styles.textInput}
-            >
+            <Text className="flex-1 font-urbanist-semibold text-lg leading-[1.6] tracking-[0.2px] text-offwhite">
               {gender}
             </Text>
             <CaretDown />
@@ -181,20 +163,14 @@ export default function PersonalInfo() {
 
         {/* Date of Birth */}
         <View className="gap-2">
-          <Text
-            className="text-lg font-semibold leading-[1.6] tracking-[0.2px] text-offwhite"
-            style={styles.label}
-          >
+          <Text className="font-urbanist-semibold text-lg leading-[1.6] tracking-[0.2px] text-offwhite">
             Date of Birth
           </Text>
           <Pressable
             className="flex-row items-center justify-between rounded-[10px] border border-neutral-700 bg-neutral-800 px-5 py-[18px]"
             testID="date-picker"
           >
-            <Text
-              className="flex-1 text-lg font-semibold leading-[1.6] tracking-[0.2px] text-offwhite"
-              style={styles.textInput}
-            >
+            <Text className="flex-1 font-urbanist-semibold text-lg leading-[1.6] tracking-[0.2px] text-offwhite">
               {dateOfBirth}
             </Text>
             <Calendar color={colors.offwhite.DEFAULT} size={20} />
@@ -205,21 +181,3 @@ export default function PersonalInfo() {
   );
 }
 
-const styles = StyleSheet.create({
-  headerTitle: {
-    fontFamily: 'Urbanist_700Bold',
-    letterSpacing: 0,
-  },
-  label: {
-    fontFamily: 'Urbanist_600SemiBold',
-  },
-  textInput: {
-    fontFamily: 'Urbanist_600SemiBold',
-    fontSize: 18,
-    lineHeight: 28.8,
-    letterSpacing: 0.2,
-    color: colors.offwhite.DEFAULT,
-    flex: 1,
-    padding: 0,
-  },
-});

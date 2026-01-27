@@ -6,6 +6,7 @@ import {
   ConflictException,
 } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
+import { StringUtils } from '@/common/utils/string.utils';
 
 // Local enum definition (matches schema.prisma EmergencyEventStatus)
 // This allows the service to work before prisma generate is run
@@ -540,10 +541,10 @@ export class SafetyService {
     );
 
     // Note: In production, this would send SMS/push notifications to emergency contacts
-    // For now, we log the escalation
+    // For now, we log the escalation (with masked PII)
     for (const contact of event.user.emergencyContacts) {
       this.logger.warn(
-        `NOTIFY EMERGENCY CONTACT: ${contact.name} (${contact.phone}) for user ${event.user.fullName}`,
+        `NOTIFY EMERGENCY CONTACT: ${contact.name} (${StringUtils.maskPhone(contact.phone)}) for user ${event.userId}`,
       );
     }
   }

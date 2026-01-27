@@ -3,7 +3,7 @@ import { useRouter } from 'expo-router';
 import { MotiView } from 'moti';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, StyleSheet } from 'react-native';
+import { Pressable } from 'react-native';
 import { showMessage } from 'react-native-flash-message';
 
 import {
@@ -15,10 +15,9 @@ import {
   View,
 } from '@/components/ui';
 import {
-  ArrowLeft,
   Briefcase,
   CheckCircle,
-  Heart,
+  Heart
 } from '@/components/ui/icons';
 
 import { authService } from '@/lib/api/services/auth.service';
@@ -45,9 +44,9 @@ export default function SelectRole() {
 
       // Navigate to role-specific onboarding
       if (selectedRole === 'hirer') {
-        router.replace('/hirer/onboarding/profile' as Href);
+        router.push('/hirer/onboarding/profile' as Href);
       } else {
-        router.replace('/companion/onboard/create-profile' as Href);
+        router.push('/companion/onboard/create-profile' as Href);
       }
     } catch (error) {
       console.error('Set role error:', error);
@@ -67,12 +66,7 @@ export default function SelectRole() {
 
       {/* Header with back button */}
       <SafeAreaView edges={['top']}>
-        <View className="flex-row items-center gap-4 px-4 py-3">
-          <Pressable onPress={() => router.back()}>
-            <ArrowLeft color={colors.midnight.DEFAULT} width={24} height={24} />
-          </Pressable>
-          <View className="flex-1" />
-        </View>
+
       </SafeAreaView>
 
       <View className="flex-1 px-6">
@@ -83,7 +77,7 @@ export default function SelectRole() {
           transition={{ type: 'timing', duration: 500 }}
           className="mb-8"
         >
-          <Text style={styles.title} className="mb-2 text-2xl text-midnight">
+          <Text className="mb-2 font-urbanist-bold text-2xl text-midnight">
             {t('auth.select_role.title')}
           </Text>
           <Text className="text-base text-gray-500">
@@ -103,8 +97,8 @@ export default function SelectRole() {
               onPress={() => setSelectedRole('hirer')}
               disabled={isSubmitting}
               className={`rounded-2xl border-2 p-5 ${selectedRole === 'hirer'
-                  ? 'border-teal-400 bg-teal-400/10'
-                  : 'border-border-light bg-white'
+                ? 'border-teal-400 bg-teal-400/10'
+                : 'border-border-light bg-white'
                 }`}
             >
               <View className="flex-row items-center gap-4">
@@ -119,7 +113,7 @@ export default function SelectRole() {
                   />
                 </View>
                 <View className="flex-1">
-                  <Text style={styles.cardTitle} className="text-base text-midnight">
+                  <Text className="font-urbanist-semibold text-base text-midnight">
                     {t('auth.select_role.hirer.title')}
                   </Text>
                   <Text className="text-sm text-gray-500">
@@ -128,8 +122,8 @@ export default function SelectRole() {
                 </View>
                 <View
                   className={`size-6 items-center justify-center rounded-full border-2 ${selectedRole === 'hirer'
-                      ? 'border-teal-400 bg-teal-400'
-                      : 'border-border-light'
+                    ? 'border-teal-400 bg-teal-400'
+                    : 'border-border-light'
                     }`}
                 >
                   {selectedRole === 'hirer' && (
@@ -150,15 +144,15 @@ export default function SelectRole() {
               onPress={() => setSelectedRole('companion')}
               disabled={isSubmitting}
               className={`rounded-2xl border-2 p-5 ${selectedRole === 'companion'
-                  ? 'border-lavender-400 bg-lavender-400/10'
-                  : 'border-border-light bg-white'
+                ? 'border-lavender-400 bg-lavender-400/10'
+                : 'border-border-light bg-white'
                 }`}
             >
               <View className="flex-row items-center gap-4">
                 <View
                   className={`size-12 items-center justify-center rounded-xl ${selectedRole === 'companion'
-                      ? 'bg-lavender-400'
-                      : 'bg-lavender-400/20'
+                    ? 'bg-lavender-400'
+                    : 'bg-lavender-400/20'
                     }`}
                 >
                   <Heart
@@ -170,7 +164,7 @@ export default function SelectRole() {
                   />
                 </View>
                 <View className="flex-1">
-                  <Text style={styles.cardTitle} className="text-base text-midnight">
+                  <Text className="font-urbanist-semibold text-base text-midnight">
                     {t('auth.select_role.companion.title')}
                   </Text>
                   <Text className="text-sm text-gray-500">
@@ -179,8 +173,8 @@ export default function SelectRole() {
                 </View>
                 <View
                   className={`size-6 items-center justify-center rounded-full border-2 ${selectedRole === 'companion'
-                      ? 'border-lavender-400 bg-lavender-400'
-                      : 'border-border-light'
+                    ? 'border-lavender-400 bg-lavender-400'
+                    : 'border-border-light'
                     }`}
                 >
                   {selectedRole === 'companion' && (
@@ -216,11 +210,3 @@ export default function SelectRole() {
   );
 }
 
-const styles = StyleSheet.create({
-  title: {
-    fontFamily: 'Urbanist_700Bold',
-  },
-  cardTitle: {
-    fontFamily: 'Urbanist_600SemiBold',
-  },
-});

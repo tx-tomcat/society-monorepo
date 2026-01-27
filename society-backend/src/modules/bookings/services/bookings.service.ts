@@ -8,9 +8,10 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { Prisma, BookingStatus, PaymentStatus, ServiceType, StrikeType } from '@generated/client';
+import { Prisma, BookingStatus, PaymentStatus, StrikeType } from '@generated/client';
 import { PrismaService } from '@/prisma/prisma.service';
 import { ContentReviewService } from '@/modules/moderation/services/content-review.service';
+import { OccasionTrackingService } from '@/modules/occasions/services/occasion-tracking.service';
 import {
   CreateBookingDto,
   UpdateBookingStatusDto,
@@ -25,6 +26,7 @@ import {
   BookingRequestItem,
   ScheduleDay,
 } from '../dto/booking.dto';
+import { BookingUtils } from '../utils/booking.utils';
 
 // Booking frequency limits
 const BOOKING_LIMITS = {
@@ -73,6 +75,7 @@ export class BookingsService {
     private readonly prisma: PrismaService,
     private readonly contentReviewService: ContentReviewService,
     private readonly configService: ConfigService,
+    private readonly occasionTrackingService: OccasionTrackingService,
   ) {
     this.supabase = createClient(
       this.configService.get<string>('SUPABASE_URL')!,
@@ -426,7 +429,7 @@ export class BookingsService {
               hirerId,
               companionId: dto.companionId,
               status: BookingStatus.PENDING,
-              occasionType: dto.occasionType,
+              occasionId: dto.occasionId,
               startDatetime,
               endDatetime,
               durationHours,
@@ -449,6 +452,18 @@ export class BookingsService {
           timeout: 10000, // 10 seconds timeout for transaction
         },
       );
+
+      // Track occasion usage (fire-and-forget - don't block response)
+      if (dto.occasionId) {
+        this.occasionTrackingService
+          .trackBookingCreated(hirerId, dto.occasionId, booking.id)
+          .catch((err) =>
+            this.logger.warn(
+              `Failed to track occasion usage for booking ${booking.id}`,
+              err instanceof Error ? err.stack : err,
+            ),
+          );
+      }
 
       return {
         id: booking.id,
@@ -496,11 +511,22 @@ export class BookingsService {
         skip: (page - 1) * limit,
         take: limit,
         include: {
+          occasion: {
+            select: { id: true, code: true, emoji: true, nameEn: true },
+          },
           companion: {
-            include: {
+            select: {
+              id: true,
+              fullName: true,
               companionProfile: {
-                include: {
-                  photos: { orderBy: { position: 'asc' }, take: 1 },
+                select: {
+                  id: true,
+                  ratingAvg: true,
+                  photos: {
+                    orderBy: { position: 'asc' },
+                    take: 1,
+                    select: { url: true },
+                  },
                 },
               },
             },
@@ -514,13 +540,13 @@ export class BookingsService {
       id: b.id,
       bookingNumber: b.bookingNumber,
       status: b.status,
-      occasionType: b.occasionType,
+      occasion: BookingUtils.mapOccasion(b.occasion),
       startDatetime: b.startDatetime.toISOString(),
       endDatetime: b.endDatetime.toISOString(),
       durationHours: Number(b.durationHours),
       locationAddress: b.locationAddress,
       totalPrice: b.totalPrice,
-      companion: b.companion.companionProfile ? {
+      companion: b.companion?.companionProfile ? {
         id: b.companion.companionProfile.id,
         userId: b.companion.id,
         displayName: b.companion.fullName,
@@ -564,9 +590,17 @@ export class BookingsService {
         skip: (page - 1) * limit,
         take: limit,
         include: {
+          occasion: {
+            select: { id: true, code: true, emoji: true, nameEn: true },
+          },
           hirer: {
-            include: {
-              hirerProfile: true,
+            select: {
+              id: true,
+              fullName: true,
+              avatarUrl: true,
+              hirerProfile: {
+                select: { ratingAvg: true },
+              },
             },
           },
         },
@@ -578,18 +612,18 @@ export class BookingsService {
       id: b.id,
       bookingNumber: b.bookingNumber,
       status: b.status,
-      occasionType: b.occasionType,
+      occasion: BookingUtils.mapOccasion(b.occasion),
       startDatetime: b.startDatetime.toISOString(),
       endDatetime: b.endDatetime.toISOString(),
       durationHours: Number(b.durationHours),
       locationAddress: b.locationAddress,
       totalPrice: b.totalPrice,
-      hirer: {
+      hirer: b.hirer ? {
         id: b.hirer.id,
         displayName: b.hirer.fullName,
         avatar: b.hirer.avatarUrl,
         rating: b.hirer.hirerProfile ? Number(b.hirer.hirerProfile.ratingAvg) : 5,
-      },
+      } : undefined,
     }));
 
     return {
@@ -610,23 +644,42 @@ export class BookingsService {
     const booking = await this.prisma.booking.findUnique({
       where: { id: bookingId },
       include: {
+        occasion: {
+          select: { id: true, code: true, emoji: true, nameEn: true },
+        },
         companion: {
-          include: {
+          select: {
+            id: true,
+            fullName: true,
+            phone: true,
             companionProfile: {
-              include: {
-                photos: { orderBy: { position: 'asc' }, take: 1 },
+              select: {
+                id: true,
+                ratingAvg: true,
+                photos: {
+                  orderBy: { position: 'asc' },
+                  take: 1,
+                  select: { url: true },
+                },
               },
             },
           },
         },
         hirer: {
-          include: {
-            hirerProfile: true,
+          select: {
+            id: true,
+            fullName: true,
+            phone: true,
+            avatarUrl: true,
+            hirerProfile: {
+              select: { ratingAvg: true },
+            },
           },
         },
         reviews: {
           where: { reviewerId: userId },
           take: 1,
+          select: { id: true, rating: true, comment: true, tags: true, createdAt: true },
         },
       },
     });
@@ -650,7 +703,7 @@ export class BookingsService {
       id: booking.id,
       bookingNumber: booking.bookingNumber,
       status: booking.status,
-      occasionType: booking.occasionType,
+      occasion: BookingUtils.mapOccasion(booking.occasion),
       startDatetime: booking.startDatetime.toISOString(),
       endDatetime: booking.endDatetime.toISOString(),
       durationHours: Number(booking.durationHours),
@@ -843,11 +896,15 @@ export class BookingsService {
   }
 
   /**
-   * Get pending booking requests (Companion)
+   * Get pending booking requests (Companion) with cursor-based pagination
    */
   async getBookingRequests(
     companionUserId: string,
-  ): Promise<{ requests: BookingRequestItem[] }> {
+    query: { limit?: number; cursor?: string } = {},
+  ): Promise<{ requests: BookingRequestItem[]; nextCursor: string | null }> {
+    const { limit = 20, cursor } = query;
+
+    // Fetch one extra to check if there are more results
     const requests = await this.prisma.booking.findMany({
       where: {
         companionId: companionUserId,
@@ -855,36 +912,51 @@ export class BookingsService {
         requestExpiresAt: { gt: new Date() },
       },
       orderBy: { createdAt: 'desc' },
+      take: limit + 1,
+      ...(cursor && { cursor: { id: cursor }, skip: 1 }),
       include: {
+        occasion: {
+          select: { id: true, code: true, emoji: true, nameEn: true },
+        },
         hirer: {
-          include: {
-            hirerProfile: true,
+          select: {
+            id: true,
+            fullName: true,
+            avatarUrl: true,
+            hirerProfile: {
+              select: { ratingAvg: true },
+            },
           },
         },
       },
     });
 
-    const requestList: BookingRequestItem[] = requests.map((r) => ({
+    // Check if there are more results
+    const hasMore = requests.length > limit;
+    const resultsToReturn = hasMore ? requests.slice(0, limit) : requests;
+    const nextCursor = hasMore ? resultsToReturn[resultsToReturn.length - 1].id : null;
+
+    const requestList: BookingRequestItem[] = resultsToReturn.map((r) => ({
       id: r.id,
       bookingNumber: r.bookingNumber,
-      occasionType: r.occasionType,
+      occasion: BookingUtils.mapOccasion(r.occasion),
       startDatetime: r.startDatetime.toISOString(),
       endDatetime: r.endDatetime.toISOString(),
       durationHours: Number(r.durationHours),
       locationAddress: r.locationAddress,
       totalPrice: r.totalPrice,
       specialRequests: r.specialRequests,
-      hirer: {
+      hirer: r.hirer ? {
         id: r.hirer.id,
         displayName: r.hirer.fullName,
         avatar: r.hirer.avatarUrl,
         rating: r.hirer.hirerProfile ? Number(r.hirer.hirerProfile.ratingAvg) : 5,
-      },
+      } : undefined,
       createdAt: r.createdAt.toISOString(),
       requestExpiresAt: r.requestExpiresAt?.toISOString() || '',
     }));
 
-    return { requests: requestList };
+    return { requests: requestList, nextCursor };
   }
 
   /**
@@ -911,6 +983,7 @@ export class BookingsService {
       },
       orderBy: [{ startDatetime: 'asc' }],
       include: {
+        occasion: true,
         hirer: true,
       },
     });
@@ -930,7 +1003,7 @@ export class BookingsService {
         bookingNumber: booking.bookingNumber,
         startTime: booking.startDatetime.toISOString().substring(11, 16),
         endTime: booking.endDatetime.toISOString().substring(11, 16),
-        occasionType: booking.occasionType,
+        occasion: BookingUtils.mapOccasion(booking.occasion),
         status: booking.status,
         hirer: {
           displayName: booking.hirer.fullName,
@@ -1004,42 +1077,49 @@ export class BookingsService {
       }
     }
 
-    // Create review
-    const review = await this.prisma.review.create({
-      data: {
-        bookingId,
-        reviewerId: hirerId,
-        revieweeId: booking.companionId,
-        rating: dto.rating,
-        comment: dto.comment,
-        tags: dto.tags || [],
-        isVisible: dto.isVisible ?? true,
-      },
-    });
-
-    // Update companion rating
+    // ATOMIC: Create review and update rating in a single transaction
     const companionProfile = booking.companion.companionProfile;
-    if (companionProfile) {
-      const allReviews = await this.prisma.review.findMany({
-        where: { revieweeId: booking.companionId },
-        select: { rating: true },
-      });
 
-      const avgRating =
-        allReviews.reduce((sum, r) => sum + r.rating, 0) / allReviews.length;
-
-      await this.prisma.companionProfile.update({
-        where: { id: companionProfile.id },
+    const result = await this.prisma.$transaction(async (tx) => {
+      // Create review
+      const review = await tx.review.create({
         data: {
-          ratingAvg: avgRating,
-          ratingCount: allReviews.length,
+          bookingId,
+          reviewerId: hirerId,
+          revieweeId: booking.companionId,
+          rating: dto.rating,
+          comment: dto.comment,
+          tags: dto.tags || [],
+          isVisible: dto.isVisible ?? true,
         },
       });
-    }
+
+      // Update companion rating atomically
+      if (companionProfile) {
+        // Use aggregate in transaction to get accurate count and sum
+        const stats = await tx.review.aggregate({
+          where: { revieweeId: booking.companionId },
+          _count: { rating: true },
+          _avg: { rating: true },
+        });
+
+        await tx.companionProfile.update({
+          where: { id: companionProfile.id },
+          data: {
+            ratingAvg: stats._avg.rating ?? dto.rating,
+            ratingCount: stats._count.rating,
+          },
+        });
+      }
+
+      return review;
+    }, {
+      timeout: 10000, // 10 second timeout for consistency with payment operations
+    });
 
     return {
-      id: review.id,
-      rating: review.rating,
+      id: result.id,
+      rating: result.rating,
       message: 'Review submitted successfully',
     };
   }
@@ -1111,28 +1191,34 @@ export class BookingsService {
     if (dto.comment !== undefined) updateData.comment = dto.comment;
     if (dto.tags !== undefined) updateData.tags = dto.tags;
 
-    // Update review
-    const updatedReview = await this.prisma.review.update({
-      where: { id: reviewId },
-      data: updateData,
+    // ATOMIC: Update review and recalculate rating in a single transaction
+    const companionProfile = review.booking.companion.companionProfile;
+    const shouldRecalculateRating = dto.rating !== undefined && companionProfile;
+
+    const updatedReview = await this.prisma.$transaction(async (tx) => {
+      // Update review
+      const updated = await tx.review.update({
+        where: { id: reviewId },
+        data: updateData,
+      });
+
+      // Recalculate companion rating atomically if rating changed
+      if (shouldRecalculateRating) {
+        const stats = await tx.review.aggregate({
+          where: { revieweeId: review.revieweeId },
+          _avg: { rating: true },
+        });
+
+        await tx.companionProfile.update({
+          where: { id: companionProfile.id },
+          data: { ratingAvg: stats._avg.rating ?? dto.rating },
+        });
+      }
+
+      return updated;
+    }, {
+      timeout: 10000, // 10 second timeout for consistency with payment operations
     });
-
-    // Recalculate companion rating if rating changed
-    if (dto.rating !== undefined && review.booking.companion.companionProfile) {
-      const companionProfile = review.booking.companion.companionProfile;
-      const allReviews = await this.prisma.review.findMany({
-        where: { revieweeId: review.revieweeId },
-        select: { rating: true },
-      });
-
-      const avgRating =
-        allReviews.reduce((sum, r) => sum + r.rating, 0) / allReviews.length;
-
-      await this.prisma.companionProfile.update({
-        where: { id: companionProfile.id },
-        data: { ratingAvg: avgRating },
-      });
-    }
 
     const hoursRemaining = Math.max(0, EDIT_WINDOW_HOURS - hoursSinceCreation);
 

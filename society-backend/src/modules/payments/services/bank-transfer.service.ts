@@ -91,8 +91,11 @@ export class BankTransferService {
 
   /**
    * Process incoming bank transfer webhook
+   * Uses atomic operations to prevent race conditions
    */
   async processIncomingPayment(payload: BankTransferWebhookDto): Promise<BankTransferResult> {
+    const idempotencyKey = `bank_transfer:${payload.transactionId}`;
+
     this.logger.log(`Processing bank transfer: ${JSON.stringify({
       transactionId: payload.transactionId,
       amount: payload.amount,
@@ -148,32 +151,137 @@ export class BankTransferService {
       };
     }
 
-    // Check for duplicate transaction
-    const existingTransaction = await this.prisma.payment.findFirst({
-      where: { providerTxnId: payload.transactionId },
-    });
+    // ATOMIC: Use serializable transaction to prevent duplicate processing
+    try {
+      const result = await this.prisma.$transaction(async (tx) => {
+        // Check for existing webhook log (idempotency)
+        const existingLog = await tx.webhookLog.findUnique({
+          where: { idempotencyKey },
+        });
 
-    if (existingTransaction) {
-      this.logger.warn(`Duplicate transaction: ${payload.transactionId}`);
+        if (existingLog) {
+          return {
+            success: false,
+            message: 'Transaction already processed',
+            paymentId: existingLog.response?.paymentId as string | undefined,
+            alreadyProcessed: true,
+          };
+        }
+
+        // Create webhook log FIRST to claim the idempotency key
+        const webhookLog = await tx.webhookLog.create({
+          data: {
+            idempotencyKey,
+            source: 'bank_transfer',
+            endpoint: '/webhooks/bank-transfer',
+            status: 'processing',
+          },
+        });
+
+        // ATOMIC: Update payment only if status is PENDING
+        const updatedPayment = await tx.payment.updateMany({
+          where: {
+            id: payment.id,
+            status: PaymentStatus.PENDING, // Only update if still pending
+          },
+          data: {
+            status: PaymentStatus.HELD,
+            providerTxnId: payload.transactionId,
+            paidAt: new Date(),
+            providerResponse: {
+              bankCode: payload.bankCode,
+              senderAccount: payload.senderAccount,
+              senderName: payload.senderName,
+              transferNote: payload.transferNote,
+              timestamp: payload.timestamp,
+            },
+          },
+        });
+
+        if (updatedPayment.count === 0) {
+          // Payment was already processed or status changed
+          await tx.webhookLog.update({
+            where: { id: webhookLog.id },
+            data: {
+              status: 'failed',
+              response: { error: 'Payment not in PENDING status' },
+            },
+          });
+          return {
+            success: false,
+            message: 'Payment already processed or not in pending status',
+            paymentId: payment.id,
+            alreadyProcessed: true,
+          };
+        }
+
+        // Create earning record (upsert to handle retries)
+        const platformFee = Math.floor(payment.amount * PLATFORM_FEE_PERCENT / 100);
+        const netAmount = payment.amount - platformFee;
+
+        await tx.earning.upsert({
+          where: { bookingId: payment.bookingId },
+          create: {
+            companionId: payment.booking.companionId,
+            bookingId: payment.bookingId,
+            grossAmount: payment.amount,
+            platformFee,
+            netAmount,
+            status: EarningsStatus.PENDING,
+          },
+          update: {}, // No update if exists
+        });
+
+        // Mark webhook as completed
+        await tx.webhookLog.update({
+          where: { id: webhookLog.id },
+          data: {
+            status: 'completed',
+            response: { paymentId: payment.id, orderReference },
+          },
+        });
+
+        return {
+          success: true,
+          paymentId: payment.id,
+          alreadyProcessed: false,
+        };
+      }, {
+        isolationLevel: 'Serializable', // Highest isolation to prevent race conditions
+        timeout: 10000, // 10 second timeout
+      });
+
+      if (result.alreadyProcessed) {
+        this.logger.warn(`Duplicate transaction: ${payload.transactionId}`);
+        return {
+          success: false,
+          message: result.message,
+          orderReference,
+          paymentId: result.paymentId,
+        };
+      }
+
+      this.logger.log(`Bank transfer processed successfully for payment ${result.paymentId}`);
+
       return {
-        success: false,
-        message: 'Transaction already processed',
+        success: true,
+        paymentId: result.paymentId,
+        message: 'Payment processed successfully',
         orderReference,
-        paymentId: existingTransaction.id,
       };
+    } catch (error) {
+      // Handle unique constraint violation (concurrent webhook)
+      if ((error as { code?: string }).code === 'P2002') {
+        this.logger.warn(`Concurrent webhook detected for transaction ${payload.transactionId}`);
+        return {
+          success: false,
+          message: 'Transaction already being processed',
+          orderReference,
+          paymentId: payment.id,
+        };
+      }
+      throw error;
     }
-
-    // Update payment status and create earnings record
-    await this.processSuccessfulPayment(payment.id, payload);
-
-    this.logger.log(`Bank transfer processed successfully for payment ${payment.id}`);
-
-    return {
-      success: true,
-      paymentId: payment.id,
-      message: 'Payment processed successfully',
-      orderReference,
-    };
   }
 
   /**
@@ -236,64 +344,6 @@ export class BankTransferService {
     });
 
     return paymentByAmount;
-  }
-
-  /**
-   * Process successful payment - update status and create earnings
-   */
-  private async processSuccessfulPayment(
-    paymentId: string,
-    payload: BankTransferWebhookDto,
-  ): Promise<void> {
-    const payment = await this.prisma.payment.findUnique({
-      where: { id: paymentId },
-      include: { booking: true },
-    });
-
-    if (!payment) {
-      throw new Error(`Payment ${paymentId} not found`);
-    }
-
-    // Update payment to HELD status (in escrow)
-    await this.prisma.payment.update({
-      where: { id: paymentId },
-      data: {
-        status: PaymentStatus.HELD,
-        providerTxnId: payload.transactionId,
-        paidAt: new Date(),
-        providerResponse: {
-          bankCode: payload.bankCode,
-          senderAccount: payload.senderAccount,
-          senderName: payload.senderName,
-          transferNote: payload.transferNote,
-          timestamp: payload.timestamp,
-        },
-      },
-    });
-
-    // Create earning record for companion
-    const platformFee = Math.floor(payment.amount * PLATFORM_FEE_PERCENT / 100);
-    const netAmount = payment.amount - platformFee;
-
-    // Check if earning already exists (in case of retry)
-    const existingEarning = await this.prisma.earning.findUnique({
-      where: { bookingId: payment.bookingId },
-    });
-
-    if (!existingEarning) {
-      await this.prisma.earning.create({
-        data: {
-          companionId: payment.booking.companionId,
-          bookingId: payment.bookingId,
-          grossAmount: payment.amount,
-          platformFee,
-          netAmount,
-          status: EarningsStatus.PENDING,
-        },
-      });
-    }
-
-    this.logger.log(`Payment ${paymentId} processed: held in escrow, earning created`);
   }
 
   /**

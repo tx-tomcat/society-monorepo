@@ -50,26 +50,25 @@ export function useZaloLoginHandler(options: UseZaloLoginHandlerOptions = {}): {
         console.warn('Failed to sync user data:', syncError);
         // Continue anyway - app will handle missing user data
       }
-      router.replace('/auth/select-role' as Href);
-      // // Navigate based on user state
-      // if (authResponse.isNewUser || !authResponse.user.role) {
-      //   // New user or no role - needs to select role
-      //   router.replace('/auth/select-role' as Href);
-      // } else if (!authResponse.hasProfile) {
-      //   // Has role but hasn't completed onboarding
-      //   if (authResponse.user.role === 'COMPANION') {
-      //     router.replace('/companion/onboard/create-profile' as Href);
-      //   } else {
-      //     router.replace('/hirer/onboarding' as Href);
-      //   }
-      // } else {
-      //   // Existing user with completed profile - redirect to dashboard
-      //   if (authResponse.user.role === 'COMPANION') {
-      //     router.replace('/companion/(app)' as Href);
-      //   } else {
-      //     router.replace('/(app)' as Href);
-      //   }
-      // }
+      // Navigate based on user state
+      if (authResponse.isNewUser || !authResponse.user.role) {
+        // New user or no role - needs to select role
+        router.replace('/auth/select-role' as Href);
+      } else if (!authResponse.hasProfile) {
+        // Has role but hasn't completed onboarding
+        if (authResponse.user.role === 'COMPANION') {
+          router.replace('/companion/onboard/create-profile' as Href);
+        } else {
+          router.replace('/hirer/onboarding/profile' as Href);
+        }
+      } else {
+        // Existing user with completed profile - redirect to dashboard
+        if (authResponse.user.role === 'COMPANION') {
+          router.replace('/companion/(app)' as Href);
+        } else {
+          router.replace('/(app)' as Href);
+        }
+      }
 
       options.onSuccess?.(authResponse);
     } catch (error) {
