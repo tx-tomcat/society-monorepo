@@ -16,7 +16,7 @@ import {
   View,
 } from '@/components/ui';
 import { ArrowLeft, Calendar, Check, ChevronDown, MapPin, X } from '@/components/ui/icons';
-import { VIETNAM_PROVINCES, getProvinceName } from '@/lib/constants';
+import { getProvinceName, VIETNAM_PROVINCES } from '@/lib/constants';
 import { usePhoneVerificationStatus, useUpdateProfile } from '@/lib/hooks';
 import { isAdult } from '@/lib/validation';
 
@@ -130,12 +130,11 @@ export default function HirerOnboardingProfile() {
     setTouched({ dateOfBirth: true, gender: true, province: true });
 
     if (!isFormValid || !dateOfBirth || !gender || !province) return;
-
     // Check phone verification - redirect if not verified
-    if (!phoneStatus?.isVerified) {
-      router.push('/phone-verification' as Href);
-      return;
-    }
+    // if (!phoneStatus?.isVerified) {
+    //   router.push('/phone-verification' as Href);
+    //   return;
+    // }
 
     try {
       // Update the user profile with the provided information
@@ -305,9 +304,8 @@ export default function HirerOnboardingProfile() {
                 setShowProvincePicker(true);
                 setTouched((prev) => ({ ...prev, province: true }));
               }}
-              className={`flex-row items-center rounded-xl border bg-white p-4 ${
-                errors.province ? 'border-red-400' : 'border-border-light'
-              }`}
+              className={`flex-row items-center rounded-xl border bg-white p-4 ${errors.province ? 'border-red-400' : 'border-border-light'
+                }`}
             >
               <MapPin
                 color={errors.province ? colors.rose[400] : colors.text.tertiary}
@@ -315,9 +313,8 @@ export default function HirerOnboardingProfile() {
                 height={20}
               />
               <Text
-                className={`flex-1 pl-3 font-urbanist-medium text-base ${
-                  province ? 'text-midnight' : 'text-text-tertiary'
-                }`}
+                className={`flex-1 pl-3 font-urbanist-medium text-base ${province ? 'text-midnight' : 'text-text-tertiary'
+                  }`}
               >
                 {province
                   ? getProvinceName(province, 'vi')
@@ -354,16 +351,14 @@ export default function HirerOnboardingProfile() {
                         setProvince(p.code);
                         setShowProvincePicker(false);
                       }}
-                      className={`mb-2 rounded-xl border p-4 ${
-                        province === p.code
-                          ? 'border-rose-400 bg-softpink'
-                          : 'border-border-light bg-white'
-                      }`}
+                      className={`mb-2 rounded-xl border p-4 ${province === p.code
+                        ? 'border-rose-400 bg-softpink'
+                        : 'border-border-light bg-white'
+                        }`}
                     >
                       <Text
-                        className={`text-base ${
-                          province === p.code ? 'text-rose-400 font-semibold' : 'text-midnight'
-                        }`}
+                        className={`text-base ${province === p.code ? 'text-rose-400 font-semibold' : 'text-midnight'
+                          }`}
                       >
                         {p.name}
                       </Text>

@@ -10,6 +10,25 @@ export type InteractionEventType =
   | 'BOOKING_COMPLETED'
   | 'BOOKING_CANCELLED';
 
+export interface EmbeddedCompanionData {
+  id: string;
+  userId: string;
+  displayName: string;
+  age?: number | null;
+  bio?: string | null;
+  avatar?: string | null;
+  heightCm?: number | null;
+  gender?: string | null;
+  languages: string[];
+  hourlyRate: number;
+  rating: number;
+  reviewCount: number;
+  isVerified: boolean;
+  isActive: boolean;
+  photos: { id: string; url: string; isPrimary: boolean; position: number }[];
+  services: { occasionId: string; occasion?: { id: string; nameEn: string; nameVi: string; emoji: string } }[];
+}
+
 export interface ScoredCompanion {
   companionId: string;
   score: number;
@@ -21,6 +40,7 @@ export interface ScoredCompanion {
     popularity: number;
     behavioralAffinity: number;
   };
+  companion: EmbeddedCompanionData;
 }
 
 export interface RecommendationsResponse {

@@ -10,7 +10,7 @@ import {
   ScrollView,
   TextInput,
 } from 'react-native';
-import { showMessage } from 'react-native-flash-message';
+import Toast from 'react-native-toast-message';
 
 import {
   Badge,
@@ -65,10 +65,10 @@ export default function WithdrawFunds() {
         }
       } catch (error) {
         console.error('Failed to fetch withdrawal data:', error);
-        showMessage({
-          message: t('companion.withdraw.load_error'),
-          description: t('companion.withdraw.load_error_description'),
-          type: 'danger',
+        Toast.show({
+          type: 'error',
+          text1: t('companion.withdraw.load_error'),
+          text2: t('companion.withdraw.load_error_description'),
         });
       } finally {
         setIsLoading(false);
@@ -120,18 +120,18 @@ export default function WithdrawFunds() {
                 bankAccountId: selectedBank,
                 amount: withdrawAmount,
               });
-              showMessage({
-                message: t('companion.withdraw.success'),
-                description: t('companion.withdraw.success_description'),
+              Toast.show({
                 type: 'success',
+                text1: t('companion.withdraw.success'),
+                text2: t('companion.withdraw.success_description'),
               });
               router.back();
             } catch (error) {
               console.error('Withdrawal request failed:', error);
-              showMessage({
-                message: t('companion.withdraw.request_failed'),
-                description: t('companion.withdraw.request_failed_description'),
-                type: 'danger',
+              Toast.show({
+                type: 'error',
+                text1: t('companion.withdraw.request_failed'),
+                text2: t('companion.withdraw.request_failed_description'),
               });
             } finally {
               setIsSubmitting(false);

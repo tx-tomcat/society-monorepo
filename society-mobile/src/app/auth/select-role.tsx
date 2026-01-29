@@ -4,7 +4,7 @@ import { MotiView } from 'moti';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable } from 'react-native';
-import { showMessage } from 'react-native-flash-message';
+import Toast from 'react-native-toast-message';
 
 import {
   Button,
@@ -21,7 +21,9 @@ import {
 } from '@/components/ui/icons';
 
 import { authService } from '@/lib/api/services/auth.service';
+import type { BackendUserRole } from '@/lib/api/types/user.types';
 import { resetAuthFlow } from '@/lib/stores';
+import { getUser, setUser } from '@/lib/stores/user';
 
 type Role = 'hirer' | 'companion';
 
@@ -39,6 +41,19 @@ export default function SelectRole() {
       // Set user role via API
       await authService.setUserRole(selectedRole);
 
+      // Update user store with the new role
+      const currentUser = getUser();
+      if (currentUser) {
+        const backendRole: BackendUserRole = selectedRole === 'hirer' ? 'HIRER' : 'COMPANION';
+        setUser({
+          ...currentUser,
+          user: {
+            ...currentUser.user,
+            role: backendRole,
+          },
+        });
+      }
+
       // Reset auth flow state
       resetAuthFlow();
 
@@ -50,10 +65,10 @@ export default function SelectRole() {
       }
     } catch (error) {
       console.error('Set role error:', error);
-      showMessage({
-        message: t('common.error'),
-        description: t('auth.errors.set_role_failed'),
-        type: 'danger',
+      Toast.show({
+        type: 'error',
+        text1: t('common.error'),
+        text2: t('auth.errors.set_role_failed'),
       });
     } finally {
       setIsSubmitting(false);

@@ -274,7 +274,6 @@ export default function SearchScreen() {
               <FlashList
                 data={results}
                 renderItem={renderResult}
-                estimatedItemSize={80}
                 keyExtractor={(item) => item.id}
                 showsVerticalScrollIndicator={false}
               />

@@ -28,7 +28,6 @@ import {
   Heart,
   Search,
 } from '@/components/ui/icons';
-import type { ServiceType } from '@/lib/api/services/companions.service';
 import { getPhotoUrl } from '@/lib/api/services/companions.service';
 import {
   useCompanions,
@@ -38,44 +37,17 @@ import {
   useTrackInteraction,
 } from '@/lib/hooks';
 import { useCompanion } from '@/lib/hooks/use-companions';
+import { useOccasionsStore } from '@/lib/stores';
 import { formatVND } from '@/lib/utils';
-
-// Occasion filter chips matching wireframe
-const occasionFilters: {
-  id: string;
-  i18nKey: string;
-  serviceType?: ServiceType;
-}[] = [
-  { id: 'all', i18nKey: 'hirer.home.occasions.all' },
-  {
-    id: 'dining',
-    i18nKey: 'hirer.home.occasions.dining',
-    serviceType: 'CASUAL_OUTING',
-  },
-  {
-    id: 'party',
-    i18nKey: 'hirer.home.occasions.party',
-    serviceType: 'CLASS_REUNION',
-  },
-  {
-    id: 'coffee',
-    i18nKey: 'hirer.home.occasions.coffee',
-    serviceType: 'CASUAL_OUTING',
-  },
-];
 
 export default function BrowseCompanions() {
   const router = useRouter();
   const { t } = useTranslation();
-  const [selectedFilter, setSelectedFilter] = React.useState('all');
+  const [selectedOccasionId, setSelectedOccasionId] = React.useState<string | undefined>(undefined);
   const [searchQuery, setSearchQuery] = React.useState('');
 
-  // Get the service type filter
-  const selectedServiceType = React.useMemo(() => {
-    if (selectedFilter === 'all') return undefined;
-    const filter = occasionFilters.find((f) => f.id === selectedFilter);
-    return filter?.serviceType;
-  }, [selectedFilter]);
+  // Get occasions from store
+  const occasions = useOccasionsStore.use.occasions();
 
   // API hooks
   const {
@@ -84,7 +56,7 @@ export default function BrowseCompanions() {
     refetch,
     isRefetching,
   } = useCompanions({
-    serviceType: selectedServiceType,
+    occasionId: selectedOccasionId,
     verified: true,
     sort: 'rating',
   });
@@ -105,8 +77,9 @@ export default function BrowseCompanions() {
     if (!companionsData?.companions) return [];
     return companionsData.companions.map((c) => ({
       id: c.id,
+      userId: c.userId, // User.id for favorites operations
       name: c.displayName || '',
-      age: 0,
+      age: c.age || 0,
       image:
         getPhotoUrl(c.photos?.[0]) ||
         c.avatar ||
@@ -118,7 +91,7 @@ export default function BrowseCompanions() {
       isVerified: c.isVerified ?? c.verificationStatus === 'verified',
       isOnline: c.isActive ?? false,
       isPremium: c.isFeatured,
-      specialties: c.services?.map((s) => s.type) || [],
+      specialties: c.services?.map((s) => s.occasion?.name || s.occasionId) || [],
     }));
   }, [companionsData, t]);
 
@@ -150,7 +123,7 @@ export default function BrowseCompanions() {
 
   const handleBookPress = React.useCallback(
     (companion: CompanionData) => {
-      router.push(`/booking/${companion.id}` as Href);
+      router.push(`/hirer/booking/new?companionId=${companion.id}` as Href);
     },
     [router]
   );
@@ -216,22 +189,40 @@ export default function BrowseCompanions() {
             className="mt-3"
           >
             <View className="flex-row gap-2">
-              {occasionFilters.map((filter) => (
+              {/* All filter */}
+              <Pressable
+                onPress={() => setSelectedOccasionId(undefined)}
+                className={`rounded-full px-4 py-2 ${
+                  !selectedOccasionId ? 'bg-rose-400' : 'bg-softpink'
+                }`}
+              >
+                <Text
+                  className={`text-xs ${
+                    !selectedOccasionId
+                      ? 'font-semibold text-white'
+                      : 'text-midnight'
+                  }`}
+                >
+                  {t('hirer.home.occasions.all')}
+                </Text>
+              </Pressable>
+              {/* Dynamic occasion filters */}
+              {occasions.map((occasion) => (
                 <Pressable
-                  key={filter.id}
-                  onPress={() => setSelectedFilter(filter.id)}
+                  key={occasion.id}
+                  onPress={() => setSelectedOccasionId(occasion.id)}
                   className={`rounded-full px-4 py-2 ${
-                    selectedFilter === filter.id ? 'bg-rose-400' : 'bg-softpink'
+                    selectedOccasionId === occasion.id ? 'bg-rose-400' : 'bg-softpink'
                   }`}
                 >
                   <Text
                     className={`text-xs ${
-                      selectedFilter === filter.id
+                      selectedOccasionId === occasion.id
                         ? 'font-semibold text-white'
                         : 'text-midnight'
                     }`}
                   >
-                    {t(filter.i18nKey)}
+                    {occasion.emoji} {occasion.name}
                   </Text>
                 </Pressable>
               ))}
@@ -275,7 +266,6 @@ export default function BrowseCompanions() {
         <FlashList
           data={filteredCompanions}
           renderItem={renderCompanion}
-          estimatedItemSize={80}
           keyExtractor={(item) => item.id}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingTop: 12, paddingBottom: 20 }}
@@ -318,6 +308,7 @@ function TeaserItem({
 
   const companion: CompanionData = {
     id: companionData.id,
+    userId: companionData.userId, // User.id for favorites operations
     name: companionData.displayName || '',
     age: companionData.age || 0,
     image:

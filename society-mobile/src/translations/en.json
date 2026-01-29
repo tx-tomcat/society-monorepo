@@ -190,6 +190,9 @@
     "copy": "Copy",
     "go_back": "Go Back",
     "cancel": "Cancel",
+    "change": "Change",
+    "clear_search": "Clear search",
+    "collapse": "Collapse",
     "coming_soon": "Coming Soon",
     "confirm": "Confirm",
     "continue": "Continue",
@@ -686,6 +689,14 @@
       "verified_desc": "Identity verified through government ID and background check",
       "verified_profile": "Verified Profile"
     },
+    "reviews": {
+      "title": "Reviews",
+      "reviews": "reviews",
+      "all": "All",
+      "verified": "Verified",
+      "no_reviews": "No reviews found",
+      "no_reviews_filter": "Try selecting a different rating filter"
+    },
     "companion_card": {
       "book_now": "Book Now",
       "online": "Online",
@@ -850,10 +861,16 @@
     },
     "orders": {
       "empty": "No bookings found",
+      "empty_upcoming_subtitle": "Your upcoming appointments will appear here",
+      "empty_past_title": "No past bookings",
+      "empty_past_subtitle": "Completed bookings will be shown here",
+      "browse_partners": "Browse Partners",
       "header": "My Bookings",
       "status": {
+        "awaiting": "Awaiting",
         "cancelled": "Cancelled",
         "completed": "Completed",
+        "confirmed": "Confirmed",
         "in_progress": "In Progress",
         "pending": "Pending",
         "upcoming": "Upcoming"
@@ -882,8 +899,37 @@
       "estimated_total": "Estimated Total",
       "service_fee_note": "Service fee will be added at checkout",
       "total": "Total",
-      "continue": "Continue to Payment",
-      "no_slots_available": "No time slots available for this date"
+      "continue": "Review Booking",
+      "no_slots_available": "No time slots available for this date",
+      "selected": "Selected",
+      "no_occasions": "No occasions available",
+      "search_occasion": "Search occasions...",
+      "no_search_results": "No occasions found"
+    },
+    "review": {
+      "title": "Review Booking",
+      "booking_details": "Booking Details",
+      "date": "Date",
+      "time_duration": "Time & Duration",
+      "hours": "hours",
+      "location": "Location",
+      "occasion": "Occasion",
+      "special_requests": "Special Requests",
+      "price_breakdown": "Price Breakdown",
+      "service_fee": "Service Fee",
+      "estimated_total": "Estimated Total",
+      "how_it_works": "How It Works",
+      "step_1_title": "Send Request",
+      "step_1_desc": "Your booking request will be sent to the companion for confirmation.",
+      "step_2_title": "Companion Confirms",
+      "step_2_desc": "The companion will review and accept your booking within 24 hours.",
+      "step_3_title": "Complete Payment",
+      "step_3_desc": "Once confirmed, you'll be notified to complete payment securely.",
+      "secure_booking": "Safe & Secure",
+      "secure_booking_desc": "Your request is protected. Payment is only collected after confirmation.",
+      "terms_agreement": "I agree to the booking terms and cancellation policy. I understand that payment will be required after the companion confirms.",
+      "submitting": "Submitting...",
+      "confirm_booking": "Send Booking Request"
     },
     "payment": {
       "title": "Payment",
@@ -906,17 +952,17 @@
       "confirm_pay": "Confirm & Pay"
     },
     "confirmation": {
-      "success_title": "Booking Confirmed!",
-      "success_subtitle": "Your companion will be notified and will reach out to you shortly.",
+      "success_title": "Request Sent!",
+      "success_subtitle": "Your booking request has been sent to the companion for confirmation.",
       "booking_id": "Booking ID",
       "date_time": "Date & Time",
       "hours": "hours",
       "location": "Location",
       "occasion": "Occasion",
       "whats_next": "What's Next?",
-      "step_1": "Your companion will confirm the booking within 24 hours.",
-      "step_2": "You'll receive a message with meeting details and contact info.",
-      "step_3": "Payment will be held in escrow until the booking is complete.",
+      "step_1": "The companion will review and confirm your booking within 24 hours.",
+      "step_2": "Once confirmed, you'll be notified to complete the payment.",
+      "step_3": "After payment, you'll receive meeting details and contact info.",
       "need_help": "Need help? Contact support",
       "view_bookings": "View My Bookings"
     },
@@ -1148,18 +1194,18 @@
   "phone_verification": {
     "title": "Verify Phone",
     "enter_phone": "Enter your phone number",
-    "phone_description_zalo": "We'll send a verification code via Zalo to confirm your identity",
+    "phone_description_sms": "We'll send a verification code via SMS to confirm your identity",
     "invalid_phone": "Please enter a valid Vietnam phone number",
-    "send_code_zalo": "Send Code via Zalo",
+    "send_code_sms": "Send Code via SMS",
     "enter_code": "Enter verification code",
-    "code_sent_zalo": "We sent a 6-digit code to your Zalo at {{phone}}",
+    "code_sent_sms": "We sent a 6-digit code via SMS to {{phone}}",
     "verify": "Verify",
     "resend_code": "Didn't receive code? Resend",
     "resend_in": "Resend code in {{seconds}}s",
     "success_title": "Phone Verified!",
     "success_message": "Your phone number has been verified successfully",
-    "zalo_notice_title": "Verification via Zalo",
-    "zalo_notice_desc": "You'll receive the code in your Zalo app"
+    "sms_notice_title": "Verification via SMS",
+    "sms_notice_desc": "You'll receive a verification code via text message"
   },
   "settings": {
     "about": "About",
@@ -1189,5 +1235,5 @@
     "vietnamese": "Vietnamese",
     "website": "Website"
   },
-  "welcome": "Welcome to obytes app site"
+  "welcome": "Welcome"
 }

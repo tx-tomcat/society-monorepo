@@ -121,9 +121,10 @@ export const bookingsService = {
 
   /**
    * Get hirer's bookings
+   * @param status - Single status or comma-separated statuses (e.g., "PENDING,CONFIRMED")
    */
   async getHirerBookings(
-    status?: BookingStatus,
+    status?: string,
     page = 1,
     limit = 20
   ): Promise<BookingListResponse> {
@@ -137,9 +138,10 @@ export const bookingsService = {
 
   /**
    * Get companion's bookings
+   * @param status - Single status or comma-separated statuses (e.g., "PENDING,CONFIRMED")
    */
   async getCompanionBookings(
-    status?: BookingStatus,
+    status?: string,
     page = 1,
     limit = 20
   ): Promise<BookingListResponse> {

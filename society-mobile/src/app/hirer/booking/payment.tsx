@@ -26,17 +26,14 @@ import {
   Calendar,
   CheckCircle,
   Clock,
-  CreditCard,
-  Info,
   MapPin,
   ShieldCheck,
-  Wallet,
+  Wallet
 } from '@/components/ui/icons';
 import { getPhotoUrl } from '@/lib/api/services/companions.service';
 import {
   useCompanion,
   useCreateBooking,
-  useCreateBookingPayment,
   useWalletBalance,
 } from '@/lib/hooks';
 import { formatVND } from '@/lib/utils';
@@ -65,7 +62,8 @@ const BASE_PAYMENT_METHODS: Omit<PaymentMethod, 'balance' | 'insufficientFunds'>
 export default function PaymentScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{
-    companionId: string;
+    companionId: string; // User.id - used for booking creation
+    companionProfileId: string; // CompanionProfile.id - used for fetching companion data
     occasionId: string;
     occasionName: string;
     occasionEmoji: string;
@@ -77,15 +75,16 @@ export default function PaymentScreen() {
   }>();
   const { t } = useTranslation();
 
-  // API hooks
+  // API hooks - use companionProfileId for fetching, companionId for booking
   const { data: companionData, isLoading: isLoadingCompanion } = useCompanion(
-    params.companionId || ''
+    params.companionProfileId || params.companionId || ''
   );
   const createBooking = useCreateBooking();
-  const createPayment = useCreateBookingPayment();
+  // Note: Payment is created after companion confirms the booking, not here
 
   // Wallet balance hook
   const { data: walletData } = useWalletBalance();
+
 
   // Transform companion data from API Companion type
   const companion = React.useMemo(() => {
@@ -101,9 +100,7 @@ export default function PaymentScreen() {
 
   // Calculate pricing (needed before paymentMethods)
   const duration = parseInt(params.duration || '3', 10);
-  const subtotal = (companion?.hourlyRate || 0) * duration;
-  const serviceFee = Math.round(subtotal * 0.18); // 18% platform fee
-  const total = subtotal + serviceFee;
+  const total = (companion?.hourlyRate || 0) * duration;
 
   // Build payment methods list with Luxe Wallet at top if user has balance
   const paymentMethods = React.useMemo(() => {
@@ -142,7 +139,7 @@ export default function PaymentScreen() {
     }
   }, [paymentMethods, selectedPaymentMethod]);
 
-  const isProcessing = createBooking.isPending || createPayment.isPending;
+  const isProcessing = createBooking.isPending;
 
   const handleBack = React.useCallback(() => {
     router.back();
@@ -160,7 +157,8 @@ export default function PaymentScreen() {
       endDate.setHours(endDate.getHours() + duration);
       const endDatetime = endDate.toISOString();
 
-      // First create the booking
+      // Create the booking request (payment happens after companion confirms)
+      // Flow: Hirer creates booking (PENDING) -> Companion confirms -> Hirer pays
       const bookingResult = await createBooking.mutateAsync({
         companionId: params.companionId,
         // Only include occasionId if it's a valid non-empty string
@@ -171,22 +169,7 @@ export default function PaymentScreen() {
         specialRequests: params.notes,
       });
 
-      // Map payment method to provider
-      const providerMap: Record<
-        string,
-        'bank_transfer' | 'wallet'
-      > = {
-        luxe_wallet: 'wallet',
-        bank: 'bank_transfer',
-      };
-
-      // Then create the payment
-      await createPayment.mutateAsync({
-        bookingId: bookingResult.id,
-        provider: providerMap[selectedPaymentMethod] || 'bank_transfer',
-      });
-
-      // Navigate to confirmation screen
+      // Navigate to confirmation screen (booking created, waiting for companion to accept)
       router.push({
         pathname: '/hirer/booking/confirmation',
         params: {
@@ -196,7 +179,7 @@ export default function PaymentScreen() {
       } as unknown as Href);
     } catch (error) {
       // Error handling is done by React Query
-      console.error('Payment failed:', error);
+      console.error('Booking failed:', error);
     }
   }, [
     router,
@@ -204,9 +187,7 @@ export default function PaymentScreen() {
     agreedToTerms,
     companion,
     duration,
-    selectedPaymentMethod,
     createBooking,
-    createPayment,
   ]);
 
   const formatDate = (dateStr: string) => {
@@ -451,13 +432,6 @@ export default function PaymentScreen() {
               );
             })}
           </View>
-
-          <Pressable className="mt-4 flex-row items-center justify-center gap-2 rounded-xl border border-dashed border-border py-3">
-            <CreditCard color={colors.text.tertiary} width={18} height={18} />
-            <Text className="text-sm font-medium text-text-secondary">
-              {t('hirer.payment.add_new_method')}
-            </Text>
-          </Pressable>
         </MotiView>
 
         {/* Price Breakdown */}
@@ -477,30 +451,9 @@ export default function PaymentScreen() {
                 {formatVND(companion.hourlyRate)} × {duration}{' '}
                 {t('hirer.payment.hours')}
               </Text>
-              <Text className="font-medium text-midnight">
-                {formatVND(subtotal)}
+              <Text className="font-urbanist-bold text-2xl text-rose-400">
+                {formatVND(total)}
               </Text>
-            </View>
-            <View className="flex-row items-center justify-between">
-              <View className="flex-row items-center gap-1">
-                <Text className="text-text-secondary">
-                  {t('hirer.payment.service_fee')}
-                </Text>
-                <Info color={colors.text.tertiary} width={14} height={14} />
-              </View>
-              <Text className="font-medium text-midnight">
-                {formatVND(serviceFee)}
-              </Text>
-            </View>
-            <View className="border-t border-border-light pt-3">
-              <View className="flex-row items-center justify-between">
-                <Text className="font-urbanist-semibold text-lg text-midnight">
-                  {t('hirer.payment.total')}
-                </Text>
-                <Text className="font-urbanist-bold text-2xl text-rose-400">
-                  {formatVND(total)}
-                </Text>
-              </View>
             </View>
           </View>
         </MotiView>

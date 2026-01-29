@@ -28,7 +28,7 @@ export class ProfileService {
             // Only fetch enabled services with minimal fields
             services: {
               where: { isEnabled: true },
-              select: { serviceType: true, priceAdjustment: true },
+              select: { occasionId: true, priceAdjustment: true },
             },
             // Availability is needed for scheduling - keep but select minimal fields
             availability: {

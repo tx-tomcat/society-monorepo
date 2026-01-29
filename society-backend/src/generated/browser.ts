@@ -213,6 +213,11 @@ export type SupportTicketMessage = Prisma.SupportTicketMessageModel
  */
 export type SystemConfig = Prisma.SystemConfigModel
 /**
+ * Model PlatformConfig
+ * 
+ */
+export type PlatformConfig = Prisma.PlatformConfigModel
+/**
  * Model EmergencyContact
  * 
  */

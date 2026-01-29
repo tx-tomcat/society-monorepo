@@ -1,18 +1,25 @@
-import { DateUtils } from '@/common/utils/date.utils';
-import { StringUtils } from '@/common/utils/string.utils';
-import { PrismaService } from '@/prisma/prisma.service';
+import { DateUtils } from "@/common/utils/date.utils";
+import { StringUtils } from "@/common/utils/string.utils";
 import {
-  CachePatternsService,
   CACHE_KEYS,
   CACHE_TTL,
-} from '@/modules/cache/cache-patterns.service';
-import { BoostStatus, BoostTier, CompanionAvailability, Prisma, ServiceType, UserRole, VerificationStatus } from '@generated/client';
+  CachePatternsService,
+} from "@/modules/cache/cache-patterns.service";
+import { PrismaService } from "@/prisma/prisma.service";
+import {
+  BoostStatus,
+  BoostTier,
+  CompanionAvailability,
+  Prisma,
+  UserRole,
+  VerificationStatus,
+} from "@generated/client";
 import {
   BadRequestException,
   Injectable,
   Logger,
   NotFoundException,
-} from '@nestjs/common';
+} from "@nestjs/common";
 import {
   ActiveBoostInfo,
   BoostHistoryItem,
@@ -26,30 +33,39 @@ import {
   PurchaseBoostDto,
   UpdateAvailabilityDto,
   UpdateCompanionProfileDto,
-} from '../dto/companion.dto';
+} from "../dto/companion.dto";
 
 // Boost pricing configuration (in VND)
-const BOOST_PRICING: Record<BoostTierEnum, { durationHours: number; price: number; multiplier: number; name: string; description: string }> = {
+const BOOST_PRICING: Record<
+  BoostTierEnum,
+  {
+    durationHours: number;
+    price: number;
+    multiplier: number;
+    name: string;
+    description: string;
+  }
+> = {
   [BoostTierEnum.STANDARD]: {
-    name: 'Standard Boost',
+    name: "Standard Boost",
     durationHours: 24,
     price: 99_000, // ~$4 USD
     multiplier: 1.5,
-    description: 'Appear higher in search results for 24 hours',
+    description: "Appear higher in search results for 24 hours",
   },
   [BoostTierEnum.PREMIUM]: {
-    name: 'Premium Boost',
+    name: "Premium Boost",
     durationHours: 48,
     price: 179_000, // ~$7 USD
     multiplier: 2.0,
-    description: 'Double your visibility for 48 hours',
+    description: "Double your visibility for 48 hours",
   },
   [BoostTierEnum.SUPER]: {
-    name: 'Super Boost',
+    name: "Super Boost",
     durationHours: 72,
     price: 249_000, // ~$10 USD
     multiplier: 3.0,
-    description: 'Maximum visibility for 72 hours - appear at the top',
+    description: "Maximum visibility for 72 hours - appear at the top",
   },
 };
 
@@ -71,7 +87,7 @@ export class CompanionsService {
    */
   async browseCompanions(query: BrowseCompanionsQueryDto, userId?: string) {
     const {
-      serviceType,
+      occasionId,
       minPrice,
       maxPrice,
       rating,
@@ -83,7 +99,7 @@ export class CompanionsService {
       radiusKm = 25,
       page = 1,
       limit = 20,
-      sort = 'popular',
+      sort = "popular",
     } = query;
 
     // Get blocked user IDs if user is authenticated
@@ -91,10 +107,7 @@ export class CompanionsService {
     if (userId) {
       const blocks = await this.prisma.userBlock.findMany({
         where: {
-          OR: [
-            { blockerId: userId },
-            { blockedId: userId },
-          ],
+          OR: [{ blockerId: userId }, { blockedId: userId }],
         },
         select: { blockerId: true, blockedId: true },
       });
@@ -112,16 +125,16 @@ export class CompanionsService {
       isActive: true,
       isHidden: false,
       user: {
-        status: 'ACTIVE',
+        status: "ACTIVE",
         // Exclude blocked users from results
         ...(blockedUserIds.length > 0 && { id: { notIn: blockedUserIds } }),
       },
     };
 
-    if (serviceType) {
+    if (occasionId) {
       where.services = {
         some: {
-          serviceType: serviceType as ServiceType,
+          occasionId: occasionId,
           isEnabled: true,
         },
       };
@@ -150,25 +163,27 @@ export class CompanionsService {
     }
 
     // Build orderBy
-    let orderBy: Prisma.CompanionProfileOrderByWithRelationInput | Prisma.CompanionProfileOrderByWithRelationInput[] = {};
+    let orderBy:
+      | Prisma.CompanionProfileOrderByWithRelationInput
+      | Prisma.CompanionProfileOrderByWithRelationInput[] = {};
     switch (sort) {
-      case 'rating':
-        orderBy = { ratingAvg: 'desc' };
+      case "rating":
+        orderBy = { ratingAvg: "desc" };
         break;
-      case 'price_asc':
-        orderBy = { hourlyRate: 'asc' };
+      case "price_asc":
+        orderBy = { hourlyRate: "asc" };
         break;
-      case 'price_desc':
-        orderBy = { hourlyRate: 'desc' };
+      case "price_desc":
+        orderBy = { hourlyRate: "desc" };
         break;
-      case 'distance':
+      case "distance":
         // Distance sorting requires location data in schema - fall back to popular
         // TODO: Add locationLat/locationLng to CompanionProfile to enable distance sorting
-        orderBy = [{ totalBookings: 'desc' }, { ratingAvg: 'desc' }];
+        orderBy = [{ totalBookings: "desc" }, { ratingAvg: "desc" }];
         break;
-      case 'popular':
+      case "popular":
       default:
-        orderBy = [{ totalBookings: 'desc' }, { ratingAvg: 'desc' }];
+        orderBy = [{ totalBookings: "desc" }, { ratingAvg: "desc" }];
         break;
     }
 
@@ -194,14 +209,25 @@ export class CompanionsService {
           },
           // Only fetch first 3 photos with minimal fields for list view
           photos: {
-            orderBy: { position: 'asc' },
+            orderBy: { position: "asc" },
             take: 3,
             select: { url: true },
           },
-          // Only fetch serviceType for list view
+          // Fetch occasion info for list view
           services: {
             where: { isEnabled: true },
-            select: { serviceType: true },
+            select: {
+              occasionId: true,
+              occasion: {
+                select: {
+                  id: true,
+                  code: true,
+                  nameEn: true,
+                  nameVi: true,
+                  emoji: true,
+                },
+              },
+            },
           },
         },
       }),
@@ -215,7 +241,8 @@ export class CompanionsService {
       age: c.user.dateOfBirth
         ? DateUtils.calculateAge(c.user.dateOfBirth as Date)
         : null,
-      avatar: c.user.avatarUrl || (c.photos.length > 0 ? c.photos[0].url : null),
+      avatar:
+        c.user.avatarUrl || (c.photos.length > 0 ? c.photos[0].url : null),
       gender: c.user.gender,
       hourlyRate: c.hourlyRate,
       halfDayRate: c.halfDayRate,
@@ -226,7 +253,12 @@ export class CompanionsService {
       isFeatured: c.isFeatured,
       isBoosted: boostedCompanions.has(c.id),
       boostMultiplier: boostedCompanions.get(c.id) || null,
-      services: c.services.map((s) => s.serviceType),
+      services: c.services.map((s) => ({
+        id: s.occasion.id,
+        code: s.occasion.code,
+        name: s.occasion.nameEn, // TODO: Use language from request
+        emoji: s.occasion.emoji,
+      })),
       photos: c.photos.map((p) => p.url),
       isAvailable: c.isActive && !c.isHidden,
       distanceKm: null, // Location data not yet available in schema
@@ -234,7 +266,7 @@ export class CompanionsService {
 
     // Re-sort to prioritize boosted profiles (only for popular/default sort)
     // Boosted profiles appear first, sorted by their multiplier (highest first)
-    if (sort === 'popular' || !sort) {
+    if (sort === "popular" || !sort) {
       companionList = companionList.sort((a, b) => {
         const aMultiplier = a.boostMultiplier || 0;
         const bMultiplier = b.boostMultiplier || 0;
@@ -267,7 +299,9 @@ export class CompanionsService {
   /**
    * Get companion profile by ID (public view)
    */
-  async getCompanionProfile(companionId: string): Promise<CompanionProfileResponse> {
+  async getCompanionProfile(
+    companionId: string,
+  ): Promise<CompanionProfileResponse> {
     const companion = await this.prisma.companionProfile.findUnique({
       where: { id: companionId },
       include: {
@@ -283,10 +317,21 @@ export class CompanionsService {
           },
         },
         photos: {
-          orderBy: { position: 'asc' },
+          orderBy: { position: "asc" },
         },
         services: {
           where: { isEnabled: true },
+          include: {
+            occasion: {
+              select: {
+                id: true,
+                code: true,
+                nameEn: true,
+                nameVi: true,
+                emoji: true,
+              },
+            },
+          },
         },
         availability: {
           where: { isAvailable: true },
@@ -295,11 +340,11 @@ export class CompanionsService {
     });
 
     if (!companion) {
-      throw new NotFoundException('Companion not found');
+      throw new NotFoundException("Companion not found");
     }
 
     if (!companion.isActive || companion.isHidden) {
-      throw new NotFoundException('Companion profile not available');
+      throw new NotFoundException("Companion profile not available");
     }
 
     // Fetch reviews separately using the Review model
@@ -308,7 +353,7 @@ export class CompanionsService {
         revieweeId: companion.userId,
         isVisible: true,
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
       take: 10,
       include: {
         reviewer: {
@@ -329,7 +374,9 @@ export class CompanionsService {
       id: companion.id,
       userId: companion.userId,
       displayName: companion.user.fullName,
-      age: companion.user.dateOfBirth ? DateUtils.calculateAge(companion.user.dateOfBirth) : null,
+      age: companion.user.dateOfBirth
+        ? DateUtils.calculateAge(companion.user.dateOfBirth)
+        : null,
       bio: companion.bio,
       avatar: companion.user.avatarUrl,
       photos: companion.photos.map((p) => p.url),
@@ -346,20 +393,33 @@ export class CompanionsService {
       completedBookings: companion.completedBookings,
       isVerified: companion.verificationStatus === VerificationStatus.VERIFIED,
       isFeatured: companion.isFeatured,
-      services: companion.services.map((s) => ({
-        type: s.serviceType,
+      services: companion.services.map((s: any) => ({
+        occasionId: s.occasionId,
+        occasion: {
+          id: s.occasion.id,
+          code: s.occasion.code,
+          name: s.occasion.nameEn, // TODO: Use language from request
+          emoji: s.occasion.emoji,
+        },
         description: s.description,
         priceAdjustment: s.priceAdjustment,
       })),
-      memberSince: companion.user.createdAt.toISOString().split('T')[0],
-      reviews: reviews.map((r) => ({
+      memberSince: this.formatDateToString(companion.user.createdAt),
+      reviews: reviews.map((r: any) => ({
         id: r.id,
         rating: r.rating,
         comment: r.comment,
-        occasion: r.booking.occasionType,
-        date: r.createdAt.toISOString().split('T')[0],
+        occasion: r.booking.occasion
+          ? {
+              id: r.booking.occasion.id,
+              code: r.booking.occasion.code,
+              name: r.booking.occasion.nameEn,
+              emoji: r.booking.occasion.emoji,
+            }
+          : null,
+        date: this.formatDateToString(r.createdAt),
         reviewer: {
-          name: r.reviewer.fullName || 'Anonymous',
+          name: r.reviewer.fullName || "Anonymous",
           avatar: r.reviewer.avatarUrl,
         },
       })),
@@ -377,7 +437,11 @@ export class CompanionsService {
     companionId: string,
     startDate: string,
     endDate: string,
-  ): Promise<{ companionId: string; timezone: string; availability: DayAvailabilityDetail[] }> {
+  ): Promise<{
+    companionId: string;
+    timezone: string;
+    availability: DayAvailabilityDetail[];
+  }> {
     const companion = await this.prisma.companionProfile.findUnique({
       where: { id: companionId },
       include: {
@@ -386,7 +450,7 @@ export class CompanionsService {
     });
 
     if (!companion) {
-      throw new NotFoundException('Companion not found');
+      throw new NotFoundException("Companion not found");
     }
 
     // Get bookings for the date range
@@ -398,7 +462,7 @@ export class CompanionsService {
           lte: new Date(endDate),
         },
         status: {
-          in: ['CONFIRMED', 'ACTIVE'],
+          in: ["CONFIRMED", "ACTIVE"],
         },
       },
       select: {
@@ -413,7 +477,7 @@ export class CompanionsService {
 
     for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
       const dayOfWeek = d.getDay();
-      const dateStr = d.toISOString().split('T')[0];
+      const dateStr = d.toISOString().split("T")[0];
 
       // Find recurring availability for this day
       const dayAvailability = companion.availability.filter(
@@ -422,22 +486,26 @@ export class CompanionsService {
 
       // Find specific date exceptions
       const specificDate = companion.availability.find(
-        (a) => !a.isRecurring && a.specificDate?.toISOString().split('T')[0] === dateStr,
+        (a) =>
+          !a.isRecurring &&
+          a.specificDate?.toISOString().split("T")[0] === dateStr,
       );
 
       // Get booked slots for this date
       const bookedForDate = bookings.filter(
-        (b) => b.startDatetime.toISOString().split('T')[0] === dateStr,
+        (b) => b.startDatetime.toISOString().split("T")[0] === dateStr,
       );
 
-      const slots: { start: string; end: string }[] = dayAvailability.map((a) => ({
-        start: a.startTime,
-        end: a.endTime,
-      }));
+      const slots: { start: string; end: string }[] = dayAvailability.map(
+        (a) => ({
+          start: a.startTime,
+          end: a.endTime,
+        }),
+      );
 
       const bookedSlots = bookedForDate.map((b) => ({
-        start: b.startDatetime.toISOString().split('T')[1].substring(0, 5),
-        end: b.endDatetime.toISOString().split('T')[1].substring(0, 5),
+        start: b.startDatetime.toISOString().split("T")[1].substring(0, 5),
+        end: b.endDatetime.toISOString().split("T")[1].substring(0, 5),
       }));
 
       availability.push({
@@ -450,7 +518,7 @@ export class CompanionsService {
 
     return {
       companionId,
-      timezone: 'Asia/Ho_Chi_Minh',
+      timezone: "Asia/Ho_Chi_Minh",
       availability,
     };
   }
@@ -465,15 +533,15 @@ export class CompanionsService {
     });
 
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException("User not found");
     }
 
     if (user.role !== UserRole.COMPANION) {
-      throw new BadRequestException('User is not a companion');
+      throw new BadRequestException("User is not a companion");
     }
 
     if (!user.companionProfile) {
-      throw new NotFoundException('Companion profile not found');
+      throw new NotFoundException("Companion profile not found");
     }
 
     const updated = await this.prisma.companionProfile.update({
@@ -501,9 +569,13 @@ export class CompanionsService {
         companionProfile: {
           include: {
             photos: {
-              orderBy: { position: 'asc' },
+              orderBy: { position: "asc" },
             },
-            services: true,
+            services: {
+              include: {
+                occasion: true,
+              },
+            },
             availability: true,
             bankAccounts: true,
           },
@@ -512,11 +584,11 @@ export class CompanionsService {
     });
 
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException("User not found");
     }
 
     if (!user.companionProfile) {
-      throw new NotFoundException('Companion profile not found');
+      throw new NotFoundException("Companion profile not found");
     }
 
     const profile = user.companionProfile;
@@ -540,7 +612,13 @@ export class CompanionsService {
       })),
       services: profile.services.map((s) => ({
         id: s.id,
-        type: s.serviceType,
+        occasionId: s.occasionId,
+        occasion: {
+          id: s.occasion.id,
+          code: s.occasion.code,
+          name: s.occasion.nameEn, // TODO: Use language from request
+          emoji: s.occasion.emoji,
+        },
         description: s.description,
         priceAdjustment: s.priceAdjustment,
         isEnabled: s.isEnabled,
@@ -577,7 +655,7 @@ export class CompanionsService {
     });
 
     if (!profile) {
-      throw new NotFoundException('Companion profile not found');
+      throw new NotFoundException("Companion profile not found");
     }
 
     // Delete existing recurring availability
@@ -607,17 +685,21 @@ export class CompanionsService {
       const exceptionDates = dto.exceptions.map((e) => new Date(e.date));
 
       // Fetch all existing exceptions in a single query
-      const existingExceptions = await this.prisma.companionAvailability.findMany({
-        where: {
-          companionId: profile.id,
-          isRecurring: false,
-          specificDate: { in: exceptionDates },
-        },
-      });
+      const existingExceptions =
+        await this.prisma.companionAvailability.findMany({
+          where: {
+            companionId: profile.id,
+            isRecurring: false,
+            specificDate: { in: exceptionDates },
+          },
+        });
 
       // Create a map for quick lookup
       const existingMap = new Map(
-        existingExceptions.map((e) => [e.specificDate?.toISOString().split('T')[0], e]),
+        existingExceptions.map((e) => [
+          e.specificDate?.toISOString().split("T")[0],
+          e,
+        ]),
       );
 
       // Separate into updates and creates
@@ -633,7 +715,7 @@ export class CompanionsService {
       }[] = [];
 
       for (const exception of dto.exceptions) {
-        const dateKey = new Date(exception.date).toISOString().split('T')[0];
+        const dateKey = new Date(exception.date).toISOString().split("T")[0];
         const existing = existingMap.get(dateKey);
 
         if (existing) {
@@ -642,8 +724,8 @@ export class CompanionsService {
           toCreate.push({
             companionId: profile.id,
             dayOfWeek: new Date(exception.date).getDay(),
-            startTime: '00:00',
-            endTime: '23:59',
+            startTime: "00:00",
+            endTime: "23:59",
             isRecurring: false,
             specificDate: new Date(exception.date),
             isAvailable: exception.available,
@@ -674,19 +756,23 @@ export class CompanionsService {
       }
     }
 
-    return { success: true, message: 'Availability updated' };
+    return { success: true, message: "Availability updated" };
   }
 
   /**
    * Get companion reviews
    */
-  async getCompanionReviews(companionId: string, page: number = 1, limit: number = 20) {
+  async getCompanionReviews(
+    companionId: string,
+    page: number = 1,
+    limit: number = 20,
+  ) {
     const companion = await this.prisma.companionProfile.findUnique({
       where: { id: companionId },
     });
 
     if (!companion) {
-      throw new NotFoundException('Companion not found');
+      throw new NotFoundException("Companion not found");
     }
 
     const [reviews, total] = await Promise.all([
@@ -695,7 +781,7 @@ export class CompanionsService {
           revieweeId: companion.userId,
           isVisible: true,
         },
-        orderBy: { createdAt: 'desc' },
+        orderBy: { createdAt: "desc" },
         skip: (page - 1) * limit,
         take: limit,
         include: {
@@ -722,7 +808,7 @@ export class CompanionsService {
 
     // Calculate rating breakdown
     const ratingBreakdown = await this.prisma.review.groupBy({
-      by: ['rating'],
+      by: ["rating"],
       where: { revieweeId: companion.userId, isVisible: true },
       _count: { rating: true },
     });
@@ -734,20 +820,38 @@ export class CompanionsService {
 
     return {
       averageRating: Number(companion.ratingAvg),
-      totalReviews: companion.ratingCount,
-      ratingBreakdown: breakdown,
-      reviews: reviews.map((r) => ({
-        id: r.id,
-        rating: r.rating,
-        comment: r.comment,
-        tags: r.tags,
-        occasion: r.booking.occasionType,
-        date: r.createdAt.toISOString().split('T')[0],
-        reviewer: {
-          name: r.reviewer.fullName || 'Anonymous',
-          avatar: r.reviewer.avatarUrl,
-        },
-      })),
+      total: total,
+      ratingDistribution: breakdown,
+      reviews: reviews.map((r) => {
+        // Handle both Date objects and string dates (from Redis cache)
+        const createdAt =
+          r.createdAt instanceof Date
+            ? r.createdAt.toISOString()
+            : String(r.createdAt);
+
+        // Mask reviewer name for privacy (e.g., "Nguyễn Văn A" → "N****A")
+        const maskName = (name: string | null): string => {
+          if (!name || name.length < 2) return "A****";
+          const firstChar = name.charAt(0);
+          const lastChar = name.charAt(name.length - 1);
+          return `${firstChar}****${lastChar}`;
+        };
+
+        return {
+          id: r.id,
+          bookingId: r.bookingId,
+          reviewerId: r.reviewerId,
+          rating: r.rating,
+          comment: r.comment,
+          tags: r.tags,
+          createdAt,
+          reviewer: {
+            id: r.reviewerId,
+            fullName: maskName(r.reviewer.fullName),
+            avatarUrl: r.reviewer.avatarUrl,
+          },
+        };
+      }),
       pagination: {
         page,
         limit,
@@ -767,7 +871,7 @@ export class CompanionsService {
     });
 
     if (!profile) {
-      throw new NotFoundException('Companion profile not found');
+      throw new NotFoundException("Companion profile not found");
     }
 
     const nextPosition = profile.photos.length;
@@ -801,7 +905,7 @@ export class CompanionsService {
     });
 
     if (!profile) {
-      throw new NotFoundException('Companion profile not found');
+      throw new NotFoundException("Companion profile not found");
     }
 
     const photo = await this.prisma.companionPhoto.findUnique({
@@ -809,7 +913,7 @@ export class CompanionsService {
     });
 
     if (!photo || photo.companionId !== profile.id) {
-      throw new NotFoundException('Photo not found');
+      throw new NotFoundException("Photo not found");
     }
 
     await this.prisma.companionPhoto.delete({
@@ -824,28 +928,33 @@ export class CompanionsService {
    */
   async updateServices(
     userId: string,
-    services: { type: ServiceType; description?: string; priceAdjustment?: number; isEnabled?: boolean }[],
+    services: {
+      occasionId: string;
+      description?: string;
+      priceAdjustment?: number;
+      isEnabled?: boolean;
+    }[],
   ) {
     const profile = await this.prisma.companionProfile.findUnique({
       where: { userId },
     });
 
     if (!profile) {
-      throw new NotFoundException('Companion profile not found');
+      throw new NotFoundException("Companion profile not found");
     }
 
     // Upsert each service
     for (const service of services) {
       await this.prisma.companionService.upsert({
         where: {
-          companionId_serviceType: {
+          companionId_occasionId: {
             companionId: profile.id,
-            serviceType: service.type,
+            occasionId: service.occasionId,
           },
         },
         create: {
           companionId: profile.id,
-          serviceType: service.type,
+          occasionId: service.occasionId,
           description: service.description,
           priceAdjustment: service.priceAdjustment ?? 0,
           isEnabled: service.isEnabled ?? true,
@@ -858,17 +967,18 @@ export class CompanionsService {
       });
     }
 
-    // Return updated services
+    // Return updated services with occasion data
     const updatedServices = await this.prisma.companionService.findMany({
       where: { companionId: profile.id },
+      include: { occasion: true },
     });
 
     return updatedServices;
   }
 
-
-
-  private getThisWeekAvailability(availability: CompanionAvailability[]): { date: string; slots: string[] }[] {
+  private getThisWeekAvailability(
+    availability: CompanionAvailability[],
+  ): { date: string; slots: string[] }[] {
     const result: { date: string; slots: string[] }[] = [];
     const today = new Date();
 
@@ -876,10 +986,12 @@ export class CompanionsService {
       const date = new Date(today);
       date.setDate(date.getDate() + i);
       const dayOfWeek = date.getDay();
-      const dateStr = date.toISOString().split('T')[0];
+      const dateStr = date.toISOString().split("T")[0];
 
       const daySlots = availability
-        .filter((a) => a.isRecurring && a.dayOfWeek === dayOfWeek && a.isAvailable)
+        .filter(
+          (a) => a.isRecurring && a.dayOfWeek === dayOfWeek && a.isAvailable,
+        )
         .map((a) => `${a.startTime}-${a.endTime}`);
 
       if (daySlots.length > 0) {
@@ -888,6 +1000,17 @@ export class CompanionsService {
     }
 
     return result;
+  }
+
+  /**
+   * Format a date value to YYYY-MM-DD string
+   * Handles both Date objects and ISO date strings (from cache)
+   */
+  private formatDateToString(date: Date | string): string {
+    if (typeof date === "string") {
+      return date.split("T")[0];
+    }
+    return date.toISOString().split("T")[0];
   }
 
   // ============================================
@@ -917,7 +1040,7 @@ export class CompanionsService {
     });
 
     if (!profile) {
-      throw new NotFoundException('Companion profile not found');
+      throw new NotFoundException("Companion profile not found");
     }
 
     const activeBoost = await this.prisma.profileBoost.findFirst({
@@ -926,7 +1049,7 @@ export class CompanionsService {
         status: BoostStatus.ACTIVE,
         expiresAt: { gt: new Date() },
       },
-      orderBy: { expiresAt: 'desc' },
+      orderBy: { expiresAt: "desc" },
     });
 
     if (!activeBoost) {
@@ -934,7 +1057,12 @@ export class CompanionsService {
     }
 
     const remainingHours = activeBoost.expiresAt
-      ? Math.max(0, Math.ceil((activeBoost.expiresAt.getTime() - Date.now()) / (1000 * 60 * 60)))
+      ? Math.max(
+          0,
+          Math.ceil(
+            (activeBoost.expiresAt.getTime() - Date.now()) / (1000 * 60 * 60),
+          ),
+        )
       : null;
 
     return {
@@ -951,18 +1079,21 @@ export class CompanionsService {
   /**
    * Get boost history for a companion
    */
-  async getBoostHistory(userId: string, limit = 10): Promise<BoostHistoryItem[]> {
+  async getBoostHistory(
+    userId: string,
+    limit = 10,
+  ): Promise<BoostHistoryItem[]> {
     const profile = await this.prisma.companionProfile.findUnique({
       where: { userId },
     });
 
     if (!profile) {
-      throw new NotFoundException('Companion profile not found');
+      throw new NotFoundException("Companion profile not found");
     }
 
     const boosts = await this.prisma.profileBoost.findMany({
       where: { companionId: profile.id },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
       take: limit,
     });
 
@@ -981,13 +1112,16 @@ export class CompanionsService {
    * Purchase a profile boost
    * Creates a PENDING boost and returns payment URL for completing the purchase
    */
-  async purchaseBoost(userId: string, dto: PurchaseBoostDto): Promise<BoostPurchaseResult> {
+  async purchaseBoost(
+    userId: string,
+    dto: PurchaseBoostDto,
+  ): Promise<BoostPurchaseResult> {
     const profile = await this.prisma.companionProfile.findUnique({
       where: { userId },
     });
 
     if (!profile) {
-      throw new NotFoundException('Companion profile not found');
+      throw new NotFoundException("Companion profile not found");
     }
 
     // Check if there's already an active boost
@@ -1001,8 +1135,9 @@ export class CompanionsService {
 
     if (existingBoost) {
       throw new BadRequestException({
-        message: 'You already have an active boost. Please wait until it expires before purchasing a new one.',
-        error: 'BOOST_ALREADY_ACTIVE',
+        message:
+          "You already have an active boost. Please wait until it expires before purchasing a new one.",
+        error: "BOOST_ALREADY_ACTIVE",
         currentBoostExpires: existingBoost.expiresAt,
       });
     }
@@ -1018,15 +1153,16 @@ export class CompanionsService {
 
     if (pendingBoost) {
       throw new BadRequestException({
-        message: 'You have a pending boost purchase. Please complete or wait for it to expire before purchasing again.',
-        error: 'BOOST_PAYMENT_PENDING',
+        message:
+          "You have a pending boost purchase. Please complete or wait for it to expire before purchasing again.",
+        error: "BOOST_PAYMENT_PENDING",
         pendingBoostId: pendingBoost.id,
       });
     }
 
     const pricing = BOOST_PRICING[dto.tier];
     if (!pricing) {
-      throw new BadRequestException('Invalid boost tier');
+      throw new BadRequestException("Invalid boost tier");
     }
 
     // Create boost with PENDING status (awaiting payment)
@@ -1041,7 +1177,9 @@ export class CompanionsService {
       },
     });
 
-    this.logger.log(`Profile boost created with PENDING status for companion ${profile.id}: ${dto.tier} tier`);
+    this.logger.log(
+      `Profile boost created with PENDING status for companion ${profile.id}: ${dto.tier} tier`,
+    );
 
     // Return boost info - payment URL will be generated by the controller using payment service
     return {
@@ -1067,18 +1205,24 @@ export class CompanionsService {
     }
 
     if (boost.status !== BoostStatus.PENDING) {
-      this.logger.warn(`Cannot activate boost ${boostId}: status is ${boost.status}, expected PENDING`);
+      this.logger.warn(
+        `Cannot activate boost ${boostId}: status is ${boost.status}, expected PENDING`,
+      );
       return;
     }
 
     const pricing = BOOST_PRICING[boost.tier as unknown as BoostTierEnum];
     if (!pricing) {
-      this.logger.error(`Invalid boost tier for boost ${boostId}: ${boost.tier}`);
+      this.logger.error(
+        `Invalid boost tier for boost ${boostId}: ${boost.tier}`,
+      );
       return;
     }
 
     const now = new Date();
-    const expiresAt = new Date(now.getTime() + pricing.durationHours * 60 * 60 * 1000);
+    const expiresAt = new Date(
+      now.getTime() + pricing.durationHours * 60 * 60 * 1000,
+    );
 
     await this.prisma.profileBoost.update({
       where: { id: boostId },
@@ -1089,7 +1233,9 @@ export class CompanionsService {
       },
     });
 
-    this.logger.log(`Profile boost ${boostId} activated, expires ${expiresAt.toISOString()}`);
+    this.logger.log(
+      `Profile boost ${boostId} activated, expires ${expiresAt.toISOString()}`,
+    );
   }
 
   /**
@@ -1111,13 +1257,16 @@ export class CompanionsService {
   /**
    * Cancel an active boost (no refund)
    */
-  async cancelBoost(userId: string, boostId: string): Promise<{ success: boolean; message: string }> {
+  async cancelBoost(
+    userId: string,
+    boostId: string,
+  ): Promise<{ success: boolean; message: string }> {
     const profile = await this.prisma.companionProfile.findUnique({
       where: { userId },
     });
 
     if (!profile) {
-      throw new NotFoundException('Companion profile not found');
+      throw new NotFoundException("Companion profile not found");
     }
 
     const boost = await this.prisma.profileBoost.findFirst({
@@ -1129,7 +1278,7 @@ export class CompanionsService {
     });
 
     if (!boost) {
-      throw new NotFoundException('Active boost not found');
+      throw new NotFoundException("Active boost not found");
     }
 
     await this.prisma.profileBoost.update({
@@ -1137,11 +1286,13 @@ export class CompanionsService {
       data: { status: BoostStatus.CANCELLED },
     });
 
-    this.logger.log(`Profile boost ${boostId} cancelled by companion ${profile.id}`);
+    this.logger.log(
+      `Profile boost ${boostId} cancelled by companion ${profile.id}`,
+    );
 
     return {
       success: true,
-      message: 'Boost has been cancelled. No refund will be provided.',
+      message: "Boost has been cancelled. No refund will be provided.",
     };
   }
 
@@ -1169,7 +1320,9 @@ export class CompanionsService {
     const totalExpired = result.count + pendingResult.count;
 
     if (totalExpired > 0) {
-      this.logger.log(`Expired ${result.count} active boosts and ${pendingResult.count} pending boosts`);
+      this.logger.log(
+        `Expired ${result.count} active boosts and ${pendingResult.count} pending boosts`,
+      );
     }
 
     return { count: totalExpired };
@@ -1195,7 +1348,7 @@ export class CompanionsService {
             companionId: true,
             multiplier: true,
           },
-          orderBy: { multiplier: 'desc' },
+          orderBy: { multiplier: "desc" },
         });
 
         const boostMap = new Map<string, number>();

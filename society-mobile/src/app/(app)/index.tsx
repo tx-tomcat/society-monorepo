@@ -49,6 +49,8 @@ export default function HirerDashboard() {
 
   // Get current user for greeting
   const { data: currentUser } = useCurrentUser();
+
+  console.log('currentUser', currentUser);
   const userName = currentUser?.user?.fullName?.split(' ')[0] || 'there';
 
   const fetchDashboardData = React.useCallback(async () => {

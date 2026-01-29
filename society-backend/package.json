@@ -10,7 +10,8 @@
     "start": "node dist/main",
     "test": "jest",
     "db:seed:companions": "npx tsx prisma/seed-companions.ts",
-    "db:seed:invitations": "npx tsx prisma/seed-invitations.ts"
+    "db:seed:invitations": "npx tsx prisma/seed-invitations.ts",
+    "db:seed:platform-config": "npx tsx prisma/seed-platform-config.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.71.2",

@@ -278,6 +278,7 @@ export type OccasionWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"Occasion"> | Date | string
   bookings?: Prisma.BookingListRelationFilter
   interactions?: Prisma.OccasionInteractionListRelationFilter
+  companionServices?: Prisma.CompanionServiceListRelationFilter
 }
 
 export type OccasionOrderByWithRelationInput = {
@@ -297,6 +298,7 @@ export type OccasionOrderByWithRelationInput = {
   updatedAt?: Prisma.SortOrder
   bookings?: Prisma.BookingOrderByRelationAggregateInput
   interactions?: Prisma.OccasionInteractionOrderByRelationAggregateInput
+  companionServices?: Prisma.CompanionServiceOrderByRelationAggregateInput
 }
 
 export type OccasionWhereUniqueInput = Prisma.AtLeast<{
@@ -319,6 +321,7 @@ export type OccasionWhereUniqueInput = Prisma.AtLeast<{
   updatedAt?: Prisma.DateTimeFilter<"Occasion"> | Date | string
   bookings?: Prisma.BookingListRelationFilter
   interactions?: Prisma.OccasionInteractionListRelationFilter
+  companionServices?: Prisma.CompanionServiceListRelationFilter
 }, "id" | "code">
 
 export type OccasionOrderByWithAggregationInput = {
@@ -380,6 +383,7 @@ export type OccasionCreateInput = {
   updatedAt?: Date | string
   bookings?: Prisma.BookingCreateNestedManyWithoutOccasionInput
   interactions?: Prisma.OccasionInteractionCreateNestedManyWithoutOccasionInput
+  companionServices?: Prisma.CompanionServiceCreateNestedManyWithoutOccasionInput
 }
 
 export type OccasionUncheckedCreateInput = {
@@ -399,6 +403,7 @@ export type OccasionUncheckedCreateInput = {
   updatedAt?: Date | string
   bookings?: Prisma.BookingUncheckedCreateNestedManyWithoutOccasionInput
   interactions?: Prisma.OccasionInteractionUncheckedCreateNestedManyWithoutOccasionInput
+  companionServices?: Prisma.CompanionServiceUncheckedCreateNestedManyWithoutOccasionInput
 }
 
 export type OccasionUpdateInput = {
@@ -418,6 +423,7 @@ export type OccasionUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   bookings?: Prisma.BookingUpdateManyWithoutOccasionNestedInput
   interactions?: Prisma.OccasionInteractionUpdateManyWithoutOccasionNestedInput
+  companionServices?: Prisma.CompanionServiceUpdateManyWithoutOccasionNestedInput
 }
 
 export type OccasionUncheckedUpdateInput = {
@@ -437,6 +443,7 @@ export type OccasionUncheckedUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   bookings?: Prisma.BookingUncheckedUpdateManyWithoutOccasionNestedInput
   interactions?: Prisma.OccasionInteractionUncheckedUpdateManyWithoutOccasionNestedInput
+  companionServices?: Prisma.CompanionServiceUncheckedUpdateManyWithoutOccasionNestedInput
 }
 
 export type OccasionCreateManyInput = {
@@ -488,6 +495,11 @@ export type OccasionUncheckedUpdateManyInput = {
   holidays?: Prisma.OccasionUpdateholidaysInput | string[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type OccasionScalarRelationFilter = {
+  is?: Prisma.OccasionWhereInput
+  isNot?: Prisma.OccasionWhereInput
 }
 
 export type OccasionNullableScalarRelationFilter = {
@@ -548,9 +560,18 @@ export type OccasionSumOrderByAggregateInput = {
   displayOrder?: Prisma.SortOrder
 }
 
-export type OccasionScalarRelationFilter = {
-  is?: Prisma.OccasionWhereInput
-  isNot?: Prisma.OccasionWhereInput
+export type OccasionCreateNestedOneWithoutCompanionServicesInput = {
+  create?: Prisma.XOR<Prisma.OccasionCreateWithoutCompanionServicesInput, Prisma.OccasionUncheckedCreateWithoutCompanionServicesInput>
+  connectOrCreate?: Prisma.OccasionCreateOrConnectWithoutCompanionServicesInput
+  connect?: Prisma.OccasionWhereUniqueInput
+}
+
+export type OccasionUpdateOneRequiredWithoutCompanionServicesNestedInput = {
+  create?: Prisma.XOR<Prisma.OccasionCreateWithoutCompanionServicesInput, Prisma.OccasionUncheckedCreateWithoutCompanionServicesInput>
+  connectOrCreate?: Prisma.OccasionCreateOrConnectWithoutCompanionServicesInput
+  upsert?: Prisma.OccasionUpsertWithoutCompanionServicesInput
+  connect?: Prisma.OccasionWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.OccasionUpdateToOneWithWhereWithoutCompanionServicesInput, Prisma.OccasionUpdateWithoutCompanionServicesInput>, Prisma.OccasionUncheckedUpdateWithoutCompanionServicesInput>
 }
 
 export type OccasionCreateNestedOneWithoutBookingsInput = {
@@ -610,6 +631,98 @@ export type OccasionUpdateOneRequiredWithoutInteractionsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.OccasionUpdateToOneWithWhereWithoutInteractionsInput, Prisma.OccasionUpdateWithoutInteractionsInput>, Prisma.OccasionUncheckedUpdateWithoutInteractionsInput>
 }
 
+export type OccasionCreateWithoutCompanionServicesInput = {
+  id?: string
+  code: string
+  emoji: string
+  nameEn: string
+  nameVi: string
+  descriptionEn?: string | null
+  descriptionVi?: string | null
+  displayOrder?: number
+  isActive?: boolean
+  timeSlots?: Prisma.OccasionCreatetimeSlotsInput | string[]
+  dayTypes?: Prisma.OccasionCreatedayTypesInput | string[]
+  holidays?: Prisma.OccasionCreateholidaysInput | string[]
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  bookings?: Prisma.BookingCreateNestedManyWithoutOccasionInput
+  interactions?: Prisma.OccasionInteractionCreateNestedManyWithoutOccasionInput
+}
+
+export type OccasionUncheckedCreateWithoutCompanionServicesInput = {
+  id?: string
+  code: string
+  emoji: string
+  nameEn: string
+  nameVi: string
+  descriptionEn?: string | null
+  descriptionVi?: string | null
+  displayOrder?: number
+  isActive?: boolean
+  timeSlots?: Prisma.OccasionCreatetimeSlotsInput | string[]
+  dayTypes?: Prisma.OccasionCreatedayTypesInput | string[]
+  holidays?: Prisma.OccasionCreateholidaysInput | string[]
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  bookings?: Prisma.BookingUncheckedCreateNestedManyWithoutOccasionInput
+  interactions?: Prisma.OccasionInteractionUncheckedCreateNestedManyWithoutOccasionInput
+}
+
+export type OccasionCreateOrConnectWithoutCompanionServicesInput = {
+  where: Prisma.OccasionWhereUniqueInput
+  create: Prisma.XOR<Prisma.OccasionCreateWithoutCompanionServicesInput, Prisma.OccasionUncheckedCreateWithoutCompanionServicesInput>
+}
+
+export type OccasionUpsertWithoutCompanionServicesInput = {
+  update: Prisma.XOR<Prisma.OccasionUpdateWithoutCompanionServicesInput, Prisma.OccasionUncheckedUpdateWithoutCompanionServicesInput>
+  create: Prisma.XOR<Prisma.OccasionCreateWithoutCompanionServicesInput, Prisma.OccasionUncheckedCreateWithoutCompanionServicesInput>
+  where?: Prisma.OccasionWhereInput
+}
+
+export type OccasionUpdateToOneWithWhereWithoutCompanionServicesInput = {
+  where?: Prisma.OccasionWhereInput
+  data: Prisma.XOR<Prisma.OccasionUpdateWithoutCompanionServicesInput, Prisma.OccasionUncheckedUpdateWithoutCompanionServicesInput>
+}
+
+export type OccasionUpdateWithoutCompanionServicesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  emoji?: Prisma.StringFieldUpdateOperationsInput | string
+  nameEn?: Prisma.StringFieldUpdateOperationsInput | string
+  nameVi?: Prisma.StringFieldUpdateOperationsInput | string
+  descriptionEn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  descriptionVi?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  displayOrder?: Prisma.IntFieldUpdateOperationsInput | number
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  timeSlots?: Prisma.OccasionUpdatetimeSlotsInput | string[]
+  dayTypes?: Prisma.OccasionUpdatedayTypesInput | string[]
+  holidays?: Prisma.OccasionUpdateholidaysInput | string[]
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  bookings?: Prisma.BookingUpdateManyWithoutOccasionNestedInput
+  interactions?: Prisma.OccasionInteractionUpdateManyWithoutOccasionNestedInput
+}
+
+export type OccasionUncheckedUpdateWithoutCompanionServicesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  emoji?: Prisma.StringFieldUpdateOperationsInput | string
+  nameEn?: Prisma.StringFieldUpdateOperationsInput | string
+  nameVi?: Prisma.StringFieldUpdateOperationsInput | string
+  descriptionEn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  descriptionVi?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  displayOrder?: Prisma.IntFieldUpdateOperationsInput | number
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  timeSlots?: Prisma.OccasionUpdatetimeSlotsInput | string[]
+  dayTypes?: Prisma.OccasionUpdatedayTypesInput | string[]
+  holidays?: Prisma.OccasionUpdateholidaysInput | string[]
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  bookings?: Prisma.BookingUncheckedUpdateManyWithoutOccasionNestedInput
+  interactions?: Prisma.OccasionInteractionUncheckedUpdateManyWithoutOccasionNestedInput
+}
+
 export type OccasionCreateWithoutBookingsInput = {
   id?: string
   code: string
@@ -626,6 +739,7 @@ export type OccasionCreateWithoutBookingsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   interactions?: Prisma.OccasionInteractionCreateNestedManyWithoutOccasionInput
+  companionServices?: Prisma.CompanionServiceCreateNestedManyWithoutOccasionInput
 }
 
 export type OccasionUncheckedCreateWithoutBookingsInput = {
@@ -644,6 +758,7 @@ export type OccasionUncheckedCreateWithoutBookingsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   interactions?: Prisma.OccasionInteractionUncheckedCreateNestedManyWithoutOccasionInput
+  companionServices?: Prisma.CompanionServiceUncheckedCreateNestedManyWithoutOccasionInput
 }
 
 export type OccasionCreateOrConnectWithoutBookingsInput = {
@@ -678,6 +793,7 @@ export type OccasionUpdateWithoutBookingsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   interactions?: Prisma.OccasionInteractionUpdateManyWithoutOccasionNestedInput
+  companionServices?: Prisma.CompanionServiceUpdateManyWithoutOccasionNestedInput
 }
 
 export type OccasionUncheckedUpdateWithoutBookingsInput = {
@@ -696,6 +812,7 @@ export type OccasionUncheckedUpdateWithoutBookingsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   interactions?: Prisma.OccasionInteractionUncheckedUpdateManyWithoutOccasionNestedInput
+  companionServices?: Prisma.CompanionServiceUncheckedUpdateManyWithoutOccasionNestedInput
 }
 
 export type OccasionCreateWithoutInteractionsInput = {
@@ -714,6 +831,7 @@ export type OccasionCreateWithoutInteractionsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   bookings?: Prisma.BookingCreateNestedManyWithoutOccasionInput
+  companionServices?: Prisma.CompanionServiceCreateNestedManyWithoutOccasionInput
 }
 
 export type OccasionUncheckedCreateWithoutInteractionsInput = {
@@ -732,6 +850,7 @@ export type OccasionUncheckedCreateWithoutInteractionsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   bookings?: Prisma.BookingUncheckedCreateNestedManyWithoutOccasionInput
+  companionServices?: Prisma.CompanionServiceUncheckedCreateNestedManyWithoutOccasionInput
 }
 
 export type OccasionCreateOrConnectWithoutInteractionsInput = {
@@ -766,6 +885,7 @@ export type OccasionUpdateWithoutInteractionsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   bookings?: Prisma.BookingUpdateManyWithoutOccasionNestedInput
+  companionServices?: Prisma.CompanionServiceUpdateManyWithoutOccasionNestedInput
 }
 
 export type OccasionUncheckedUpdateWithoutInteractionsInput = {
@@ -784,6 +904,7 @@ export type OccasionUncheckedUpdateWithoutInteractionsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   bookings?: Prisma.BookingUncheckedUpdateManyWithoutOccasionNestedInput
+  companionServices?: Prisma.CompanionServiceUncheckedUpdateManyWithoutOccasionNestedInput
 }
 
 
@@ -794,11 +915,13 @@ export type OccasionUncheckedUpdateWithoutInteractionsInput = {
 export type OccasionCountOutputType = {
   bookings: number
   interactions: number
+  companionServices: number
 }
 
 export type OccasionCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   bookings?: boolean | OccasionCountOutputTypeCountBookingsArgs
   interactions?: boolean | OccasionCountOutputTypeCountInteractionsArgs
+  companionServices?: boolean | OccasionCountOutputTypeCountCompanionServicesArgs
 }
 
 /**
@@ -825,6 +948,13 @@ export type OccasionCountOutputTypeCountInteractionsArgs<ExtArgs extends runtime
   where?: Prisma.OccasionInteractionWhereInput
 }
 
+/**
+ * OccasionCountOutputType without action
+ */
+export type OccasionCountOutputTypeCountCompanionServicesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CompanionServiceWhereInput
+}
+
 
 export type OccasionSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -843,6 +973,7 @@ export type OccasionSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   updatedAt?: boolean
   bookings?: boolean | Prisma.Occasion$bookingsArgs<ExtArgs>
   interactions?: boolean | Prisma.Occasion$interactionsArgs<ExtArgs>
+  companionServices?: boolean | Prisma.Occasion$companionServicesArgs<ExtArgs>
   _count?: boolean | Prisma.OccasionCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["occasion"]>
 
@@ -901,6 +1032,7 @@ export type OccasionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs =
 export type OccasionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   bookings?: boolean | Prisma.Occasion$bookingsArgs<ExtArgs>
   interactions?: boolean | Prisma.Occasion$interactionsArgs<ExtArgs>
+  companionServices?: boolean | Prisma.Occasion$companionServicesArgs<ExtArgs>
   _count?: boolean | Prisma.OccasionCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type OccasionIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -911,6 +1043,7 @@ export type $OccasionPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
   objects: {
     bookings: Prisma.$BookingPayload<ExtArgs>[]
     interactions: Prisma.$OccasionInteractionPayload<ExtArgs>[]
+    companionServices: Prisma.$CompanionServicePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1323,6 +1456,7 @@ export interface Prisma__OccasionClient<T, Null = never, ExtArgs extends runtime
   readonly [Symbol.toStringTag]: "PrismaPromise"
   bookings<T extends Prisma.Occasion$bookingsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Occasion$bookingsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BookingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   interactions<T extends Prisma.Occasion$interactionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Occasion$interactionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OccasionInteractionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  companionServices<T extends Prisma.Occasion$companionServicesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Occasion$companionServicesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CompanionServicePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1799,6 +1933,30 @@ export type Occasion$interactionsArgs<ExtArgs extends runtime.Types.Extensions.I
   take?: number
   skip?: number
   distinct?: Prisma.OccasionInteractionScalarFieldEnum | Prisma.OccasionInteractionScalarFieldEnum[]
+}
+
+/**
+ * Occasion.companionServices
+ */
+export type Occasion$companionServicesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CompanionService
+   */
+  select?: Prisma.CompanionServiceSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CompanionService
+   */
+  omit?: Prisma.CompanionServiceOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompanionServiceInclude<ExtArgs> | null
+  where?: Prisma.CompanionServiceWhereInput
+  orderBy?: Prisma.CompanionServiceOrderByWithRelationInput | Prisma.CompanionServiceOrderByWithRelationInput[]
+  cursor?: Prisma.CompanionServiceWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CompanionServiceScalarFieldEnum | Prisma.CompanionServiceScalarFieldEnum[]
 }
 
 /**

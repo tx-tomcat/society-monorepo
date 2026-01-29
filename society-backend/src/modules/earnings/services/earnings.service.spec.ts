@@ -3,7 +3,7 @@ import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { EarningsService } from './earnings.service';
 import { PrismaService } from '@/prisma/prisma.service';
 import { VerificationService } from '../../verification/services/verification.service';
-import { EarningsStatus, WithdrawalStatus, ServiceType, VerificationStatus } from '@generated/client';
+import { EarningsStatus, WithdrawalStatus, VerificationStatus } from '@generated/client';
 
 describe('EarningsService', () => {
   let service: EarningsService;
@@ -112,7 +112,8 @@ describe('EarningsService', () => {
           releasedAt: new Date(),
           createdAt: new Date(),
           booking: {
-            occasionType: ServiceType.CASUAL_OUTING,
+            occasionId: 'occasion-1',
+            occasion: { id: 'occasion-1', code: 'cafe', nameEn: 'Cafe Meetup', emoji: '☕' },
             hirer: { fullName: 'John' },
           },
         },

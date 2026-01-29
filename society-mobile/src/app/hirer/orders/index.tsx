@@ -203,16 +203,16 @@ export default function MyBookings() {
         occasionEmoji: b.occasion?.emoji || '👋',
         date: b.startDatetime
           ? new Date(b.startDatetime).toLocaleDateString('en-US', {
-              month: 'short',
-              day: 'numeric',
-            })
+            month: 'short',
+            day: 'numeric',
+          })
           : '',
         time: b.startDatetime
           ? new Date(b.startDatetime).toLocaleTimeString('en-US', {
-              hour: 'numeric',
-              minute: '2-digit',
-              hour12: true,
-            })
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: true,
+          })
           : `${b.durationHours}h`,
         location: b.locationAddress?.split(',')[0] || '',
         status: mapStatus(b.status),
@@ -261,14 +261,12 @@ export default function MyBookings() {
                 className="flex-1"
               >
                 <View
-                  className={`items-center rounded-lg py-2 ${
-                    isActive ? 'bg-teal-400' : 'bg-neutral-100'
-                  }`}
+                  className={`items-center rounded-lg py-2 ${isActive ? 'bg-teal-400' : 'bg-neutral-100'
+                    }`}
                 >
                   <Text
-                    className={`text-xs font-semibold ${
-                      isActive ? 'text-white' : 'text-text-secondary'
-                    }`}
+                    className={`text-xs font-semibold ${isActive ? 'text-white' : 'text-text-secondary'
+                      }`}
                   >
                     {t(tab.labelKey)}
                   </Text>
@@ -288,7 +286,6 @@ export default function MyBookings() {
         <FlashList
           data={bookings}
           renderItem={renderBooking}
-          estimatedItemSize={130}
           keyExtractor={(item) => item.id}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingTop: 12 }}

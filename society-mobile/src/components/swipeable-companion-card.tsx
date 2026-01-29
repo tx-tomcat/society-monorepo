@@ -25,15 +25,13 @@ import { Badge } from '@/components/ui/badge';
 import {
   Calendar,
   Heart,
-  MapPin,
   MessageCircle,
   OnlineDot,
   ShieldCheck,
   Star,
 } from '@/components/ui/icons';
 import type { ScoredCompanion } from '@/lib/api/services/recommendations.service';
-import { useCompanion } from '@/lib/hooks/use-companions';
-import { formatVND } from '@/lib/utils';
+import { formatLanguages, formatVND, getOccasionName } from '@/lib/utils';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const CARD_WIDTH = SCREEN_WIDTH - 32;
@@ -64,6 +62,254 @@ function PhotoIndicator({
 }
 
 // Main swipeable card component
+// Static card for FlatList (same design, no swipe gestures)
+export function CompanionCard({
+  recommendation,
+  onBookPress,
+  onCardPress,
+}: {
+  recommendation: ScoredCompanion;
+  onBookPress?: (companionId: string) => void;
+  onCardPress?: (companionId: string) => void;
+}) {
+  const { t, i18n } = useTranslation();
+  const router = useRouter();
+
+  // Use embedded companion data from recommendation (no API call needed!)
+  const companion = recommendation.companion;
+
+  const [currentPhotoIndex, setCurrentPhotoIndex] = React.useState(0);
+
+  // Get photos array from embedded data
+  const photos = React.useMemo(() => {
+    if (!companion?.photos?.length) {
+      return companion?.avatar
+        ? [companion.avatar]
+        : ['https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=800'];
+    }
+    return companion.photos.map((p) => p.url);
+  }, [companion]);
+
+  const handleViewProfile = React.useCallback(() => {
+    if (onCardPress) {
+      onCardPress(recommendation.companionId);
+    } else {
+      router.push(`/hirer/companion/${recommendation.companionId}` as Href);
+    }
+  }, [router, recommendation.companionId, onCardPress]);
+
+  const handleBookNow = React.useCallback(() => {
+    if (onBookPress) {
+      onBookPress(recommendation.companionId);
+    }
+  }, [onBookPress, recommendation.companionId]);
+
+  // Handle photo tap to navigate between photos
+  const handleLeftTap = React.useCallback(() => {
+    if (currentPhotoIndex > 0) {
+      setCurrentPhotoIndex((prev) => prev - 1);
+    }
+  }, [currentPhotoIndex]);
+
+  const handleRightTap = React.useCallback(() => {
+    if (currentPhotoIndex < photos.length - 1) {
+      setCurrentPhotoIndex((prev) => prev + 1);
+    }
+  }, [currentPhotoIndex, photos.length]);
+
+  if (!companion) {
+    return (
+      <RNView
+        className="mx-4 mb-4 overflow-hidden rounded-3xl bg-charcoal-100"
+        style={{ height: CARD_HEIGHT }}
+      />
+    );
+  }
+
+  return (
+    <Pressable onPress={handleViewProfile}>
+      <RNView
+        className="mx-4 mb-4 overflow-hidden rounded-3xl bg-charcoal-100"
+        style={{
+          height: CARD_HEIGHT,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 8 },
+          shadowOpacity: 0.12,
+          shadowRadius: 16,
+          elevation: 12,
+        }}
+      >
+        {/* Photo with gradient overlay */}
+        <RNView className="relative flex-1">
+          <Image
+            source={{ uri: photos[currentPhotoIndex] }}
+            className="size-full"
+            contentFit="cover"
+          />
+
+          {/* Gradient overlay for text readability */}
+          <LinearGradient
+            colors={['transparent', 'rgba(0,0,0,0.3)', 'rgba(0,0,0,0.85)']}
+            locations={[0.4, 0.65, 1]}
+            style={{
+              position: 'absolute',
+              left: 0,
+              right: 0,
+              bottom: 0,
+              height: '70%',
+            }}
+          />
+
+          {/* Photo navigation tap zones */}
+          <RNView className="absolute inset-0 flex-row">
+            <Pressable className="flex-1" onPress={handleLeftTap} />
+            <Pressable className="flex-1" onPress={handleRightTap} />
+          </RNView>
+
+          {/* Photo indicator */}
+          <PhotoIndicator total={photos.length} current={currentPhotoIndex} />
+
+          {/* Top badges */}
+          <RNView className="absolute left-4 top-7 flex-row gap-2">
+            {companion.isActive && (
+              <Badge
+                label={t('hirer.companion_card.online')}
+                variant="online"
+                size="sm"
+                icon={<OnlineDot color="#FFFFFF" width={8} height={8} />}
+              />
+            )}
+            {companion.isVerified && (
+              <Badge
+                label={t('hirer.companion_card.verified')}
+                variant="verified"
+                size="sm"
+                icon={<ShieldCheck color="#FFFFFF" width={12} height={12} />}
+              />
+            )}
+          </RNView>
+
+          {/* Bottom content overlay */}
+          <RNView
+            className="absolute inset-x-0 bottom-0 p-5"
+            style={{ paddingBottom: Platform.OS === 'ios' ? 24 : 20 }}
+          >
+            {/* Recommendation reason */}
+            <RNView className="mb-3 flex-row items-center gap-1.5 self-start rounded-full bg-white/15 px-3 py-1.5">
+              <Heart
+                color={colors.rose[400]}
+                width={12}
+                height={12}
+                fill={colors.rose[400]}
+              />
+              <Text className="font-urbanist-medium text-xs text-white">
+                {recommendation.reason}
+              </Text>
+            </RNView>
+
+            {/* Name and age */}
+            <RNView className="mb-2 flex-row items-center gap-2">
+              <Text className="font-urbanist-bold text-[28px] tracking-tight text-white">
+                {companion.displayName}
+                {companion.age && (
+                  <Text className="font-urbanist text-[26px] text-white/90">
+                    , {companion.age}
+                  </Text>
+                )}
+              </Text>
+              {companion.isVerified && (
+                <ShieldCheck color={colors.teal[400]} width={24} height={24} />
+              )}
+            </RNView>
+
+            {/* Rating and reviews */}
+            <RNView className="mb-3 flex-row items-center gap-4">
+              <RNView className="flex-row items-center gap-1">
+                <Star color="#FFD93D" width={16} height={16} filled />
+                <Text className="font-urbanist-medium text-sm text-white/90">
+                  {companion.rating?.toFixed(1) || '5.0'} ({companion.reviewCount || 0})
+                </Text>
+              </RNView>
+              {companion.languages && companion.languages.length > 0 && (
+                <RNView className="flex-row items-center gap-1">
+                  <MessageCircle color="#FFFFFF" width={14} height={14} />
+                  <Text className="font-urbanist-medium text-sm text-white/90">
+                    {formatLanguages(companion.languages, 2)}
+                  </Text>
+                </RNView>
+              )}
+            </RNView>
+
+            {/* Services tags */}
+            {companion.services?.length > 0 && (
+              <RNView className="mb-4 flex-row flex-wrap gap-2">
+                {companion.services.slice(0, 3).map((service) => (
+                  <RNView
+                    key={service.occasionId}
+                    className="rounded-2xl bg-white/20 px-3 py-1.5"
+                  >
+                    <Text className="font-urbanist-medium text-xs text-white">
+                      {getOccasionName(service.occasion, i18n.language) || service.occasionId}
+                    </Text>
+                  </RNView>
+                ))}
+              </RNView>
+            )}
+
+            {/* Price */}
+            <RNView className="mb-4">
+              <Text className="mb-0.5 font-urbanist text-xs text-white/70">
+                {t('hirer.companion_card.starting_from')}
+              </Text>
+              <Text className="font-urbanist-bold text-2xl text-rose-300">
+                {formatVND(companion.hourlyRate)}
+                <Text className="font-urbanist-medium text-base text-white/70">
+                  /hr
+                </Text>
+              </Text>
+            </RNView>
+
+            {/* Action buttons */}
+            <RNView className="flex-row items-center gap-3">
+              <Pressable onPress={handleBookNow} className="flex-1 overflow-hidden rounded-2xl">
+                <LinearGradient
+                  colors={[colors.rose[400], colors.coral[400]]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 8,
+                    paddingVertical: 16,
+                  }}
+                >
+                  <Calendar color="#FFFFFF" width={20} height={20} />
+                  <Text className="font-urbanist-bold text-base tracking-wide text-white">
+                    {t('hirer.companion_card.book_now')}
+                  </Text>
+                </LinearGradient>
+              </Pressable>
+
+              <Pressable
+                onPress={handleViewProfile}
+                className="overflow-hidden rounded-2xl"
+              >
+                <RNView className="items-center justify-center rounded-2xl border border-white/10 bg-white/20 px-4 py-3.5">
+                  <Text className="font-urbanist-semibold text-[13px] text-white">
+                    {t('hirer.browse.for_you.view_profile')}
+                  </Text>
+                </RNView>
+              </Pressable>
+            </RNView>
+          </RNView>
+        </RNView>
+      </RNView>
+    </Pressable>
+  );
+}
+
+// Main swipeable card component
 export function SwipeableCompanionCard({
   recommendation,
   onSwipeLeft,
@@ -77,11 +323,11 @@ export function SwipeableCompanionCard({
   onBookPress?: (companionId: string) => void;
   isActive: boolean;
 }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const router = useRouter();
-  const { data: companion, isLoading } = useCompanion(
-    recommendation.companionId
-  );
+
+  // Use embedded companion data from recommendation (no API call needed!)
+  const companion = recommendation.companion;
 
   const [currentPhotoIndex, setCurrentPhotoIndex] = React.useState(0);
   const translateX = useSharedValue(0);
@@ -91,14 +337,14 @@ export function SwipeableCompanionCard({
   const likeOpacity = useSharedValue(0);
   const nopeOpacity = useSharedValue(0);
 
-  // Get photos array
+  // Get photos array from embedded data
   const photos = React.useMemo(() => {
     if (!companion?.photos?.length) {
       return companion?.avatar
         ? [companion.avatar]
         : ['https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=800'];
     }
-    return companion.photos.map((p) => (typeof p === 'string' ? p : p.url));
+    return companion.photos.map((p) => p.url);
   }, [companion]);
 
   // Handle photo tap to navigate between photos
@@ -205,7 +451,7 @@ export function SwipeableCompanionCard({
     router.push(`/hirer/chat/${recommendation.companionId}` as Href);
   }, [router, recommendation.companionId]);
 
-  if (isLoading || !companion) {
+  if (!companion) {
     return (
       <RNView
         className="overflow-hidden rounded-3xl"
@@ -349,9 +595,9 @@ export function SwipeableCompanionCard({
                 </RNView>
                 {companion.languages && companion.languages.length > 0 && (
                   <RNView className="flex-row items-center gap-1">
-                    <MapPin color="#FFFFFF" width={14} height={14} />
+                    <MessageCircle color="#FFFFFF" width={14} height={14} />
                     <Text className="font-urbanist-medium text-sm text-white/90">
-                      {companion.languages.slice(0, 2).join(', ')}
+                      {formatLanguages(companion.languages, 2)}
                     </Text>
                   </RNView>
                 )}
@@ -362,11 +608,11 @@ export function SwipeableCompanionCard({
                 <RNView className="mb-4 flex-row flex-wrap gap-2">
                   {companion.services.slice(0, 3).map((service) => (
                     <RNView
-                      key={service.type}
+                      key={service.occasionId}
                       className="rounded-2xl bg-white/20 px-3 py-1.5"
                     >
                       <Text className="font-urbanist-medium text-xs text-white">
-                        {service.type}
+                        {getOccasionName(service.occasion, i18n.language) || service.occasionId}
                       </Text>
                     </RNView>
                   ))}
@@ -388,12 +634,6 @@ export function SwipeableCompanionCard({
 
               {/* Action buttons */}
               <RNView className="flex-row items-center gap-3">
-                <Pressable onPress={handleMessage} className="overflow-hidden rounded-2xl">
-                  <RNView className="items-center justify-center rounded-2xl border border-white/10 bg-white/20 px-4 py-3.5">
-                    <MessageCircle color="#FFFFFF" width={22} height={22} />
-                  </RNView>
-                </Pressable>
-
                 <Pressable onPress={handleBookNow} className="flex-1 overflow-hidden rounded-2xl">
                   <LinearGradient
                     colors={[colors.rose[400], colors.coral[400]]}

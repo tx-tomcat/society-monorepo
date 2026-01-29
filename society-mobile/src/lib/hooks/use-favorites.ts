@@ -44,7 +44,11 @@ export function useAddFavorite() {
     mutationFn: (companionId: string) =>
       favoritesService.addFavorite(companionId),
     onSuccess: (_, companionId) => {
-      queryClient.invalidateQueries({ queryKey: ['favorites'] });
+      // Only invalidate the favorites list, not status checks
+      queryClient.invalidateQueries({
+        queryKey: ['favorites'],
+        predicate: (query) => !query.queryKey.includes('check'),
+      });
       queryClient.setQueryData(['favorites', 'check', companionId], {
         isFavorite: true,
       });
@@ -66,7 +70,11 @@ export function useRemoveFavorite() {
     mutationFn: (companionId: string) =>
       favoritesService.removeFavorite(companionId),
     onSuccess: (_, companionId) => {
-      queryClient.invalidateQueries({ queryKey: ['favorites'] });
+      // Only invalidate the favorites list, not status checks
+      queryClient.invalidateQueries({
+        queryKey: ['favorites'],
+        predicate: (query) => !query.queryKey.includes('check'),
+      });
       queryClient.setQueryData(['favorites', 'check', companionId], {
         isFavorite: false,
       });
@@ -87,10 +95,44 @@ export function useToggleFavorite() {
   return useMutation({
     mutationFn: (companionId: string) =>
       favoritesService.toggleFavorite(companionId),
+    onMutate: async (companionId) => {
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({
+        queryKey: ['favorites', 'check', companionId],
+      });
+
+      // Snapshot the previous value
+      const previousData = queryClient.getQueryData<{ isFavorite: boolean }>([
+        'favorites',
+        'check',
+        companionId,
+      ]);
+
+      // Optimistically update to the new value
+      queryClient.setQueryData(['favorites', 'check', companionId], {
+        isFavorite: !previousData?.isFavorite,
+      });
+
+      return { previousData, companionId };
+    },
+    onError: (_err, companionId, context) => {
+      // Rollback on error
+      if (context?.previousData !== undefined) {
+        queryClient.setQueryData(
+          ['favorites', 'check', companionId],
+          context.previousData
+        );
+      }
+    },
     onSuccess: (result, companionId) => {
-      queryClient.invalidateQueries({ queryKey: ['favorites'] });
+      // Update with actual server response
       queryClient.setQueryData(['favorites', 'check', companionId], {
         isFavorite: result.isFavorite,
+      });
+      // Invalidate favorites list only (not status checks)
+      queryClient.invalidateQueries({
+        queryKey: ['favorites'],
+        predicate: (query) => !query.queryKey.includes('check'),
       });
       // Track BOOKMARK or UNBOOKMARK based on new state (fire-and-forget)
       const eventType = result.isFavorite ? 'BOOKMARK' : 'UNBOOKMARK';

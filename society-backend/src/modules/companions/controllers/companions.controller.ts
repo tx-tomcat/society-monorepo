@@ -27,7 +27,6 @@ import {
   UpdateServicesDto,
   PurchaseBoostDto,
 } from '../dto/companion.dto';
-import { ServiceType } from '@generated/client';
 
 @Controller('companions')
 export class CompanionsController {
@@ -159,7 +158,7 @@ export class CompanionsController {
     @Body() dto: UpdateServicesDto,
   ) {
     const services = dto.services.map((s) => ({
-      type: s.type as ServiceType,
+      occasionId: s.occasionId,
       description: s.description,
       priceAdjustment: s.priceAdjustment,
       isEnabled: s.isEnabled,

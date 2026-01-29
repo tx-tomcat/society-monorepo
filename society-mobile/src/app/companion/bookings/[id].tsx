@@ -11,7 +11,7 @@ import {
   Pressable,
   ScrollView,
 } from 'react-native';
-import { showMessage } from 'react-native-flash-message';
+import Toast from 'react-native-toast-message';
 
 import {
   Badge,
@@ -77,9 +77,9 @@ export default function CompanionBookingDetail() {
         setBooking(data);
       } catch (error) {
         console.error('Failed to fetch booking:', error);
-        showMessage({
-          message: t('errors.booking_not_found'),
-          type: 'danger',
+        Toast.show({
+          type: 'error',
+          text1: t('errors.booking_not_found'),
         });
       } finally {
         setIsLoading(false);
@@ -127,17 +127,17 @@ export default function CompanionBookingDetail() {
           onPress: async () => {
             try {
               await bookingsService.cancelBooking(booking.id, undefined);
-              showMessage({
-                message: t('companion.booking_detail.cancelled'),
+              Toast.show({
                 type: 'info',
+                text1: t('companion.booking_detail.cancelled'),
               });
               router.back();
             } catch (error) {
               console.error('Failed to cancel booking:', error);
-              showMessage({
-                message: t('errors.cancel_failed'),
-                description: t('errors.try_again'),
-                type: 'danger',
+              Toast.show({
+                type: 'error',
+                text1: t('errors.cancel_failed'),
+                text2: t('errors.try_again'),
               });
             }
           },
@@ -151,16 +151,16 @@ export default function CompanionBookingDetail() {
     try {
       await bookingsService.updateBookingStatus(booking.id, 'ACTIVE');
       setBooking((prev) => (prev ? { ...prev, status: 'ACTIVE' } : null));
-      showMessage({
-        message: t('companion.booking_detail.checked_in'),
+      Toast.show({
         type: 'success',
+        text1: t('companion.booking_detail.checked_in'),
       });
     } catch (error) {
       console.error('Failed to check in:', error);
-      showMessage({
-        message: t('errors.check_in_failed'),
-        description: t('errors.try_again'),
-        type: 'danger',
+      Toast.show({
+        type: 'error',
+        text1: t('errors.check_in_failed'),
+        text2: t('errors.try_again'),
       });
     }
   }, [booking, t]);
@@ -180,16 +180,16 @@ export default function CompanionBookingDetail() {
               setBooking((prev) =>
                 prev ? { ...prev, status: 'COMPLETED' } : null
               );
-              showMessage({
-                message: t('companion.booking_detail.completed'),
+              Toast.show({
                 type: 'success',
+                text1: t('companion.booking_detail.completed'),
               });
             } catch (error) {
               console.error('Failed to complete booking:', error);
-              showMessage({
-                message: t('errors.complete_failed'),
-                description: t('errors.try_again'),
-                type: 'danger',
+              Toast.show({
+                type: 'error',
+                text1: t('errors.complete_failed'),
+                text2: t('errors.try_again'),
               });
             }
           },

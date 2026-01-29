@@ -1,4 +1,3 @@
-import type { Href } from 'expo-router';
 import { useRouter } from 'expo-router';
 import { MotiView } from 'moti';
 import React from 'react';
@@ -19,7 +18,7 @@ import {
   Text,
   View,
 } from '@/components/ui';
-import { ArrowLeft, Check, Zalo } from '@/components/ui/icons';
+import { ArrowLeft, Check, MessageCircle } from '@/components/ui/icons';
 import {
   isValidVietnamPhone,
   usePhoneVerification,
@@ -191,21 +190,21 @@ export default function PhoneVerificationScreen() {
 
       <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
         <View className="flex-1 px-6 pt-8">
-          {/* Zalo Badge */}
+          {/* SMS Notice Badge */}
           <MotiView
             from={{ opacity: 0, translateY: -20 }}
             animate={{ opacity: 1, translateY: 0 }}
-            className="mb-8 flex-row items-center gap-3 rounded-xl bg-blue-50 p-4"
+            className="mb-8 flex-row items-center gap-3 rounded-xl bg-teal-50 p-4"
           >
             <View className="h-10 w-10 items-center justify-center rounded-full bg-white">
-              <Zalo size={28} />
+              <MessageCircle color={colors.teal[500]} width={24} height={24} />
             </View>
             <View className="flex-1">
-              <Text className="text-sm font-medium text-blue-600">
-                {t('phone_verification.zalo_notice_title')}
+              <Text className="text-sm font-medium text-teal-600">
+                {t('phone_verification.sms_notice_title')}
               </Text>
-              <Text className="text-xs text-blue-500">
-                {t('phone_verification.zalo_notice_desc')}
+              <Text className="text-xs text-teal-500">
+                {t('phone_verification.sms_notice_desc')}
               </Text>
             </View>
           </MotiView>
@@ -220,7 +219,7 @@ export default function PhoneVerificationScreen() {
                 {t('phone_verification.enter_phone')}
               </Text>
               <Text className="mb-6 text-sm text-text-secondary">
-                {t('phone_verification.phone_description_zalo')}
+                {t('phone_verification.phone_description_sms')}
               </Text>
 
               <View className="mb-6 flex-row items-center">
@@ -248,7 +247,7 @@ export default function PhoneVerificationScreen() {
               )}
 
               <Button
-                label={t('phone_verification.send_code_zalo')}
+                label={t('phone_verification.send_code_sms')}
                 onPress={handleSendCode}
                 disabled={!isValidVietnamPhone(phone) || isSending}
                 loading={isSending}
@@ -267,7 +266,7 @@ export default function PhoneVerificationScreen() {
                 {t('phone_verification.enter_code')}
               </Text>
               <Text className="mb-6 text-sm text-text-secondary">
-                {t('phone_verification.code_sent_zalo', { phone: phoneNumber })}
+                {t('phone_verification.code_sent_sms', { phone: phoneNumber })}
               </Text>
 
               {/* OTP Input Boxes */}
@@ -279,9 +278,8 @@ export default function PhoneVerificationScreen() {
                       key={index}
                       ref={(ref) => { otpInputRefs.current[index] = ref; }}
                       style={{ fontFamily: 'Urbanist_700Bold', color: colors.midnight.DEFAULT }}
-                      className={`h-14 w-12 rounded-xl border-2 bg-white text-center text-2xl font-bold ${
-                        otp[index] ? 'border-rose-400' : 'border-border-light'
-                      }`}
+                      className={`h-14 w-12 rounded-xl border-2 bg-white text-center text-2xl font-bold ${otp[index] ? 'border-rose-400' : 'border-border-light'
+                        }`}
                       value={otp[index]}
                       onChangeText={(v) => handleOtpChange(v, index)}
                       onKeyPress={({ nativeEvent }) =>
@@ -317,9 +315,8 @@ export default function PhoneVerificationScreen() {
                 className="mt-4"
               >
                 <Text
-                  className={`text-center text-sm ${
-                    canResend ? 'text-rose-400' : 'text-text-tertiary'
-                  }`}
+                  className={`text-center text-sm ${canResend ? 'text-rose-400' : 'text-text-tertiary'
+                    }`}
                 >
                   {canResend
                     ? t('phone_verification.resend_code')

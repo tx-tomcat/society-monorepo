@@ -91,7 +91,19 @@ module.exports = {
         ],
       },
       fontSize: {
-        // Typography scale matching Old Money Editorial
+        // Mobile-optimized base sizes (override Tailwind defaults)
+        // Minimum readable size on mobile is 14px
+        xs: ['14px', { lineHeight: '1.4' }],   // was 12px, now 14px
+        sm: ['15px', { lineHeight: '1.5' }],   // was 14px, now 15px
+        base: ['16px', { lineHeight: '1.6' }], // unchanged
+        lg: ['18px', { lineHeight: '1.6' }],   // unchanged
+        xl: ['20px', { lineHeight: '1.5' }],   // unchanged
+        '2xl': ['24px', { lineHeight: '1.4' }],
+        '3xl': ['30px', { lineHeight: '1.3' }],
+        '4xl': ['36px', { lineHeight: '1.2' }],
+        '5xl': ['48px', { lineHeight: '1.1' }],
+
+        // Typography scale for headings
         'h1-desktop': [
           '72px',
           { lineHeight: '1.2', letterSpacing: '-0.02em', fontWeight: '700' },
@@ -133,15 +145,15 @@ module.exports = {
           { lineHeight: '1.6', letterSpacing: '0.005em', fontWeight: '400' },
         ],
         'body-sm': [
-          '14px',
+          '15px',
           { lineHeight: '1.6', letterSpacing: '0.005em', fontWeight: '400' },
         ],
         caption: [
-          '12px',
+          '14px',
           { lineHeight: '1.4', letterSpacing: '0.01em', fontWeight: '500' },
         ],
         button: [
-          '14px',
+          '16px',
           { lineHeight: '1.4', letterSpacing: '0.02em', fontWeight: '600' },
         ],
       },

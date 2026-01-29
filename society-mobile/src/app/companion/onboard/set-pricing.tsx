@@ -15,6 +15,7 @@ import {
   View,
 } from '@/components/ui';
 import { ArrowLeft, Info, PriceTag } from '@/components/ui/icons';
+import { usePlatformConfigStore } from '@/lib/hooks';
 import { useCompanionOnboarding } from '@/lib/stores';
 import { formatVND } from '@/lib/utils';
 
@@ -29,6 +30,7 @@ export default function SetPricing() {
   const storedMinimumHours = useCompanionOnboarding.use.minimumHours();
   const setPricingData = useCompanionOnboarding.use.setPricingData();
   const markStepComplete = useCompanionOnboarding.use.markStepComplete();
+  const platformFeePercent = usePlatformConfigStore((s) => s.config.platformFeePercent);
 
   const [hourlyRate, setHourlyRate] = React.useState(
     storedHourlyRate.toString()
@@ -66,7 +68,7 @@ export default function SetPricing() {
 
   const hourlyRateNum = parseInt(hourlyRate, 10) || 0;
   const minHoursNum = parseInt(minimumHours, 10) || 2;
-  const platformFee = hourlyRateNum * 0.18;
+  const platformFee = Math.round(hourlyRateNum * platformFeePercent);
   const yourEarnings = hourlyRateNum - platformFee;
 
   const estimatedMonthly = yourEarnings * minHoursNum * 20; // 20 bookings per month estimate

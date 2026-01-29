@@ -13,7 +13,7 @@ import {
   ScrollView,
   TextInput,
 } from 'react-native';
-import { showMessage } from 'react-native-flash-message';
+import Toast from 'react-native-toast-message';
 
 import {
   Button,
@@ -201,9 +201,9 @@ export default function TopupScreen() {
       setStep('payment');
     } catch (error) {
       console.error('Failed to create topup:', error);
-      showMessage({
-        message: t('hirer.wallet.topup_create_failed'),
-        type: 'danger',
+      Toast.show({
+        type: 'error',
+        text1: t('hirer.wallet.topup_create_failed'),
       });
     }
   }, [amount, createTopupMutation, t]);
@@ -211,18 +211,18 @@ export default function TopupScreen() {
   const handleCopyCode = React.useCallback(async () => {
     if (!topupData?.code) return;
     await Clipboard.setStringAsync(topupData.code);
-    showMessage({
-      message: t('hirer.wallet.code_copied'),
+    Toast.show({
       type: 'success',
+      text1: t('hirer.wallet.code_copied'),
     });
   }, [topupData?.code, t]);
 
   const handleCopyAmount = React.useCallback(async () => {
     if (!topupData?.amount) return;
     await Clipboard.setStringAsync(topupData.amount.toString());
-    showMessage({
-      message: t('hirer.wallet.amount_copied'),
+    Toast.show({
       type: 'success',
+      text1: t('hirer.wallet.amount_copied'),
     });
   }, [topupData?.amount, t]);
 
@@ -233,16 +233,16 @@ export default function TopupScreen() {
         if (canOpen) {
           await Linking.openURL(deeplink);
         } else {
-          showMessage({
-            message: t('hirer.wallet.bank_app_not_installed'),
-            type: 'warning',
+          Toast.show({
+            type: 'info',
+            text1: t('hirer.wallet.bank_app_not_installed'),
           });
         }
       } catch (error) {
         console.error('Failed to open bank app:', error);
-        showMessage({
-          message: t('hirer.wallet.bank_open_failed'),
-          type: 'danger',
+        Toast.show({
+          type: 'error',
+          text1: t('hirer.wallet.bank_open_failed'),
         });
       }
     },

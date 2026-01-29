@@ -32,6 +32,36 @@ const vietnameseNames = {
   ],
 };
 
+// Vietnamese hirer names for reviews
+const hirerNames = [
+  'Trần Văn Minh',
+  'Nguyễn Thị Hồng',
+  'Lê Hoàng Long',
+  'Phạm Thùy Dung',
+  'Hoàng Văn Đức',
+  'Vũ Thị Mai',
+  'Đặng Quốc Bảo',
+  'Bùi Thị Lan',
+  'Ngô Minh Tuấn',
+  'Đỗ Thị Hạnh',
+];
+
+// Sample review comments
+const reviewComments = [
+  'Rất chuyên nghiệp và thân thiện. Mọi người trong gia đình đều rất hài lòng!',
+  'Bạn đồng hành tuyệt vời, giao tiếp tốt và rất lịch sự. Sẽ đặt lại lần sau.',
+  'Đúng giờ, ăn mặc đẹp và rất biết cách ứng xử. Highly recommended!',
+  'Cuộc trò chuyện rất thú vị, bạn ấy có kiến thức rộng và rất dễ chịu.',
+  'Mình rất hài lòng với dịch vụ. Bạn ấy rất chu đáo và quan tâm.',
+  'Tuyệt vời! Bạn ấy giúp buổi tiệc thêm vui vẻ và ấm cúng.',
+  'Rất tự tin và chuyên nghiệp. Đối tác kinh doanh của mình đều ấn tượng.',
+  'Bạn ấy rất dễ thương và hòa đồng. Gia đình mình rất thích!',
+  'Dịch vụ tốt, đáng giá tiền. Sẽ giới thiệu cho bạn bè.',
+  'Lần đầu sử dụng dịch vụ và rất hài lòng. Bạn ấy rất tinh tế.',
+  'Excellent! Vượt xa mong đợi của mình. 10/10 sẽ đặt lại.',
+  'Bạn đồng hành rất am hiểu và biết cách làm mọi người thoải mái.',
+];
+
 const bios = [
   'Tốt nghiệp Đại học Kinh tế TP.HCM. Yêu thích du lịch và khám phá văn hóa. Có kinh nghiệm đồng hành trong các sự kiện doanh nghiệp và gia đình.',
   'Sinh viên năm cuối Đại học Ngoại thương. Thông thạo tiếng Anh và tiếng Nhật. Thích đọc sách và nấu ăn.',
@@ -64,14 +94,14 @@ const samplePhotoUrls = [
   'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=800',
 ];
 
-// Service types with descriptions
-const serviceTypes = [
-  { type: 'FAMILY_INTRODUCTION', description: 'Đồng hành trong các buổi gặp gỡ gia đình' },
-  { type: 'WEDDING_ATTENDANCE', description: 'Đồng hành tham dự đám cưới và sự kiện' },
-  { type: 'TET_COMPANIONSHIP', description: 'Đồng hành trong dịp Tết và lễ hội' },
-  { type: 'BUSINESS_EVENT', description: 'Đồng hành trong các sự kiện doanh nghiệp' },
-  { type: 'CASUAL_OUTING', description: 'Đồng hành cafe, ăn uống, shopping' },
-  { type: 'CLASS_REUNION', description: 'Đồng hành trong các buổi họp lớp' },
+// Occasion codes mapped to descriptions (will be matched with DB occasions)
+const occasionCodes = [
+  { code: 'family_intro', description: 'Đồng hành trong các buổi gặp gỡ gia đình' },
+  { code: 'wedding', description: 'Đồng hành tham dự đám cưới và sự kiện' },
+  { code: 'tet', description: 'Đồng hành trong dịp Tết và lễ hội' },
+  { code: 'business_meeting', description: 'Đồng hành trong các sự kiện doanh nghiệp' },
+  { code: 'cafe', description: 'Đồng hành cafe, ăn uống, shopping' },
+  { code: 'reunion', description: 'Đồng hành trong các buổi họp lớp' },
 ] as const;
 
 // Helper to generate random hourly rate (in VND)
@@ -105,6 +135,74 @@ const provinces = [
 
 async function main() {
   console.log('🌱 Seeding mock companions...\n');
+
+  // Delete old seeded companions first
+  console.log('🗑️  Removing old seeded companions...');
+  const oldCompanions = await prisma.user.findMany({
+    where: {
+      zaloId: { startsWith: 'seed_companion_' },
+    },
+    select: { id: true, fullName: true },
+  });
+
+  if (oldCompanions.length > 0) {
+    // Delete in correct order due to foreign key constraints
+    const userIds = oldCompanions.map((u) => u.id);
+
+    // Get companion profile IDs
+    const companionProfiles = await prisma.companionProfile.findMany({
+      where: { userId: { in: userIds } },
+      select: { id: true },
+    });
+    const companionIds = companionProfiles.map((p) => p.id);
+
+    // Delete related records first
+    await prisma.companionService.deleteMany({
+      where: { companionId: { in: companionIds } },
+    });
+    await prisma.companionPhoto.deleteMany({
+      where: { companionId: { in: companionIds } },
+    });
+    await prisma.companionAvailability.deleteMany({
+      where: { companionId: { in: companionIds } },
+    });
+    await prisma.companionProfile.deleteMany({
+      where: { id: { in: companionIds } },
+    });
+    await prisma.user.deleteMany({
+      where: { id: { in: userIds } },
+    });
+
+    console.log(`✓ Deleted ${oldCompanions.length} old seeded companions\n`);
+  } else {
+    console.log('  No old seeded companions found\n');
+  }
+
+  // First, fetch occasions from database to get their IDs
+  const occasions = await prisma.occasion.findMany({
+    where: { isActive: true },
+  });
+
+  if (occasions.length === 0) {
+    console.error('❌ No occasions found in database. Please run seed-occasions.ts first.');
+    process.exit(1);
+  }
+
+  console.log(`📋 Found ${occasions.length} occasions in database\n`);
+
+  // Build occasion lookup map by code
+  const occasionMap = new Map(occasions.map((o) => [o.code, o]));
+
+  // Filter occasionCodes to only include ones that exist in DB
+  const availableServices = occasionCodes
+    .filter((s) => occasionMap.has(s.code))
+    .map((s) => ({
+      occasionId: occasionMap.get(s.code)!.id,
+      code: s.code,
+      description: s.description,
+    }));
+
+  console.log(`✅ Matched ${availableServices.length} occasion codes to database\n`);
 
   const companionsToCreate = 15;
   let created = 0;
@@ -200,13 +298,13 @@ async function main() {
 
       // Add services (3-5 random services)
       const serviceCount = 3 + Math.floor(Math.random() * 3);
-      const selectedServices = pickRandom(serviceTypes, serviceCount);
+      const selectedServices = pickRandom(availableServices, serviceCount);
 
       for (const service of selectedServices) {
         await prisma.companionService.create({
           data: {
             companionId: companionProfile.id,
-            serviceType: service.type,
+            occasionId: service.occasionId,
             description: service.description,
             priceAdjustment: Math.random() > 0.7 ? Math.floor(Math.random() * 200000) : 0,
             isEnabled: true,
@@ -262,7 +360,199 @@ async function main() {
     }
   }
 
-  console.log(`\n🎉 Seeding complete! Created ${created} companions.`);
+  console.log(`\n🎉 Created ${created} companions.`);
+
+  // ============================================
+  // Create mock hirers and reviews
+  // ============================================
+  console.log('\n📝 Creating mock hirers and reviews...\n');
+
+  // Delete old seeded hirers
+  const oldHirers = await prisma.user.findMany({
+    where: { zaloId: { startsWith: 'seed_hirer_' } },
+    select: { id: true },
+  });
+
+  if (oldHirers.length > 0) {
+    const hirerIds = oldHirers.map((h) => h.id);
+
+    // Delete reviews first (foreign key)
+    await prisma.review.deleteMany({
+      where: { reviewerId: { in: hirerIds } },
+    });
+    // Delete bookings
+    await prisma.booking.deleteMany({
+      where: { hirerId: { in: hirerIds } },
+    });
+    // Delete hirer profiles
+    await prisma.hirerProfile.deleteMany({
+      where: { userId: { in: hirerIds } },
+    });
+    // Delete users
+    await prisma.user.deleteMany({
+      where: { id: { in: hirerIds } },
+    });
+    console.log(`✓ Deleted ${oldHirers.length} old seeded hirers\n`);
+  }
+
+  // Get all seeded companions
+  const seededCompanions = await prisma.user.findMany({
+    where: { zaloId: { startsWith: 'seed_companion_' } },
+    include: { companionProfile: true },
+  });
+
+  if (seededCompanions.length === 0) {
+    console.log('⚠ No seeded companions found, skipping reviews');
+  } else {
+    // Create hirers
+    const createdHirers: { id: string; fullName: string }[] = [];
+
+    for (let i = 0; i < hirerNames.length; i++) {
+      const name = hirerNames[i];
+      const emailName = name
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/đ/g, 'd')
+        .replace(/Đ/g, 'D')
+        .replace(/\s+/g, '.');
+
+      try {
+        const hirer = await prisma.user.create({
+          data: {
+            zaloId: `seed_hirer_${i + 1}_${Date.now()}`,
+            phone: `+8491${String(2000000 + i).slice(-7)}`,
+            email: `${emailName}.hirer@example.com`,
+            fullName: name,
+            gender: i % 2 === 0 ? 'MALE' : 'FEMALE',
+            dateOfBirth: new Date(1980 + Math.floor(Math.random() * 15), Math.floor(Math.random() * 12), Math.floor(Math.random() * 28) + 1),
+            role: 'HIRER',
+            status: 'ACTIVE',
+            isVerified: true,
+            trustScore: 85 + Math.floor(Math.random() * 15),
+            avatarUrl: samplePhotoUrls[(i + 5) % samplePhotoUrls.length],
+            hirerProfile: {
+              create: {
+                province: provinces[i % provinces.length],
+              },
+            },
+          },
+        });
+        createdHirers.push({ id: hirer.id, fullName: hirer.fullName || name });
+        console.log(`✓ Created hirer: ${name}`);
+      } catch (error) {
+        console.log(`⚠ Skipped hirer ${name}: already exists or error`);
+      }
+    }
+
+    console.log(`\n📋 Creating bookings and reviews...\n`);
+
+    let bookingNumber = 1000;
+    let reviewsCreated = 0;
+
+    // For each companion, create some completed bookings with reviews
+    for (const companion of seededCompanions) {
+      if (!companion.companionProfile) continue;
+
+      const companionProfile = companion.companionProfile;
+      const reviewCount = companionProfile.ratingCount || Math.floor(Math.random() * 20) + 5;
+
+      // Create reviews (up to reviewCount, limited by available hirers)
+      const reviewsToCreate = Math.min(reviewCount, createdHirers.length);
+      const shuffledHirers = [...createdHirers].sort(() => 0.5 - Math.random());
+
+      let totalRating = 0;
+      let actualReviewCount = 0;
+
+      for (let r = 0; r < reviewsToCreate; r++) {
+        const hirer = shuffledHirers[r % shuffledHirers.length];
+        const occasionId = availableServices[r % availableServices.length]?.occasionId;
+
+        // Random date in the past 6 months
+        const bookingDate = new Date();
+        bookingDate.setDate(bookingDate.getDate() - Math.floor(Math.random() * 180) - 7);
+        const endDate = new Date(bookingDate);
+        endDate.setHours(endDate.getHours() + 2 + Math.floor(Math.random() * 4));
+
+        const basePrice = companionProfile.hourlyRate * 3;
+        const platformFee = Math.floor(basePrice * 0.18);
+
+        try {
+          // Create completed booking
+          const booking = await prisma.booking.create({
+            data: {
+              bookingNumber: `SOC-2024-${String(bookingNumber++).padStart(4, '0')}`,
+              hirerId: hirer.id,
+              companionId: companion.id,
+              status: 'COMPLETED',
+              occasionId,
+              startDatetime: bookingDate,
+              endDatetime: endDate,
+              durationHours: 3,
+              locationAddress: ['Quận 1, TP.HCM', 'Quận 3, TP.HCM', 'Quận 7, TP.HCM', 'Thủ Đức, TP.HCM'][r % 4],
+              basePrice,
+              platformFee,
+              surgeFee: 0,
+              totalPrice: basePrice + platformFee,
+              paymentStatus: 'RELEASED',
+              confirmedAt: bookingDate,
+              completedAt: endDate,
+            },
+          });
+
+          // Create review for the booking
+          // Weight towards higher ratings (realistic distribution)
+          const ratingWeights = [1, 2, 5, 15, 77]; // 1-star: 1%, 2-star: 2%, etc.
+          const rand = Math.random() * 100;
+          let rating = 5;
+          let cumulative = 0;
+          for (let i = 0; i < ratingWeights.length; i++) {
+            cumulative += ratingWeights[i];
+            if (rand < cumulative) {
+              rating = i + 1;
+              break;
+            }
+          }
+
+          await prisma.review.create({
+            data: {
+              bookingId: booking.id,
+              reviewerId: hirer.id,
+              revieweeId: companion.id,
+              rating,
+              comment: reviewComments[r % reviewComments.length],
+              isVisible: true,
+              createdAt: endDate,
+            },
+          });
+
+          totalRating += rating;
+          actualReviewCount++;
+          reviewsCreated++;
+        } catch (error) {
+          // Skip duplicate bookings
+        }
+      }
+
+      // Update companion's rating stats based on actual reviews
+      if (actualReviewCount > 0) {
+        const avgRating = totalRating / actualReviewCount;
+        await prisma.companionProfile.update({
+          where: { id: companionProfile.id },
+          data: {
+            ratingAvg: parseFloat(avgRating.toFixed(2)),
+            ratingCount: actualReviewCount,
+          },
+        });
+      }
+
+      console.log(`✓ Created ${actualReviewCount} reviews for ${companion.fullName}`);
+    }
+
+    console.log(`\n🎉 Created ${reviewsCreated} total reviews.`);
+  }
+
+  console.log('\n✅ Seeding complete!');
 }
 
 main()

@@ -423,6 +423,7 @@ export const ModelName = {
   SupportTicket: 'SupportTicket',
   SupportTicketMessage: 'SupportTicketMessage',
   SystemConfig: 'SystemConfig',
+  PlatformConfig: 'PlatformConfig',
   EmergencyContact: 'EmergencyContact',
   EmergencyEvent: 'EmergencyEvent',
   FavoriteCompanion: 'FavoriteCompanion',
@@ -451,7 +452,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "userSettings" | "userDevice" | "userSession" | "companionProfile" | "companionPhoto" | "companionService" | "companionAvailability" | "hirerProfile" | "verification" | "photoVerification" | "booking" | "bookingCancellation" | "payment" | "paymentStatusHistory" | "earning" | "bankAccount" | "withdrawal" | "review" | "conversation" | "message" | "userBlock" | "report" | "userStrike" | "notification" | "pushToken" | "notificationLog" | "moderationQueue" | "moderationAction" | "userSuspension" | "appeal" | "file" | "ipBlocklist" | "securityEvent" | "featureFlag" | "adminAuditLog" | "supportTicket" | "supportTicketMessage" | "systemConfig" | "emergencyContact" | "emergencyEvent" | "favoriteCompanion" | "profileBoost" | "referral" | "occasion" | "holiday" | "occasionInteraction" | "userInteraction" | "recommendationCache" | "paymentRequest" | "webhookLog" | "idempotencyKey"
+    modelProps: "user" | "userSettings" | "userDevice" | "userSession" | "companionProfile" | "companionPhoto" | "companionService" | "companionAvailability" | "hirerProfile" | "verification" | "photoVerification" | "booking" | "bookingCancellation" | "payment" | "paymentStatusHistory" | "earning" | "bankAccount" | "withdrawal" | "review" | "conversation" | "message" | "userBlock" | "report" | "userStrike" | "notification" | "pushToken" | "notificationLog" | "moderationQueue" | "moderationAction" | "userSuspension" | "appeal" | "file" | "ipBlocklist" | "securityEvent" | "featureFlag" | "adminAuditLog" | "supportTicket" | "supportTicketMessage" | "systemConfig" | "platformConfig" | "emergencyContact" | "emergencyEvent" | "favoriteCompanion" | "profileBoost" | "referral" | "occasion" | "holiday" | "occasionInteraction" | "userInteraction" | "recommendationCache" | "paymentRequest" | "webhookLog" | "idempotencyKey"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -3341,6 +3342,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    PlatformConfig: {
+      payload: Prisma.$PlatformConfigPayload<ExtArgs>
+      fields: Prisma.PlatformConfigFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.PlatformConfigFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlatformConfigPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.PlatformConfigFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlatformConfigPayload>
+        }
+        findFirst: {
+          args: Prisma.PlatformConfigFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlatformConfigPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.PlatformConfigFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlatformConfigPayload>
+        }
+        findMany: {
+          args: Prisma.PlatformConfigFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlatformConfigPayload>[]
+        }
+        create: {
+          args: Prisma.PlatformConfigCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlatformConfigPayload>
+        }
+        createMany: {
+          args: Prisma.PlatformConfigCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.PlatformConfigCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlatformConfigPayload>[]
+        }
+        delete: {
+          args: Prisma.PlatformConfigDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlatformConfigPayload>
+        }
+        update: {
+          args: Prisma.PlatformConfigUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlatformConfigPayload>
+        }
+        deleteMany: {
+          args: Prisma.PlatformConfigDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.PlatformConfigUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.PlatformConfigUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlatformConfigPayload>[]
+        }
+        upsert: {
+          args: Prisma.PlatformConfigUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlatformConfigPayload>
+        }
+        aggregate: {
+          args: Prisma.PlatformConfigAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregatePlatformConfig>
+        }
+        groupBy: {
+          args: Prisma.PlatformConfigGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PlatformConfigGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.PlatformConfigCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PlatformConfigCountAggregateOutputType> | number
+        }
+      }
+    }
     EmergencyContact: {
       payload: Prisma.$EmergencyContactPayload<ExtArgs>
       fields: Prisma.EmergencyContactFieldRefs
@@ -4455,7 +4530,7 @@ export type CompanionPhotoScalarFieldEnum = (typeof CompanionPhotoScalarFieldEnu
 export const CompanionServiceScalarFieldEnum = {
   id: 'id',
   companionId: 'companionId',
-  serviceType: 'serviceType',
+  occasionId: 'occasionId',
   description: 'description',
   priceAdjustment: 'priceAdjustment',
   isEnabled: 'isEnabled',
@@ -4958,6 +5033,27 @@ export const SystemConfigScalarFieldEnum = {
 export type SystemConfigScalarFieldEnum = (typeof SystemConfigScalarFieldEnum)[keyof typeof SystemConfigScalarFieldEnum]
 
 
+export const PlatformConfigScalarFieldEnum = {
+  id: 'id',
+  platformFeePercent: 'platformFeePercent',
+  cancellationFeePercent: 'cancellationFeePercent',
+  minBookingHours: 'minBookingHours',
+  maxBookingHours: 'maxBookingHours',
+  minAdvanceBookingHours: 'minAdvanceBookingHours',
+  maxAdvanceBookingDays: 'maxAdvanceBookingDays',
+  freeCancellationHours: 'freeCancellationHours',
+  supportEmail: 'supportEmail',
+  supportPhone: 'supportPhone',
+  minAppVersion: 'minAppVersion',
+  currentAppVersion: 'currentAppVersion',
+  updatedBy: 'updatedBy',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PlatformConfigScalarFieldEnum = (typeof PlatformConfigScalarFieldEnum)[keyof typeof PlatformConfigScalarFieldEnum]
+
+
 export const EmergencyContactScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
@@ -5334,20 +5430,6 @@ export type ListEnumVerificationStatusFieldRefInput<$PrismaModel> = FieldRefInpu
 
 
 /**
- * Reference to a field of type 'ServiceType'
- */
-export type EnumServiceTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ServiceType'>
-    
-
-
-/**
- * Reference to a field of type 'ServiceType[]'
- */
-export type ListEnumServiceTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ServiceType[]'>
-    
-
-
-/**
  * Reference to a field of type 'Json'
  */
 export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
@@ -5372,6 +5454,20 @@ export type EnumBookingStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$Pr
  * Reference to a field of type 'BookingStatus[]'
  */
 export type ListEnumBookingStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BookingStatus[]'>
+    
+
+
+/**
+ * Reference to a field of type 'ServiceType'
+ */
+export type EnumServiceTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ServiceType'>
+    
+
+
+/**
+ * Reference to a field of type 'ServiceType[]'
+ */
+export type ListEnumServiceTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ServiceType[]'>
     
 
 
@@ -5816,6 +5912,7 @@ export type GlobalOmitConfig = {
   supportTicket?: Prisma.SupportTicketOmit
   supportTicketMessage?: Prisma.SupportTicketMessageOmit
   systemConfig?: Prisma.SystemConfigOmit
+  platformConfig?: Prisma.PlatformConfigOmit
   emergencyContact?: Prisma.EmergencyContactOmit
   emergencyEvent?: Prisma.EmergencyEventOmit
   favoriteCompanion?: Prisma.FavoriteCompanionOmit

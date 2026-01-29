@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import * as Localization from 'expo-localization';
+import { getCalendars } from 'expo-localization';
 
 import type {
   Occasion,
@@ -12,7 +12,7 @@ import { occasionsService } from '../api/services/occasions.service';
  * Automatically includes device timezone for accurate context detection
  */
 export function useOccasions() {
-  const timezone = Localization.timezone;
+  const timezone = getCalendars()[0]?.timeZone ?? 'Asia/Ho_Chi_Minh';
 
   return useQuery<OccasionsResponse>({
     queryKey: ['occasions', 'contextual', timezone],

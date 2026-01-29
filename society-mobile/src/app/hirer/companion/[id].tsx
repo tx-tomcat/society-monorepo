@@ -35,12 +35,11 @@ import {
   Heart,
   MaiFlower,
   MapPin,
-  MessageCircle,
   Share,
   ShieldCheck,
   Star,
   VerifiedBadge,
-  WeddingRings,
+  WeddingRings
 } from '@/components/ui/icons';
 import { getPhotoUrl } from '@/lib/api/services/companions.service';
 import {
@@ -50,7 +49,7 @@ import {
   useIsFavorite,
   useToggleFavorite,
 } from '@/lib/hooks';
-import { formatVND } from '@/lib/utils';
+import { formatVND, getLanguageName } from '@/lib/utils';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const IMAGE_HEIGHT = SCREEN_WIDTH * 1.1;
@@ -179,9 +178,8 @@ function ImageGallery({
         {images.map((_, index) => (
           <View
             key={index}
-            className={`h-2 rounded-full ${
-              index === currentIndex ? 'w-6 bg-white' : 'w-2 bg-white/50'
-            }`}
+            className={`h-2 rounded-full ${index === currentIndex ? 'w-6 bg-white' : 'w-2 bg-white/50'
+              }`}
           />
         ))}
       </View>
@@ -202,17 +200,32 @@ export default function CompanionProfileScreen() {
   const [currentImageIndex, setCurrentImageIndex] = React.useState(0);
   const [selectedDate, setSelectedDate] = React.useState<string | null>(null);
 
+  // Calculate date range for availability (next 7 days from today or selected date)
+  const dateRange = React.useMemo(() => {
+    const start = selectedDate ? new Date(selectedDate) : new Date();
+    const end = new Date(start);
+    end.setDate(end.getDate() + 7);
+    return {
+      startDate: start.toISOString().split('T')[0],
+      endDate: end.toISOString().split('T')[0],
+    };
+  }, [selectedDate]);
+
   // API hooks
   const { data: companionData, isLoading: isLoadingCompanion } = useCompanion(
     id || ''
   );
-  const { data: favoriteData } = useIsFavorite(id || '');
+  // Use userId for favorites (not CompanionProfile.id)
+  const companionUserId = companionData?.userId;
+  const { data: favoriteData } = useIsFavorite(companionUserId || '');
   const toggleFavoriteMutation = useToggleFavorite();
   const { data: availabilityData } = useCompanionAvailability(
     id || '',
-    selectedDate || undefined
+    dateRange.startDate,
+    dateRange.endDate
   );
   const { data: reviewsData } = useCompanionReviews(id || '', 1, 5);
+
 
   const isFavorite = favoriteData?.isFavorite ?? false;
 
@@ -223,7 +236,7 @@ export default function CompanionProfileScreen() {
     return {
       id: c.id,
       name: c.displayName || '',
-      age: 0, // Not available in API
+      age: c.age || 0,
       images:
         c.photos?.map((p) => getPhotoUrl(p) || '').filter(Boolean) ||
         (c.avatar ? [c.avatar] : []),
@@ -240,7 +253,7 @@ export default function CompanionProfileScreen() {
           ? Math.round(((c.completedBookings ?? 0) / (c.completedBookings ?? 1)) * 100)
           : 0,
       languages: c.languages || [],
-      specialties: c.services?.map((s) => s.type) || [],
+      specialties: c.services?.map((s) => s.occasion?.name || s.occasionId) || [],
       reviews: [] as Review[],
       availability: [] as TimeSlot[],
     };
@@ -286,10 +299,10 @@ export default function CompanionProfileScreen() {
   }, []);
 
   const handleToggleFavorite = React.useCallback(() => {
-    if (id) {
-      toggleFavoriteMutation.mutate(id);
+    if (companionUserId) {
+      toggleFavoriteMutation.mutate(companionUserId);
     }
-  }, [id, toggleFavoriteMutation]);
+  }, [companionUserId, toggleFavoriteMutation]);
 
   const handleMessage = React.useCallback(() => {
     if (id) {
@@ -374,40 +387,6 @@ export default function CompanionProfileScreen() {
           currentIndex={currentImageIndex}
           onIndexChange={setCurrentImageIndex}
         />
-
-        {/* Floating Header */}
-        <SafeAreaView
-          edges={['top']}
-          style={[StyleSheet.absoluteFill, { height: 100 }]}
-        >
-          <View className="flex-row items-center justify-between px-4 pt-2">
-            <Pressable
-              onPress={handleBack}
-              className="size-10 items-center justify-center rounded-full bg-black/30"
-            >
-              <ArrowLeft color="#FFFFFF" width={24} height={24} />
-            </Pressable>
-            <View className="flex-row gap-2">
-              <Pressable
-                onPress={handleShare}
-                className="size-10 items-center justify-center rounded-full bg-black/30"
-              >
-                <Share color="#FFFFFF" width={20} height={20} />
-              </Pressable>
-              <Pressable
-                onPress={handleToggleFavorite}
-                className="size-10 items-center justify-center rounded-full bg-black/30"
-              >
-                <Heart
-                  color={isFavorite ? colors.rose[400] : '#FFFFFF'}
-                  width={20}
-                  height={20}
-                  fill={isFavorite ? colors.rose[400] : 'none'}
-                />
-              </Pressable>
-            </View>
-          </View>
-        </SafeAreaView>
 
         {/* Profile Content */}
         <View className="-mt-6 rounded-t-3xl bg-warmwhite">
@@ -504,7 +483,7 @@ export default function CompanionProfileScreen() {
             </Text>
             <View className="mt-4 flex-row flex-wrap gap-2">
               {companion.languages.map((lang) => (
-                <Badge key={lang} label={lang} variant="lavender" size="sm" />
+                <Badge key={lang} label={getLanguageName(lang)} variant="lavender" size="sm" />
               ))}
             </View>
           </MotiView>
@@ -562,93 +541,7 @@ export default function CompanionProfileScreen() {
             </MotiView>
           )}
 
-          {/* Availability Preview */}
-          <MotiView
-            from={{ opacity: 0, translateY: 20 }}
-            animate={{ opacity: 1, translateY: 0 }}
-            transition={{ type: 'timing', duration: 400, delay: 250 }}
-            className="mt-6 px-4"
-          >
-            <View className="mb-3 flex-row items-center gap-2">
-              <Calendar color={colors.rose[400]} width={20} height={20} />
-              <Text
-                style={{ fontFamily: 'Urbanist_600SemiBold' }}
-                className="text-base text-midnight"
-              >
-                {t('hirer.companion.availability')}
-              </Text>
-            </View>
 
-            {/* Date Selector */}
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              className="mb-4"
-            >
-              {dates.map((date, index) => {
-                const isSelected = selectedDate === date.id;
-                return (
-                  <Pressable
-                    key={date.id}
-                    onPress={() => setSelectedDate(date.id)}
-                    className={`mr-3 items-center rounded-xl px-4 py-3 ${
-                      isSelected ? 'bg-rose-400' : 'bg-white'
-                    }`}
-                  >
-                    <Text
-                      className={`text-xs ${
-                        isSelected ? 'text-white' : 'text-text-tertiary'
-                      }`}
-                    >
-                      {date.day}
-                    </Text>
-                    <Text
-                      className={`font-urbanist-bold text-lg ${
-                        isSelected ? 'text-white' : 'text-midnight'
-                      }`}
-                    >
-                      {date.date}
-                    </Text>
-                    <Text
-                      className={`text-xs ${
-                        isSelected ? 'text-white/80' : 'text-text-tertiary'
-                      }`}
-                    >
-                      {date.month}
-                    </Text>
-                  </Pressable>
-                );
-              })}
-            </ScrollView>
-
-            {/* Time Slots */}
-            <View className="flex-row flex-wrap gap-2">
-              {availability.length > 0 ? (
-                availability.map((slot) => (
-                  <View
-                    key={slot.id}
-                    className={`rounded-lg px-4 py-2 ${
-                      slot.available ? 'bg-white' : 'bg-neutral-100'
-                    }`}
-                  >
-                    <Text
-                      className={`text-sm font-medium ${
-                        slot.available
-                          ? 'text-midnight'
-                          : 'text-text-tertiary line-through'
-                      }`}
-                    >
-                      {slot.time}
-                    </Text>
-                  </View>
-                ))
-              ) : (
-                <Text className="text-sm text-text-tertiary">
-                  {t('hirer.companion.select_date')}
-                </Text>
-              )}
-            </View>
-          </MotiView>
 
           {/* Reviews Section */}
           <MotiView
@@ -701,22 +594,48 @@ export default function CompanionProfileScreen() {
         </View>
       </ScrollView>
 
+      {/* Floating Header - Outside ScrollView to stay fixed */}
+      <SafeAreaView
+        edges={['top']}
+        style={[StyleSheet.absoluteFill, { height: 100 }]}
+        pointerEvents="box-none"
+      >
+        <View className="flex-row items-center justify-between px-4 pt-2">
+          <Pressable
+            onPress={handleBack}
+            className="size-10 items-center justify-center rounded-full bg-black/30"
+          >
+            <ArrowLeft color="#FFFFFF" width={20} height={20} />
+          </Pressable>
+          <View className="flex-row gap-2">
+            <Pressable
+              onPress={handleShare}
+              className="size-10 items-center justify-center rounded-full bg-black/30"
+            >
+              <Share color="#FFFFFF" width={20} height={20} />
+            </Pressable>
+            <Pressable
+              onPress={handleToggleFavorite}
+              className="size-10 items-center justify-center rounded-full bg-black/30"
+            >
+              <Heart
+                color={isFavorite ? colors.rose[400] : '#FFFFFF'}
+                width={20}
+                height={20}
+                fill={isFavorite ? colors.rose[400] : 'none'}
+              />
+            </Pressable>
+          </View>
+        </View>
+      </SafeAreaView>
+
       {/* Bottom Actions */}
       <SafeAreaView
         edges={['bottom']}
         className="border-t border-border-light bg-white"
       >
         <View className="flex-row items-center gap-3 p-4">
-          <Pressable
-            onPress={handleMessage}
-            className="size-12 items-center justify-center rounded-xl bg-lavender-400/10"
-          >
-            <MessageCircle
-              color={colors.lavender[400]}
-              width={24}
-              height={24}
-            />
-          </Pressable>
+
           <Button
             label={t('hirer.companion.book_now')}
             onPress={handleBookNow}

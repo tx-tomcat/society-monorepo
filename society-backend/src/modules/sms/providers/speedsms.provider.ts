@@ -36,10 +36,16 @@ export class SpeedSmsProvider implements SmsProvider {
     this.accessToken = this.configService.get<string>('SPEEDSMS_ACCESS_TOKEN') || '';
     this.smsType = this.configService.get<number>('SPEEDSMS_TYPE') || 2;
     this.sender = this.configService.get<string>('SPEEDSMS_SENDER') || '';
-    this.useVoiceOtp = this.configService.get<boolean>('SPEEDSMS_USE_VOICE_OTP') || false;
+    // ConfigService returns strings, so compare explicitly
+    this.useVoiceOtp = this.configService.get<string>('SPEEDSMS_USE_VOICE_OTP') === 'true';
 
     if (!this.accessToken) {
       this.logger.warn('SpeedSMS access token not configured');
+    } else {
+      this.logger.log(
+        `SpeedSMS configured: token=${this.accessToken.slice(0, 4)}...${this.accessToken.slice(-4)}, ` +
+        `type=${this.smsType}, voiceOtp=${this.useVoiceOtp}`,
+      );
     }
   }
 
@@ -58,9 +64,6 @@ export class SpeedSmsProvider implements SmsProvider {
     const normalizedPhone = this.normalizePhone(phoneNumber);
 
     try {
-      if (this.useVoiceOtp) {
-        return await this.sendVoiceOtp(normalizedPhone, otp);
-      }
       return await this.sendSmsOtp(normalizedPhone, otp);
     } catch (error) {
       this.logger.error('SpeedSMS request failed', error);
@@ -82,12 +85,13 @@ export class SpeedSmsProvider implements SmsProvider {
       to: phone,
       content: message,
       type: this.smsType.toString(),
-      ...(this.sender && { sender: this.sender }),
     });
 
     const url = `${this.baseUrl}/sms/send?${params.toString()}`;
+    this.logger.log(`SpeedSMS request to ${this.maskPhone(phone)}`);
     const response = await fetch(url);
     const result: SpeedSmsResponse = await response.json();
+    this.logger.log(`SpeedSMS response: ${JSON.stringify(result)}`);
 
     if (result.status === 'success' && result.code === '00') {
       this.logger.log(

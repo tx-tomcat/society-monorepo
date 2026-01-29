@@ -23,8 +23,8 @@ export class CreateBookingDto {
   companionId: string; // User ID of the companion
 
   @IsOptional()
-  @IsUUID()
-  occasionId?: string; // ID of the selected occasion (optional)
+  @IsString()
+  occasionId?: string; // ID of the selected occasion (CUID format)
 
   @IsDateString()
   startDatetime: string;
@@ -66,8 +66,16 @@ export class UpdateBookingStatusDto {
 
 export class GetBookingsQueryDto {
   @IsOptional()
-  @IsEnum(BookingStatus)
-  status?: BookingStatus;
+  @Transform(({ value }) => {
+    // Support comma-separated statuses: "PENDING,CONFIRMED" -> ["PENDING", "CONFIRMED"]
+    if (typeof value === 'string') {
+      return value.includes(',') ? value.split(',').map(s => s.trim()) : [value];
+    }
+    return value;
+  })
+  @IsArray()
+  @IsEnum(BookingStatus, { each: true })
+  status?: BookingStatus[];
 
   @IsOptional()
   @Transform(({ value }) => parseInt(value, 10))

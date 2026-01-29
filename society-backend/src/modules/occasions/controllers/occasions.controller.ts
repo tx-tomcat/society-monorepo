@@ -35,6 +35,7 @@ import { OccasionTrackingService } from '../services/occasion-tracking.service';
 import { OccasionsService } from '../services/occasions.service';
 
 @Controller('occasions')
+@UseGuards(JwtAuthGuard)
 export class OccasionsController {
   private readonly logger = new Logger(OccasionsController.name);
 

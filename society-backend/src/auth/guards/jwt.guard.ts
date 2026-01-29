@@ -66,7 +66,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     }
 
     if (!token) {
-      return false;
+      throw new UnauthorizedException('No authorization token provided');
     }
 
     try {
@@ -99,7 +99,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
 
 
       if (!dbUser) {
-        return false;
+        throw new UnauthorizedException('Invalid or expired token');
       }
 
       // 4. Check if user account is active
@@ -135,7 +135,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
         throw error;
       }
       this.logger.error('JWT Guard error:', error);
-      return false;
+      throw new UnauthorizedException('Authentication failed');
     }
   }
 

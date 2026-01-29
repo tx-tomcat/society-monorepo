@@ -4,7 +4,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { MotiView } from 'moti';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, ScrollView } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView } from 'react-native';
 
 import {
   Badge,
@@ -18,29 +18,24 @@ import {
 } from '@/components/ui';
 import {
   Calendar,
-  CheckCircle,
   Clock,
   Help,
   Home,
   MapPin,
   MessageCircle,
-  Phone,
+  Send,
   Share,
+  VerifiedBadge,
 } from '@/components/ui/icons';
-import { useOccasion } from '@/lib/hooks';
-
-const MOCK_COMPANION = {
-  id: '1',
-  name: 'Minh Anh',
-  image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400',
-  phone: '+84 xxx xxx xxx',
-};
+import { getPhotoUrl } from '@/lib/api/services/companions.service';
+import { useCompanion, useOccasion } from '@/lib/hooks';
 
 export default function BookingConfirmationScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{
     bookingId: string;
     companionId: string;
+    companionProfileId: string;
     occasionId: string;
     occasionName: string;
     occasionEmoji: string;
@@ -52,12 +47,29 @@ export default function BookingConfirmationScreen() {
   }>();
   const { t } = useTranslation();
 
+  // Fetch companion data
+  const { data: companionData, isLoading: isLoadingCompanion } = useCompanion(
+    params.companionProfileId || params.companionId || ''
+  );
+
+  // Transform companion data
+  const companion = React.useMemo(() => {
+    if (!companionData) return null;
+    const c = companionData;
+    return {
+      id: c.id,
+      userId: c.userId,
+      name: c.displayName || '',
+      image: c.avatar || getPhotoUrl(c.photos?.[0]) || '',
+      isVerified: c.isVerified ?? c.verificationStatus === 'verified',
+    };
+  }, [companionData]);
+
   // Fetch occasion details if we have an ID but no name
   const { data: occasionData } = useOccasion(params.occasionId || '');
   const occasionName = params.occasionName || occasionData?.name || '-';
   const occasionEmoji = params.occasionEmoji || occasionData?.emoji || '';
 
-  const companion = MOCK_COMPANION;
   const duration = parseInt(params.duration || '3', 10);
 
   const handleGoHome = React.useCallback(() => {
@@ -65,12 +77,14 @@ export default function BookingConfirmationScreen() {
   }, [router]);
 
   const handleViewBookings = React.useCallback(() => {
-    router.replace('/hirer/bookings' as Href);
+    router.replace('/hirer/orders' as Href);
   }, [router]);
 
   const handleMessage = React.useCallback(() => {
-    router.push(`/hirer/chat/${companion.id}` as Href);
-  }, [router, companion.id]);
+    if (companion?.userId) {
+      router.push(`/hirer/chat/${companion.userId}` as Href);
+    }
+  }, [router, companion?.userId]);
 
   const handleShare = React.useCallback(() => {
     // TODO: Implement share functionality
@@ -89,6 +103,16 @@ export default function BookingConfirmationScreen() {
       year: 'numeric',
     });
   };
+
+  // Loading state
+  if (isLoadingCompanion) {
+    return (
+      <View className="flex-1 items-center justify-center bg-warmwhite">
+        <FocusAwareStatusBar />
+        <ActivityIndicator color={colors.rose[400]} size="large" />
+      </View>
+    );
+  }
 
   return (
     <View className="flex-1 bg-warmwhite">
@@ -111,30 +135,30 @@ export default function BookingConfirmationScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 100 }}
       >
-        {/* Success Animation */}
+        {/* Success Animation - Send Icon for "Request Sent" */}
         <MotiView
           from={{ opacity: 0, scale: 0.5 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ type: 'spring', damping: 15 }}
           className="items-center px-4 pt-8"
         >
-          <View className="mb-6 size-24 items-center justify-center rounded-full bg-teal-400">
+          <View className="mb-6 size-24 items-center justify-center rounded-full bg-lavender-400">
             <MotiView
-              from={{ scale: 0 }}
-              animate={{ scale: 1 }}
+              from={{ scale: 0, rotate: '-45deg' }}
+              animate={{ scale: 1, rotate: '0deg' }}
               transition={{ type: 'spring', damping: 10, delay: 300 }}
             >
-              <CheckCircle color="#FFFFFF" width={48} height={48} />
+              <Send color="#FFFFFF" width={44} height={44} />
             </MotiView>
           </View>
           <Text className="mb-2 text-center font-urbanist-bold text-2xl text-midnight">
             {t('hirer.confirmation.success_title')}
           </Text>
-          <Text className="mb-4 text-center text-base text-text-secondary">
+          <Text className="mx-8 mb-4 text-center text-base leading-relaxed text-text-secondary">
             {t('hirer.confirmation.success_subtitle')}
           </Text>
           <Badge
-            label={`${t('hirer.confirmation.booking_id')}: ${params.bookingId || 'N/A'}`}
+            label={`${t('hirer.confirmation.booking_id')}: ${params.bookingId?.slice(0, 8) || 'N/A'}`}
             variant="lavender"
             size="default"
           />
@@ -148,30 +172,36 @@ export default function BookingConfirmationScreen() {
           className="mx-4 mt-8 rounded-2xl bg-white p-5"
         >
           {/* Companion Info */}
-          <View className="mb-5 flex-row items-center gap-4 border-b border-border-light pb-5">
-            <Image
-              source={{ uri: companion.image }}
-              className="size-16 rounded-full"
-              contentFit="cover"
-            />
-            <View className="flex-1">
-              <Text className="font-urbanist-semibold text-lg text-midnight">
-                {companion.name}
-              </Text>
-              <View className="mt-1 flex-row items-center gap-1">
-                <Phone color={colors.text.tertiary} width={14} height={14} />
-                <Text className="text-sm text-text-tertiary">
-                  {companion.phone}
-                </Text>
+          {companion && (
+            <View className="mb-5 flex-row items-center gap-4 border-b border-border-light pb-5">
+              <Image
+                source={{ uri: companion.image }}
+                className="size-16 rounded-full"
+                contentFit="cover"
+              />
+              <View className="flex-1">
+                <View className="flex-row items-center gap-1">
+                  <Text className="font-urbanist-semibold text-lg text-midnight">
+                    {companion.name}
+                  </Text>
+                  {companion.isVerified && (
+                    <VerifiedBadge color={colors.teal[400]} width={18} height={18} />
+                  )}
+                </View>
+                <Badge
+                  label="Awaiting Confirmation"
+                  variant="coral"
+                  size="sm"
+                />
               </View>
+              <Pressable
+                onPress={handleMessage}
+                className="size-11 items-center justify-center rounded-full bg-lavender-400"
+              >
+                <MessageCircle color="#FFFFFF" width={20} height={20} />
+              </Pressable>
             </View>
-            <Pressable
-              onPress={handleMessage}
-              className="size-11 items-center justify-center rounded-full bg-lavender-400"
-            >
-              <MessageCircle color="#FFFFFF" width={20} height={20} />
-            </Pressable>
-          </View>
+          )}
 
           {/* Event Details */}
           <View className="gap-4">

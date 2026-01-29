@@ -4,7 +4,6 @@ import type {
   CompanionServiceInput,
   CreateCompanionProfileInput,
   RecurringAvailabilitySlot,
-  ServiceType,
 } from '../api/services/companions.service';
 import { companionsService } from '../api/services/companions.service';
 import { FILE_VALIDATION, filesService } from '../api/services/files.service';
@@ -25,8 +24,8 @@ export interface CompanionOnboardingData {
   halfDayRate?: number;
   fullDayRate?: number;
 
-  // Services (occasion IDs mapped to ServiceTypes)
-  services: ServiceType[];
+  // Services (occasion IDs)
+  services: CompanionServiceInput[];
 
   // Availability
   availability: RecurringAvailabilitySlot[];

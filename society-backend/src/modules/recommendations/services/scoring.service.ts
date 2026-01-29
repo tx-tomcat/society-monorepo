@@ -22,6 +22,25 @@ const SCORING_WEIGHTS = {
   behavioralAffinity: 0.15,
 };
 
+export interface CompanionData {
+  id: string;
+  userId: string;
+  displayName: string;
+  age?: number | null;
+  bio?: string | null;
+  avatar?: string | null;
+  heightCm?: number | null;
+  gender?: string | null;
+  languages: string[];
+  hourlyRate: number;
+  rating: number;
+  reviewCount: number;
+  isVerified: boolean;
+  isActive: boolean;
+  photos: { id: string; url: string; isPrimary: boolean; position: number }[];
+  services: { occasionId: string; occasion?: { id: string; nameEn: string; nameVi: string; emoji: string } }[];
+}
+
 export interface ScoredCompanion {
   companionId: string;
   score: number;
@@ -33,6 +52,7 @@ export interface ScoredCompanion {
     popularity: number;
     behavioralAffinity: number;
   };
+  companion: CompanionData;
 }
 
 @Injectable()
@@ -60,7 +80,7 @@ export class ScoringService {
       return [];
     }
 
-    // Get companion profiles first to have userId mapping
+    // Get companion profiles with full data for embedding in response
     const companions = await this.prisma.companionProfile.findMany({
       where: {
         id: { in: candidateCompanionIds }, // Query by CompanionProfile.id
@@ -68,9 +88,28 @@ export class ScoringService {
         isHidden: false,
       },
       include: {
-        user: { select: { isVerified: true } },
-        photos: { where: { isVerified: true }, select: { id: true } },
-        services: { where: { isEnabled: true }, select: { serviceType: true } },
+        user: {
+          select: {
+            id: true,
+            fullName: true,
+            avatarUrl: true,
+            dateOfBirth: true,
+            gender: true,
+            isVerified: true,
+          },
+        },
+        photos: {
+          where: { isVerified: true },
+          select: { id: true, url: true, isPrimary: true, position: true },
+          orderBy: [{ isPrimary: 'desc' }, { position: 'asc' }],
+        },
+        services: {
+          where: { isEnabled: true },
+          select: {
+            occasionId: true,
+            occasion: { select: { id: true, nameEn: true, nameVi: true, emoji: true } },
+          },
+        },
       },
     });
 
@@ -102,14 +141,14 @@ export class ScoringService {
       },
       select: {
         companionId: true,
-        occasionType: true,
+        occasionId: true,
       },
       take: 20,
       orderBy: { createdAt: 'desc' },
     });
 
-    // Extract preferred service types from booking history
-    const preferredServices = new Set(bookings.map((b) => b.occasionType));
+    // Extract preferred occasions from booking history
+    const preferredOccasions = new Set(bookings.map((b) => b.occasionId).filter(Boolean));
 
     // Build interaction score map
     const interactionScoreMap = new Map<string, number>();
@@ -124,16 +163,16 @@ export class ScoringService {
 
     // Score each companion
     const scoredCompanions: ScoredCompanion[] = companions.map((companion) => {
-      // 1. Preference Match (service type overlap)
-      const companionServices = new Set(
-        companion.services.map((s) => s.serviceType),
+      // 1. Preference Match (occasion overlap)
+      const companionOccasions = new Set(
+        companion.services.map((s) => s.occasionId),
       );
-      const serviceOverlap =
-        preferredServices.size > 0
-          ? [...preferredServices].filter((s) => companionServices.has(s))
-              .length / preferredServices.size
+      const occasionOverlap =
+        preferredOccasions.size > 0
+          ? [...preferredOccasions].filter((o) => companionOccasions.has(o))
+              .length / preferredOccasions.size
           : 0.5; // Default for new users
-      const preferenceMatch = serviceOverlap;
+      const preferenceMatch = occasionOverlap;
 
       // 2. Profile Quality
       const hasVerifiedPhotos = companion.photos.length >= 3;
@@ -184,6 +223,14 @@ export class ScoringService {
         },
       ].sort((a, b) => b.value - a.value);
 
+      // Calculate age from dateOfBirth
+      const age = companion.user.dateOfBirth
+        ? Math.floor(
+            (Date.now() - new Date(companion.user.dateOfBirth).getTime()) /
+              (365.25 * 24 * 60 * 60 * 1000),
+          )
+        : null;
+
       return {
         companionId: companion.id, // Use CompanionProfile.id, not userId
         score,
@@ -194,6 +241,24 @@ export class ScoringService {
           availability,
           popularity,
           behavioralAffinity,
+        },
+        companion: {
+          id: companion.id,
+          userId: companion.userId,
+          displayName: companion.user.fullName || 'Anonymous',
+          age,
+          bio: companion.bio,
+          avatar: companion.user.avatarUrl,
+          heightCm: companion.heightCm,
+          gender: companion.user.gender,
+          languages: companion.languages || [],
+          hourlyRate: Number(companion.hourlyRate),
+          rating: Number(companion.ratingAvg) || 0,
+          reviewCount: companion.ratingCount || 0,
+          isVerified: companion.user.isVerified,
+          isActive: companion.isActive,
+          photos: companion.photos,
+          services: companion.services,
         },
       };
     });

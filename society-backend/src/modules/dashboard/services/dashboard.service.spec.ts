@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
 import { DashboardService } from './dashboard.service';
 import { PrismaService } from '@/prisma/prisma.service';
-import { BookingStatus, ServiceType } from '@generated/client';
+import { BookingStatus } from '@generated/client';
 
 describe('DashboardService', () => {
   let service: DashboardService;
@@ -62,7 +62,8 @@ describe('DashboardService', () => {
           startDatetime: futureTime,
           endDatetime: new Date(futureTime.getTime() + 3 * 60 * 60 * 1000),
           locationAddress: 'Coffee Shop',
-          occasionType: ServiceType.CASUAL_OUTING,
+          occasionId: 'occasion-1',
+          occasion: { id: 'occasion-1', code: 'cafe', nameEn: 'Cafe Meetup', emoji: '☕' },
           basePrice: 300000,
           totalPrice: 354000,
           createdAt: new Date(),
@@ -82,7 +83,8 @@ describe('DashboardService', () => {
           startDatetime: tomorrow,
           endDatetime: new Date(tomorrow.getTime() + 3 * 60 * 60 * 1000),
           locationAddress: 'Restaurant',
-          occasionType: ServiceType.BUSINESS_EVENT,
+          occasionId: 'occasion-2',
+          occasion: { id: 'occasion-2', code: 'business_meeting', nameEn: 'Business Meeting', emoji: '💼' },
           basePrice: 1270000,
           totalPrice: 1500000,
           createdAt: new Date(),
@@ -135,7 +137,8 @@ describe('DashboardService', () => {
           startDatetime: futureTime,
           endDatetime: new Date(futureTime.getTime() + 4 * 60 * 60 * 1000),
           locationAddress: 'Event Venue',
-          occasionType: ServiceType.WEDDING_ATTENDANCE,
+          occasionId: 'occasion-3',
+          occasion: { id: 'occasion-3', code: 'wedding', nameEn: 'Wedding', emoji: '💒' },
           basePrice: 850000,
           totalPrice: 1000000,
           createdAt: new Date(),

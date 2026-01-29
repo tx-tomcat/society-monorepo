@@ -1,22 +1,22 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '@/prisma/prisma.service';
 import {
-  CachePatternsService,
   CACHE_KEYS,
   CACHE_TTL,
+  CachePatternsService,
 } from '@/modules/cache/cache-patterns.service';
+import { PrismaService } from '@/prisma/prisma.service';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import {
-  OccasionDto,
-  OccasionDetailDto,
-  OccasionsResponseDto,
   ContextDto,
-  CreateOccasionDto,
-  UpdateOccasionDto,
-  HolidayDto,
   CreateHolidayDto,
-  UpdateHolidayDto,
-  TimeSlot,
+  CreateOccasionDto,
   DayType,
+  HolidayDto,
+  OccasionDetailDto,
+  OccasionDto,
+  OccasionsResponseDto,
+  TimeSlot,
+  UpdateHolidayDto,
+  UpdateOccasionDto,
 } from '../dto/occasion.dto';
 
 @Injectable()
@@ -24,7 +24,7 @@ export class OccasionsService {
   constructor(
     private prisma: PrismaService,
     private cachePatterns: CachePatternsService,
-  ) {}
+  ) { }
 
   /**
    * Get contextual occasions based on current time, day, and active holidays
@@ -58,11 +58,11 @@ export class OccasionsService {
           // If holidays active, show matching holiday occasions OR non-holiday occasions
           context.activeHolidays.length > 0
             ? {
-                OR: [
-                  { holidays: { isEmpty: true } },
-                  { holidays: { hasSome: context.activeHolidays } },
-                ],
-              }
+              OR: [
+                { holidays: { isEmpty: true } },
+                { holidays: { hasSome: context.activeHolidays } },
+              ],
+            }
             : { holidays: { isEmpty: true } },
         ],
       },
@@ -92,7 +92,6 @@ export class OccasionsService {
         });
       },
     );
-
     if (!occasions) return [];
     return occasions.map((o) => this.mapToOccasionDto(o, language));
   }

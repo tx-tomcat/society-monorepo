@@ -4,7 +4,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { MotiView } from 'moti';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, ScrollView } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView } from 'react-native';
 
 import {
   colors,
@@ -14,141 +14,15 @@ import {
   Text,
   View,
 } from '@/components/ui';
-import {
-  ArrowLeft,
-  Briefcase,
-  Calendar,
-  Coffee,
-  Confetti,
-  Family,
-  MaiFlower,
-  Star,
-  WeddingRings,
-} from '@/components/ui/icons';
-
-type OccasionInfo = {
-  id: string;
-  code: string;
-  emoji: string;
-  name: string;
-};
-
-type Review = {
-  id: string;
-  author: string;
-  avatar: string;
-  rating: number;
-  date: string;
-  comment: string;
-  occasion: OccasionInfo | null;
-  isVerifiedBooking: boolean;
-};
-
-// Fallback icon mapping for occasions without emoji
-const OCCASION_ICONS: Record<
-  string,
-  React.ComponentType<{ color: string; width: number; height: number }>
-> = {
-  wedding_attendance: WeddingRings,
-  family_introduction: Family,
-  business_event: Briefcase,
-  tet_celebration: MaiFlower,
-  casual_outing: Coffee,
-  social_event: Confetti,
-};
+import { ArrowLeft, Star } from '@/components/ui/icons';
+import type { CompanionReview } from '@/lib/api/services/companions.service';
+import { useCompanionReviews } from '@/lib/hooks';
+import { formatRelativeDate } from '@/lib/utils';
 
 const RATING_FILTERS = ['all', '5', '4', '3', '2', '1'];
 
-const MOCK_REVIEWS: Review[] = [
-  {
-    id: '1',
-    author: 'Hoàng Long',
-    avatar:
-      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200',
-    rating: 5,
-    date: '2 weeks ago',
-    comment:
-      "Minh Anh was absolutely wonderful at my sister's wedding. She arrived early, dressed elegantly, and made everyone feel comfortable. Her conversation skills are excellent and she navigated family dynamics with grace. Highly recommend for any formal event!",
-    occasion: { id: '1', code: 'wedding_attendance', emoji: '💒', name: 'Wedding' },
-    isVerifiedBooking: true,
-  },
-  {
-    id: '2',
-    author: 'Thu Trang',
-    avatar:
-      'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200',
-    rating: 5,
-    date: '1 month ago',
-    comment:
-      'Perfect companion for our corporate dinner. Eloquent, well-dressed, and great at conversation. She made a wonderful impression on our business partners. Will definitely book again for future events.',
-    occasion: { id: '2', code: 'business_event', emoji: '💼', name: 'Business' },
-    isVerifiedBooking: true,
-  },
-  {
-    id: '3',
-    author: 'Văn Đức',
-    avatar:
-      'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200',
-    rating: 4,
-    date: '1 month ago',
-    comment:
-      'Very professional and punctual. Made the family gathering much more enjoyable. Great personality and knew how to engage with everyone from grandparents to cousins.',
-    occasion: { id: '3', code: 'family_introduction', emoji: '👨‍👩‍👧', name: 'Family' },
-    isVerifiedBooking: true,
-  },
-  {
-    id: '4',
-    author: 'Ngọc Mai',
-    avatar:
-      'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200',
-    rating: 5,
-    date: '2 months ago',
-    comment:
-      'Booked for Tết celebration. She helped make our family reunion so much warmer. Everyone loved her, especially the elderly relatives. Such a genuine and warm person!',
-    occasion: { id: '4', code: 'tet_celebration', emoji: '🏮', name: 'Tết' },
-    isVerifiedBooking: true,
-  },
-  {
-    id: '5',
-    author: 'Minh Quân',
-    avatar:
-      'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200',
-    rating: 5,
-    date: '2 months ago',
-    comment:
-      'Amazing experience! Minh Anh is professional, charming, and a wonderful conversationalist. She made everyone feel at ease and added such a positive energy to the event.',
-    occasion: { id: '5', code: 'social_event', emoji: '🎉', name: 'Party' },
-    isVerifiedBooking: true,
-  },
-  {
-    id: '6',
-    author: 'Hải Yến',
-    avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200',
-    rating: 4,
-    date: '3 months ago',
-    comment:
-      'Good companion for a casual outing. Friendly, easy to talk to, and very presentable. Would recommend for anyone looking for pleasant company.',
-    occasion: { id: '6', code: 'casual_outing', emoji: '☕', name: 'Casual' },
-    isVerifiedBooking: true,
-  },
-];
-
-const MOCK_STATS = {
-  averageRating: 4.9,
-  totalReviews: 127,
-  ratingDistribution: {
-    5: 108,
-    4: 15,
-    3: 3,
-    2: 1,
-    1: 0,
-  },
-};
-
-function ReviewItem({ review }: { review: Review }) {
+function ReviewItem({ review }: { review: CompanionReview }) {
   const { t } = useTranslation();
-  const occasionCode = review.occasion?.code || '';
-  const OccasionIcon = OCCASION_ICONS[occasionCode] || Calendar;
 
   return (
     <MotiView
@@ -160,24 +34,28 @@ function ReviewItem({ review }: { review: Review }) {
       {/* Header */}
       <View className="mb-3 flex-row items-center gap-3">
         <Image
-          source={{ uri: review.avatar }}
+          source={{
+            uri:
+              review.reviewer?.avatarUrl ||
+              'https://via.placeholder.com/100x100',
+          }}
           className="size-12 rounded-full"
           contentFit="cover"
         />
         <View className="flex-1">
           <View className="flex-row items-center gap-2">
             <Text className="font-urbanist-semibold text-base text-midnight">
-              {review.author}
+              {review.reviewer?.fullName || 'Anonymous'}
             </Text>
-            {review.isVerifiedBooking && (
-              <View className="rounded-full bg-teal-400/10 px-2 py-0.5">
-                <Text className="text-[10px] font-medium text-teal-600">
-                  {t('hirer.reviews.verified')}
-                </Text>
-              </View>
-            )}
+            <View className="rounded-full bg-teal-400/10 px-2 py-0.5">
+              <Text className="text-[10px] font-medium text-teal-600">
+                {t('hirer.reviews.verified')}
+              </Text>
+            </View>
           </View>
-          <Text className="text-sm text-text-tertiary">{review.date}</Text>
+          <Text className="text-sm text-text-tertiary">
+            {formatRelativeDate(review.createdAt)}
+          </Text>
         </View>
         <View className="flex-row items-center gap-1 rounded-full bg-yellow-400/10 px-3 py-1.5">
           <Star color={colors.yellow[400]} width={14} height={14} />
@@ -188,22 +66,10 @@ function ReviewItem({ review }: { review: Review }) {
       </View>
 
       {/* Comment */}
-      <Text className="mb-3 leading-relaxed text-text-secondary">
-        {review.comment}
-      </Text>
-
-      {/* Occasion Tag */}
-      {review.occasion && (
-        <View className="flex-row items-center gap-1.5">
-          {review.occasion.emoji ? (
-            <Text className="text-sm">{review.occasion.emoji}</Text>
-          ) : (
-            <OccasionIcon color={colors.lavender[400]} width={14} height={14} />
-          )}
-          <Text className="text-xs font-medium text-lavender-500">
-            {review.occasion.name}
-          </Text>
-        </View>
+      {review.comment && (
+        <Text className="leading-relaxed text-text-secondary">
+          {review.comment}
+        </Text>
       )}
     </MotiView>
   );
@@ -244,21 +110,83 @@ export default function CompanionReviewsScreen() {
 
   const [selectedFilter, setSelectedFilter] = React.useState('all');
 
+  // Fetch reviews from API
+  const { data: reviewsData, isLoading } = useCompanionReviews(id || '', 1, 50);
+
   const handleBack = React.useCallback(() => {
     router.back();
   }, [router]);
 
+  // Filter reviews based on selected rating
   const filteredReviews = React.useMemo(() => {
-    if (selectedFilter === 'all') return MOCK_REVIEWS;
-    return MOCK_REVIEWS.filter(
+    if (!reviewsData?.reviews) return [];
+    if (selectedFilter === 'all') return reviewsData.reviews;
+    return reviewsData.reviews.filter(
       (r) => r.rating === parseInt(selectedFilter, 10)
     );
-  }, [selectedFilter]);
+  }, [reviewsData?.reviews, selectedFilter]);
+
+  // Get stats from API response
+  const stats = React.useMemo(() => {
+    if (!reviewsData) {
+      return {
+        averageRating: 0,
+        totalReviews: 0,
+        ratingDistribution: { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 } as Record<
+          number,
+          number
+        >,
+      };
+    }
+    return {
+      averageRating: reviewsData.averageRating || 0,
+      totalReviews: reviewsData.total || 0,
+      ratingDistribution: (reviewsData.ratingDistribution || {
+        5: 0,
+        4: 0,
+        3: 0,
+        2: 0,
+        1: 0,
+      }) as Record<number, number>,
+    };
+  }, [reviewsData]);
 
   const renderReview = React.useCallback(
-    ({ item }: { item: Review }) => <ReviewItem review={item} />,
+    ({ item }: { item: CompanionReview }) => <ReviewItem review={item} />,
     []
   );
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <View className="flex-1 bg-warmwhite">
+        <FocusAwareStatusBar />
+        <SafeAreaView edges={['top']}>
+          <View className="flex-row items-center gap-4 border-b border-border-light px-4 py-3">
+            <Pressable
+              onPress={handleBack}
+              className="size-10 items-center justify-center"
+            >
+              <ArrowLeft
+                color={colors.midnight.DEFAULT}
+                width={24}
+                height={24}
+              />
+            </Pressable>
+            <Text className="flex-1 font-urbanist-bold text-xl text-midnight">
+              {t('hirer.reviews.title')}
+            </Text>
+          </View>
+        </SafeAreaView>
+        <View className="flex-1 items-center justify-center">
+          <ActivityIndicator color={colors.rose[400]} size="large" />
+          <Text className="mt-4 text-text-secondary">
+            {t('common.loading')}
+          </Text>
+        </View>
+      </View>
+    );
+  }
 
   return (
     <View className="flex-1 bg-warmwhite">
@@ -285,14 +213,14 @@ export default function CompanionReviewsScreen() {
           {/* Average Rating */}
           <View className="items-center">
             <Text className="font-urbanist-bold text-5xl text-midnight">
-              {MOCK_STATS.averageRating}
+              {stats.averageRating.toFixed(1)}
             </Text>
             <View className="mt-1 flex-row">
               {[1, 2, 3, 4, 5].map((star) => (
                 <Star
                   key={star}
                   color={
-                    star <= Math.round(MOCK_STATS.averageRating)
+                    star <= Math.round(stats.averageRating)
                       ? colors.yellow[400]
                       : colors.neutral[200]
                   }
@@ -302,7 +230,7 @@ export default function CompanionReviewsScreen() {
               ))}
             </View>
             <Text className="mt-1 text-sm text-text-tertiary">
-              {MOCK_STATS.totalReviews} {t('hirer.reviews.reviews')}
+              {stats.totalReviews} {t('hirer.reviews.reviews')}
             </Text>
           </View>
 
@@ -312,12 +240,8 @@ export default function CompanionReviewsScreen() {
               <RatingBar
                 key={rating}
                 rating={rating}
-                count={
-                  MOCK_STATS.ratingDistribution[
-                    rating as keyof typeof MOCK_STATS.ratingDistribution
-                  ]
-                }
-                total={MOCK_STATS.totalReviews}
+                count={stats.ratingDistribution[rating] || 0}
+                total={stats.totalReviews}
               />
             ))}
           </View>
@@ -362,7 +286,6 @@ export default function CompanionReviewsScreen() {
           <FlashList
             data={filteredReviews}
             renderItem={renderReview}
-            estimatedItemSize={180}
             keyExtractor={(item) => item.id}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ paddingBottom: 20 }}
@@ -384,4 +307,3 @@ export default function CompanionReviewsScreen() {
     </View>
   );
 }
-

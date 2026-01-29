@@ -79,7 +79,7 @@ export default function CompanionProfile() {
   const companion = mockCompanionDetails; // In real app: fetch by id
 
   const handleBookPress = () => {
-    router.push(`/booking/${id}` as Href);
+    router.push(`/hirer/booking/new?companionId=${id}` as Href);
   };
 
   const handleBackPress = () => {

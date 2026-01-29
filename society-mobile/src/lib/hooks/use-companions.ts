@@ -49,12 +49,16 @@ export function useCompanion(companionId: string) {
 /**
  * React Query hook to fetch companion availability
  */
-export function useCompanionAvailability(companionId: string, date?: string) {
+export function useCompanionAvailability(
+  companionId: string,
+  startDate: string,
+  endDate: string
+) {
   return useQuery({
-    queryKey: ['companion', companionId, 'availability', date],
+    queryKey: ['companion', companionId, 'availability', startDate, endDate],
     queryFn: () =>
-      companionsService.getCompanionAvailability(companionId, date),
-    enabled: !!companionId,
+      companionsService.getCompanionAvailability(companionId, startDate, endDate),
+    enabled: !!companionId && !!startDate && !!endDate,
     staleTime: 2 * 60 * 1000, // 2 minutes - availability changes frequently
   });
 }

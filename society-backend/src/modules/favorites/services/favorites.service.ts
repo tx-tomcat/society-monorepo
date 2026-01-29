@@ -20,21 +20,32 @@ export class FavoritesService {
   constructor(private readonly prisma: PrismaService) {}
 
   /**
-   * Add a companion to favorites
+   * Validate that companionId is a valid User with a companion profile
    */
-  async addFavorite(hirerId: string, dto: AddFavoriteDto): Promise<{ id: string; message: string }> {
-    // Verify companion exists and has a companion profile
-    const companion = await this.prisma.user.findUnique({
-      where: { id: dto.companionId },
+  private async validateCompanionUserId(companionId: string): Promise<boolean> {
+    const user = await this.prisma.user.findUnique({
+      where: { id: companionId },
       include: { companionProfile: true },
     });
 
-    if (!companion || !companion.companionProfile) {
+    return !!user?.companionProfile;
+  }
+
+  /**
+   * Add a companion to favorites
+   * companionId must be User.id (not CompanionProfile.id)
+   */
+  async addFavorite(hirerId: string, dto: AddFavoriteDto): Promise<{ id: string; message: string }> {
+    const companionId = dto.companionId;
+
+    // Validate that companionId is a valid companion user
+    const isValid = await this.validateCompanionUserId(companionId);
+    if (!isValid) {
       throw new NotFoundException('Companion not found');
     }
 
     // Check if user is trying to favorite themselves
-    if (hirerId === dto.companionId) {
+    if (hirerId === companionId) {
       throw new BadRequestException('You cannot add yourself to favorites');
     }
 
@@ -43,7 +54,7 @@ export class FavoritesService {
       where: {
         hirerId_companionId: {
           hirerId,
-          companionId: dto.companionId,
+          companionId,
         },
       },
     });
@@ -55,12 +66,12 @@ export class FavoritesService {
     const favorite = await this.prisma.favoriteCompanion.create({
       data: {
         hirerId,
-        companionId: dto.companionId,
+        companionId,
         notes: dto.notes,
       },
     });
 
-    this.logger.log(`User ${hirerId} added companion ${dto.companionId} to favorites`);
+    this.logger.log(`User ${hirerId} added companion ${companionId} to favorites`);
 
     return {
       id: favorite.id,
@@ -70,24 +81,26 @@ export class FavoritesService {
 
   /**
    * Remove a companion from favorites
+   * companionId must be User.id (not CompanionProfile.id)
    */
   async removeFavorite(hirerId: string, companionId: string): Promise<{ message: string }> {
-    const favorite = await this.prisma.favoriteCompanion.findUnique({
+    // Validate that companionId is a valid companion user
+    const isValid = await this.validateCompanionUserId(companionId);
+    if (!isValid) {
+      throw new NotFoundException('Companion not found');
+    }
+
+    // Use deleteMany to avoid race condition issues
+    const result = await this.prisma.favoriteCompanion.deleteMany({
       where: {
-        hirerId_companionId: {
-          hirerId,
-          companionId,
-        },
+        hirerId,
+        companionId,
       },
     });
 
-    if (!favorite) {
+    if (result.count === 0) {
       throw new NotFoundException('Favorite not found');
     }
-
-    await this.prisma.favoriteCompanion.delete({
-      where: { id: favorite.id },
-    });
 
     this.logger.log(`User ${hirerId} removed companion ${companionId} from favorites`);
 
@@ -143,12 +156,19 @@ export class FavoritesService {
 
   /**
    * Update notes for a favorite companion
+   * companionId must be User.id (not CompanionProfile.id)
    */
   async updateNotes(
     hirerId: string,
     companionId: string,
     dto: UpdateFavoriteNotesDto,
   ): Promise<{ message: string }> {
+    // Validate that companionId is a valid companion user
+    const isValid = await this.validateCompanionUserId(companionId);
+    if (!isValid) {
+      throw new NotFoundException('Companion not found');
+    }
+
     const favorite = await this.prisma.favoriteCompanion.findUnique({
       where: {
         hirerId_companionId: {
@@ -174,8 +194,15 @@ export class FavoritesService {
 
   /**
    * Check if a companion is in user's favorites
+   * companionId must be User.id (not CompanionProfile.id)
    */
   async isFavorite(hirerId: string, companionId: string): Promise<{ isFavorite: boolean }> {
+    // Validate that companionId is a valid companion user
+    const isValid = await this.validateCompanionUserId(companionId);
+    if (!isValid) {
+      return { isFavorite: false };
+    }
+
     const favorite = await this.prisma.favoriteCompanion.findUnique({
       where: {
         hirerId_companionId: {
@@ -192,11 +219,22 @@ export class FavoritesService {
 
   /**
    * Toggle favorite status (add if not exists, remove if exists)
+   * companionId must be User.id (not CompanionProfile.id)
    */
   async toggleFavorite(
     hirerId: string,
     companionId: string,
   ): Promise<{ isFavorite: boolean; message: string }> {
+    // Validate that companionId is a valid companion user
+    const isValid = await this.validateCompanionUserId(companionId);
+    if (!isValid) {
+      throw new NotFoundException('Companion not found');
+    }
+
+    if (hirerId === companionId) {
+      throw new BadRequestException('You cannot add yourself to favorites');
+    }
+
     const existing = await this.prisma.favoriteCompanion.findUnique({
       where: {
         hirerId_companionId: {
@@ -207,27 +245,17 @@ export class FavoritesService {
     });
 
     if (existing) {
-      await this.prisma.favoriteCompanion.delete({
-        where: { id: existing.id },
+      // Use deleteMany to avoid "record not found" errors from race conditions
+      await this.prisma.favoriteCompanion.deleteMany({
+        where: {
+          hirerId,
+          companionId,
+        },
       });
       return {
         isFavorite: false,
         message: 'Companion removed from favorites',
       };
-    }
-
-    // Verify companion exists
-    const companion = await this.prisma.user.findUnique({
-      where: { id: companionId },
-      include: { companionProfile: true },
-    });
-
-    if (!companion || !companion.companionProfile) {
-      throw new NotFoundException('Companion not found');
-    }
-
-    if (hirerId === companionId) {
-      throw new BadRequestException('You cannot add yourself to favorites');
     }
 
     await this.prisma.favoriteCompanion.create({

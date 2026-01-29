@@ -3,7 +3,7 @@ import type { Href } from 'expo-router';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React from 'react';
 import { ActivityIndicator, Pressable, ScrollView } from 'react-native';
-import { showMessage } from 'react-native-flash-message';
+import Toast from 'react-native-toast-message';
 
 import {
   Badge,
@@ -89,8 +89,6 @@ export default function BookingFlow() {
   }, [companionData]);
 
   const totalPrice = (companion?.pricePerHour || 0) * duration;
-  const serviceFee = totalPrice * 0.18; // 18% commission
-  const grandTotal = totalPrice + serviceFee;
 
   const handleBackPress = () => {
     if (step === 'details') {
@@ -131,10 +129,10 @@ export default function BookingFlow() {
         router.push('/booking/confirmation' as Href);
       } catch (error) {
         console.error('Booking error:', error);
-        showMessage({
-          message: 'Booking Failed',
-          description: 'Unable to create booking. Please try again.',
-          type: 'danger',
+        Toast.show({
+          type: 'error',
+          text1: 'Booking Failed',
+          text2: 'Unable to create booking. Please try again.',
         });
       }
     }
@@ -169,7 +167,7 @@ export default function BookingFlow() {
       case 'payment':
         return createBooking.isPending
           ? 'Processing...'
-          : `Pay ${formatVND(grandTotal)}`;
+          : `Pay ${formatVND(totalPrice)}`;
     }
   };
 
@@ -487,17 +485,8 @@ export default function BookingFlow() {
                   <Text className="text-text-secondary">
                     {formatVND(companion.pricePerHour)} x {duration} hours
                   </Text>
-                  <Text className="text-midnight">{formatVND(totalPrice)}</Text>
-                </View>
-                <View className="flex-row justify-between">
-                  <Text className="text-text-secondary">Service fee</Text>
-                  <Text className="text-midnight">{formatVND(serviceFee)}</Text>
-                </View>
-                <View className="my-2 h-px bg-border-light" />
-                <View className="flex-row justify-between">
-                  <Text className="font-semibold text-midnight">Total</Text>
                   <Text className="text-lg font-bold text-rose-400">
-                    {formatVND(grandTotal)}
+                    {formatVND(totalPrice)}
                   </Text>
                 </View>
               </View>

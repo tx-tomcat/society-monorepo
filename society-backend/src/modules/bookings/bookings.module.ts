@@ -5,9 +5,10 @@ import { BookingsService } from './services/bookings.service';
 import { BookingTasks } from './tasks/booking.tasks';
 import { ModerationModule } from '../moderation/moderation.module';
 import { OccasionsModule } from '../occasions/occasions.module';
+import { PlatformConfigModule } from '../config/config.module';
 
 @Module({
-  imports: [ConfigModule, ModerationModule, OccasionsModule],
+  imports: [ConfigModule, ModerationModule, OccasionsModule, PlatformConfigModule],
   controllers: [BookingsController],
   providers: [BookingsService, BookingTasks],
   exports: [BookingsService],

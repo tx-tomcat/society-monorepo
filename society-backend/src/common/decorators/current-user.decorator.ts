@@ -10,8 +10,6 @@ export const CurrentUser = createParamDecorator(
     const request = ctx.switchToHttp().getRequest();
     const user = request.user;
 
-    console.log('CurrentUser', user);
-
     if (!user) {
       return null;
     }

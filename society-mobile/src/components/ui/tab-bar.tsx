@@ -1,7 +1,8 @@
 /* eslint-disable max-lines-per-function */
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
-import React from 'react';
-import { Pressable } from 'react-native';
+import { type TabTriggerSlotProps } from 'expo-router/ui';
+import React, { type Ref } from 'react';
+import { Pressable, type View as RNView } from 'react-native';
 import Svg, { Circle, Path, Rect } from 'react-native-svg';
 
 import { SafeAreaView, Text, View } from '@/components/ui';
@@ -235,9 +236,8 @@ export function TabBar({
               <View className="items-center gap-0.5">
                 <IconComponent focused={isFocused} color={color} />
                 <Text
-                  className={`text-[10px] leading-[1.6] tracking-[0.2px] ${
-                    isFocused ? 'font-urbanist-bold' : 'font-urbanist-medium'
-                  }`}
+                  className={`text-[10px] leading-[1.6] tracking-[0.2px] ${isFocused ? 'font-urbanist-bold' : 'font-urbanist-medium'
+                    }`}
                   style={{ color: isFocused ? color : colors.text.tertiary }}
                 >
                   {label}
@@ -251,7 +251,7 @@ export function TabBar({
   );
 }
 
-// Pre-configured tab bars for each role
+// Pre-configured tab bars for each role (React Navigation style - legacy)
 export function HirerTabBar(props: BottomTabBarProps) {
   return <TabBar {...props} accentColor={colors.rose[400]} />;
 }
@@ -259,3 +259,75 @@ export function HirerTabBar(props: BottomTabBarProps) {
 export function CompanionTabBar(props: BottomTabBarProps) {
   return <TabBar {...props} accentColor={colors.lavender[400]} />;
 }
+
+// Custom Tab Button for expo-router/ui
+type CustomTabButtonProps = TabTriggerSlotProps & {
+  name: string;
+  accentColor?: string;
+  ref?: Ref<RNView>;
+};
+
+function CustomTabButton({
+  name,
+  accentColor = colors.rose[400],
+  isFocused = false,
+  ...props
+}: CustomTabButtonProps) {
+  const focused = isFocused ?? false;
+  const color = focused ? accentColor : colors.text.tertiary;
+  const IconComponent = iconMap[name] || HomeIcon;
+  const label = labelMap[name] || name;
+
+  return (
+    <Pressable
+      {...props}
+      accessibilityRole="button"
+      accessibilityState={focused ? { selected: true } : {}}
+      className="flex flex-1 items-center justify-center py-2 "
+    >
+      <View className="items-center w-full gap-0.5 ">
+        <IconComponent focused={focused} color={color} />
+        <Text
+          className={`text-[10px] leading-[1.6] tracking-[0.2px] ${focused ? 'font-urbanist-bold' : 'font-urbanist-medium'
+            }`}
+          style={{ color: focused ? color : colors.text.tertiary }}
+        >
+          {label}
+        </Text>
+      </View>
+    </Pressable>
+  );
+}
+
+// Custom Tab List wrapper for expo-router/ui (used with TabList asChild)
+type CustomTabListProps = {
+  accentColor?: string;
+  children: React.ReactNode;
+};
+
+export const CustomTabList = React.forwardRef<RNView, CustomTabListProps>(
+  function CustomTabList({ accentColor = colors.rose[400], children }, ref) {
+    return (
+      <SafeAreaView
+        edges={['bottom']}
+        className="w-full"
+        style={{ backgroundColor: colors.warmwhite.DEFAULT }}
+      >
+        <View
+          ref={ref}
+          className="flex-row items-center justify-between px-4 w-full"
+          style={{ borderTopWidth: 1, borderTopColor: colors.border.light }}
+        >
+          {React.Children.map(children, (child) => {
+            if (React.isValidElement(child)) {
+              return React.cloneElement(child, { accentColor } as Partial<CustomTabButtonProps>);
+            }
+            return child;
+          })}
+        </View>
+      </SafeAreaView>
+    );
+  }
+);
+
+export { CustomTabButton };

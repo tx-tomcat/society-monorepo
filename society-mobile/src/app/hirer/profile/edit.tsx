@@ -14,11 +14,10 @@ import {
 
 import {
   colors,
-  FocusAwareStatusBar,
   Image,
   SafeAreaView,
   Text,
-  View,
+  View
 } from '@/components/ui';
 import { ArrowLeft, Camera, Check } from '@/components/ui/icons';
 import { useCurrentUser, useSafeBack } from '@/lib/hooks';
@@ -99,30 +98,27 @@ export default function EditProfileScreen() {
   );
 
   return (
-    <View className="flex-1 bg-warmwhite">
-      <FocusAwareStatusBar />
+    <SafeAreaView className="flex-1 bg-warmwhite">
 
-      <SafeAreaView edges={['top']}>
-        {/* Header */}
-        <View className="flex-row items-center justify-between px-4 py-3">
-          <Pressable
-            onPress={goBack}
-            className="size-10 items-center justify-center"
-          >
-            <ArrowLeft color={colors.midnight.DEFAULT} width={24} height={24} />
-          </Pressable>
-          <Text className="font-urbanist-bold text-xl text-midnight">
-            {t('hirer.edit_profile.header')}
-          </Text>
-          <Pressable
-            onPress={handleSave}
-            disabled={isSaving}
-            className="size-10 items-center justify-center rounded-full bg-rose-400"
-          >
-            <Check color="#FFFFFF" width={20} height={20} />
-          </Pressable>
-        </View>
-      </SafeAreaView>
+      {/* Header */}
+      <View className="flex-row items-center justify-between px-4 py-3">
+        <Pressable
+          onPress={goBack}
+          className="size-10 items-center justify-center"
+        >
+          <ArrowLeft color={colors.midnight.DEFAULT} width={24} height={24} />
+        </Pressable>
+        <Text className="font-urbanist-bold text-xl text-midnight">
+          {t('hirer.edit_profile.header')}
+        </Text>
+        <Pressable
+          onPress={handleSave}
+          disabled={isSaving}
+          className="size-10 items-center justify-center rounded-full bg-rose-400"
+        >
+          <Check color="#FFFFFF" width={20} height={20} />
+        </Pressable>
+      </View>
 
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -256,6 +252,6 @@ export default function EditProfileScreen() {
 
         </ScrollView>
       </KeyboardAvoidingView>
-    </View>
+    </SafeAreaView>
   );
 }

@@ -6,7 +6,7 @@ import { MotiView } from 'moti';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, Pressable, ScrollView, TextInput } from 'react-native';
-import { showMessage } from 'react-native-flash-message';
+import Toast from 'react-native-toast-message';
 
 import {
   Button,
@@ -103,9 +103,9 @@ export default function CreateProfile() {
   const handleAddPhoto = React.useCallback(
     async (index: number) => {
       if (photos.length >= 6 && index >= photos.length) {
-        showMessage({
-          message: t('companion.onboard.create_profile.max_photos'),
-          type: 'warning',
+        Toast.show({
+          type: 'info',
+          text1: t('companion.onboard.create_profile.max_photos'),
         });
         return;
       }
@@ -154,9 +154,9 @@ export default function CreateProfile() {
   const handleRemovePhoto = React.useCallback(
     (index: number) => {
       if (index === 0 && photos.length === 1) {
-        showMessage({
-          message: t('companion.onboard.create_profile.need_main_photo'),
-          type: 'warning',
+        Toast.show({
+          type: 'info',
+          text1: t('companion.onboard.create_profile.need_main_photo'),
         });
         return;
       }

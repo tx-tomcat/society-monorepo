@@ -132,18 +132,18 @@ describe('CompanionsService', () => {
       expect(result.companions[0].isVerified).toBe(true);
     });
 
-    it('should filter by service type', async () => {
+    it('should filter by occasion', async () => {
       mockPrismaService.companionProfile.findMany.mockResolvedValue([]);
       mockPrismaService.companionProfile.count.mockResolvedValue(0);
 
-      await service.browseCompanions({ serviceType: 'FAMILY_INTRODUCTION' });
+      await service.browseCompanions({ occasionId: 'occasion-family-intro' });
 
       expect(mockPrismaService.companionProfile.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
           where: expect.objectContaining({
             services: {
               some: {
-                serviceType: 'FAMILY_INTRODUCTION',
+                occasionId: 'occasion-family-intro',
                 isEnabled: true,
               },
             },

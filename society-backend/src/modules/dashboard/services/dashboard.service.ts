@@ -3,7 +3,7 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { BookingStatus, ServiceType } from '@generated/client';
+import { BookingStatus } from '@generated/client';
 import { PrismaService } from '@/prisma/prisma.service';
 import {
   DashboardResponse,
@@ -62,6 +62,7 @@ export class DashboardService {
         },
         include: {
           hirer: true,
+          occasion: true,
         },
         orderBy: { startDatetime: 'asc' },
       }),
@@ -90,6 +91,7 @@ export class DashboardService {
         },
         include: {
           hirer: true,
+          occasion: true,
         },
         orderBy: { startDatetime: 'asc' },
         take: 5,
@@ -119,7 +121,12 @@ export class DashboardService {
         id: nextBooking.id,
         startDatetime: nextBooking.startDatetime.toISOString(),
         endDatetime: nextBooking.endDatetime.toISOString(),
-        occasionType: nextBooking.occasionType as ServiceType,
+        occasion: nextBooking.occasion ? {
+          id: nextBooking.occasion.id,
+          code: nextBooking.occasion.code,
+          name: nextBooking.occasion.nameEn, // TODO: Use language from request
+          emoji: nextBooking.occasion.emoji,
+        } : null,
         hirer: {
           displayName: nextBooking.hirer?.fullName || 'Anonymous',
           avatar: nextBooking.hirer?.avatarUrl || null,
@@ -142,7 +149,12 @@ export class DashboardService {
       id: b.id,
       startDatetime: b.startDatetime.toISOString(),
       endDatetime: b.endDatetime.toISOString(),
-      occasionType: b.occasionType as ServiceType,
+      occasion: b.occasion ? {
+        id: b.occasion.id,
+        code: b.occasion.code,
+        name: b.occasion.nameEn, // TODO: Use language from request
+        emoji: b.occasion.emoji,
+      } : null,
       status: b.status,
       hirer: {
         displayName: b.hirer?.fullName || 'Anonymous',

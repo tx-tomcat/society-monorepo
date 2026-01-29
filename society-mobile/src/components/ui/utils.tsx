@@ -18,15 +18,46 @@ export const showError = (error: AxiosError) => {
     description,
     type: 'danger',
     duration: 4000,
-    icon: 'danger',
+    autoHide: true,
   });
 };
 
-export const showErrorMessage = (message: string = 'Something went wrong ') => {
+export const showErrorMessage = (message: string = 'Something went wrong') => {
   showMessage({
     message,
     type: 'danger',
     duration: 4000,
+    autoHide: true,
+  });
+};
+
+export const showSuccessMessage = (message: string, description?: string) => {
+  showMessage({
+    message,
+    description,
+    type: 'success',
+    duration: 3000,
+    autoHide: true,
+  });
+};
+
+export const showInfoMessage = (message: string, description?: string) => {
+  showMessage({
+    message,
+    description,
+    type: 'info',
+    duration: 3000,
+    autoHide: true,
+  });
+};
+
+export const showWarningMessage = (message: string, description?: string) => {
+  showMessage({
+    message,
+    description,
+    type: 'warning',
+    duration: 4000,
+    autoHide: true,
   });
 };
 

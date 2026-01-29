@@ -85,7 +85,7 @@ export default function BookingDetail() {
       companionId?: string;
       companionName?: string;
       companionImage?: string;
-      occasion?: string;
+      occasion?: { id?: string; code?: string; emoji?: string; name?: string } | string;
       date?: string;
       startTime?: string;
       endTime?: string;
@@ -95,7 +95,6 @@ export default function BookingDetail() {
       notes?: string;
       hourlyRate?: number;
       subtotal?: number;
-      serviceFee?: number;
       totalAmount?: number;
       bookingCode?: string;
       createdAt?: string;
@@ -103,7 +102,6 @@ export default function BookingDetail() {
     const hours = b.duration || 0;
     const hourlyRate = b.hourlyRate || 0;
     const subtotal = b.subtotal || hourlyRate * hours;
-    const serviceFee = b.serviceFee || Math.round(subtotal * 0.18);
 
     return {
       id: b.id,
@@ -115,7 +113,7 @@ export default function BookingDetail() {
         reviewCount: b.companion?.totalReviews ?? b.companion?.reviewCount ?? 0,
         isVerified: b.companion?.isVerified ?? false,
       },
-      occasion: b.occasion || 'Casual',
+      occasion: typeof b.occasion === 'object' ? b.occasion?.name || 'Casual' : b.occasion || 'Casual',
       date: b.date
         ? new Date(b.date).toLocaleDateString('en-US', {
             month: 'long',
@@ -134,9 +132,7 @@ export default function BookingDetail() {
       pricing: {
         hourlyRate,
         hours,
-        subtotal,
-        serviceFee,
-        total: b.totalAmount || subtotal + serviceFee,
+        total: b.totalAmount || subtotal,
       },
       bookingCode: b.bookingCode || `SOC-${b.id.slice(0, 8).toUpperCase()}`,
       createdAt: b.createdAt
@@ -425,23 +421,6 @@ export default function BookingDetail() {
               <Text className="text-text-secondary">
                 {booking.pricing.hourlyRate.toLocaleString('vi-VN')}đ x{' '}
                 {booking.pricing.hours} hours
-              </Text>
-              <Text className="text-midnight">
-                {booking.pricing.subtotal.toLocaleString('vi-VN')}đ
-              </Text>
-            </View>
-            <View className="flex-row justify-between">
-              <Text className="text-text-secondary">
-                {t('hirer.booking_detail.service_fee')}
-              </Text>
-              <Text className="text-midnight">
-                {booking.pricing.serviceFee.toLocaleString('vi-VN')}đ
-              </Text>
-            </View>
-            <View className="h-px bg-border-light" />
-            <View className="flex-row justify-between">
-              <Text className="font-bold text-midnight">
-                {t('hirer.booking_detail.total')}
               </Text>
               <Text className="text-lg font-bold text-rose-400">
                 {booking.pricing.total.toLocaleString('vi-VN')}đ

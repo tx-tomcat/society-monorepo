@@ -14,6 +14,7 @@ export * from './progress-bar';
 export * from './select';
 export * from './text';
 export * from './utils';
+export { CustomFlashMessage } from './flash-message-config';
 
 // export base components from react-native
 export {

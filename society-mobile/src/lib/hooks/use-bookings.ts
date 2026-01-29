@@ -10,14 +10,14 @@ import { useAuth } from './use-auth';
 
 /**
  * React Query hook to fetch hirer's bookings
+ * @param status - Single status or comma-separated statuses (e.g., "PENDING,CONFIRMED")
  */
-export function useBookings(status?: BookingStatus, page = 1, limit = 20) {
+export function useBookings(status?: string, page = 1, limit = 20) {
   const { isSignedIn } = useAuth();
 
   return useQuery({
     queryKey: ['bookings', 'hirer', { status, page, limit }],
-    queryFn: () =>
-      bookingsService.getHirerBookings(status, page, limit),
+    queryFn: () => bookingsService.getHirerBookings(status, page, limit),
     enabled: isSignedIn,
     staleTime: 2 * 60 * 1000, // 2 minutes
   });
@@ -25,9 +25,10 @@ export function useBookings(status?: BookingStatus, page = 1, limit = 20) {
 
 /**
  * React Query hook to fetch companion's bookings
+ * @param status - Single status or comma-separated statuses (e.g., "PENDING,CONFIRMED")
  */
 export function useCompanionBookings(
-  status?: BookingStatus,
+  status?: string,
   page = 1,
   limit = 20
 ) {
@@ -35,8 +36,7 @@ export function useCompanionBookings(
 
   return useQuery({
     queryKey: ['bookings', 'companion', { status, page, limit }],
-    queryFn: () =>
-      bookingsService.getCompanionBookings(status, page, limit),
+    queryFn: () => bookingsService.getCompanionBookings(status, page, limit),
     enabled: isSignedIn,
     staleTime: 2 * 60 * 1000,
   });
@@ -124,8 +124,7 @@ export function useAcceptBooking() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (bookingId: string) =>
-      bookingsService.acceptBooking(bookingId),
+    mutationFn: (bookingId: string) => bookingsService.acceptBooking(bookingId),
     onSuccess: (_, bookingId) => {
       queryClient.invalidateQueries({ queryKey: ['bookings'] });
       queryClient.invalidateQueries({ queryKey: ['booking', bookingId] });
@@ -217,8 +216,7 @@ export function useCompanionSchedule(startDate: string, endDate: string) {
 
   return useQuery({
     queryKey: ['bookings', 'schedule', startDate, endDate],
-    queryFn: () =>
-      bookingsService.getCompanionSchedule(startDate, endDate),
+    queryFn: () => bookingsService.getCompanionSchedule(startDate, endDate),
     enabled: isSignedIn && !!startDate && !!endDate,
     staleTime: 5 * 60 * 1000,
   });

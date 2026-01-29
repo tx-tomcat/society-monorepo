@@ -3,7 +3,8 @@ import type { PaymentStatus } from './bookings.service';
 // Re-export PaymentStatus from bookings.service.ts for consumers of payments.service
 export type { PaymentStatus } from './bookings.service';
 
-export type PaymentProvider = 'vnpay' | 'momo' | 'stripe' | 'bank_transfer' | 'wallet';
+// PaymentProvider enum values must match backend enum (uppercase)
+export type PaymentProvider = 'VNPAY' | 'MOMO' | 'STRIPE' | 'BANK_TRANSFER';
 
 export interface Payment {
   id: string;

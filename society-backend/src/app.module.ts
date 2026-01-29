@@ -36,6 +36,7 @@ import { RecommendationsModule } from './modules/recommendations/recommendations
 import { SafetyModule } from './modules/safety/safety.module';
 import { WalletModule } from './modules/wallet/wallet.module';
 import { QueueModule } from './modules/queue/queue.module';
+import { PlatformConfigModule } from './modules/config/config.module';
 
 @Module({
   imports: [
@@ -142,6 +143,7 @@ import { QueueModule } from './modules/queue/queue.module';
     RecommendationsModule,
     SafetyModule,
     WalletModule,
+    PlatformConfigModule,
   ],
   controllers: [AppController],
   providers: [

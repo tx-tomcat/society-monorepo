@@ -48,9 +48,8 @@ export function useUpdateProfile() {
   return useMutation({
     mutationFn: async (data: UpdateProfileData) => {
       const result = await usersService.updateProfile(data);
-      // Sync updated user to store
-      const updatedUser = await usersService.getCurrentUser();
-      setUser(updatedUser);
+      // Sync updated user to store directly from API response
+      setUser(result);
       return result;
     },
     onSuccess: () => {

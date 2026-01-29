@@ -90,6 +90,7 @@ export const ModelName = {
   SupportTicket: 'SupportTicket',
   SupportTicketMessage: 'SupportTicketMessage',
   SystemConfig: 'SystemConfig',
+  PlatformConfig: 'PlatformConfig',
   EmergencyContact: 'EmergencyContact',
   EmergencyEvent: 'EmergencyEvent',
   FavoriteCompanion: 'FavoriteCompanion',
@@ -234,7 +235,7 @@ export type CompanionPhotoScalarFieldEnum = (typeof CompanionPhotoScalarFieldEnu
 export const CompanionServiceScalarFieldEnum = {
   id: 'id',
   companionId: 'companionId',
-  serviceType: 'serviceType',
+  occasionId: 'occasionId',
   description: 'description',
   priceAdjustment: 'priceAdjustment',
   isEnabled: 'isEnabled',
@@ -735,6 +736,27 @@ export const SystemConfigScalarFieldEnum = {
 } as const
 
 export type SystemConfigScalarFieldEnum = (typeof SystemConfigScalarFieldEnum)[keyof typeof SystemConfigScalarFieldEnum]
+
+
+export const PlatformConfigScalarFieldEnum = {
+  id: 'id',
+  platformFeePercent: 'platformFeePercent',
+  cancellationFeePercent: 'cancellationFeePercent',
+  minBookingHours: 'minBookingHours',
+  maxBookingHours: 'maxBookingHours',
+  minAdvanceBookingHours: 'minAdvanceBookingHours',
+  maxAdvanceBookingDays: 'maxAdvanceBookingDays',
+  freeCancellationHours: 'freeCancellationHours',
+  supportEmail: 'supportEmail',
+  supportPhone: 'supportPhone',
+  minAppVersion: 'minAppVersion',
+  currentAppVersion: 'currentAppVersion',
+  updatedBy: 'updatedBy',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PlatformConfigScalarFieldEnum = (typeof PlatformConfigScalarFieldEnum)[keyof typeof PlatformConfigScalarFieldEnum]
 
 
 export const EmergencyContactScalarFieldEnum = {

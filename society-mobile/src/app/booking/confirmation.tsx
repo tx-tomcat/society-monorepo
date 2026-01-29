@@ -18,7 +18,7 @@ export default function BookingConfirmation() {
   const { data: userData } = useCurrentUser();
 
   const handleViewBooking = () => {
-    router.push('/booking/active/1' as Href);
+    router.push('/hirer/orders' as Href);
   };
 
   const handleBackToHome = () => {

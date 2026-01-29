@@ -1,8 +1,15 @@
-import { BookingStatus, ServiceType } from '@generated/client';
+import { BookingStatus } from '@generated/client';
 
 // ============================================
 // Response Types
 // ============================================
+
+export interface OccasionInfo {
+  id: string;
+  code: string;
+  name: string;
+  emoji: string;
+}
 
 export interface DashboardResponse {
   todaysSummary: TodaySummary;
@@ -22,7 +29,7 @@ export interface NextBookingInfo {
   id: string;
   startDatetime: string;
   endDatetime: string;
-  occasionType: ServiceType;
+  occasion: OccasionInfo | null;
   hirer: {
     displayName: string;
     avatar: string | null;
@@ -35,7 +42,7 @@ export interface UpcomingBooking {
   id: string;
   startDatetime: string;
   endDatetime: string;
-  occasionType: ServiceType;
+  occasion: OccasionInfo | null;
   status: BookingStatus;
   hirer: {
     displayName: string;

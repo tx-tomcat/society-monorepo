@@ -1,5 +1,5 @@
-import { Prisma, PrismaClient } from '@generated/client';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Prisma, PrismaClient } from "@generated/client";
+import { CACHE_MANAGER } from "@nestjs/cache-manager";
 import {
   Inject,
   Injectable,
@@ -7,11 +7,11 @@ import {
   OnModuleDestroy,
   OnModuleInit,
   Optional,
-} from '@nestjs/common';
-import { PrismaPg } from '@prisma/adapter-pg';
-import { Cache } from 'cache-manager';
-import { Pool } from 'pg';
-import { CacheConfig, PrismaCacheProxy, PrismaModel } from './prisma.proxy';
+} from "@nestjs/common";
+import { PrismaPg } from "@prisma/adapter-pg";
+import { Cache } from "cache-manager";
+import { Pool } from "pg";
+import { CacheConfig, PrismaCacheProxy, PrismaModel } from "./prisma.proxy";
 
 // Type for Prisma model delegate operations
 type PrismaDelegate = {
@@ -33,69 +33,74 @@ interface PaginateArgs {
 // List of Prisma model names that should be cached
 const CACHED_MODELS = [
   // Core user models
-  'user',
-  'companionProfile',
-  'hirerProfile',
-  'userSettings',
-  'userDevice',
-  'userSession',
-  'userBlock',
-  'userStrike',
-  'userSuspension',
+  "user",
+  "companionProfile",
+  "hirerProfile",
+  "userSettings",
+  "userDevice",
+  "userSession",
+  "userBlock",
+  "userStrike",
+  "userSuspension",
   // Companion related
-  'companionAvailability',
-  'companionPhoto',
-  'companionService',
+  "companionAvailability",
+  "companionPhoto",
+  "companionService",
   // Bookings & payments
-  'booking',
-  'payment',
-  'paymentRequest',
-  'earning',
-  'withdrawal',
-  'bankAccount',
+  "booking",
+  "bookingCancellation",
+  "payment",
+  "paymentStatusHistory",
+  "paymentRequest",
+  "earning",
+  "withdrawal",
+  "bankAccount",
   // Messaging
-  'message',
-  'conversation',
+  "message",
+  "conversation",
   // Notifications
-  'notification',
-  'notificationLog',
-  'pushToken',
+  "notification",
+  "notificationLog",
+  "pushToken",
   // Social features
-  'review',
-  'favoriteCompanion',
-  'referral',
+  "review",
+  "favoriteCompanion",
+  "referral",
   // Verification & security
-  'verification',
-  'photoVerification',
-  'securityEvent',
-  'ipBlocklist',
+  "verification",
+  "photoVerification",
+  "securityEvent",
+  "ipBlocklist",
   // Moderation
-  'report',
-  'appeal',
-  'moderationAction',
-  'moderationQueue',
+  "report",
+  "appeal",
+  "moderationAction",
+  "moderationQueue",
   // Files
-  'file',
+  "file",
   // Admin
-  'adminAuditLog',
-  'profileBoost',
+  "adminAuditLog",
+  "profileBoost",
   // Safety & Emergency
-  'emergencyContact',
-  'emergencyEvent',
+  "emergencyContact",
+  "emergencyEvent",
   // Support
-  'supportTicket',
-  'supportTicketMessage',
-  'featureFlag',
-  'systemConfig',
+  "supportTicket",
+  "supportTicketMessage",
+  "featureFlag",
+  "systemConfig",
   // Recommendations
-  'userInteraction',
-  'recommendationCache',
+  "userInteraction",
+  "recommendationCache",
   // Occasions & Holidays
-  'occasion',
-  'holiday',
-  'occasionInteraction',
-  // Idempotency
-  'idempotencyKey',
+  "occasion",
+  "holiday",
+  "occasionInteraction",
+  // Idempotency & Webhooks
+  "idempotencyKey",
+  "webhookLog",
+  // Platform Config
+  "platformConfig",
 ] as const;
 
 type CachedModelName = (typeof CACHED_MODELS)[number];
@@ -137,19 +142,19 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
     this._prismaClient = new PrismaClient({
       adapter,
       log:
-        process.env.NODE_ENV === 'development'
+        process.env.NODE_ENV === "development"
           ? [
-            { emit: 'event', level: 'query' },
-            { emit: 'stdout', level: 'info' },
-            { emit: 'stdout', level: 'warn' },
-            { emit: 'stdout', level: 'error' },
-          ]
-          : [{ emit: 'stdout', level: 'error' }],
+              { emit: "event", level: "query" },
+              { emit: "stdout", level: "info" },
+              { emit: "stdout", level: "warn" },
+              { emit: "stdout", level: "error" },
+            ]
+          : [{ emit: "stdout", level: "error" }],
     });
 
     // Log queries in development
-    if (process.env.NODE_ENV === 'development') {
-      this._prismaClient.$on('query' as never, (e: Prisma.QueryEvent) => {
+    if (process.env.NODE_ENV === "development") {
+      this._prismaClient.$on("query" as never, (e: Prisma.QueryEvent) => {
         this.logger.debug(`Query: ${e.query}`);
         this.logger.debug(`Duration: ${e.duration}ms`);
       });
@@ -193,7 +198,7 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
   async onModuleInit(): Promise<void> {
     try {
       await this._prismaClient.$connect();
-      this.logger.log('Successfully connected to database');
+      this.logger.log("Successfully connected to database");
 
       // Initialize cache proxy if cache manager is available
       if (this.cacheManager) {
@@ -202,14 +207,16 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
           this.cacheManager,
         );
         await this.cacheProxy.onModuleInit();
-        this.logger.log('Cache proxy initialized - queries are cached by default');
+        this.logger.log(
+          "Cache proxy initialized - queries are cached by default",
+        );
       } else {
         this.logger.warn(
-          'Cache manager not available - running without query caching',
+          "Cache manager not available - running without query caching",
         );
       }
     } catch (error) {
-      this.logger.error('Failed to connect to database', error);
+      this.logger.error("Failed to connect to database", error);
       throw error;
     }
   }
@@ -222,7 +229,7 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
 
     await this._prismaClient.$disconnect();
     await this.pool.end();
-    this.logger.log('Disconnected from database');
+    this.logger.log("Disconnected from database");
   }
 
   /**
@@ -262,7 +269,7 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
     fn: (
       prisma: Omit<
         PrismaClient,
-        '$connect' | '$disconnect' | '$on' | '$transaction' | '$extends'
+        "$connect" | "$disconnect" | "$on" | "$transaction" | "$extends"
       >,
     ) => Promise<T>,
     options?: {
@@ -286,7 +293,7 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
     fn: (
       prisma: Omit<
         PrismaClient,
-        '$connect' | '$disconnect' | '$on' | '$transaction' | '$extends'
+        "$connect" | "$disconnect" | "$on" | "$transaction" | "$extends"
       >,
     ) => Promise<T>,
     options?: {
@@ -301,7 +308,7 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
       | ((
           prisma: Omit<
             PrismaClient,
-            '$connect' | '$disconnect' | '$on' | '$transaction' | '$extends'
+            "$connect" | "$disconnect" | "$on" | "$transaction" | "$extends"
           >,
         ) => Promise<T>),
     options?: {
@@ -340,8 +347,8 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
    * Clean database - for testing purposes only
    */
   async cleanDatabase(): Promise<void> {
-    if (process.env.NODE_ENV === 'production') {
-      throw new Error('Cannot clean database in production');
+    if (process.env.NODE_ENV === "production") {
+      throw new Error("Cannot clean database in production");
     }
 
     const tablenames = await this._prismaClient.$queryRaw<
@@ -350,9 +357,9 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
 
     const tables = tablenames
       .map(({ tablename }) => tablename)
-      .filter((name) => name !== '_prisma_migrations')
+      .filter((name) => name !== "_prisma_migrations")
       .map((name) => `"public"."${name}"`)
-      .join(', ');
+      .join(", ");
 
     if (tables.length > 0) {
       await this._prismaClient.$executeRawUnsafe(
@@ -470,67 +477,72 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
   // ============================================================
 
   // Core user models
-  declare user: PrismaClient['user'];
-  declare companionProfile: PrismaClient['companionProfile'];
-  declare hirerProfile: PrismaClient['hirerProfile'];
-  declare userSettings: PrismaClient['userSettings'];
-  declare userDevice: PrismaClient['userDevice'];
-  declare userSession: PrismaClient['userSession'];
-  declare userBlock: PrismaClient['userBlock'];
-  declare userStrike: PrismaClient['userStrike'];
-  declare userSuspension: PrismaClient['userSuspension'];
+  declare user: PrismaClient["user"];
+  declare companionProfile: PrismaClient["companionProfile"];
+  declare hirerProfile: PrismaClient["hirerProfile"];
+  declare userSettings: PrismaClient["userSettings"];
+  declare userDevice: PrismaClient["userDevice"];
+  declare userSession: PrismaClient["userSession"];
+  declare userBlock: PrismaClient["userBlock"];
+  declare userStrike: PrismaClient["userStrike"];
+  declare userSuspension: PrismaClient["userSuspension"];
   // Companion related
-  declare companionAvailability: PrismaClient['companionAvailability'];
-  declare companionPhoto: PrismaClient['companionPhoto'];
-  declare companionService: PrismaClient['companionService'];
+  declare companionAvailability: PrismaClient["companionAvailability"];
+  declare companionPhoto: PrismaClient["companionPhoto"];
+  declare companionService: PrismaClient["companionService"];
   // Bookings & payments
-  declare booking: PrismaClient['booking'];
-  declare payment: PrismaClient['payment'];
-  declare paymentRequest: PrismaClient['paymentRequest'];
-  declare earning: PrismaClient['earning'];
-  declare withdrawal: PrismaClient['withdrawal'];
-  declare bankAccount: PrismaClient['bankAccount'];
+  declare booking: PrismaClient["booking"];
+  declare bookingCancellation: PrismaClient["bookingCancellation"];
+  declare payment: PrismaClient["payment"];
+  declare paymentStatusHistory: PrismaClient["paymentStatusHistory"];
+  declare paymentRequest: PrismaClient["paymentRequest"];
+  declare earning: PrismaClient["earning"];
+  declare withdrawal: PrismaClient["withdrawal"];
+  declare bankAccount: PrismaClient["bankAccount"];
   // Messaging
-  declare message: PrismaClient['message'];
-  declare conversation: PrismaClient['conversation'];
+  declare message: PrismaClient["message"];
+  declare conversation: PrismaClient["conversation"];
   // Notifications
-  declare notification: PrismaClient['notification'];
-  declare notificationLog: PrismaClient['notificationLog'];
-  declare pushToken: PrismaClient['pushToken'];
+  declare notification: PrismaClient["notification"];
+  declare notificationLog: PrismaClient["notificationLog"];
+  declare pushToken: PrismaClient["pushToken"];
   // Social features
-  declare review: PrismaClient['review'];
-  declare favoriteCompanion: PrismaClient['favoriteCompanion'];
-  declare referral: PrismaClient['referral'];
+  declare review: PrismaClient["review"];
+  declare favoriteCompanion: PrismaClient["favoriteCompanion"];
+  declare referral: PrismaClient["referral"];
   // Verification & security
-  declare verification: PrismaClient['verification'];
-  declare photoVerification: PrismaClient['photoVerification'];
-  declare securityEvent: PrismaClient['securityEvent'];
-  declare ipBlocklist: PrismaClient['ipBlocklist'];
+  declare verification: PrismaClient["verification"];
+  declare photoVerification: PrismaClient["photoVerification"];
+  declare securityEvent: PrismaClient["securityEvent"];
+  declare ipBlocklist: PrismaClient["ipBlocklist"];
   // Moderation
-  declare report: PrismaClient['report'];
-  declare appeal: PrismaClient['appeal'];
-  declare moderationAction: PrismaClient['moderationAction'];
-  declare moderationQueue: PrismaClient['moderationQueue'];
+  declare report: PrismaClient["report"];
+  declare appeal: PrismaClient["appeal"];
+  declare moderationAction: PrismaClient["moderationAction"];
+  declare moderationQueue: PrismaClient["moderationQueue"];
   // Files
-  declare file: PrismaClient['file'];
+  declare file: PrismaClient["file"];
   // Admin
-  declare adminAuditLog: PrismaClient['adminAuditLog'];
-  declare profileBoost: PrismaClient['profileBoost'];
+  declare adminAuditLog: PrismaClient["adminAuditLog"];
+  declare profileBoost: PrismaClient["profileBoost"];
   // Safety & Emergency
-  declare emergencyContact: PrismaClient['emergencyContact'];
-  declare emergencyEvent: PrismaClient['emergencyEvent'];
+  declare emergencyContact: PrismaClient["emergencyContact"];
+  declare emergencyEvent: PrismaClient["emergencyEvent"];
   // Support
-  declare supportTicket: PrismaClient['supportTicket'];
-  declare supportTicketMessage: PrismaClient['supportTicketMessage'];
-  declare featureFlag: PrismaClient['featureFlag'];
-  declare systemConfig: PrismaClient['systemConfig'];
+  declare supportTicket: PrismaClient["supportTicket"];
+  declare supportTicketMessage: PrismaClient["supportTicketMessage"];
+  declare featureFlag: PrismaClient["featureFlag"];
+  declare systemConfig: PrismaClient["systemConfig"];
   // Recommendations
-  declare userInteraction: PrismaClient['userInteraction'];
-  declare recommendationCache: PrismaClient['recommendationCache'];
+  declare userInteraction: PrismaClient["userInteraction"];
+  declare recommendationCache: PrismaClient["recommendationCache"];
   // Occasions & Holidays
-  declare occasion: PrismaClient['occasion'];
-  declare holiday: PrismaClient['holiday'];
-  declare occasionInteraction: PrismaClient['occasionInteraction'];
-  // Idempotency
-  declare idempotencyKey: PrismaClient['idempotencyKey'];
+  declare occasion: PrismaClient["occasion"];
+  declare holiday: PrismaClient["holiday"];
+  declare occasionInteraction: PrismaClient["occasionInteraction"];
+  // Idempotency & Webhooks
+  declare idempotencyKey: PrismaClient["idempotencyKey"];
+  declare webhookLog: PrismaClient["webhookLog"];
+  // Platform Config
+  declare platformConfig: PrismaClient["platformConfig"];
 }

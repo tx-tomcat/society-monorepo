@@ -107,7 +107,8 @@ export class RecommendationsService {
    * This method performs async database writes. HTTP endpoints should use fire-and-forget
    * pattern (don't await, catch errors) for optimal UX. Background jobs can await.
    *
-   * Note: dto.companionId is CompanionProfile.id, but UserInteraction stores User.id
+   * Note: dto.companionId can be either CompanionProfile.id or User.id
+   * UserInteraction stores User.id for consistency with FavoriteCompanion and Booking tables
    *
    * @example
    * // HTTP endpoint (fire-and-forget)
@@ -120,15 +121,29 @@ export class RecommendationsService {
     userId: string,
     dto: TrackInteractionDto,
   ): Promise<void> {
-    // Convert CompanionProfile.id to User.id for storage
-    // The schema stores User.id for consistency with FavoriteCompanion and Booking tables
-    const companion = await this.prisma.companionProfile.findUnique({
+    // Resolve companionId - accepts either CompanionProfile.id or User.id
+    // First try to find by User.id (new format from mobile)
+    const userWithProfile = await this.prisma.user.findUnique({
       where: { id: dto.companionId },
-      select: { userId: true },
+      include: { companionProfile: true },
     });
 
-    if (!companion) {
-      this.logger.warn(`Companion profile not found: ${dto.companionId}`);
+    let companionUserId: string | null = null;
+
+    if (userWithProfile?.companionProfile) {
+      // dto.companionId is already a User.id
+      companionUserId = userWithProfile.id;
+    } else {
+      // Try to find by CompanionProfile.id (legacy format)
+      const companion = await this.prisma.companionProfile.findUnique({
+        where: { id: dto.companionId },
+        select: { userId: true },
+      });
+      companionUserId = companion?.userId || null;
+    }
+
+    if (!companionUserId) {
+      this.logger.warn(`Companion not found: ${dto.companionId}`);
       return; // Silently ignore invalid companion IDs
     }
 
@@ -137,7 +152,7 @@ export class RecommendationsService {
     await this.prisma.userInteraction.create({
       data: {
         userId,
-        companionId: companion.userId, // Store User.id, not CompanionProfile.id
+        companionId: companionUserId, // Store User.id
         eventType: dto.eventType as InteractionEventType,
         eventValue,
         dwellTimeMs: dto.dwellTimeMs,
@@ -218,8 +233,28 @@ export class RecommendationsService {
         id: { in: candidateIds }, // Query by CompanionProfile.id
       },
       include: {
-        user: { select: { isVerified: true } },
-        photos: { where: { isVerified: true }, select: { id: true } },
+        user: {
+          select: {
+            id: true,
+            fullName: true,
+            avatarUrl: true,
+            dateOfBirth: true,
+            gender: true,
+            isVerified: true,
+          },
+        },
+        photos: {
+          where: { isVerified: true },
+          select: { id: true, url: true, isPrimary: true, position: true },
+          orderBy: [{ isPrimary: 'desc' }, { position: 'asc' }],
+        },
+        services: {
+          where: { isEnabled: true },
+          select: {
+            occasionId: true,
+            occasion: { select: { id: true, nameEn: true, nameVi: true, emoji: true } },
+          },
+        },
       },
       orderBy: [{ ratingAvg: 'desc' }, { completedBookings: 'desc' }],
     });
@@ -231,6 +266,14 @@ export class RecommendationsService {
         (c.bio && c.bio.length > 50 ? 0.2 : 0) +
         (Number(c.ratingAvg) / 5) * 0.2;
 
+      // Calculate age from dateOfBirth
+      const age = c.user.dateOfBirth
+        ? Math.floor(
+            (Date.now() - new Date(c.user.dateOfBirth).getTime()) /
+              (365.25 * 24 * 60 * 60 * 1000),
+          )
+        : null;
+
       return {
         companionId: c.id, // Use CompanionProfile.id, not userId
         score: quality,
@@ -241,6 +284,24 @@ export class RecommendationsService {
           availability: c.isActive ? 1.0 : 0.3,
           popularity: Number(c.ratingAvg) / 5,
           behavioralAffinity: 0,
+        },
+        companion: {
+          id: c.id,
+          userId: c.userId,
+          displayName: c.user.fullName || 'Anonymous',
+          age,
+          bio: c.bio,
+          avatar: c.user.avatarUrl,
+          heightCm: c.heightCm,
+          gender: c.user.gender,
+          languages: c.languages || [],
+          hourlyRate: Number(c.hourlyRate),
+          rating: Number(c.ratingAvg) || 0,
+          reviewCount: c.ratingCount || 0,
+          isVerified: c.user.isVerified,
+          isActive: c.isActive,
+          photos: c.photos,
+          services: c.services,
         },
       };
     });

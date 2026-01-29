@@ -29,20 +29,22 @@ import {
   QueryClientProvider,
   focusManager
 } from '@tanstack/react-query';
-import { Slot, useRouter, useSegments } from 'expo-router';
+import { Stack, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import React from 'react';
 import type { AppStateStatus } from 'react-native';
 import { ActivityIndicator, AppState, Platform, View } from 'react-native';
-import FlashMessage from 'react-native-flash-message';
+import FlashMessage from "react-native-flash-message";
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { colors } from '@/components/ui';
+import { CustomFlashMessage } from '@/components/ui/flash-message-config';
 import { HiremeLogo } from '@/components/ui/icons';
 import { loadSelectedTheme } from '@/lib';
-import { useAuth, useCurrentUser } from '@/lib/hooks';
+import { fetchPlatformConfig, useAuth, useCurrentUser } from '@/lib/hooks';
+import { fetchOccasions } from '@/lib/stores';
 import { useThemeConfig } from '@/lib/use-theme-config';
 
 export { ErrorBoundary } from 'expo-router';
@@ -67,7 +69,7 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       // Retry configuration - exponential backoff for transient failures
-      retry: 2,
+      retry: 1,
       retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
 
       // Stale time - how long data is considered fresh (no refetch)
@@ -93,7 +95,7 @@ const queryClient = new QueryClient({
     },
     mutations: {
       // Retry mutations once on failure (careful with non-idempotent operations)
-      retry: 1,
+      retry: 0,
       retryDelay: 1000,
 
       // Network mode - mutations only when online
@@ -103,6 +105,8 @@ const queryClient = new QueryClient({
 });
 
 loadSelectedTheme();
+// Prefetch occasions on app startup (force refresh to get latest IDs)
+fetchOccasions(true);
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 // Set the animation options. This is optional.
@@ -140,79 +144,55 @@ function InitialLayout() {
     Urbanist_900Black_Italic,
   });
 
-  // Check if user needs onboarding (missing profile or no role)
+  const user = userData?.user;
+  const role = user?.role;
+  const isCompanion = role === 'COMPANION';
+
+  // Check if user needs onboarding
   const needsOnboarding = React.useMemo(() => {
-    // If API error (user doesn't exist in backend yet), they need onboarding
-    if (isUserError) return true;
-    if (!userData?.user) return false;
-    const user = userData.user;
-    // User needs onboarding if they don't have a role
-    if (!user.role) return true;
-    // For COMPANION, they need a companion profile record
-    if (user.role === 'COMPANION') {
-      return !userData.profile;
-    }
-    // For HIRER, consider onboarding complete when they have gender and dateOfBirth
-    // (HirerProfile record is not required - it only contains optional fields)
+    if (isUserError || !user) return isUserError;
+    if (!role) return true;
+    if (isCompanion) return !userData.profile;
     return !user.gender || !user.dateOfBirth;
-  }, [userData, isUserError]);
+  }, [user, role, isCompanion, userData?.profile, isUserError]);
 
-  // Get the appropriate onboarding route based on user role
-  const getOnboardingRoute = React.useCallback(() => {
-    if (!userData?.user) return '/auth/select-role';
-    const role = userData.user.role;
-    // User without role needs to select one first
+  // Get route based on user state
+  const getOnboardingRoute = () => {
     if (!role) return '/auth/select-role';
-    // Route to role-specific onboarding
-    if (role === 'COMPANION') {
-      return '/companion/onboard/create-profile';
-    }
+    if (isCompanion) return '/companion/onboard/create-profile';
     return '/hirer/onboarding/profile';
-  }, [userData]);
+  };
 
-  // Get the appropriate dashboard route based on user role
-  const getDashboardRoute = React.useCallback(() => {
-    if (!userData?.user?.role) return '/(app)';
-    if (userData.user.role === 'COMPANION') {
-      return '/companion/(app)';
-    }
-    return '/(app)';
-  }, [userData]);
+  const getDashboardRoute = () => isCompanion ? '/companion/(app)' : '/(app)';
+
+  // Fetch platform config when signed in
+  React.useEffect(() => {
+    if (isSignedIn) fetchPlatformConfig();
+  }, [isSignedIn]);
 
   // Handle auth-based routing
   React.useEffect(() => {
-    if (!isLoaded || !fontsLoaded) return;
-    // Wait for user data to load if signed in
-    if (isSignedIn && isUserLoading) return;
+    if (!isLoaded || !fontsLoaded || (isSignedIn && isUserLoading)) return;
 
-    const firstSegment = segments[0] as string | undefined;
-    const secondSegment = segments[1] as string | undefined;
+    const [firstSegment, secondSegment] = segments as [string?, string?];
 
-    // Public routes - no authentication required
-    const isPublicRoute =
-      firstSegment === 'auth' ||
-      firstSegment === 'welcome';
-
-    // Onboarding routes - authenticated but completing profile/role selection
+    const isPublicRoute = firstSegment === 'auth' || firstSegment === 'welcome';
     const isOnboardingRoute =
       (firstSegment === 'auth' && secondSegment === 'select-role') ||
       (firstSegment === 'hirer' && secondSegment === 'onboarding') ||
-      (firstSegment === 'companion' && secondSegment === 'onboard');
+      (firstSegment === 'companion' && secondSegment === 'onboard') ||
+      firstSegment === 'phone-verification';
 
     if (!isSignedIn && !isPublicRoute) {
-      // User is not signed in and trying to access protected route
       router.replace('/welcome');
     } else if (isSignedIn && needsOnboarding && !isOnboardingRoute) {
-      // User is signed in but needs to complete onboarding
       router.replace(getOnboardingRoute());
     } else if (isSignedIn && !needsOnboarding && (isPublicRoute || isOnboardingRoute)) {
-      // User is signed in, profile complete, but on auth/onboarding route - redirect to role-specific dashboard
       router.replace(getDashboardRoute());
     }
 
-    // Mark navigation as ready after auth check
     setIsNavigationReady(true);
-  }, [isLoaded, isSignedIn, isUserLoading, needsOnboarding, segments, fontsLoaded, router, getOnboardingRoute, getDashboardRoute]);
+  }, [isLoaded, isSignedIn, isUserLoading, needsOnboarding, segments, fontsLoaded, router]);
 
   React.useEffect(() => {
     // Hide splash screen after navigation is ready
@@ -238,7 +218,17 @@ function InitialLayout() {
     );
   }
 
-  return <Slot />;
+  return (
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="(app)" />
+      <Stack.Screen name="companion/(app)" />
+      <Stack.Screen name="hirer" />
+      <Stack.Screen name="auth" />
+      <Stack.Screen name="welcome" />
+      <Stack.Screen name="phone-verification" />
+      <Stack.Screen name="settings" />
+    </Stack>
+  );
 }
 
 export default function RootLayout() {
@@ -253,6 +243,11 @@ export default function RootLayout() {
       <Providers>
         <InitialLayout />
       </Providers>
+      <FlashMessage
+        position="top"
+        floating
+        MessageComponent={CustomFlashMessage}
+      />
     </QueryClientProvider>
   );
 }
@@ -268,7 +263,6 @@ function Providers({ children }: { children: React.ReactNode }) {
           <ThemeProvider value={theme}>
             <BottomSheetModalProvider>
               {children}
-              <FlashMessage position="top" />
             </BottomSheetModalProvider>
           </ThemeProvider>
         </KeyboardProvider>

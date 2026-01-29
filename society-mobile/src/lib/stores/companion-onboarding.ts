@@ -5,16 +5,22 @@ import { storage } from '../storage';
 import { createSelectors } from '../utils';
 
 /**
- * Service type mappings for companion onboarding
+ * Map from UI occasion IDs to database occasion codes
+ * These codes are used to find occasions in the store and get their IDs
  */
-export const SERVICE_TYPE_MAP: Record<string, string> = {
-  wedding: 'WEDDING_ATTENDANCE',
-  tet: 'TET_COMPANIONSHIP',
-  family: 'FAMILY_INTRODUCTION',
-  corporate: 'BUSINESS_EVENT',
-  coffee: 'CASUAL_OUTING',
-  social: 'CLASS_REUNION',
+export const OCCASION_CODE_MAP: Record<string, string> = {
+  wedding: 'wedding',
+  tet: 'tet',
+  family: 'family_intro',
+  corporate: 'business_meeting',
+  coffee: 'cafe',
+  social: 'reunion',
 } as const;
+
+/**
+ * @deprecated Use OCCASION_CODE_MAP and look up occasion by code
+ */
+export const SERVICE_TYPE_MAP = OCCASION_CODE_MAP;
 
 export type OnboardingStep =
   | 'auth'
@@ -119,6 +125,8 @@ export interface CompanionOnboardingState {
 
   // Computed
   getAvailabilitySlots: () => AvailabilitySlot[];
+  getOccasionCodes: () => string[];
+  /** @deprecated Use getOccasionCodes instead */
   getServiceTypes: () => string[];
   verificationData: () => {
     idType: 'vneid' | 'cccd' | 'passport' | null;
@@ -258,10 +266,24 @@ const _useCompanionOnboarding = create<CompanionOnboardingState>()(
         return slots;
       },
 
+      /**
+       * Get occasion codes for the selected services
+       * These codes can be used to look up occasions in the occasions store
+       */
+      getOccasionCodes: () => {
+        const state = get();
+        return state.selectedServices
+          .map((id) => OCCASION_CODE_MAP[id])
+          .filter(Boolean);
+      },
+
+      /**
+       * @deprecated Use getOccasionCodes instead
+       */
       getServiceTypes: () => {
         const state = get();
         return state.selectedServices
-          .map((id) => SERVICE_TYPE_MAP[id])
+          .map((id) => OCCASION_CODE_MAP[id])
           .filter(Boolean);
       },
 

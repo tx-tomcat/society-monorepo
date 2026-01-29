@@ -13,7 +13,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { ServiceType, Gender, BoostTier, BoostStatus } from '@generated/client';
+import { Gender, BoostStatus } from '@generated/client';
 
 // ============================================
 // Query DTOs
@@ -22,7 +22,7 @@ import { ServiceType, Gender, BoostTier, BoostStatus } from '@generated/client';
 export class BrowseCompanionsQueryDto {
   @IsOptional()
   @IsString()
-  serviceType?: string; // ServiceType enum value
+  occasionId?: string; // Occasion ID to filter by
 
   @IsOptional()
   @Type(() => Number)
@@ -160,7 +160,7 @@ export class AddPhotoDto {
 
 export class ServiceItemDto {
   @IsString()
-  type: string; // ServiceType enum value
+  occasionId: string; // Occasion ID from database
 
   @IsOptional()
   @IsString()
@@ -229,6 +229,13 @@ export class UpdateAvailabilityDto {
 // Response Types
 // ============================================
 
+export interface OccasionInfo {
+  id: string;
+  code: string;
+  name: string;
+  emoji: string;
+}
+
 export interface CompanionListItem {
   id: string;
   userId: string;
@@ -245,14 +252,15 @@ export interface CompanionListItem {
   isFeatured: boolean;
   isBoosted?: boolean;
   boostMultiplier?: number | null;
-  services: ServiceType[];
+  services: OccasionInfo[];
   photos: string[];
   isAvailable: boolean;
   distanceKm?: number | null; // Distance from search location
 }
 
 export interface CompanionServiceItem {
-  type: ServiceType;
+  occasionId: string;
+  occasion: OccasionInfo;
   description: string | null;
   priceAdjustment: number;
 }
@@ -291,7 +299,7 @@ export interface ReviewItem {
   id: string;
   rating: number;
   comment: string | null;
-  occasion: ServiceType;
+  occasion: OccasionInfo | null;
   date: string;
   reviewer: {
     name: string;

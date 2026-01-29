@@ -82,3 +82,83 @@ export function formatVND(amount: number, options?: FormatVNDOptions): string {
     ? `${VND_SYMBOL}${formattedAmount}`
     : `${formattedAmount}${VND_SYMBOL}`;
 }
+
+/** Common language codes to human-readable names */
+const LANGUAGE_NAMES: Record<string, string> = {
+  en: 'English',
+  vi: 'Tiếng Việt',
+  zh: '中文',
+  ja: '日本語',
+  ko: '한국어',
+  fr: 'Français',
+  de: 'Deutsch',
+  es: 'Español',
+  pt: 'Português',
+  ru: 'Русский',
+  th: 'ไทย',
+  id: 'Bahasa',
+};
+
+/**
+ * Convert a language code to its human-readable name
+ * @param code - ISO 639-1 language code (e.g., 'en', 'vi')
+ * @returns Human-readable language name
+ */
+export function getLanguageName(code: string): string {
+  return LANGUAGE_NAMES[code.toLowerCase()] || code.toUpperCase();
+}
+
+/**
+ * Format an array of language codes to human-readable names
+ * @param codes - Array of ISO 639-1 language codes
+ * @param limit - Maximum number of languages to show (default: all)
+ * @returns Formatted string like "English, Tiếng Việt"
+ */
+export function formatLanguages(codes: string[], limit?: number): string {
+  const names = codes.map(getLanguageName);
+  const limited = limit ? names.slice(0, limit) : names;
+  return limited.join(', ');
+}
+
+/**
+ * Get the localized occasion name based on current locale
+ * @param occasion - Occasion object with nameEn and nameVi
+ * @param locale - Current locale ('en' or 'vi'), defaults to 'vi'
+ * @returns Localized occasion name
+ */
+export function getOccasionName(
+  occasion: { nameEn: string; nameVi: string } | undefined,
+  locale: string = 'vi'
+): string {
+  if (!occasion) return '';
+  return locale === 'en' ? occasion.nameEn : occasion.nameVi;
+}
+
+/**
+ * Format a date string to a relative time string (e.g., "2 weeks ago")
+ * @param dateString - ISO date string
+ * @returns Relative time string
+ */
+export function formatRelativeDate(dateString: string): string {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+  if (diffDays === 0) {
+    return 'Today';
+  } else if (diffDays === 1) {
+    return 'Yesterday';
+  } else if (diffDays < 7) {
+    return `${diffDays} days ago`;
+  } else if (diffDays < 30) {
+    const weeks = Math.floor(diffDays / 7);
+    return weeks === 1 ? '1 week ago' : `${weeks} weeks ago`;
+  } else if (diffDays < 365) {
+    const months = Math.floor(diffDays / 30);
+    return months === 1 ? '1 month ago' : `${months} months ago`;
+  } else {
+    const years = Math.floor(diffDays / 365);
+    return years === 1 ? '1 year ago' : `${years} years ago`;
+  }
+}

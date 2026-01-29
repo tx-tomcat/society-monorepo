@@ -1,31 +1,32 @@
 import { apiClient } from '../client';
 
-export type ServiceType =
-  | 'FAMILY_INTRODUCTION'
-  | 'WEDDING_ATTENDANCE'
-  | 'TET_COMPANIONSHIP'
-  | 'BUSINESS_EVENT'
-  | 'CASUAL_OUTING'
-  | 'CLASS_REUNION'
-  | 'OTHER';
-
 export type VerificationStatus = 'pending' | 'verified' | 'rejected';
+
+export interface OccasionInfo {
+  id: string;
+  code: string;
+  name: string;
+  emoji: string;
+}
 
 export interface CompanionPhoto {
   id: string;
   url: string;
   isPrimary: boolean;
-  order: number;
+  position: number;
 }
 
 export interface CompanionService {
-  type: ServiceType;
+  id: string;
+  occasionId: string;
+  occasion: OccasionInfo;
   description?: string;
-  isAvailable: boolean;
+  priceAdjustment: number;
+  isEnabled: boolean;
 }
 
 export interface CompanionServiceInput {
-  type: ServiceType;
+  occasionId: string;
   description?: string;
   priceAdjustment?: number;
   isEnabled?: boolean;
@@ -147,7 +148,7 @@ export interface CompanionFilters {
   location?: string;
   minPrice?: number;
   maxPrice?: number;
-  serviceType?: ServiceType;
+  occasionId?: string;
   date?: string;
   rating?: number;
   languages?: string[];
@@ -291,10 +292,12 @@ export const companionsService = {
    */
   async getCompanionAvailability(
     companionId: string,
-    date?: string
+    startDate: string,
+    endDate: string
   ): Promise<CompanionAvailability[]> {
-    const query = date ? `?date=${date}` : '';
-    return apiClient.get(`/companions/${companionId}/availability${query}`);
+    return apiClient.get(
+      `/companions/${companionId}/availability?startDate=${startDate}&endDate=${endDate}`
+    );
   },
 
   /**

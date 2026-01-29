@@ -403,18 +403,20 @@ model CompanionPhoto {
 }
 
 model CompanionService {
-  id              String      @id @default(uuid()) @db.Uuid
-  companionId     String      @map("companion_id") @db.Uuid
-  serviceType     ServiceType @map("service_type")
+  id              String   @id @default(uuid()) @db.Uuid
+  companionId     String   @map("companion_id") @db.Uuid
+  occasionId      String   @map("occasion_id")
   description     String?
-  priceAdjustment Int         @default(0) @map("price_adjustment") // +/- from base rate
-  isEnabled       Boolean     @default(true) @map("is_enabled")
-  createdAt       DateTime    @default(now()) @map("created_at")
+  priceAdjustment Int      @default(0) @map("price_adjustment") // +/- from base rate
+  isEnabled       Boolean  @default(true) @map("is_enabled")
+  createdAt       DateTime @default(now()) @map("created_at")
 
   companion CompanionProfile @relation(fields: [companionId], references: [id], onDelete: Cascade)
+  occasion  Occasion         @relation(fields: [occasionId], references: [id])
 
-  @@unique([companionId, serviceType])
-  @@index([companionId]) // ADDED: FK index (unique doesn't cover all query patterns)
+  @@unique([companionId, occasionId])
+  @@index([companionId])
+  @@index([occasionId])
   @@map("companion_services")
 }
 
@@ -1116,6 +1118,37 @@ model SystemConfig {
   @@map("system_config")
 }
 
+// Platform configuration with strongly-typed columns
+model PlatformConfig {
+  id String @id @default(uuid()) @db.Uuid
+
+  // Fee Configuration
+  platformFeePercent     Decimal @default(0.18) @map("platform_fee_percent") @db.Decimal(5, 4) // e.g., 0.18 = 18%
+  cancellationFeePercent Decimal @default(0.50) @map("cancellation_fee_percent") @db.Decimal(5, 4)
+
+  // Booking Constraints
+  minBookingHours        Int @default(1) @map("min_booking_hours")
+  maxBookingHours        Int @default(12) @map("max_booking_hours")
+  minAdvanceBookingHours Int @default(2) @map("min_advance_booking_hours")
+  maxAdvanceBookingDays  Int @default(30) @map("max_advance_booking_days")
+  freeCancellationHours  Int @default(24) @map("free_cancellation_hours")
+
+  // Support Information
+  supportEmail String? @map("support_email")
+  supportPhone String? @map("support_phone")
+
+  // App Version Control
+  minAppVersion     String @default("1.0.0") @map("min_app_version")
+  currentAppVersion String @default("1.0.0") @map("current_app_version")
+
+  // Audit
+  updatedBy String?  @map("updated_by") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("platform_config")
+}
+
 // ============================================
 // SAFETY & EMERGENCY
 // ============================================
@@ -1270,8 +1303,9 @@ model Occasion {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  bookings     Booking[]
-  interactions OccasionInteraction[]
+  bookings          Booking[]
+  interactions      OccasionInteraction[]
+  companionServices CompanionService[]
 
   @@index([isActive, displayOrder])
   @@map("occasions")
@@ -1296,19 +1330,19 @@ model Holiday {
 
 // Occasion interaction events for tracking usage metrics
 enum OccasionEventType {
-  VIEW           // Occasion appeared in list
-  SELECT         // User selected this occasion
+  VIEW // Occasion appeared in list
+  SELECT // User selected this occasion
   BOOKING_CREATED // Booking was created with this occasion
 }
 
 model OccasionInteraction {
-  id         String             @id @default(uuid()) @db.Uuid
-  userId     String?            @map("user_id") @db.Uuid // Nullable for anonymous tracking
-  occasionId String             @map("occasion_id")
-  eventType  OccasionEventType  @map("event_type")
-  sessionId  String?            @map("session_id")
-  metadata   Json               @default("{}")
-  createdAt  DateTime           @default(now()) @map("created_at")
+  id         String            @id @default(uuid()) @db.Uuid
+  userId     String?           @map("user_id") @db.Uuid // Nullable for anonymous tracking
+  occasionId String            @map("occasion_id")
+  eventType  OccasionEventType @map("event_type")
+  sessionId  String?           @map("session_id")
+  metadata   Json              @default("{}")
+  createdAt  DateTime          @default(now()) @map("created_at")
 
   occasion Occasion @relation(fields: [occasionId], references: [id], onDelete: Cascade)
 

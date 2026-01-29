@@ -6,7 +6,7 @@ import { MotiView } from 'moti';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, Pressable, RefreshControl } from 'react-native';
-import { showMessage } from 'react-native-flash-message';
+import Toast from 'react-native-toast-message';
 
 import {
   Badge,
@@ -213,16 +213,16 @@ export default function BookingRequests() {
               try {
                 await bookingsService.acceptBooking(requestId);
                 setRequests((prev) => prev.filter((r) => r.id !== requestId));
-                showMessage({
-                  message: t('companion.requests.accept_success'),
+                Toast.show({
                   type: 'success',
+                  text1: t('companion.requests.accept_success'),
                 });
               } catch (error) {
                 console.error('Failed to accept booking:', error);
-                showMessage({
-                  message: t('errors.accept_failed'),
-                  description: t('errors.try_again'),
-                  type: 'danger',
+                Toast.show({
+                  type: 'error',
+                  text1: t('errors.accept_failed'),
+                  text2: t('errors.try_again'),
                 });
               }
             },
@@ -247,16 +247,16 @@ export default function BookingRequests() {
               try {
                 await bookingsService.declineBooking(requestId, undefined);
                 setRequests((prev) => prev.filter((r) => r.id !== requestId));
-                showMessage({
-                  message: t('companion.requests.decline_success'),
+                Toast.show({
                   type: 'info',
+                  text1: t('companion.requests.decline_success'),
                 });
               } catch (error) {
                 console.error('Failed to decline booking:', error);
-                showMessage({
-                  message: t('errors.decline_failed'),
-                  description: t('errors.try_again'),
-                  type: 'danger',
+                Toast.show({
+                  type: 'error',
+                  text1: t('errors.decline_failed'),
+                  text2: t('errors.try_again'),
                 });
               }
             },
@@ -314,7 +314,6 @@ export default function BookingRequests() {
         <FlashList
           data={requests}
           renderItem={renderRequest}
-          estimatedItemSize={350}
           keyExtractor={(item) => item.id}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingTop: 16 }}

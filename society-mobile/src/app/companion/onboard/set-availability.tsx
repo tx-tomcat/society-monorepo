@@ -5,7 +5,7 @@ import { MotiView } from 'moti';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView } from 'react-native';
-import { showMessage } from 'react-native-flash-message';
+import Toast from 'react-native-toast-message';
 
 import {
   Button,
@@ -16,13 +16,13 @@ import {
   View,
 } from '@/components/ui';
 import { ArrowLeft, Calendar, CheckCircle, Clock } from '@/components/ui/icons';
-import type { ServiceType } from '@/lib/api/services/companions.service';
 import { useSubmitCompanionOnboarding } from '@/lib/hooks/use-companion-onboarding';
 import {
   type DayOfWeek as DayOfWeekStore,
-  SERVICE_TYPE_MAP,
+  OCCASION_CODE_MAP,
   type TimeSlot as TimeSlotStore,
   useCompanionOnboarding,
+  useOccasionsStore,
 } from '@/lib/stores';
 
 type DayConfig = {
@@ -179,16 +179,20 @@ export default function SetAvailability() {
     return slots;
   }, [selectedDays, selectedSlots]);
 
-  // Convert occasion IDs to service types
+  // Get occasions from store to map codes to IDs
+  const occasions = useOccasionsStore.use.occasions();
+
+  // Convert selected service IDs to occasion IDs for API
   const buildServices = React.useCallback(() => {
     return selectedServices
-      .map((id) => SERVICE_TYPE_MAP[id])
-      .filter(Boolean)
-      .map((type) => ({
-        type: type as ServiceType,
-        isEnabled: true,
-      }));
-  }, [selectedServices]);
+      .map((id) => {
+        const code = OCCASION_CODE_MAP[id];
+        if (!code) return null;
+        const occasion = occasions.find((o) => o.code === code);
+        return occasion ? { occasionId: occasion.id, isEnabled: true } : null;
+      })
+      .filter((s): s is { occasionId: string; isEnabled: boolean } => s !== null);
+  }, [selectedServices, occasions]);
 
   const handleComplete = React.useCallback(async () => {
     if (submitOnboarding.isPending) return;
@@ -221,13 +225,13 @@ export default function SetAvailability() {
       markStepComplete('set-availability');
       markStepComplete('complete');
 
-      showMessage({
-        message: t('companion.onboard.set_availability.setup_complete'),
-        description: t(
+      Toast.show({
+        type: 'success',
+        text1: t('companion.onboard.set_availability.setup_complete'),
+        text2: t(
           'companion.onboard.set_availability.setup_complete_description'
         ),
-        type: 'success',
-        duration: 4000,
+        visibilityTime: 4000,
       });
 
       // Reset onboarding state and navigate to dashboard
@@ -235,12 +239,12 @@ export default function SetAvailability() {
       router.replace('/companion/(app)' as Href);
     } catch (error) {
       console.error('Setup completion error:', error);
-      showMessage({
-        message: t('companion.onboard.set_availability.setup_error'),
-        description: t(
+      Toast.show({
+        type: 'error',
+        text1: t('companion.onboard.set_availability.setup_error'),
+        text2: t(
           'companion.onboard.set_availability.setup_error_description'
         ),
-        type: 'danger',
       });
     }
   }, [

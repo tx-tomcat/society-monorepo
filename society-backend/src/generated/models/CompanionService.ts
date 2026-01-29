@@ -37,7 +37,7 @@ export type CompanionServiceSumAggregateOutputType = {
 export type CompanionServiceMinAggregateOutputType = {
   id: string | null
   companionId: string | null
-  serviceType: $Enums.ServiceType | null
+  occasionId: string | null
   description: string | null
   priceAdjustment: number | null
   isEnabled: boolean | null
@@ -47,7 +47,7 @@ export type CompanionServiceMinAggregateOutputType = {
 export type CompanionServiceMaxAggregateOutputType = {
   id: string | null
   companionId: string | null
-  serviceType: $Enums.ServiceType | null
+  occasionId: string | null
   description: string | null
   priceAdjustment: number | null
   isEnabled: boolean | null
@@ -57,7 +57,7 @@ export type CompanionServiceMaxAggregateOutputType = {
 export type CompanionServiceCountAggregateOutputType = {
   id: number
   companionId: number
-  serviceType: number
+  occasionId: number
   description: number
   priceAdjustment: number
   isEnabled: number
@@ -77,7 +77,7 @@ export type CompanionServiceSumAggregateInputType = {
 export type CompanionServiceMinAggregateInputType = {
   id?: true
   companionId?: true
-  serviceType?: true
+  occasionId?: true
   description?: true
   priceAdjustment?: true
   isEnabled?: true
@@ -87,7 +87,7 @@ export type CompanionServiceMinAggregateInputType = {
 export type CompanionServiceMaxAggregateInputType = {
   id?: true
   companionId?: true
-  serviceType?: true
+  occasionId?: true
   description?: true
   priceAdjustment?: true
   isEnabled?: true
@@ -97,7 +97,7 @@ export type CompanionServiceMaxAggregateInputType = {
 export type CompanionServiceCountAggregateInputType = {
   id?: true
   companionId?: true
-  serviceType?: true
+  occasionId?: true
   description?: true
   priceAdjustment?: true
   isEnabled?: true
@@ -194,7 +194,7 @@ export type CompanionServiceGroupByArgs<ExtArgs extends runtime.Types.Extensions
 export type CompanionServiceGroupByOutputType = {
   id: string
   companionId: string
-  serviceType: $Enums.ServiceType
+  occasionId: string
   description: string | null
   priceAdjustment: number
   isEnabled: boolean
@@ -227,44 +227,47 @@ export type CompanionServiceWhereInput = {
   NOT?: Prisma.CompanionServiceWhereInput | Prisma.CompanionServiceWhereInput[]
   id?: Prisma.UuidFilter<"CompanionService"> | string
   companionId?: Prisma.UuidFilter<"CompanionService"> | string
-  serviceType?: Prisma.EnumServiceTypeFilter<"CompanionService"> | $Enums.ServiceType
+  occasionId?: Prisma.StringFilter<"CompanionService"> | string
   description?: Prisma.StringNullableFilter<"CompanionService"> | string | null
   priceAdjustment?: Prisma.IntFilter<"CompanionService"> | number
   isEnabled?: Prisma.BoolFilter<"CompanionService"> | boolean
   createdAt?: Prisma.DateTimeFilter<"CompanionService"> | Date | string
   companion?: Prisma.XOR<Prisma.CompanionProfileScalarRelationFilter, Prisma.CompanionProfileWhereInput>
+  occasion?: Prisma.XOR<Prisma.OccasionScalarRelationFilter, Prisma.OccasionWhereInput>
 }
 
 export type CompanionServiceOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   companionId?: Prisma.SortOrder
-  serviceType?: Prisma.SortOrder
+  occasionId?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   priceAdjustment?: Prisma.SortOrder
   isEnabled?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   companion?: Prisma.CompanionProfileOrderByWithRelationInput
+  occasion?: Prisma.OccasionOrderByWithRelationInput
 }
 
 export type CompanionServiceWhereUniqueInput = Prisma.AtLeast<{
   id?: string
-  companionId_serviceType?: Prisma.CompanionServiceCompanionIdServiceTypeCompoundUniqueInput
+  companionId_occasionId?: Prisma.CompanionServiceCompanionIdOccasionIdCompoundUniqueInput
   AND?: Prisma.CompanionServiceWhereInput | Prisma.CompanionServiceWhereInput[]
   OR?: Prisma.CompanionServiceWhereInput[]
   NOT?: Prisma.CompanionServiceWhereInput | Prisma.CompanionServiceWhereInput[]
   companionId?: Prisma.UuidFilter<"CompanionService"> | string
-  serviceType?: Prisma.EnumServiceTypeFilter<"CompanionService"> | $Enums.ServiceType
+  occasionId?: Prisma.StringFilter<"CompanionService"> | string
   description?: Prisma.StringNullableFilter<"CompanionService"> | string | null
   priceAdjustment?: Prisma.IntFilter<"CompanionService"> | number
   isEnabled?: Prisma.BoolFilter<"CompanionService"> | boolean
   createdAt?: Prisma.DateTimeFilter<"CompanionService"> | Date | string
   companion?: Prisma.XOR<Prisma.CompanionProfileScalarRelationFilter, Prisma.CompanionProfileWhereInput>
-}, "id" | "companionId_serviceType">
+  occasion?: Prisma.XOR<Prisma.OccasionScalarRelationFilter, Prisma.OccasionWhereInput>
+}, "id" | "companionId_occasionId">
 
 export type CompanionServiceOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   companionId?: Prisma.SortOrder
-  serviceType?: Prisma.SortOrder
+  occasionId?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   priceAdjustment?: Prisma.SortOrder
   isEnabled?: Prisma.SortOrder
@@ -282,7 +285,7 @@ export type CompanionServiceScalarWhereWithAggregatesInput = {
   NOT?: Prisma.CompanionServiceScalarWhereWithAggregatesInput | Prisma.CompanionServiceScalarWhereWithAggregatesInput[]
   id?: Prisma.UuidWithAggregatesFilter<"CompanionService"> | string
   companionId?: Prisma.UuidWithAggregatesFilter<"CompanionService"> | string
-  serviceType?: Prisma.EnumServiceTypeWithAggregatesFilter<"CompanionService"> | $Enums.ServiceType
+  occasionId?: Prisma.StringWithAggregatesFilter<"CompanionService"> | string
   description?: Prisma.StringNullableWithAggregatesFilter<"CompanionService"> | string | null
   priceAdjustment?: Prisma.IntWithAggregatesFilter<"CompanionService"> | number
   isEnabled?: Prisma.BoolWithAggregatesFilter<"CompanionService"> | boolean
@@ -291,18 +294,18 @@ export type CompanionServiceScalarWhereWithAggregatesInput = {
 
 export type CompanionServiceCreateInput = {
   id?: string
-  serviceType: $Enums.ServiceType
   description?: string | null
   priceAdjustment?: number
   isEnabled?: boolean
   createdAt?: Date | string
   companion: Prisma.CompanionProfileCreateNestedOneWithoutServicesInput
+  occasion: Prisma.OccasionCreateNestedOneWithoutCompanionServicesInput
 }
 
 export type CompanionServiceUncheckedCreateInput = {
   id?: string
   companionId: string
-  serviceType: $Enums.ServiceType
+  occasionId: string
   description?: string | null
   priceAdjustment?: number
   isEnabled?: boolean
@@ -311,18 +314,18 @@ export type CompanionServiceUncheckedCreateInput = {
 
 export type CompanionServiceUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  serviceType?: Prisma.EnumServiceTypeFieldUpdateOperationsInput | $Enums.ServiceType
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   priceAdjustment?: Prisma.IntFieldUpdateOperationsInput | number
   isEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   companion?: Prisma.CompanionProfileUpdateOneRequiredWithoutServicesNestedInput
+  occasion?: Prisma.OccasionUpdateOneRequiredWithoutCompanionServicesNestedInput
 }
 
 export type CompanionServiceUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   companionId?: Prisma.StringFieldUpdateOperationsInput | string
-  serviceType?: Prisma.EnumServiceTypeFieldUpdateOperationsInput | $Enums.ServiceType
+  occasionId?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   priceAdjustment?: Prisma.IntFieldUpdateOperationsInput | number
   isEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -332,7 +335,7 @@ export type CompanionServiceUncheckedUpdateInput = {
 export type CompanionServiceCreateManyInput = {
   id?: string
   companionId: string
-  serviceType: $Enums.ServiceType
+  occasionId: string
   description?: string | null
   priceAdjustment?: number
   isEnabled?: boolean
@@ -341,7 +344,6 @@ export type CompanionServiceCreateManyInput = {
 
 export type CompanionServiceUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  serviceType?: Prisma.EnumServiceTypeFieldUpdateOperationsInput | $Enums.ServiceType
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   priceAdjustment?: Prisma.IntFieldUpdateOperationsInput | number
   isEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -351,7 +353,7 @@ export type CompanionServiceUpdateManyMutationInput = {
 export type CompanionServiceUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   companionId?: Prisma.StringFieldUpdateOperationsInput | string
-  serviceType?: Prisma.EnumServiceTypeFieldUpdateOperationsInput | $Enums.ServiceType
+  occasionId?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   priceAdjustment?: Prisma.IntFieldUpdateOperationsInput | number
   isEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -368,15 +370,15 @@ export type CompanionServiceOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
 }
 
-export type CompanionServiceCompanionIdServiceTypeCompoundUniqueInput = {
+export type CompanionServiceCompanionIdOccasionIdCompoundUniqueInput = {
   companionId: string
-  serviceType: $Enums.ServiceType
+  occasionId: string
 }
 
 export type CompanionServiceCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   companionId?: Prisma.SortOrder
-  serviceType?: Prisma.SortOrder
+  occasionId?: Prisma.SortOrder
   description?: Prisma.SortOrder
   priceAdjustment?: Prisma.SortOrder
   isEnabled?: Prisma.SortOrder
@@ -390,7 +392,7 @@ export type CompanionServiceAvgOrderByAggregateInput = {
 export type CompanionServiceMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   companionId?: Prisma.SortOrder
-  serviceType?: Prisma.SortOrder
+  occasionId?: Prisma.SortOrder
   description?: Prisma.SortOrder
   priceAdjustment?: Prisma.SortOrder
   isEnabled?: Prisma.SortOrder
@@ -400,7 +402,7 @@ export type CompanionServiceMaxOrderByAggregateInput = {
 export type CompanionServiceMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   companionId?: Prisma.SortOrder
-  serviceType?: Prisma.SortOrder
+  occasionId?: Prisma.SortOrder
   description?: Prisma.SortOrder
   priceAdjustment?: Prisma.SortOrder
   isEnabled?: Prisma.SortOrder
@@ -453,22 +455,60 @@ export type CompanionServiceUncheckedUpdateManyWithoutCompanionNestedInput = {
   deleteMany?: Prisma.CompanionServiceScalarWhereInput | Prisma.CompanionServiceScalarWhereInput[]
 }
 
-export type EnumServiceTypeFieldUpdateOperationsInput = {
-  set?: $Enums.ServiceType
+export type CompanionServiceCreateNestedManyWithoutOccasionInput = {
+  create?: Prisma.XOR<Prisma.CompanionServiceCreateWithoutOccasionInput, Prisma.CompanionServiceUncheckedCreateWithoutOccasionInput> | Prisma.CompanionServiceCreateWithoutOccasionInput[] | Prisma.CompanionServiceUncheckedCreateWithoutOccasionInput[]
+  connectOrCreate?: Prisma.CompanionServiceCreateOrConnectWithoutOccasionInput | Prisma.CompanionServiceCreateOrConnectWithoutOccasionInput[]
+  createMany?: Prisma.CompanionServiceCreateManyOccasionInputEnvelope
+  connect?: Prisma.CompanionServiceWhereUniqueInput | Prisma.CompanionServiceWhereUniqueInput[]
+}
+
+export type CompanionServiceUncheckedCreateNestedManyWithoutOccasionInput = {
+  create?: Prisma.XOR<Prisma.CompanionServiceCreateWithoutOccasionInput, Prisma.CompanionServiceUncheckedCreateWithoutOccasionInput> | Prisma.CompanionServiceCreateWithoutOccasionInput[] | Prisma.CompanionServiceUncheckedCreateWithoutOccasionInput[]
+  connectOrCreate?: Prisma.CompanionServiceCreateOrConnectWithoutOccasionInput | Prisma.CompanionServiceCreateOrConnectWithoutOccasionInput[]
+  createMany?: Prisma.CompanionServiceCreateManyOccasionInputEnvelope
+  connect?: Prisma.CompanionServiceWhereUniqueInput | Prisma.CompanionServiceWhereUniqueInput[]
+}
+
+export type CompanionServiceUpdateManyWithoutOccasionNestedInput = {
+  create?: Prisma.XOR<Prisma.CompanionServiceCreateWithoutOccasionInput, Prisma.CompanionServiceUncheckedCreateWithoutOccasionInput> | Prisma.CompanionServiceCreateWithoutOccasionInput[] | Prisma.CompanionServiceUncheckedCreateWithoutOccasionInput[]
+  connectOrCreate?: Prisma.CompanionServiceCreateOrConnectWithoutOccasionInput | Prisma.CompanionServiceCreateOrConnectWithoutOccasionInput[]
+  upsert?: Prisma.CompanionServiceUpsertWithWhereUniqueWithoutOccasionInput | Prisma.CompanionServiceUpsertWithWhereUniqueWithoutOccasionInput[]
+  createMany?: Prisma.CompanionServiceCreateManyOccasionInputEnvelope
+  set?: Prisma.CompanionServiceWhereUniqueInput | Prisma.CompanionServiceWhereUniqueInput[]
+  disconnect?: Prisma.CompanionServiceWhereUniqueInput | Prisma.CompanionServiceWhereUniqueInput[]
+  delete?: Prisma.CompanionServiceWhereUniqueInput | Prisma.CompanionServiceWhereUniqueInput[]
+  connect?: Prisma.CompanionServiceWhereUniqueInput | Prisma.CompanionServiceWhereUniqueInput[]
+  update?: Prisma.CompanionServiceUpdateWithWhereUniqueWithoutOccasionInput | Prisma.CompanionServiceUpdateWithWhereUniqueWithoutOccasionInput[]
+  updateMany?: Prisma.CompanionServiceUpdateManyWithWhereWithoutOccasionInput | Prisma.CompanionServiceUpdateManyWithWhereWithoutOccasionInput[]
+  deleteMany?: Prisma.CompanionServiceScalarWhereInput | Prisma.CompanionServiceScalarWhereInput[]
+}
+
+export type CompanionServiceUncheckedUpdateManyWithoutOccasionNestedInput = {
+  create?: Prisma.XOR<Prisma.CompanionServiceCreateWithoutOccasionInput, Prisma.CompanionServiceUncheckedCreateWithoutOccasionInput> | Prisma.CompanionServiceCreateWithoutOccasionInput[] | Prisma.CompanionServiceUncheckedCreateWithoutOccasionInput[]
+  connectOrCreate?: Prisma.CompanionServiceCreateOrConnectWithoutOccasionInput | Prisma.CompanionServiceCreateOrConnectWithoutOccasionInput[]
+  upsert?: Prisma.CompanionServiceUpsertWithWhereUniqueWithoutOccasionInput | Prisma.CompanionServiceUpsertWithWhereUniqueWithoutOccasionInput[]
+  createMany?: Prisma.CompanionServiceCreateManyOccasionInputEnvelope
+  set?: Prisma.CompanionServiceWhereUniqueInput | Prisma.CompanionServiceWhereUniqueInput[]
+  disconnect?: Prisma.CompanionServiceWhereUniqueInput | Prisma.CompanionServiceWhereUniqueInput[]
+  delete?: Prisma.CompanionServiceWhereUniqueInput | Prisma.CompanionServiceWhereUniqueInput[]
+  connect?: Prisma.CompanionServiceWhereUniqueInput | Prisma.CompanionServiceWhereUniqueInput[]
+  update?: Prisma.CompanionServiceUpdateWithWhereUniqueWithoutOccasionInput | Prisma.CompanionServiceUpdateWithWhereUniqueWithoutOccasionInput[]
+  updateMany?: Prisma.CompanionServiceUpdateManyWithWhereWithoutOccasionInput | Prisma.CompanionServiceUpdateManyWithWhereWithoutOccasionInput[]
+  deleteMany?: Prisma.CompanionServiceScalarWhereInput | Prisma.CompanionServiceScalarWhereInput[]
 }
 
 export type CompanionServiceCreateWithoutCompanionInput = {
   id?: string
-  serviceType: $Enums.ServiceType
   description?: string | null
   priceAdjustment?: number
   isEnabled?: boolean
   createdAt?: Date | string
+  occasion: Prisma.OccasionCreateNestedOneWithoutCompanionServicesInput
 }
 
 export type CompanionServiceUncheckedCreateWithoutCompanionInput = {
   id?: string
-  serviceType: $Enums.ServiceType
+  occasionId: string
   description?: string | null
   priceAdjustment?: number
   isEnabled?: boolean
@@ -507,16 +547,60 @@ export type CompanionServiceScalarWhereInput = {
   NOT?: Prisma.CompanionServiceScalarWhereInput | Prisma.CompanionServiceScalarWhereInput[]
   id?: Prisma.UuidFilter<"CompanionService"> | string
   companionId?: Prisma.UuidFilter<"CompanionService"> | string
-  serviceType?: Prisma.EnumServiceTypeFilter<"CompanionService"> | $Enums.ServiceType
+  occasionId?: Prisma.StringFilter<"CompanionService"> | string
   description?: Prisma.StringNullableFilter<"CompanionService"> | string | null
   priceAdjustment?: Prisma.IntFilter<"CompanionService"> | number
   isEnabled?: Prisma.BoolFilter<"CompanionService"> | boolean
   createdAt?: Prisma.DateTimeFilter<"CompanionService"> | Date | string
 }
 
+export type CompanionServiceCreateWithoutOccasionInput = {
+  id?: string
+  description?: string | null
+  priceAdjustment?: number
+  isEnabled?: boolean
+  createdAt?: Date | string
+  companion: Prisma.CompanionProfileCreateNestedOneWithoutServicesInput
+}
+
+export type CompanionServiceUncheckedCreateWithoutOccasionInput = {
+  id?: string
+  companionId: string
+  description?: string | null
+  priceAdjustment?: number
+  isEnabled?: boolean
+  createdAt?: Date | string
+}
+
+export type CompanionServiceCreateOrConnectWithoutOccasionInput = {
+  where: Prisma.CompanionServiceWhereUniqueInput
+  create: Prisma.XOR<Prisma.CompanionServiceCreateWithoutOccasionInput, Prisma.CompanionServiceUncheckedCreateWithoutOccasionInput>
+}
+
+export type CompanionServiceCreateManyOccasionInputEnvelope = {
+  data: Prisma.CompanionServiceCreateManyOccasionInput | Prisma.CompanionServiceCreateManyOccasionInput[]
+  skipDuplicates?: boolean
+}
+
+export type CompanionServiceUpsertWithWhereUniqueWithoutOccasionInput = {
+  where: Prisma.CompanionServiceWhereUniqueInput
+  update: Prisma.XOR<Prisma.CompanionServiceUpdateWithoutOccasionInput, Prisma.CompanionServiceUncheckedUpdateWithoutOccasionInput>
+  create: Prisma.XOR<Prisma.CompanionServiceCreateWithoutOccasionInput, Prisma.CompanionServiceUncheckedCreateWithoutOccasionInput>
+}
+
+export type CompanionServiceUpdateWithWhereUniqueWithoutOccasionInput = {
+  where: Prisma.CompanionServiceWhereUniqueInput
+  data: Prisma.XOR<Prisma.CompanionServiceUpdateWithoutOccasionInput, Prisma.CompanionServiceUncheckedUpdateWithoutOccasionInput>
+}
+
+export type CompanionServiceUpdateManyWithWhereWithoutOccasionInput = {
+  where: Prisma.CompanionServiceScalarWhereInput
+  data: Prisma.XOR<Prisma.CompanionServiceUpdateManyMutationInput, Prisma.CompanionServiceUncheckedUpdateManyWithoutOccasionInput>
+}
+
 export type CompanionServiceCreateManyCompanionInput = {
   id?: string
-  serviceType: $Enums.ServiceType
+  occasionId: string
   description?: string | null
   priceAdjustment?: number
   isEnabled?: boolean
@@ -525,16 +609,16 @@ export type CompanionServiceCreateManyCompanionInput = {
 
 export type CompanionServiceUpdateWithoutCompanionInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  serviceType?: Prisma.EnumServiceTypeFieldUpdateOperationsInput | $Enums.ServiceType
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   priceAdjustment?: Prisma.IntFieldUpdateOperationsInput | number
   isEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  occasion?: Prisma.OccasionUpdateOneRequiredWithoutCompanionServicesNestedInput
 }
 
 export type CompanionServiceUncheckedUpdateWithoutCompanionInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  serviceType?: Prisma.EnumServiceTypeFieldUpdateOperationsInput | $Enums.ServiceType
+  occasionId?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   priceAdjustment?: Prisma.IntFieldUpdateOperationsInput | number
   isEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -543,7 +627,43 @@ export type CompanionServiceUncheckedUpdateWithoutCompanionInput = {
 
 export type CompanionServiceUncheckedUpdateManyWithoutCompanionInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  serviceType?: Prisma.EnumServiceTypeFieldUpdateOperationsInput | $Enums.ServiceType
+  occasionId?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  priceAdjustment?: Prisma.IntFieldUpdateOperationsInput | number
+  isEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type CompanionServiceCreateManyOccasionInput = {
+  id?: string
+  companionId: string
+  description?: string | null
+  priceAdjustment?: number
+  isEnabled?: boolean
+  createdAt?: Date | string
+}
+
+export type CompanionServiceUpdateWithoutOccasionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  priceAdjustment?: Prisma.IntFieldUpdateOperationsInput | number
+  isEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  companion?: Prisma.CompanionProfileUpdateOneRequiredWithoutServicesNestedInput
+}
+
+export type CompanionServiceUncheckedUpdateWithoutOccasionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  companionId?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  priceAdjustment?: Prisma.IntFieldUpdateOperationsInput | number
+  isEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type CompanionServiceUncheckedUpdateManyWithoutOccasionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  companionId?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   priceAdjustment?: Prisma.IntFieldUpdateOperationsInput | number
   isEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -555,66 +675,73 @@ export type CompanionServiceUncheckedUpdateManyWithoutCompanionInput = {
 export type CompanionServiceSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   companionId?: boolean
-  serviceType?: boolean
+  occasionId?: boolean
   description?: boolean
   priceAdjustment?: boolean
   isEnabled?: boolean
   createdAt?: boolean
   companion?: boolean | Prisma.CompanionProfileDefaultArgs<ExtArgs>
+  occasion?: boolean | Prisma.OccasionDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["companionService"]>
 
 export type CompanionServiceSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   companionId?: boolean
-  serviceType?: boolean
+  occasionId?: boolean
   description?: boolean
   priceAdjustment?: boolean
   isEnabled?: boolean
   createdAt?: boolean
   companion?: boolean | Prisma.CompanionProfileDefaultArgs<ExtArgs>
+  occasion?: boolean | Prisma.OccasionDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["companionService"]>
 
 export type CompanionServiceSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   companionId?: boolean
-  serviceType?: boolean
+  occasionId?: boolean
   description?: boolean
   priceAdjustment?: boolean
   isEnabled?: boolean
   createdAt?: boolean
   companion?: boolean | Prisma.CompanionProfileDefaultArgs<ExtArgs>
+  occasion?: boolean | Prisma.OccasionDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["companionService"]>
 
 export type CompanionServiceSelectScalar = {
   id?: boolean
   companionId?: boolean
-  serviceType?: boolean
+  occasionId?: boolean
   description?: boolean
   priceAdjustment?: boolean
   isEnabled?: boolean
   createdAt?: boolean
 }
 
-export type CompanionServiceOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "companionId" | "serviceType" | "description" | "priceAdjustment" | "isEnabled" | "createdAt", ExtArgs["result"]["companionService"]>
+export type CompanionServiceOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "companionId" | "occasionId" | "description" | "priceAdjustment" | "isEnabled" | "createdAt", ExtArgs["result"]["companionService"]>
 export type CompanionServiceInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   companion?: boolean | Prisma.CompanionProfileDefaultArgs<ExtArgs>
+  occasion?: boolean | Prisma.OccasionDefaultArgs<ExtArgs>
 }
 export type CompanionServiceIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   companion?: boolean | Prisma.CompanionProfileDefaultArgs<ExtArgs>
+  occasion?: boolean | Prisma.OccasionDefaultArgs<ExtArgs>
 }
 export type CompanionServiceIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   companion?: boolean | Prisma.CompanionProfileDefaultArgs<ExtArgs>
+  occasion?: boolean | Prisma.OccasionDefaultArgs<ExtArgs>
 }
 
 export type $CompanionServicePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "CompanionService"
   objects: {
     companion: Prisma.$CompanionProfilePayload<ExtArgs>
+    occasion: Prisma.$OccasionPayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     companionId: string
-    serviceType: $Enums.ServiceType
+    occasionId: string
     description: string | null
     priceAdjustment: number
     isEnabled: boolean
@@ -1014,6 +1141,7 @@ readonly fields: CompanionServiceFieldRefs;
 export interface Prisma__CompanionServiceClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   companion<T extends Prisma.CompanionProfileDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.CompanionProfileDefaultArgs<ExtArgs>>): Prisma.Prisma__CompanionProfileClient<runtime.Types.Result.GetResult<Prisma.$CompanionProfilePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  occasion<T extends Prisma.OccasionDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.OccasionDefaultArgs<ExtArgs>>): Prisma.Prisma__OccasionClient<runtime.Types.Result.GetResult<Prisma.$OccasionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1045,7 +1173,7 @@ export interface Prisma__CompanionServiceClient<T, Null = never, ExtArgs extends
 export interface CompanionServiceFieldRefs {
   readonly id: Prisma.FieldRef<"CompanionService", 'String'>
   readonly companionId: Prisma.FieldRef<"CompanionService", 'String'>
-  readonly serviceType: Prisma.FieldRef<"CompanionService", 'ServiceType'>
+  readonly occasionId: Prisma.FieldRef<"CompanionService", 'String'>
   readonly description: Prisma.FieldRef<"CompanionService", 'String'>
   readonly priceAdjustment: Prisma.FieldRef<"CompanionService", 'Int'>
   readonly isEnabled: Prisma.FieldRef<"CompanionService", 'Boolean'>

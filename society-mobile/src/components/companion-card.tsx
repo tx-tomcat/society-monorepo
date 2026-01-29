@@ -37,6 +37,7 @@ const companionCard = tv({
 
 export type CompanionData = {
   id: string;
+  userId: string; // User.id for favorites operations
   name: string;
   age: number;
   image: string;
