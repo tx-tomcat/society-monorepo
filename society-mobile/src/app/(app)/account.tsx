@@ -17,7 +17,6 @@ import {
 import {
     ArrowRight,
     Bell,
-    CreditCard,
     Edit,
     Heart,
     Help,
@@ -29,7 +28,7 @@ import {
     Star,
     User
 } from '@/components/ui/icons';
-import { useAuth, useCurrentUser } from '@/lib/hooks';
+import { useAuth, useCurrentUser, useUnreadNotificationCount } from '@/lib/hooks';
 
 type SettingsItem = {
     id: string;
@@ -61,14 +60,6 @@ const SETTINGS_SECTIONS: { titleKey: string; items: SettingsItem[] }[] = [
                 iconBg: 'bg-rose-400/10',
                 iconColor: colors.rose[400],
                 route: '/hirer/favorites',
-            },
-            {
-                id: 'payment-methods',
-                labelKey: 'hirer.settings.payment_methods',
-                icon: CreditCard,
-                iconBg: 'bg-teal-400/10',
-                iconColor: colors.teal[400],
-                route: '/hirer/payment-methods',
             },
         ],
     },
@@ -185,7 +176,9 @@ export default function HirerSettingsScreen() {
     const { t } = useTranslation();
     const { signOut } = useAuth();
     const { data: userData } = useCurrentUser();
+    const { data: unreadData } = useUnreadNotificationCount();
     const user = userData?.user;
+    const unreadCount = unreadData?.count ?? 0;
 
     const handleBack = React.useCallback(() => {
         router.back();
@@ -230,6 +223,26 @@ export default function HirerSettingsScreen() {
     return (
         <SafeAreaView className="flex-1 bg-warmwhite">
             <FocusAwareStatusBar />
+
+            {/* Header with notification bell */}
+            <View className="flex-row items-center justify-between border-b border-border-light px-4 py-3">
+                <Text className="font-urbanist-bold text-xl text-midnight">
+                    {t('hirer.settings.title')}
+                </Text>
+                <Pressable
+                    onPress={() => router.push('/hirer/notifications' as Href)}
+                    className="relative"
+                >
+                    <Bell color={colors.midnight.DEFAULT} width={24} height={24} />
+                    {unreadCount > 0 && (
+                        <View className="absolute -right-1 -top-1 min-w-[18px] items-center justify-center rounded-full bg-rose-400 px-1">
+                            <Text className="text-[10px] font-bold text-white">
+                                {unreadCount > 99 ? '99+' : unreadCount}
+                            </Text>
+                        </View>
+                    )}
+                </Pressable>
+            </View>
 
             <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
                 {/* Profile Card */}

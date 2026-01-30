@@ -236,7 +236,7 @@ export function TabBar({
               <View className="items-center gap-0.5">
                 <IconComponent focused={isFocused} color={color} />
                 <Text
-                  className={`text-[10px] leading-[1.6] tracking-[0.2px] ${isFocused ? 'font-urbanist-bold' : 'font-urbanist-medium'
+                  className={`text-xs leading-[1.6] tracking-[0.2px] ${isFocused ? 'font-urbanist-bold' : 'font-urbanist-medium'
                     }`}
                   style={{ color: isFocused ? color : colors.text.tertiary }}
                 >
@@ -288,7 +288,7 @@ function CustomTabButton({
       <View className="items-center w-full gap-0.5 ">
         <IconComponent focused={focused} color={color} />
         <Text
-          className={`text-[10px] leading-[1.6] tracking-[0.2px] ${focused ? 'font-urbanist-bold' : 'font-urbanist-medium'
+          className={`text-xs leading-[1.6] tracking-[0.2px] ${focused ? 'font-urbanist-bold' : 'font-urbanist-medium'
             }`}
           style={{ color: focused ? color : colors.text.tertiary }}
         >

@@ -117,7 +117,7 @@ function BookingCard({
             style={{ backgroundColor: statusConfig.bgColor }}
           >
             <Text
-              className="text-[11px] font-semibold"
+              className="text-xs font-semibold"
               style={{ color: statusConfig.textColor }}
             >
               {statusConfig.label}

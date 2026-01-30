@@ -14,7 +14,7 @@ const profileCard = tv({
     image: 'size-full',
     gradientContainer: 'absolute inset-x-0 bottom-0 h-[200px]',
     content: 'absolute bottom-6 left-6 right-[124px] gap-3',
-    name: 'text-[32px] font-bold leading-[1.4] text-white',
+    name: 'text-3xl font-bold leading-snug text-white',
     chipsContainer: 'flex-row gap-2.5',
     chip: 'flex-row items-center gap-1 rounded-full border border-neutral-300 px-3 py-1',
     chipText:

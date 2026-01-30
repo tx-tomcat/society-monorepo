@@ -44,6 +44,7 @@ import { CustomFlashMessage } from '@/components/ui/flash-message-config';
 import { HiremeLogo } from '@/components/ui/icons';
 import { loadSelectedTheme } from '@/lib';
 import { fetchPlatformConfig, useAuth, useCurrentUser } from '@/lib/hooks';
+import { useNotifications } from '@/lib/notifications';
 import { fetchOccasions } from '@/lib/stores';
 import { useThemeConfig } from '@/lib/use-theme-config';
 
@@ -122,6 +123,9 @@ function InitialLayout() {
   const segments = useSegments();
   const router = useRouter();
   const [isNavigationReady, setIsNavigationReady] = React.useState(false);
+
+  // Initialize push notifications (hook internally checks isSignedIn)
+  useNotifications();
 
   const [fontsLoaded] = useFonts({
     Urbanist_100Thin,

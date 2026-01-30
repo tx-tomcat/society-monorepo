@@ -48,7 +48,7 @@ function ReviewItem({ review }: { review: CompanionReview }) {
               {review.reviewer?.fullName || 'Anonymous'}
             </Text>
             <View className="rounded-full bg-teal-400/10 px-2 py-0.5">
-              <Text className="text-[10px] font-medium text-teal-600">
+              <Text className="text-xs font-medium text-teal-600">
                 {t('hirer.reviews.verified')}
               </Text>
             </View>

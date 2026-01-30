@@ -32,6 +32,7 @@ import {
   ShieldCheck,
   Star,
 } from '@/components/ui/icons';
+import { getPhotoUrl } from '@/lib/api/services/companions.service';
 import { useBooking, useCancelBooking } from '@/lib/hooks';
 
 type BookingStatus =
@@ -58,9 +59,15 @@ const STATUS_CONFIG: Record<
   },
 };
 
+// Day of week keys for i18n
+const DAY_KEYS = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'] as const;
+
+// Month keys for i18n
+const MONTH_KEYS = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'] as const;
+
 export default function BookingDetail() {
   const router = useRouter();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { id } = useLocalSearchParams<{ id: string }>();
 
   // API hooks
@@ -70,80 +77,95 @@ export default function BookingDetail() {
   // Transform booking data
   const booking = React.useMemo(() => {
     if (!bookingData) return null;
-    const b = bookingData as {
-      id: string;
-      companion?: {
-        id?: string;
-        name?: string;
-        profileImage?: string;
-        avgRating?: number;
-        rating?: number;
-        totalReviews?: number;
-        reviewCount?: number;
-        isVerified?: boolean;
-      };
-      companionId?: string;
-      companionName?: string;
-      companionImage?: string;
-      occasion?: { id?: string; code?: string; emoji?: string; name?: string } | string;
-      date?: string;
-      startTime?: string;
-      endTime?: string;
-      duration?: number;
-      location?: string;
-      status?: string;
-      notes?: string;
-      hourlyRate?: number;
-      subtotal?: number;
-      totalAmount?: number;
-      bookingCode?: string;
-      createdAt?: string;
+    const b = bookingData;
+    const hours = b.durationHours || 0;
+    const hourlyRate = b.basePrice ? Math.round(b.basePrice / hours) : 0;
+    const startDate = b.startDatetime ? new Date(b.startDatetime) : null;
+    const endDate = b.endDatetime ? new Date(b.endDatetime) : null;
+
+    // Format time range
+    const formatTime = (date: Date) => {
+      return date.toLocaleTimeString('en-US', {
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true,
+      });
     };
-    const hours = b.duration || 0;
-    const hourlyRate = b.hourlyRate || 0;
-    const subtotal = b.subtotal || hourlyRate * hours;
+
+    // Map API status to local status
+    const mapStatus = (apiStatus: string): BookingStatus => {
+      switch (apiStatus) {
+        case 'PENDING':
+          return 'pending';
+        case 'CONFIRMED':
+          return 'upcoming';
+        case 'ACTIVE':
+          return 'active';
+        case 'COMPLETED':
+          return 'completed';
+        case 'CANCELLED':
+        case 'DISPUTED':
+        case 'EXPIRED':
+          return 'cancelled';
+        default:
+          return 'upcoming';
+      }
+    };
 
     return {
       id: b.id,
       companion: {
         id: b.companion?.id || b.companionId || '',
-        name: b.companion?.name || b.companionName || '',
-        image: b.companion?.profileImage || b.companionImage || '',
-        rating: b.companion?.avgRating ?? b.companion?.rating ?? 0,
-        reviewCount: b.companion?.totalReviews ?? b.companion?.reviewCount ?? 0,
-        isVerified: b.companion?.isVerified ?? false,
+        name: b.companion?.displayName || '',
+        image: b.companion?.avatar || getPhotoUrl(b.companion?.photos?.[0]) || '',
+        rating: b.companion?.rating ?? 0,
+        reviewCount: b.companion?.reviewCount ?? 0,
+        isVerified: b.companion?.isVerified ?? b.companion?.verificationStatus === 'verified',
       },
-      occasion: typeof b.occasion === 'object' ? b.occasion?.name || 'Casual' : b.occasion || 'Casual',
-      date: b.date
-        ? new Date(b.date).toLocaleDateString('en-US', {
-            month: 'long',
-            day: 'numeric',
-            year: 'numeric',
-          })
+      occasion: b.occasion?.name || 'Meeting',
+      occasionEmoji: b.occasion?.emoji || '📅',
+      date: startDate
+        ? (() => {
+          const dayKey = DAY_KEYS[startDate.getDay()];
+          const monthKey = MONTH_KEYS[startDate.getMonth()];
+          const day = startDate.getDate();
+          const year = startDate.getFullYear();
+          const weekday = t(`common.days.${dayKey}`);
+          const month = t(`common.months.${monthKey}`);
+          // Vietnamese: "Thứ 6, 30 Tháng 1 2026", English: "Friday, Jan 30, 2026"
+          return i18n.language === 'vi'
+            ? `${weekday}, ${day} ${month} ${year}`
+            : `${weekday}, ${month} ${day}, ${year}`;
+        })()
         : '',
-      time:
-        b.startTime && b.endTime
-          ? `${b.startTime} - ${b.endTime}`
-          : b.startTime || '',
-      duration: `${hours} hours`,
-      location: b.location || '',
-      status: (b.status || 'upcoming') as BookingStatus,
-      specialRequests: b.notes || '',
+      time: startDate && endDate
+        ? `${formatTime(startDate)} - ${formatTime(endDate)}`
+        : '',
+      duration: `${hours} ${t('common.hours')}`,
+      location: b.locationAddress || '',
+      status: mapStatus(b.status),
+      specialRequests: b.specialRequests || '',
       pricing: {
         hourlyRate,
         hours,
-        total: b.totalAmount || subtotal,
+        total: b.totalPrice || 0,
       },
-      bookingCode: b.bookingCode || `SOC-${b.id.slice(0, 8).toUpperCase()}`,
+      bookingCode: b.bookingNumber || `SOC-${b.id.slice(0, 8).toUpperCase()}`,
       createdAt: b.createdAt
-        ? new Date(b.createdAt).toLocaleDateString('en-US', {
-            month: 'short',
-            day: 'numeric',
-            year: 'numeric',
-          })
+        ? (() => {
+          const date = new Date(b.createdAt);
+          const monthKey = MONTH_KEYS[date.getMonth()];
+          const day = date.getDate();
+          const year = date.getFullYear();
+          const month = t(`common.months.${monthKey}`);
+          // Vietnamese: "30 Tháng 1 2026", English: "Jan 30, 2026"
+          return i18n.language === 'vi'
+            ? `${day} ${month} ${year}`
+            : `${month} ${day}, ${year}`;
+        })()
         : '',
     };
-  }, [bookingData]);
+  }, [bookingData, t, i18n.language]);
 
   const handleBack = React.useCallback(() => {
     router.back();
@@ -297,27 +319,29 @@ export default function BookingDetail() {
             </View>
           </View>
 
-          {/* Quick Actions */}
-          <View className="mt-4 flex-row gap-3">
-            <Pressable
-              onPress={handleCallCompanion}
-              className="flex-1 flex-row items-center justify-center gap-2 rounded-xl bg-softpink py-3"
-            >
-              <Phone color={colors.rose[400]} width={20} height={20} />
-              <Text className="font-semibold text-rose-400">
-                {t('hirer.booking_detail.call')}
-              </Text>
-            </Pressable>
-            <Pressable
-              onPress={handleMessageCompanion}
-              className="flex-1 flex-row items-center justify-center gap-2 rounded-xl bg-softpink py-3"
-            >
-              <MessageCircle color={colors.rose[400]} width={20} height={20} />
-              <Text className="font-semibold text-rose-400">
-                {t('hirer.booking_detail.message')}
-              </Text>
-            </Pressable>
-          </View>
+          {/* Quick Actions - only show when booking is confirmed/upcoming or active */}
+          {(booking.status === 'upcoming' || booking.status === 'active') && (
+            <View className="mt-4 flex-row gap-3">
+              <Pressable
+                onPress={handleCallCompanion}
+                className="flex-1 flex-row items-center justify-center gap-2 rounded-xl bg-softpink py-3"
+              >
+                <Phone color={colors.rose[400]} width={20} height={20} />
+                <Text className="font-semibold text-rose-400">
+                  {t('hirer.booking_detail.call')}
+                </Text>
+              </Pressable>
+              <Pressable
+                onPress={handleMessageCompanion}
+                className="flex-1 flex-row items-center justify-center gap-2 rounded-xl bg-softpink py-3"
+              >
+                <MessageCircle color={colors.rose[400]} width={20} height={20} />
+                <Text className="font-semibold text-rose-400">
+                  {t('hirer.booking_detail.message')}
+                </Text>
+              </Pressable>
+            </View>
+          )}
         </MotiView>
 
         {/* Booking Info */}
@@ -473,13 +497,7 @@ export default function BookingDetail() {
               loading={cancelBookingMutation.isPending}
             />
           )}
-          <Button
-            label={t('hirer.booking_detail.get_directions')}
-            onPress={() => {}}
-            variant="default"
-            size="lg"
-            className="flex-1"
-          />
+
         </View>
       </SafeAreaView>
     </View>

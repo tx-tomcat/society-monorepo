@@ -209,10 +209,10 @@ export function CompanionCard({
 
             {/* Name and age */}
             <RNView className="mb-2 flex-row items-center gap-2">
-              <Text className="font-urbanist-bold text-[28px] tracking-tight text-white">
+              <Text className="font-urbanist-bold text-3xl tracking-tight text-white">
                 {companion.displayName}
                 {companion.age && (
-                  <Text className="font-urbanist text-[26px] text-white/90">
+                  <Text className="font-urbanist text-2xl text-white/90">
                     , {companion.age}
                   </Text>
                 )}
@@ -296,7 +296,7 @@ export function CompanionCard({
                 className="overflow-hidden rounded-2xl"
               >
                 <RNView className="items-center justify-center rounded-2xl border border-white/10 bg-white/20 px-4 py-3.5">
-                  <Text className="font-urbanist-semibold text-[13px] text-white">
+                  <Text className="font-urbanist-semibold text-xs text-white">
                     {t('hirer.browse.for_you.view_profile')}
                   </Text>
                 </RNView>
@@ -537,7 +537,7 @@ export function SwipeableCompanionCard({
               className="absolute right-8 top-20 rounded-lg border-4 border-teal-400 px-5 py-2.5"
               style={likeStampStyle}
             >
-              <Text className="font-urbanist-extrabold text-[32px] tracking-[3px] text-white">
+              <Text className="font-urbanist-extrabold text-3xl tracking-[3px] text-white">
                 LIKE
               </Text>
             </Animated.View>
@@ -547,7 +547,7 @@ export function SwipeableCompanionCard({
               className="absolute left-8 top-20 rounded-lg border-4 border-rose-400 px-5 py-2.5"
               style={nopeStampStyle}
             >
-              <Text className="font-urbanist-extrabold text-[32px] tracking-[3px] text-white">
+              <Text className="font-urbanist-extrabold text-3xl tracking-[3px] text-white">
                 NOPE
               </Text>
             </Animated.View>
@@ -572,10 +572,10 @@ export function SwipeableCompanionCard({
 
               {/* Name and age */}
               <RNView className="mb-2 flex-row items-center gap-2">
-                <Text className="font-urbanist-bold text-[28px] tracking-tight text-white">
+                <Text className="font-urbanist-bold text-3xl tracking-tight text-white">
                   {companion.displayName}
                   {companion.age && (
-                    <Text className="font-urbanist text-[26px] text-white/90">
+                    <Text className="font-urbanist text-2xl text-white/90">
                       , {companion.age}
                     </Text>
                   )}
@@ -659,7 +659,7 @@ export function SwipeableCompanionCard({
                   className="overflow-hidden rounded-2xl"
                 >
                   <RNView className="items-center justify-center rounded-2xl border border-white/10 bg-white/20 px-4 py-3.5">
-                    <Text className="font-urbanist-semibold text-[13px] text-white">
+                    <Text className="font-urbanist-semibold text-xs text-white">
                       {t('hirer.browse.for_you.view_profile')}
                     </Text>
                   </RNView>

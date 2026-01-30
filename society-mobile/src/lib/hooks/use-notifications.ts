@@ -1,11 +1,16 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query';
 
 import type { NotificationPreferences } from '../api/services/notifications.service';
 import { notificationsService } from '../api/services/notifications.service';
 import { useAuth } from './use-auth';
 
 /**
- * React Query hook to fetch notifications
+ * React Query hook to fetch notifications (single page)
  */
 export function useNotifications(page = 1, limit = 20) {
   const { isSignedIn } = useAuth();
@@ -15,6 +20,29 @@ export function useNotifications(page = 1, limit = 20) {
     queryFn: () => notificationsService.getNotifications(page, limit),
     enabled: isSignedIn,
     staleTime: 1 * 60 * 1000, // 1 minute - notifications should be fresh
+  });
+}
+
+/**
+ * React Query infinite query hook for notifications list with pagination
+ */
+export function useNotificationsList(limit = 20) {
+  const { isSignedIn } = useAuth();
+
+  return useInfiniteQuery({
+    queryKey: ['notifications', 'list'],
+    queryFn: ({ pageParam = 1 }) =>
+      notificationsService.getNotifications(pageParam, limit),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => {
+      const totalPages = Math.ceil(lastPage.total / lastPage.limit);
+      if (lastPage.page < totalPages) {
+        return lastPage.page + 1;
+      }
+      return undefined;
+    },
+    enabled: isSignedIn,
+    staleTime: 1 * 60 * 1000,
   });
 }
 

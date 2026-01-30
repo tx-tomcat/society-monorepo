@@ -1,13 +1,24 @@
 import { apiClient } from '../client';
-import type { Companion } from './companions.service';
+
+// Simplified companion data returned by favorites API
+export interface FavoriteCompanion {
+  id: string; // CompanionProfile.id - use for navigation
+  userId: string; // User.id
+  displayName: string;
+  avatar: string | null;
+  rating: number;
+  reviewCount: number;
+  hourlyRate: number;
+  isActive: boolean;
+  isVerified: boolean;
+}
 
 export interface Favorite {
   id: string;
-  userId: string;
-  companionId: string;
-  notes?: string;
-  createdAt: string;
-  companion: Companion;
+  companionId: string; // User.id (for add/remove operations)
+  notes: string | null;
+  addedAt: string;
+  companion: FavoriteCompanion;
 }
 
 export interface FavoritesListResponse {

@@ -27,7 +27,6 @@ import {
   Star,
   Trash2,
 } from '@/components/ui/icons';
-import { getPhotoUrl } from '@/lib/api/services/companions.service';
 import { useFavorites, useRemoveFavorite } from '@/lib/hooks';
 
 type FavoriteItem = {
@@ -163,24 +162,34 @@ export default function Favorites() {
   } = useFavorites();
   const removeFavorite = useRemoveFavorite();
 
-  // Transform favorites - map from Companion type to FavoriteItem format
+  // Transform favorites - map from API response to FavoriteItem format
   const favorites = React.useMemo(() => {
     if (!favoritesData?.favorites) return [];
-    return favoritesData.favorites.map((f) => ({
-      id: f.id,
-      companionId: f.companionId,
-      companion: {
-        id: f.companion?.id || f.companionId,
-        name: f.companion?.displayName || '',
-        profileImage:
-          f.companion?.avatar || getPhotoUrl(f.companion?.photos?.[0]),
-        hourlyRate: f.companion?.hourlyRate || 0,
-        avgRating: f.companion?.rating ?? 0,
-        totalReviews: f.companion?.reviewCount ?? 0,
-        location: f.companion?.languages?.join(', '),
-        isVerified: f.companion?.isVerified ?? false,
-      },
-    }));
+    return favoritesData.favorites
+      .filter((f) => {
+        // Skip favorites where companion profile ID is missing
+        if (!f.companion?.id) {
+          console.warn(
+            `Favorite ${f.id} has no companion profile ID, userId: ${f.companion?.userId || f.companionId}`
+          );
+          return false;
+        }
+        return true;
+      })
+      .map((f) => ({
+        id: f.id,
+        companionId: f.companionId, // User.id - for remove operations
+        companion: {
+          id: f.companion.id, // CompanionProfile.id - for navigation
+          name: f.companion?.displayName || '',
+          profileImage: f.companion?.avatar || '',
+          hourlyRate: f.companion?.hourlyRate || 0,
+          avgRating: f.companion?.rating ?? 0,
+          totalReviews: f.companion?.reviewCount ?? 0,
+          location: '', // Not provided by favorites API
+          isVerified: f.companion?.isVerified ?? false,
+        },
+      }));
   }, [favoritesData]);
 
   const handleBack = React.useCallback(() => {
@@ -210,7 +219,7 @@ export default function Favorites() {
       >
         <FavoriteCard
           favorite={item}
-          onPress={() => handleCompanionPress(item.companionId)}
+          onPress={() => handleCompanionPress(item.companion.id)}
           onRemove={() => handleRemoveFavorite(item.companionId)}
         />
       </MotiView>

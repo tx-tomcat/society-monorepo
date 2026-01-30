@@ -23,10 +23,12 @@ export interface FavoriteCompanionItem {
   notes: string | null;
   addedAt: string;
   companion: {
-    userId: string;
+    id: string; // CompanionProfile.id - use this for navigation
+    userId: string; // User.id
     displayName: string;
     avatar: string | null;
     rating: number;
+    reviewCount: number;
     hourlyRate: number;
     isActive: boolean;
     isVerified: boolean;

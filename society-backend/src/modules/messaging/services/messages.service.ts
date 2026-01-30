@@ -8,6 +8,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { PrismaService } from '../../../prisma/prisma.service';
+import { NotificationsService } from '../../notifications/services/notifications.service';
 import { CreateMessageDto, UpdateMessageDto } from '../dto/message.dto';
 import { MessageResponse, ConversationResponse, MessageReactionResponse, PaginationMeta } from '../interfaces/messaging.interface';
 import { filterMessageContent } from '../../../common/utils/content-filter.utils';
@@ -67,6 +68,7 @@ export class MessagesService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly configService: ConfigService,
+    private readonly notificationsService: NotificationsService,
   ) {
     this.supabase = createClient(
       this.configService.get<string>('SUPABASE_URL')!,
@@ -288,6 +290,27 @@ export class MessagesService {
     }
 
     this.logger.log(`Message sent in conversation ${conversationId} by user ${userId}`);
+
+    // Send push notification to the other participant
+    const recipientId = conversation.participant1Id === userId
+      ? conversation.participant2Id
+      : conversation.participant1Id;
+
+    // Get sender name for notification
+    this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { fullName: true },
+    }).then((sender) => {
+      if (sender) {
+        this.notificationsService
+          .notifyNewMessage(recipientId, sender.fullName, conversationId)
+          .catch((err) =>
+            this.logger.warn(`Failed to send new message notification: ${err.message}`),
+          );
+      }
+    }).catch((err) =>
+      this.logger.warn(`Failed to get sender for notification: ${err.message}`),
+    );
 
     // Realtime broadcast happens automatically via Supabase Realtime
 

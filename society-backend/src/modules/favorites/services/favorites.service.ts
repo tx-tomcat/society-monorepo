@@ -132,21 +132,32 @@ export class FavoritesService {
       orderBy: { createdAt: 'desc' },
     });
 
-    const items: FavoriteCompanionItem[] = favorites.map((fav) => ({
-      id: fav.id,
-      companionId: fav.companionId,
-      notes: fav.notes,
-      addedAt: fav.createdAt.toISOString(),
-      companion: {
-        userId: fav.companion.id,
-        displayName: fav.companion.fullName,
-        avatar: fav.companion.companionProfile?.photos[0]?.url || fav.companion.avatarUrl,
-        rating: Number(fav.companion.companionProfile?.ratingAvg || 0),
-        hourlyRate: fav.companion.companionProfile?.hourlyRate || 0,
-        isActive: fav.companion.companionProfile?.isActive || false,
-        isVerified: fav.companion.companionProfile?.verificationStatus === 'VERIFIED',
-      },
-    }));
+    const items: FavoriteCompanionItem[] = favorites.map((fav) => {
+      // Debug: Log companion profile ID vs user ID
+      this.logger.debug(
+        `Favorite mapping - User.id: ${fav.companion.id}, CompanionProfile.id: ${fav.companion.companionProfile?.id || 'NULL'}`,
+      );
+
+      return {
+        id: fav.id,
+        companionId: fav.companionId,
+        notes: fav.notes,
+        addedAt: fav.createdAt instanceof Date
+          ? fav.createdAt.toISOString()
+          : String(fav.createdAt),
+        companion: {
+          id: fav.companion.companionProfile?.id || '',
+          userId: fav.companion.id,
+          displayName: fav.companion.fullName,
+          avatar: fav.companion.companionProfile?.photos[0]?.url || fav.companion.avatarUrl,
+          rating: Number(fav.companion.companionProfile?.ratingAvg || 0),
+          reviewCount: fav.companion.companionProfile?.ratingCount || 0,
+          hourlyRate: fav.companion.companionProfile?.hourlyRate || 0,
+          isActive: fav.companion.companionProfile?.isActive || false,
+          isVerified: fav.companion.companionProfile?.verificationStatus === 'VERIFIED',
+        },
+      };
+    });
 
     return {
       favorites: items,

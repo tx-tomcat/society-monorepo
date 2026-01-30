@@ -1,5 +1,6 @@
 import { PlatformConfigService } from "@/modules/config/services/config.service";
 import { ContentReviewService } from "@/modules/moderation/services/content-review.service";
+import { NotificationsService } from "@/modules/notifications/services/notifications.service";
 import { OccasionTrackingService } from "@/modules/occasions/services/occasion-tracking.service";
 import { PrismaService } from "@/prisma/prisma.service";
 import {
@@ -117,6 +118,7 @@ export class BookingsService {
     private readonly configService: ConfigService,
     private readonly occasionTrackingService: OccasionTrackingService,
     private readonly platformConfigService: PlatformConfigService,
+    private readonly notificationsService: NotificationsService,
   ) {
     this.supabase = createClient(
       this.configService.get<string>("SUPABASE_URL")!,
@@ -543,6 +545,15 @@ export class BookingsService {
           );
       }
 
+      // Send push notification to companion about new booking request
+      this.notificationsService
+        .notifyBookingRequest(dto.companionId, hirer.fullName, booking.id)
+        .catch((err) =>
+          this.logger.warn(
+            `Failed to send booking request notification: ${err.message}`,
+          ),
+        );
+
       return {
         id: booking.id,
         bookingNumber: booking.bookingNumber,
@@ -910,6 +921,10 @@ export class BookingsService {
   ) {
     const booking = await this.prisma.booking.findUnique({
       where: { id: bookingId },
+      include: {
+        hirer: { select: { id: true, fullName: true } },
+        companion: { select: { id: true, fullName: true } },
+      },
     });
 
     if (!booking) {
@@ -973,6 +988,13 @@ export class BookingsService {
     if (status === BookingStatus.CONFIRMED) {
       updateData.paymentStatus = PaymentStatus.HELD;
       updateData.confirmedAt = new Date();
+
+      // Notify hirer that booking is confirmed
+      this.notificationsService
+        .notifyBookingConfirmed(booking.hirerId, booking.companion.fullName, bookingId)
+        .catch((err) =>
+          this.logger.warn(`Failed to send booking confirmed notification: ${err.message}`),
+        );
     } else if (status === BookingStatus.COMPLETED) {
       updateData.paymentStatus = PaymentStatus.RELEASED;
       updateData.completedAt = new Date();
@@ -1028,6 +1050,15 @@ export class BookingsService {
         data: updateData,
       });
 
+      // Notify the other party about cancellation
+      const cancelledByName = isHirer ? booking.hirer.fullName : booking.companion.fullName;
+      const recipientId = isHirer ? booking.companionId : booking.hirerId;
+      this.notificationsService
+        .notifyBookingCancelled(recipientId, bookingId, cancelledByName)
+        .catch((err) =>
+          this.logger.warn(`Failed to send booking cancelled notification: ${err.message}`),
+        );
+
       return {
         id: updatedBooking.id,
         status: updatedBooking.status,
@@ -1049,6 +1080,24 @@ export class BookingsService {
       where: { id: bookingId },
       data: updateData,
     });
+
+    // Send notifications based on status change
+    if (status === BookingStatus.COMPLETED) {
+      // Notify both parties about completion
+      this.notificationsService
+        .send({
+          userId: booking.hirerId,
+          type: "BOOKING_COMPLETED" as any,
+          title: "Booking Completed",
+          body: `Your booking with ${booking.companion.fullName} has been completed. Please leave a review!`,
+          data: { bookingId },
+          actionUrl: `/bookings/${bookingId}`,
+          sendPush: true,
+        })
+        .catch((err) =>
+          this.logger.warn(`Failed to send booking completed notification to hirer: ${err.message}`),
+        );
+    }
 
     return {
       id: updatedBooking.id,
@@ -1192,6 +1241,9 @@ export class BookingsService {
         reviews: {
           where: { reviewerId: hirerId },
         },
+        hirer: {
+          select: { fullName: true },
+        },
         companion: {
           include: { companionProfile: true },
         },
@@ -1283,6 +1335,13 @@ export class BookingsService {
         timeout: 10000, // 10 second timeout for consistency with payment operations
       },
     );
+
+    // Notify companion of new review
+    this.notificationsService
+      .notifyNewReview(booking.companionId, booking.hirer.fullName, dto.rating, bookingId)
+      .catch((err) =>
+        this.logger.warn(`Failed to send new review notification: ${err.message}`),
+      );
 
     return {
       id: result.id,
@@ -1451,6 +1510,9 @@ export class BookingsService {
   ) {
     const booking = await this.prisma.booking.findUnique({
       where: { id: bookingId },
+      include: {
+        companion: { select: { fullName: true } },
+      },
     });
 
     if (!booking) {
@@ -1480,6 +1542,13 @@ export class BookingsService {
         cancelReason: reason || "Declined by companion",
       },
     });
+
+    // Notify hirer that booking was declined
+    this.notificationsService
+      .notifyBookingDeclined(booking.hirerId, booking.companion.fullName, bookingId)
+      .catch((err) =>
+        this.logger.warn(`Failed to send booking declined notification: ${err.message}`),
+      );
 
     return {
       id: updatedBooking.id,

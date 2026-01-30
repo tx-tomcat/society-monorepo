@@ -1,8 +1,9 @@
 /* eslint-disable max-lines-per-function */
+import * as Location from 'expo-location';
 import { MotiView } from 'moti';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Pressable, ScrollView, Switch } from 'react-native';
+import { Alert, Linking, Pressable, ScrollView, Switch } from 'react-native';
 
 import {
   colors,
@@ -16,8 +17,7 @@ import {
   ArrowRight,
   Lock,
   Shield,
-  ShieldCheck,
-  Trash2,
+  Trash2
 } from '@/components/ui/icons';
 import { useDeleteAccount, useSafeBack } from '@/lib/hooks';
 import { useAuth } from '@/lib/hooks/use-auth';
@@ -46,18 +46,18 @@ const INITIAL_PRIVACY_SETTINGS: PrivacySetting[] = [
     descriptionKey: 'hirer.privacy.profile_visible_desc',
     enabled: true,
   },
-  {
-    id: 'show_online_status',
-    labelKey: 'hirer.privacy.show_online_status',
-    descriptionKey: 'hirer.privacy.show_online_status_desc',
-    enabled: true,
-  },
-  {
-    id: 'show_last_active',
-    labelKey: 'hirer.privacy.show_last_active',
-    descriptionKey: 'hirer.privacy.show_last_active_desc',
-    enabled: false,
-  },
+  // {
+  //   id: 'show_online_status',
+  //   labelKey: 'hirer.privacy.show_online_status',
+  //   descriptionKey: 'hirer.privacy.show_online_status_desc',
+  //   enabled: true,
+  // },
+  // {
+  //   id: 'show_last_active',
+  //   labelKey: 'hirer.privacy.show_last_active',
+  //   descriptionKey: 'hirer.privacy.show_last_active_desc',
+  //   enabled: false,
+  // },
   {
     id: 'share_location',
     labelKey: 'hirer.privacy.share_location',
@@ -67,22 +67,22 @@ const INITIAL_PRIVACY_SETTINGS: PrivacySetting[] = [
 ];
 
 const SECURITY_ACTIONS: SecurityAction[] = [
-  {
-    id: 'change_password',
-    labelKey: 'hirer.privacy.change_password',
-    descriptionKey: 'hirer.privacy.change_password_desc',
-    icon: Lock,
-    iconBg: 'bg-lavender-100',
-    iconColor: colors.lavender[400],
-  },
-  {
-    id: 'two_factor',
-    labelKey: 'hirer.privacy.two_factor',
-    descriptionKey: 'hirer.privacy.two_factor_desc',
-    icon: ShieldCheck,
-    iconBg: 'bg-teal-100',
-    iconColor: colors.teal[400],
-  },
+  // {
+  //   id: 'change_password',
+  //   labelKey: 'hirer.privacy.change_password',
+  //   descriptionKey: 'hirer.privacy.change_password_desc',
+  //   icon: Lock,
+  //   iconBg: 'bg-lavender-100',
+  //   iconColor: colors.lavender[400],
+  // },
+  // {
+  //   id: 'two_factor',
+  //   labelKey: 'hirer.privacy.two_factor',
+  //   descriptionKey: 'hirer.privacy.two_factor_desc',
+  //   icon: ShieldCheck,
+  //   iconBg: 'bg-teal-100',
+  //   iconColor: colors.teal[400],
+  // },
   {
     id: 'blocked_users',
     labelKey: 'hirer.privacy.blocked_users',
@@ -178,11 +178,41 @@ export default function PrivacySettingsScreen() {
     PrivacySetting[]
   >(INITIAL_PRIVACY_SETTINGS);
 
-  const handleToggle = React.useCallback((id: string, value: boolean) => {
-    setPrivacySettings((prev) =>
-      prev.map((s) => (s.id === id ? { ...s, enabled: value } : s))
-    );
-  }, []);
+  const handleToggle = React.useCallback(
+    async (id: string, value: boolean) => {
+      // Handle location permission request when enabling share_location
+      if (id === 'share_location' && value) {
+        const { status: existingStatus } =
+          await Location.getForegroundPermissionsAsync();
+
+        if (existingStatus !== 'granted') {
+          const { status } =
+            await Location.requestForegroundPermissionsAsync();
+
+          if (status !== 'granted') {
+            // Permission denied - show alert and don't enable the toggle
+            Alert.alert(
+              t('hirer.privacy.location_permission_title'),
+              t('hirer.privacy.location_permission_message'),
+              [
+                { text: t('common.cancel'), style: 'cancel' },
+                {
+                  text: t('common.settings'),
+                  onPress: () => Linking.openSettings(),
+                },
+              ]
+            );
+            return; // Don't update the toggle
+          }
+        }
+      }
+
+      setPrivacySettings((prev) =>
+        prev.map((s) => (s.id === id ? { ...s, enabled: value } : s))
+      );
+    },
+    [t]
+  );
 
   const handleSecurityAction = React.useCallback(
     (action: SecurityAction) => {

@@ -40,6 +40,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     bundleIdentifier: Env.BUNDLE_ID,
     infoPlist: {
       ITSAppUsesNonExemptEncryption: false,
+      NSLocationWhenInUseUsageDescription:
+        'This app needs access to your location to help you select a meeting location.',
     },
   },
   experiments: {
@@ -51,6 +53,14 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       backgroundColor: '#2E3C4B',
     },
     package: Env.PACKAGE,
+    permissions: [
+      'ACCESS_COARSE_LOCATION',
+      'ACCESS_FINE_LOCATION',
+      'RECEIVE_BOOT_COMPLETED',
+      'VIBRATE',
+      'SCHEDULE_EXACT_ALARM',
+    ],
+    googleServicesFile: './google-services.json',
   },
   web: {
     favicon: './assets/favicon.png',
@@ -67,10 +77,26 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     ],
     ['expo-apple-authentication'],
     ['expo-font'],
+    [
+      'expo-location',
+      {
+        locationAlwaysAndWhenInUsePermission:
+          'Allow $(PRODUCT_NAME) to use your location to help you select meeting locations.',
+      },
+    ],
     'expo-localization',
     'expo-router',
     ['app-icon-badge', appIconBadgeConfig],
     ['react-native-edge-to-edge'],
+    [
+      'expo-notifications',
+      {
+        icon: './assets/notification-icon.png',
+        color: '#F87171', // Rose/coral color matching the app theme
+        defaultChannel: 'default',
+        enableBackgroundRemoteNotifications: true,
+      },
+    ],
   ],
   extra: {
     ...ClientEnv,

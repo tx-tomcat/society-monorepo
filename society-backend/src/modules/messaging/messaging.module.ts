@@ -7,10 +7,11 @@ import {
 } from './controllers/messages.controller';
 import { ConversationsService } from './services/conversations.service';
 import { MessagesService } from './services/messages.service';
+import { NotificationsModule } from '../notifications/notifications.module';
 import { PrismaModule } from '../../prisma/prisma.module';
 
 @Module({
-  imports: [ConfigModule, PrismaModule],
+  imports: [ConfigModule, NotificationsModule, PrismaModule],
   controllers: [
     ConversationsController,
     MessagesController,

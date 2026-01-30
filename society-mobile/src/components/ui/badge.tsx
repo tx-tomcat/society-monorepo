@@ -58,11 +58,33 @@ const badge = tv({
         container: 'bg-rose-400',
         label: 'text-white',
       },
+      // Status variants for bookings
+      pending: {
+        container: 'bg-yellow-100',
+        label: 'text-yellow-800',
+      },
+      confirmed: {
+        container: 'bg-teal-100',
+        label: 'text-teal-800',
+      },
+      completed: {
+        container: 'bg-lavender-100',
+        label: 'text-lavender-800',
+      },
+      cancelled: {
+        container: 'bg-danger-100',
+        label: 'text-danger-800',
+      },
+      // Occasion variant
+      occasion: {
+        container: 'bg-softpink',
+        label: 'text-rose-500',
+      },
     },
     size: {
       sm: {
         container: 'px-2 py-0.5',
-        label: 'text-[10px]',
+        label: 'text-xs',
       },
       default: {
         container: 'px-3 py-1',

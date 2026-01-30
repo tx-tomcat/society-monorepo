@@ -13,6 +13,8 @@ import {
   TextInput,
 } from 'react-native';
 
+// TODO: Add location picker feature later
+// import { LocationPicker } from '@/components/location-picker';
 import { OccasionSelector } from '@/components/occasion-selector';
 import {
   Button,
@@ -70,6 +72,12 @@ export default function BookingFormScreen() {
   const [selectedTime, setSelectedTime] = React.useState<string | null>(null);
   const [selectedDuration, setSelectedDuration] = React.useState('3');
   const [location, setLocation] = React.useState('');
+  // TODO: Add location picker feature later
+  // const [locationCoords, setLocationCoords] = React.useState<{
+  //   latitude: number;
+  //   longitude: number;
+  // } | null>(null);
+  // const [showLocationPicker, setShowLocationPicker] = React.useState(false);
   const [notes, setNotes] = React.useState('');
 
   // Calculate date range for availability (next 14 days from selected date or today)
@@ -463,7 +471,10 @@ export default function BookingFormScreen() {
                 onChangeText={setLocation}
                 placeholder={t('hirer.booking.location_placeholder')}
                 placeholderTextColor={colors.text.tertiary}
-                style={{ fontFamily: 'Urbanist_400Regular', color: colors.midnight.DEFAULT }}
+                style={{
+                  fontFamily: 'Urbanist_400Regular',
+                  color: colors.midnight.DEFAULT,
+                }}
                 className="px-4 py-3 text-base"
                 multiline={false}
               />
@@ -549,6 +560,29 @@ export default function BookingFormScreen() {
           />
         </View>
       </SafeAreaView>
+
+      {/* TODO: Add location picker feature later
+      <LocationPicker
+        visible={showLocationPicker}
+        onClose={() => setShowLocationPicker(false)}
+        onSelect={(locationData) => {
+          setLocation(locationData.address);
+          setLocationCoords({
+            latitude: locationData.latitude,
+            longitude: locationData.longitude,
+          });
+        }}
+        initialLocation={
+          locationCoords
+            ? {
+                address: location,
+                latitude: locationCoords.latitude,
+                longitude: locationCoords.longitude,
+              }
+            : undefined
+        }
+      />
+      */}
     </View>
   );
 }

@@ -198,7 +198,7 @@ export default function ForYouTab() {
               <Heart color="#FFFFFF" width={18} height={18} fill="#FFFFFF" />
             </LinearGradient>
             <Text
-              className="font-urbanist-bold text-[22px] tracking-tight"
+              className="font-urbanist-bold text-xl tracking-tight"
               style={{ color: colors.charcoal[900] }}
             >
               {t('hirer.browse.for_you.title')}

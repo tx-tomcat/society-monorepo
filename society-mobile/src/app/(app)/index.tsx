@@ -32,7 +32,7 @@ import { favoritesService } from '@/lib/api/services/favorites.service';
 import { useCurrentUser } from '@/lib/hooks';
 
 type UpcomingBooking = Booking & {
-  displayStatus: 'upcoming' | 'active';
+  displayStatus: 'upcoming' | 'active' | 'pending';
 };
 
 export default function HirerDashboard() {
@@ -50,13 +50,13 @@ export default function HirerDashboard() {
   // Get current user for greeting
   const { data: currentUser } = useCurrentUser();
 
-  console.log('currentUser', currentUser);
   const userName = currentUser?.user?.fullName?.split(' ')[0] || 'there';
 
   const fetchDashboardData = React.useCallback(async () => {
     try {
       // Fetch all dashboard data in parallel
-      const [confirmedRes, completedRes, favoritesRes] = await Promise.all([
+      const [pendingRes, confirmedRes, completedRes, favoritesRes] = await Promise.all([
+        bookingsService.getHirerBookings('PENDING', 1, 10),
         bookingsService.getHirerBookings('CONFIRMED', 1, 10),
         bookingsService.getHirerBookings('COMPLETED', 1, 1),
         favoritesService.getFavorites(1, 1),
@@ -64,10 +64,20 @@ export default function HirerDashboard() {
 
       // Filter upcoming bookings (today and future)
       const now = new Date();
-      const todayStart = new Date();
-      todayStart.setHours(0, 0, 0, 0);
 
-      const upcoming = (confirmedRes.bookings || [])
+      // Process pending bookings
+      const pendingBookings = (pendingRes.bookings || [])
+        .filter((booking) => {
+          const endDate = new Date(booking.endDatetime);
+          return endDate >= now;
+        })
+        .map((booking) => ({
+          ...booking,
+          displayStatus: 'pending' as const,
+        }));
+
+      // Process confirmed bookings
+      const confirmedBookings = (confirmedRes.bookings || [])
         .filter((booking) => {
           const endDate = new Date(booking.endDatetime);
           return endDate >= now;
@@ -82,11 +92,17 @@ export default function HirerDashboard() {
           }
 
           return { ...booking, displayStatus };
-        })
-        .slice(0, 3); // Show max 3 upcoming bookings
+        });
 
-      setUpcomingBookings(upcoming);
-      setUpcomingCount(confirmedRes.pagination?.total || 0);
+      // Combine and sort by start date, show max 3
+      const allUpcoming = [...pendingBookings, ...confirmedBookings]
+        .sort((a, b) => new Date(a.startDatetime).getTime() - new Date(b.startDatetime).getTime())
+        .slice(0, 3);
+
+      setUpcomingBookings(allUpcoming);
+      setUpcomingCount(
+        (pendingRes.pagination?.total || 0) + (confirmedRes.pagination?.total || 0)
+      );
       setCompletedBookingsCount(completedRes.pagination?.total || 0);
       setFavoritesCount(favoritesRes.total || 0);
     } catch (error) {
@@ -120,7 +136,7 @@ export default function HirerDashboard() {
   );
 
   const handleViewAllBookings = React.useCallback(() => {
-    router.push('/hirer/orders' as Href);
+    router.push('/bookings' as Href);
   }, [router]);
 
   const handleBrowseCompanions = React.useCallback(() => {
@@ -339,12 +355,16 @@ export default function HirerDashboard() {
                             label={
                               booking.displayStatus === 'active'
                                 ? t('common.status.active')
-                                : t('common.status.upcoming')
+                                : booking.displayStatus === 'pending'
+                                  ? t('common.status.pending')
+                                  : t('common.status.upcoming')
                             }
                             variant={
                               booking.displayStatus === 'active'
                                 ? 'teal'
-                                : 'rose'
+                                : booking.displayStatus === 'pending'
+                                  ? 'pending'
+                                  : 'rose'
                             }
                             size="sm"
                           />
