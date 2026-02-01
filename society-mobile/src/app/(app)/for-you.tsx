@@ -1,11 +1,11 @@
 /* eslint-disable max-lines-per-function */
+import { FlashList } from '@shopify/flash-list';
 import { LinearGradient } from 'expo-linear-gradient';
 import type { Href } from 'expo-router';
 import { useRouter } from 'expo-router';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Pressable } from 'react-native';
-import { FlashList } from '@shopify/flash-list';
 import Animated, { FadeIn, FadeInUp } from 'react-native-reanimated';
 
 import { CompanionCard } from '@/components/swipeable-companion-card';
@@ -208,9 +208,8 @@ export default function ForYouTab() {
           <Pressable
             onPress={handleRefresh}
             disabled={isRefetching || refreshRecommendations.isPending}
-            className={`size-11 items-center justify-center rounded-full ${
-              isRefetching || refreshRecommendations.isPending ? 'opacity-50' : ''
-            }`}
+            className={`size-11 items-center justify-center rounded-full ${isRefetching || refreshRecommendations.isPending ? 'opacity-50' : ''
+              }`}
             style={{ backgroundColor: 'rgba(255,107,138,0.12)' }}
           >
             {isRefetching || refreshRecommendations.isPending ? (

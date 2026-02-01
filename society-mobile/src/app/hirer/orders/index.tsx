@@ -5,11 +5,7 @@ import { useRouter } from 'expo-router';
 import { MotiView } from 'moti';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  ActivityIndicator,
-  Pressable,
-  RefreshControl,
-} from 'react-native';
+import { ActivityIndicator, Pressable, RefreshControl } from 'react-native';
 
 import {
   colors,
@@ -20,11 +16,11 @@ import {
   View,
 } from '@/components/ui';
 import { Calendar, Clock, MapPin } from '@/components/ui/icons';
-import type { BookingStatus as APIBookingStatus } from '@/lib/api/services/bookings.service';
+import { BookingStatus } from '@/lib/api/enums';
 import { getPhotoUrl } from '@/lib/api/services/companions.service';
 import { useBookings } from '@/lib/hooks';
 
-type BookingStatus = 'pending' | 'confirmed' | 'completed' | 'cancelled';
+type DisplayBookingStatus = 'pending' | 'confirmed' | 'completed' | 'cancelled';
 
 type Booking = {
   id: string;
@@ -37,7 +33,7 @@ type Booking = {
   date: string;
   time: string;
   location: string;
-  status: BookingStatus;
+  status: DisplayBookingStatus;
 };
 
 const TABS = [
@@ -45,7 +41,7 @@ const TABS = [
   { id: 'past', labelKey: 'hirer.orders.tabs.past' },
 ];
 
-const getStatusConfig = (status: BookingStatus) => {
+const getStatusConfig = (status: DisplayBookingStatus) => {
   switch (status) {
     case 'pending':
       return {
@@ -131,7 +127,12 @@ function BookingCard({
         {/* Bottom row: Date, Time, Location */}
         <View className="flex-row items-center gap-3 px-4 py-3">
           <View className="flex-row items-center gap-1">
-            <Calendar color={colors.text.secondary} size={12} width={12} height={12} />
+            <Calendar
+              color={colors.text.secondary}
+              size={12}
+              width={12}
+              height={12}
+            />
             <Text className="text-xs text-text-secondary">{booking.date}</Text>
           </View>
           <View className="flex-row items-center gap-1">
@@ -140,7 +141,9 @@ function BookingCard({
           </View>
           <View className="flex-row items-center gap-1">
             <MapPin color={colors.text.secondary} width={12} height={12} />
-            <Text className="text-xs text-text-secondary">{booking.location}</Text>
+            <Text className="text-xs text-text-secondary">
+              {booking.location}
+            </Text>
           </View>
         </View>
       </MotiView>
@@ -154,9 +157,9 @@ export default function MyBookings() {
   const [activeTab, setActiveTab] = React.useState('upcoming');
 
   // Map local tab to API status
-  const getApiStatus = (tab: string): APIBookingStatus | undefined => {
-    if (tab === 'upcoming') return 'CONFIRMED';
-    if (tab === 'past') return 'COMPLETED';
+  const getApiStatus = (tab: string): BookingStatus | undefined => {
+    if (tab === 'upcoming') return BookingStatus.CONFIRMED;
+    if (tab === 'past') return BookingStatus.COMPLETED;
     return undefined;
   };
 
@@ -169,19 +172,19 @@ export default function MyBookings() {
   } = useBookings(getApiStatus(activeTab));
 
   // Map API status to local display status
-  const mapStatus = (apiStatus: string): BookingStatus => {
+  const mapStatus = (apiStatus: BookingStatus): DisplayBookingStatus => {
     switch (apiStatus) {
-      case 'PENDING':
+      case BookingStatus.PENDING:
         return 'pending';
-      case 'CONFIRMED':
+      case BookingStatus.CONFIRMED:
         return 'confirmed';
-      case 'ACTIVE':
+      case BookingStatus.ACTIVE:
         return 'confirmed';
-      case 'COMPLETED':
+      case BookingStatus.COMPLETED:
         return 'completed';
-      case 'CANCELLED':
-      case 'DISPUTED':
-      case 'EXPIRED':
+      case BookingStatus.CANCELLED:
+      case BookingStatus.DISPUTED:
+      case BookingStatus.EXPIRED:
         return 'cancelled';
       default:
         return 'pending';
@@ -203,16 +206,16 @@ export default function MyBookings() {
         occasionEmoji: b.occasion?.emoji || '👋',
         date: b.startDatetime
           ? new Date(b.startDatetime).toLocaleDateString('en-US', {
-            month: 'short',
-            day: 'numeric',
-          })
+              month: 'short',
+              day: 'numeric',
+            })
           : '',
         time: b.startDatetime
           ? new Date(b.startDatetime).toLocaleTimeString('en-US', {
-            hour: 'numeric',
-            minute: '2-digit',
-            hour12: true,
-          })
+              hour: 'numeric',
+              minute: '2-digit',
+              hour12: true,
+            })
           : `${b.durationHours}h`,
         location: b.locationAddress?.split(',')[0] || '',
         status: mapStatus(b.status),
@@ -261,12 +264,14 @@ export default function MyBookings() {
                 className="flex-1"
               >
                 <View
-                  className={`items-center rounded-lg py-2 ${isActive ? 'bg-teal-400' : 'bg-neutral-100'
-                    }`}
+                  className={`items-center rounded-lg py-2 ${
+                    isActive ? 'bg-teal-400' : 'bg-neutral-100'
+                  }`}
                 >
                   <Text
-                    className={`text-xs font-semibold ${isActive ? 'text-white' : 'text-text-secondary'
-                      }`}
+                    className={`text-xs font-semibold ${
+                      isActive ? 'text-white' : 'text-text-secondary'
+                    }`}
                   >
                     {t(tab.labelKey)}
                   </Text>
@@ -309,4 +314,3 @@ export default function MyBookings() {
     </View>
   );
 }
-

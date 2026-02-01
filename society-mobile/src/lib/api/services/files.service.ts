@@ -1,4 +1,4 @@
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
 
 import { apiClient } from '../client';
 
@@ -291,11 +291,15 @@ export const filesService = {
     localUri: string,
     category: FileCategory
   ): Promise<FileInfo> {
+    console.log('[Upload] Starting upload for:', localUri);
+
     // Step 1: Validate file before upload
     const validation = await validateFile(localUri, category);
     if (!validation.valid) {
+      console.log('[Upload] Validation failed:', validation.error.message);
       throw validation.error;
     }
+    console.log('[Upload] Validation passed:', { size: validation.size, mimeType: validation.mimeType });
 
     // Get file info from validation result
     const name = localUri.split('/').pop() || 'file';
@@ -306,14 +310,17 @@ export const filesService = {
     };
 
     // Step 2: Get pre-signed upload URL
+    console.log('[Upload] Getting presigned URL...');
     const uploadResult = await this.getUploadUrl({
       filename: fileInfo.name,
       contentType: fileInfo.mimeType,
       size: fileInfo.size,
       category,
     });
+    console.log('[Upload] Got presigned URL, fileId:', uploadResult.fileId);
 
     // Step 3: Upload directly to R2 using the pre-signed URL
+    console.log('[Upload] Uploading to R2...');
     const uploadResponse = await FileSystem.uploadAsync(
       uploadResult.uploadUrl,
       localUri,
@@ -324,13 +331,17 @@ export const filesService = {
         },
       }
     );
+    console.log('[Upload] R2 response status:', uploadResponse.status, 'body:', uploadResponse.body);
 
     if (uploadResponse.status !== 200) {
-      throw new Error(`Upload failed with status ${uploadResponse.status}`);
+      throw new Error(`Upload to R2 failed with status ${uploadResponse.status}: ${uploadResponse.body}`);
     }
 
     // Return the file info
-    return this.getFile(uploadResult.fileId);
+    console.log('[Upload] Getting file info for:', uploadResult.fileId);
+    const file = await this.getFile(uploadResult.fileId);
+    console.log('[Upload] File info retrieved:', file.id);
+    return file;
   },
 
   /**
@@ -344,11 +355,15 @@ export const filesService = {
     category: FileCategory,
     options?: { description?: string; isPublic?: boolean }
   ): Promise<FileInfo> {
+    console.log('[Upload Direct] Starting for:', localUri, 'category:', category);
+
     // Step 1: Validate file before upload
     const validation = await validateFile(localUri, category);
     if (!validation.valid) {
+      console.log('[Upload Direct] Validation failed:', validation.error.message);
       throw validation.error;
     }
+    console.log('[Upload Direct] Validation passed');
 
     // Get file info from validation result
     const name = localUri.split('/').pop() || 'file';
@@ -372,6 +387,8 @@ export const filesService = {
     if (options?.isPublic !== undefined) {
       formData.append('isPublic', String(options.isPublic));
     }
+
+    console.log('[Upload Direct] Sending to backend with category:', category);
 
     return apiClient.post('/files/upload', formData, {
       headers: {
@@ -398,6 +415,8 @@ export const filesService = {
         return { success: true as const, file };
       })
     );
+
+    console.log('results', results);
 
     return results.map((result, index) => {
       if (result.status === 'fulfilled') {

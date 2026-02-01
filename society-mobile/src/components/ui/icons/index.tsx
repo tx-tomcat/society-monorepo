@@ -53,6 +53,7 @@ export * from './zalo';
 export * from './check';
 export * from './check-circle';
 export * from './double-check';
+export * from './fire';
 export * from './heart';
 export * from './refresh-cw';
 export * from './sparkles';
@@ -60,6 +61,7 @@ export * from './star';
 export * from './trash';
 export * from './trash-2';
 export * from './x-circle';
+export * from './zap';
 
 // Safety & Trust
 export * from './gps';

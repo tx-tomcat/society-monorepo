@@ -167,7 +167,11 @@ function InitialLayout() {
     return '/hirer/onboarding/profile';
   };
 
-  const getDashboardRoute = () => isCompanion ? '/companion/(app)' : '/(app)';
+  const getDashboardRoute = React.useCallback(() => {
+    const route = isCompanion ? '/companion/(app)' : '/(app)';
+    console.log('[_layout] getDashboardRoute:', route, 'isCompanion:', isCompanion, 'role:', role);
+    return route;
+  }, [isCompanion, role]);
 
   // Fetch platform config when signed in
   React.useEffect(() => {
@@ -187,16 +191,23 @@ function InitialLayout() {
       (firstSegment === 'companion' && secondSegment === 'onboard') ||
       firstSegment === 'phone-verification';
 
+    // Check if user is on the wrong dashboard (companion on hirer dashboard or vice versa)
+    const isOnHirerDashboard = firstSegment === '(app)';
+    const isOnCompanionDashboard = firstSegment === 'companion' && secondSegment === '(app)';
+    const isOnWrongDashboard = isSignedIn && !needsOnboarding && (
+      (isCompanion && isOnHirerDashboard) || (!isCompanion && isOnCompanionDashboard)
+    );
+
     if (!isSignedIn && !isPublicRoute) {
       router.replace('/welcome');
     } else if (isSignedIn && needsOnboarding && !isOnboardingRoute) {
       router.replace(getOnboardingRoute());
-    } else if (isSignedIn && !needsOnboarding && (isPublicRoute || isOnboardingRoute)) {
+    } else if (isSignedIn && !needsOnboarding && (isPublicRoute || isOnboardingRoute || isOnWrongDashboard)) {
       router.replace(getDashboardRoute());
     }
 
     setIsNavigationReady(true);
-  }, [isLoaded, isSignedIn, isUserLoading, needsOnboarding, segments, fontsLoaded, router]);
+  }, [isLoaded, isSignedIn, isUserLoading, needsOnboarding, isCompanion, segments, fontsLoaded, router]);
 
   React.useEffect(() => {
     // Hide splash screen after navigation is ready

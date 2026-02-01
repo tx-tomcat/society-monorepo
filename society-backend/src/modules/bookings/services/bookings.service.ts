@@ -74,35 +74,35 @@ const TET_HOLIDAY_RANGES: Array<{
   name: string;
   surgeMultiplier: number;
 }> = [
-  // 2025 Tết: Jan 28 - Feb 4
-  {
-    start: "2025-01-28",
-    end: "2025-02-04",
-    name: "Tết Nguyên Đán 2025",
-    surgeMultiplier: 1.0,
-  },
-  // 2026 Tết: Feb 15 - Feb 22
-  {
-    start: "2026-02-15",
-    end: "2026-02-22",
-    name: "Tết Nguyên Đán 2026",
-    surgeMultiplier: 1.0,
-  },
-  // Mid-Autumn Festival 2025 (approximate)
-  {
-    start: "2025-10-04",
-    end: "2025-10-07",
-    name: "Tết Trung thu 2025",
-    surgeMultiplier: 0.5,
-  },
-  // Mid-Autumn Festival 2026 (approximate)
-  {
-    start: "2026-09-23",
-    end: "2026-09-26",
-    name: "Tết Trung thu 2026",
-    surgeMultiplier: 0.5,
-  },
-];
+    // 2025 Tết: Jan 28 - Feb 4
+    {
+      start: "2025-01-28",
+      end: "2025-02-04",
+      name: "Tết Nguyên Đán 2025",
+      surgeMultiplier: 1.0,
+    },
+    // 2026 Tết: Feb 15 - Feb 22
+    {
+      start: "2026-02-15",
+      end: "2026-02-22",
+      name: "Tết Nguyên Đán 2026",
+      surgeMultiplier: 1.0,
+    },
+    // Mid-Autumn Festival 2025 (approximate)
+    {
+      start: "2025-10-04",
+      end: "2025-10-07",
+      name: "Tết Trung thu 2025",
+      surgeMultiplier: 0.5,
+    },
+    // Mid-Autumn Festival 2026 (approximate)
+    {
+      start: "2026-09-23",
+      end: "2026-09-26",
+      name: "Tết Trung thu 2026",
+      surgeMultiplier: 0.5,
+    },
+  ];
 
 // Auto-archive delay after booking completion (in days)
 const AUTO_ARCHIVE_DELAY_DAYS = 7; // Archive conversations 7 days after completion
@@ -206,8 +206,8 @@ export class BookingsService {
       // Get booking day in Vietnam timezone
       const bookingVietnam = new Date(
         startDatetime.getTime() +
-          VIETNAM_OFFSET_MS +
-          startDatetime.getTimezoneOffset() * 60000,
+        VIETNAM_OFFSET_MS +
+        startDatetime.getTimezoneOffset() * 60000,
       );
 
       // Compare dates (ignoring time) in Vietnam timezone
@@ -617,15 +617,15 @@ export class BookingsService {
           companion: {
             select: {
               id: true,
-              fullName: true,
               companionProfile: {
                 select: {
                   id: true,
+                  displayName: true,
                   ratingAvg: true,
+                  ratingCount: true,
                   photos: {
-                    orderBy: { position: "asc" },
-                    take: 1,
-                    select: { url: true },
+                    orderBy: [{ isPrimary: "desc" }, { position: "asc" }],
+                    select: { id: true, url: true, isPrimary: true, position: true },
                   },
                 },
               },
@@ -646,14 +646,17 @@ export class BookingsService {
       durationHours: Number(b.durationHours),
       locationAddress: b.locationAddress,
       totalPrice: b.totalPrice,
+      createdAt: b.createdAt instanceof Date ? b.createdAt.toISOString() : String(b.createdAt),
       companion: b.companion?.companionProfile
         ? {
-            id: b.companion.companionProfile.id,
-            userId: b.companion.id,
-            displayName: b.companion.fullName,
-            avatar: b.companion.companionProfile.photos[0]?.url || null,
-            rating: Number(b.companion.companionProfile.ratingAvg),
-          }
+          id: b.companion.companionProfile.id,
+          userId: b.companion.id,
+          displayName: b.companion.companionProfile.displayName || "Anonymous",
+          avatar: b.companion.companionProfile.photos[0]?.url || null,
+          photos: b.companion.companionProfile.photos,
+          rating: Number(b.companion.companionProfile.ratingAvg),
+          reviewCount: b.companion.companionProfile.ratingCount || 0,
+        }
         : undefined,
     }));
 
@@ -729,15 +732,16 @@ export class BookingsService {
       durationHours: Number(b.durationHours),
       locationAddress: b.locationAddress,
       totalPrice: b.totalPrice,
+      createdAt: b.createdAt instanceof Date ? b.createdAt.toISOString() : String(b.createdAt),
       hirer: b.hirer
         ? {
-            id: b.hirer.id,
-            displayName: b.hirer.fullName,
-            avatar: b.hirer.avatarUrl,
-            rating: b.hirer.hirerProfile
-              ? Number(b.hirer.hirerProfile.ratingAvg)
-              : 5,
-          }
+          id: b.hirer.id,
+          displayName: b.hirer.fullName,
+          avatar: b.hirer.avatarUrl,
+          rating: b.hirer.hirerProfile
+            ? Number(b.hirer.hirerProfile.ratingAvg)
+            : 5,
+        }
         : undefined,
     }));
 
@@ -768,16 +772,17 @@ export class BookingsService {
         companion: {
           select: {
             id: true,
-            fullName: true,
             phone: true,
             companionProfile: {
               select: {
                 id: true,
+                displayName: true,
                 ratingAvg: true,
+                ratingCount: true,
+                verificationStatus: true,
                 photos: {
-                  orderBy: { position: "asc" },
-                  take: 1,
-                  select: { url: true },
+                  orderBy: [{ isPrimary: "desc" }, { position: "asc" }],
+                  select: { id: true, url: true, isPrimary: true, position: true },
                 },
               },
             },
@@ -851,12 +856,15 @@ export class BookingsService {
       companion: {
         id: companionProfile?.id || "",
         userId: booking.companion.id,
-        displayName: booking.companion.fullName,
+        displayName: companionProfile?.displayName || "Anonymous",
         avatar: companionProfile?.photos[0]?.url || null,
+        photos: companionProfile?.photos || [],
         rating: companionProfile ? Number(companionProfile.ratingAvg) : 0,
+        reviewCount: companionProfile?.ratingCount || 0,
+        isVerified: companionProfile?.verificationStatus === "VERIFIED",
         phone:
           isHirer &&
-          this.shouldRevealPhone(booking.status, startDatetime)
+            this.shouldRevealPhone(booking.status, startDatetime)
             ? booking.companion.phone
             : null,
       },
@@ -869,40 +877,40 @@ export class BookingsService {
           : 5,
         phone:
           isCompanion &&
-          this.shouldRevealPhone(booking.status, startDatetime)
+            this.shouldRevealPhone(booking.status, startDatetime)
             ? booking.hirer.phone
             : null,
       },
       review: review
         ? {
-            id: review.id,
-            rating: review.rating,
-            comment: review.comment,
-            tags: review.tags,
-            createdAt: review.createdAt instanceof Date
-              ? review.createdAt.toISOString()
-              : String(review.createdAt),
-          }
+          id: review.id,
+          rating: review.rating,
+          comment: review.comment,
+          tags: review.tags,
+          createdAt: review.createdAt instanceof Date
+            ? review.createdAt.toISOString()
+            : String(review.createdAt),
+        }
         : null,
       requestExpiresAt: booking.requestExpiresAt
         ? (booking.requestExpiresAt instanceof Date
-            ? booking.requestExpiresAt.toISOString()
-            : String(booking.requestExpiresAt))
+          ? booking.requestExpiresAt.toISOString()
+          : String(booking.requestExpiresAt))
         : null,
       confirmedAt: booking.confirmedAt
         ? (booking.confirmedAt instanceof Date
-            ? booking.confirmedAt.toISOString()
-            : String(booking.confirmedAt))
+          ? booking.confirmedAt.toISOString()
+          : String(booking.confirmedAt))
         : null,
       completedAt: booking.completedAt
         ? (booking.completedAt instanceof Date
-            ? booking.completedAt.toISOString()
-            : String(booking.completedAt))
+          ? booking.completedAt.toISOString()
+          : String(booking.completedAt))
         : null,
       cancelledAt: booking.cancelledAt
         ? (booking.cancelledAt instanceof Date
-            ? booking.cancelledAt.toISOString()
-            : String(booking.cancelledAt))
+          ? booking.cancelledAt.toISOString()
+          : String(booking.cancelledAt))
         : null,
       cancelReason: booking.cancelReason,
       createdAt: booking.createdAt instanceof Date
@@ -1162,13 +1170,13 @@ export class BookingsService {
       specialRequests: r.specialRequests,
       hirer: r.hirer
         ? {
-            id: r.hirer.id,
-            displayName: r.hirer.fullName,
-            avatar: r.hirer.avatarUrl,
-            rating: r.hirer.hirerProfile
-              ? Number(r.hirer.hirerProfile.ratingAvg)
-              : 5,
-          }
+          id: r.hirer.id,
+          displayName: r.hirer.fullName,
+          avatar: r.hirer.avatarUrl,
+          rating: r.hirer.hirerProfile
+            ? Number(r.hirer.hirerProfile.ratingAvg)
+            : 5,
+        }
         : undefined,
       createdAt: r.createdAt.toISOString(),
       requestExpiresAt: r.requestExpiresAt?.toISOString() || "",

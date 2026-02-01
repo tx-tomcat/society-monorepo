@@ -4488,6 +4488,7 @@ export type UserSessionScalarFieldEnum = (typeof UserSessionScalarFieldEnum)[key
 export const CompanionProfileScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
+  displayName: 'displayName',
   bio: 'bio',
   heightCm: 'heightCm',
   languages: 'languages',

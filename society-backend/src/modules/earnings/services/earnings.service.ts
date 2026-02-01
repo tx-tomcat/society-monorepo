@@ -196,13 +196,41 @@ export class EarningsService {
       return { transactions: [], pagination: { page: 1, limit: 20, total: 0, totalPages: 0 } };
     }
 
-    const { page = 1, limit = 20 } = query;
+    const { page = 1, limit = 20, period } = query;
+
+    // Calculate date filter based on period
+    let dateFilter: { gte?: Date; lte?: Date } | undefined;
+    if (period) {
+      const now = new Date();
+      const startDate = new Date();
+
+      switch (period) {
+        case 'week':
+          // Start of current week (Monday)
+          const dayOfWeek = now.getDay();
+          const diff = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+          startDate.setDate(now.getDate() - diff);
+          startDate.setHours(0, 0, 0, 0);
+          break;
+        case 'month':
+          startDate.setDate(1);
+          startDate.setHours(0, 0, 0, 0);
+          break;
+        case 'year':
+          startDate.setMonth(0, 1);
+          startDate.setHours(0, 0, 0, 0);
+          break;
+      }
+
+      dateFilter = { gte: startDate, lte: now };
+    }
 
     // Get earnings as transactions
     const earnings = await this.prisma.earning.findMany({
       where: {
         companionId: companion.id,
         status: EarningsStatus.AVAILABLE,
+        ...(dateFilter && { releasedAt: dateFilter }),
       },
       orderBy: { releasedAt: 'desc' },
       skip: (page - 1) * limit,
@@ -220,6 +248,7 @@ export class EarningsService {
       where: {
         companionId: companion.id,
         status: EarningsStatus.AVAILABLE,
+        ...(dateFilter && { releasedAt: dateFilter }),
       },
     });
 
@@ -267,7 +296,7 @@ export class EarningsService {
       accountNumber: this.maskAccountNumber(a.accountNumber),
       accountHolder: a.accountHolder,
       isDefault: a.isPrimary,
-      createdAt: a.createdAt.toISOString(),
+      createdAt: a.createdAt instanceof Date ? a.createdAt.toISOString() : String(a.createdAt),
     }));
 
     return { accounts: accountList };
@@ -305,6 +334,9 @@ export class EarningsService {
         isVerified: false,
       },
     });
+
+    // Invalidate bank account list cache
+    await this.prisma.invalidateModelCache('bankAccount');
 
     return {
       id: account.id,
@@ -356,6 +388,9 @@ export class EarningsService {
         });
       }
     }
+
+    // Invalidate bank account list cache
+    await this.prisma.invalidateModelCache('bankAccount');
 
     return { success: true };
   }

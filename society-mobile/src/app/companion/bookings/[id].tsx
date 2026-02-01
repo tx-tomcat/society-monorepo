@@ -17,6 +17,7 @@ import {
   Badge,
   Button,
   colors,
+  CompanionHeader,
   FocusAwareStatusBar,
   Image,
   SafeAreaView,
@@ -24,20 +25,18 @@ import {
   View,
 } from '@/components/ui';
 import {
-  ArrowLeft,
   Calendar,
   Clock,
-  Gps,
   MapPin,
-  MessageCircle,
-  Phone,
   ShieldCheck,
 } from '@/components/ui/icons';
+import { BookingStatus, PaymentStatus } from '@/lib/api/enums';
 import {
-  type Booking,
-  bookingsService,
-  type BookingStatus,
-} from '@/lib/api/services/bookings.service';
+  useBooking,
+  useCancelBooking,
+  useCompleteBooking,
+  useUpdateBookingStatus,
+} from '@/lib/hooks';
 import { formatVND } from '@/lib/utils';
 
 // Map status to badge variant
@@ -46,15 +45,15 @@ function getStatusBadge(status: BookingStatus): {
   variant: 'default' | 'teal' | 'lavender' | 'rose';
 } {
   switch (status) {
-    case 'CONFIRMED':
+    case BookingStatus.CONFIRMED:
       return { label: 'common.status.confirmed', variant: 'teal' };
-    case 'ACTIVE':
+    case BookingStatus.ACTIVE:
       return { label: 'common.status.active', variant: 'lavender' };
-    case 'PENDING':
+    case BookingStatus.PENDING:
       return { label: 'common.status.pending', variant: 'default' };
-    case 'COMPLETED':
+    case BookingStatus.COMPLETED:
       return { label: 'common.status.completed', variant: 'teal' };
-    case 'CANCELLED':
+    case BookingStatus.CANCELLED:
       return { label: 'common.status.cancelled', variant: 'rose' };
     default:
       return { label: 'common.status.unknown', variant: 'default' };
@@ -63,30 +62,17 @@ function getStatusBadge(status: BookingStatus): {
 
 export default function CompanionBookingDetail() {
   const router = useRouter();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { id } = useLocalSearchParams<{ id: string }>();
 
-  const [booking, setBooking] = React.useState<Booking | null>(null);
-  const [isLoading, setIsLoading] = React.useState(true);
+  // Get locale for date formatting (vi-VN or en-US)
+  const locale = i18n.language === 'vi' ? 'vi-VN' : 'en-US';
 
-  React.useEffect(() => {
-    async function fetchBooking() {
-      if (!id) return;
-      try {
-        const data = await bookingsService.getBooking(id);
-        setBooking(data);
-      } catch (error) {
-        console.error('Failed to fetch booking:', error);
-        Toast.show({
-          type: 'error',
-          text1: t('errors.booking_not_found'),
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    }
-    fetchBooking();
-  }, [id, t]);
+  // React Query hooks
+  const { data: booking, isLoading } = useBooking(id || '');
+  const cancelBooking = useCancelBooking();
+  const updateBookingStatus = useUpdateBookingStatus();
+  const completeBooking = useCompleteBooking();
 
   const handleBack = React.useCallback(() => {
     router.back();
@@ -97,13 +83,13 @@ export default function CompanionBookingDetail() {
     // TODO: Implement actual call functionality
     Alert.alert(
       t('companion.booking_detail.call'),
-      `${t('companion.booking_detail.calling')} ${booking.hirer.fullName}...`
+      `${t('companion.booking_detail.calling')} ${booking.hirer?.displayName || t('common.client')}...`
     );
   }, [t, booking]);
 
   const handleMessageClient = React.useCallback(() => {
     if (!booking) return;
-    router.push(`/chat/${booking.hirer.id}` as Href);
+    router.push(`/chat/${booking.hirer?.id}` as Href);
   }, [router, booking]);
 
   const handleStartNavigation = React.useCallback(() => {
@@ -124,48 +110,57 @@ export default function CompanionBookingDetail() {
         {
           text: t('companion.booking_detail.yes_cancel'),
           style: 'destructive',
-          onPress: async () => {
-            try {
-              await bookingsService.cancelBooking(booking.id, undefined);
-              Toast.show({
-                type: 'info',
-                text1: t('companion.booking_detail.cancelled'),
-              });
-              router.back();
-            } catch (error) {
-              console.error('Failed to cancel booking:', error);
-              Toast.show({
-                type: 'error',
-                text1: t('errors.cancel_failed'),
-                text2: t('errors.try_again'),
-              });
-            }
+          onPress: () => {
+            cancelBooking.mutate(
+              { bookingId: booking.id, reason: undefined },
+              {
+                onSuccess: () => {
+                  Toast.show({
+                    type: 'info',
+                    text1: t('companion.booking_detail.cancelled'),
+                  });
+                  router.back();
+                },
+                onError: (error) => {
+                  console.error('Failed to cancel booking:', error);
+                  Toast.show({
+                    type: 'error',
+                    text1: t('errors.cancel_failed'),
+                    text2: t('errors.try_again'),
+                  });
+                },
+              }
+            );
           },
         },
       ]
     );
-  }, [router, t, booking]);
+  }, [router, t, booking, cancelBooking]);
 
-  const handleCheckIn = React.useCallback(async () => {
+  const handleCheckIn = React.useCallback(() => {
     if (!booking) return;
-    try {
-      await bookingsService.updateBookingStatus(booking.id, 'ACTIVE');
-      setBooking((prev) => (prev ? { ...prev, status: 'ACTIVE' } : null));
-      Toast.show({
-        type: 'success',
-        text1: t('companion.booking_detail.checked_in'),
-      });
-    } catch (error) {
-      console.error('Failed to check in:', error);
-      Toast.show({
-        type: 'error',
-        text1: t('errors.check_in_failed'),
-        text2: t('errors.try_again'),
-      });
-    }
-  }, [booking, t]);
+    updateBookingStatus.mutate(
+      { bookingId: booking.id, status: 'ACTIVE' },
+      {
+        onSuccess: () => {
+          Toast.show({
+            type: 'success',
+            text1: t('companion.booking_detail.checked_in'),
+          });
+        },
+        onError: (error) => {
+          console.error('Failed to check in:', error);
+          Toast.show({
+            type: 'error',
+            text1: t('errors.check_in_failed'),
+            text2: t('errors.try_again'),
+          });
+        },
+      }
+    );
+  }, [booking, t, updateBookingStatus]);
 
-  const handleComplete = React.useCallback(async () => {
+  const handleComplete = React.useCallback(() => {
     if (!booking) return;
     Alert.alert(
       t('companion.booking_detail.complete_booking'),
@@ -174,29 +169,28 @@ export default function CompanionBookingDetail() {
         { text: t('common.cancel'), style: 'cancel' },
         {
           text: t('common.confirm'),
-          onPress: async () => {
-            try {
-              await bookingsService.completeBooking(booking.id);
-              setBooking((prev) =>
-                prev ? { ...prev, status: 'COMPLETED' } : null
-              );
-              Toast.show({
-                type: 'success',
-                text1: t('companion.booking_detail.completed'),
-              });
-            } catch (error) {
-              console.error('Failed to complete booking:', error);
-              Toast.show({
-                type: 'error',
-                text1: t('errors.complete_failed'),
-                text2: t('errors.try_again'),
-              });
-            }
+          onPress: () => {
+            completeBooking.mutate(booking.id, {
+              onSuccess: () => {
+                Toast.show({
+                  type: 'success',
+                  text1: t('companion.booking_detail.completed'),
+                });
+              },
+              onError: (error) => {
+                console.error('Failed to complete booking:', error);
+                Toast.show({
+                  type: 'error',
+                  text1: t('errors.complete_failed'),
+                  text2: t('errors.try_again'),
+                });
+              },
+            });
           },
         },
       ]
     );
-  }, [booking, t]);
+  }, [booking, t, completeBooking]);
 
   if (isLoading) {
     return (
@@ -218,15 +212,15 @@ export default function CompanionBookingDetail() {
 
   const startTime = new Date(booking.startDatetime);
   const endTime = new Date(booking.endDatetime);
-  const dateStr = startTime.toLocaleDateString('en-US', {
+  const dateStr = startTime.toLocaleDateString(locale, {
     month: 'long',
     day: 'numeric',
     year: 'numeric',
   });
-  const timeStr = `${startTime.toLocaleTimeString('en-US', {
+  const timeStr = `${startTime.toLocaleTimeString(locale, {
     hour: 'numeric',
     minute: '2-digit',
-  })} - ${endTime.toLocaleTimeString('en-US', {
+  })} - ${endTime.toLocaleTimeString(locale, {
     hour: 'numeric',
     minute: '2-digit',
   })}`;
@@ -237,21 +231,17 @@ export default function CompanionBookingDetail() {
     <View className="flex-1 bg-warmwhite">
       <FocusAwareStatusBar />
 
-      <SafeAreaView edges={['top']}>
-        <View className="flex-row items-center gap-4 border-b border-border-light px-4 py-3">
-          <Pressable onPress={handleBack}>
-            <ArrowLeft color={colors.midnight.DEFAULT} width={24} height={24} />
-          </Pressable>
-          <Text className="font-urbanist-bold flex-1 text-xl text-midnight">
-            {t('companion.booking_detail.header')}
-          </Text>
+      <CompanionHeader
+        title={t('companion.booking_detail.header')}
+        onBack={handleBack}
+        rightElement={
           <Badge
             label={t(statusBadge.label)}
             variant={statusBadge.variant}
             size="sm"
           />
-        </View>
-      </SafeAreaView>
+        }
+      />
 
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
         {/* Client Card */}
@@ -265,7 +255,7 @@ export default function CompanionBookingDetail() {
             <Image
               source={{
                 uri:
-                  booking.hirer.avatarUrl ||
+                  booking.hirer?.avatar ||
                   'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400',
               }}
               className="size-16 rounded-xl"
@@ -273,25 +263,19 @@ export default function CompanionBookingDetail() {
             />
             <View className="flex-1">
               <Text className="text-lg font-bold text-midnight">
-                {booking.hirer.fullName}
+                {booking.hirer?.displayName || t('common.anonymous')}
               </Text>
               <View className="mt-1 flex-row items-center gap-2">
                 <ShieldCheck color={colors.teal[400]} width={14} height={14} />
                 <Text className="text-sm text-midnight">
-                  {booking.hirer.trustScore}%{' '}
-                  {t('companion.booking_detail.trust')}
+                  ⭐ {booking.hirer?.rating?.toFixed(1) || '5.0'}
                 </Text>
-                {booking.hirer.isVerified && (
-                  <Text className="text-sm text-teal-400">
-                    • {t('common.verified')}
-                  </Text>
-                )}
               </View>
             </View>
           </View>
 
           {/* Quick Actions */}
-          <View className="mt-4 flex-row gap-3">
+          {/* <View className="mt-4 flex-row gap-3">
             <Pressable
               onPress={handleCallClient}
               className="flex-1 flex-row items-center justify-center gap-2 rounded-xl bg-lavender-400/10 py-3"
@@ -314,7 +298,7 @@ export default function CompanionBookingDetail() {
                 {t('companion.booking_detail.message')}
               </Text>
             </Pressable>
-          </View>
+          </View> */}
         </MotiView>
 
         {/* Booking Info */}
@@ -339,7 +323,9 @@ export default function CompanionBookingDetail() {
                   {t('companion.booking_detail.occasion')}
                 </Text>
                 <Text className="font-semibold text-midnight">
-                  {booking.occasion ? `${booking.occasion.emoji} ${booking.occasion.name}` : t('common.occasion')}
+                  {booking.occasion
+                    ? `${booking.occasion.emoji} ${booking.occasion.name}`
+                    : t('common.occasion')}
                 </Text>
               </View>
             </View>
@@ -377,7 +363,7 @@ export default function CompanionBookingDetail() {
           </View>
 
           {/* Navigate Button */}
-          <Pressable
+          {/* <Pressable
             onPress={handleStartNavigation}
             className="mt-4 flex-row items-center justify-center gap-2 rounded-xl bg-teal-400 py-3"
           >
@@ -385,7 +371,7 @@ export default function CompanionBookingDetail() {
             <Text className="font-semibold text-white">
               {t('companion.booking_detail.get_directions')}
             </Text>
-          </Pressable>
+          </Pressable> */}
 
           {/* Special Requests */}
           {booking.specialRequests && (
@@ -456,12 +442,12 @@ export default function CompanionBookingDetail() {
           <Text className="text-sm text-text-tertiary">
             {t('companion.booking_detail.booking_code')}
           </Text>
-          <Text className="font-urbanist-bold mt-1 text-2xl tracking-wider text-midnight">
+          <Text className="mt-1 font-urbanist-bold text-2xl tracking-wider text-midnight">
             {booking.bookingNumber}
           </Text>
           <Text className="mt-1 text-xs text-text-tertiary">
             {t('companion.booking_detail.booked_on')}{' '}
-            {new Date(booking.createdAt).toLocaleDateString('en-US', {
+            {new Date(booking.createdAt).toLocaleDateString(locale, {
               month: 'long',
               day: 'numeric',
               year: 'numeric',
@@ -499,43 +485,55 @@ export default function CompanionBookingDetail() {
         className="border-t border-border-light bg-white"
       >
         <View className="flex-row gap-3 p-4">
-          {booking.status === 'CONFIRMED' && (
+          {booking.status === BookingStatus.CONFIRMED && (
             <>
               <Button
                 label={t('companion.booking_detail.cancel_booking')}
                 onPress={handleCancelBooking}
                 variant="outline"
                 size="lg"
+                loading={cancelBooking.isPending}
+                disabled={
+                  cancelBooking.isPending || updateBookingStatus.isPending
+                }
                 className="flex-1"
               />
-              <Button
-                label={t('companion.booking_detail.ive_arrived')}
-                onPress={handleCheckIn}
-                variant="default"
-                size="lg"
-                className="flex-1 bg-lavender-400"
-              />
+              {booking.paymentStatus === PaymentStatus.PAID && (
+                <Button
+                  label={t('companion.booking_detail.ive_arrived')}
+                  onPress={handleCheckIn}
+                  variant="default"
+                  size="lg"
+                  loading={updateBookingStatus.isPending}
+                  disabled={
+                    cancelBooking.isPending || updateBookingStatus.isPending
+                  }
+                  className="flex-1 bg-lavender-400"
+                />
+              )}
             </>
           )}
-          {booking.status === 'ACTIVE' && (
+          {booking.status === BookingStatus.ACTIVE && (
             <Button
               label={t('companion.booking_detail.complete_booking')}
               onPress={handleComplete}
               variant="default"
               size="lg"
+              loading={completeBooking.isPending}
+              disabled={completeBooking.isPending}
               className="flex-1 bg-teal-400"
             />
           )}
-          {(booking.status === 'COMPLETED' ||
-            booking.status === 'CANCELLED') && (
-            <Button
-              label={t('common.back')}
-              onPress={handleBack}
-              variant="outline"
-              size="lg"
-              className="flex-1"
-            />
-          )}
+          {(booking.status === BookingStatus.COMPLETED ||
+            booking.status === BookingStatus.CANCELLED) && (
+              <Button
+                label={t('common.back')}
+                onPress={handleBack}
+                variant="outline"
+                size="lg"
+                className="flex-1"
+              />
+            )}
         </View>
       </SafeAreaView>
     </View>

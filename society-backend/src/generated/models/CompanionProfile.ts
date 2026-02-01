@@ -55,6 +55,7 @@ export type CompanionProfileSumAggregateOutputType = {
 export type CompanionProfileMinAggregateOutputType = {
   id: string | null
   userId: string | null
+  displayName: string | null
   bio: string | null
   heightCm: number | null
   province: string | null
@@ -80,6 +81,7 @@ export type CompanionProfileMinAggregateOutputType = {
 export type CompanionProfileMaxAggregateOutputType = {
   id: string | null
   userId: string | null
+  displayName: string | null
   bio: string | null
   heightCm: number | null
   province: string | null
@@ -105,6 +107,7 @@ export type CompanionProfileMaxAggregateOutputType = {
 export type CompanionProfileCountAggregateOutputType = {
   id: number
   userId: number
+  displayName: number
   bio: number
   heightCm: number
   languages: number
@@ -159,6 +162,7 @@ export type CompanionProfileSumAggregateInputType = {
 export type CompanionProfileMinAggregateInputType = {
   id?: true
   userId?: true
+  displayName?: true
   bio?: true
   heightCm?: true
   province?: true
@@ -184,6 +188,7 @@ export type CompanionProfileMinAggregateInputType = {
 export type CompanionProfileMaxAggregateInputType = {
   id?: true
   userId?: true
+  displayName?: true
   bio?: true
   heightCm?: true
   province?: true
@@ -209,6 +214,7 @@ export type CompanionProfileMaxAggregateInputType = {
 export type CompanionProfileCountAggregateInputType = {
   id?: true
   userId?: true
+  displayName?: true
   bio?: true
   heightCm?: true
   languages?: true
@@ -322,6 +328,7 @@ export type CompanionProfileGroupByArgs<ExtArgs extends runtime.Types.Extensions
 export type CompanionProfileGroupByOutputType = {
   id: string
   userId: string
+  displayName: string | null
   bio: string | null
   heightCm: number | null
   languages: string[]
@@ -371,6 +378,7 @@ export type CompanionProfileWhereInput = {
   NOT?: Prisma.CompanionProfileWhereInput | Prisma.CompanionProfileWhereInput[]
   id?: Prisma.UuidFilter<"CompanionProfile"> | string
   userId?: Prisma.UuidFilter<"CompanionProfile"> | string
+  displayName?: Prisma.StringNullableFilter<"CompanionProfile"> | string | null
   bio?: Prisma.StringNullableFilter<"CompanionProfile"> | string | null
   heightCm?: Prisma.IntNullableFilter<"CompanionProfile"> | number | null
   languages?: Prisma.StringNullableListFilter<"CompanionProfile">
@@ -405,6 +413,7 @@ export type CompanionProfileWhereInput = {
 export type CompanionProfileOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  displayName?: Prisma.SortOrderInput | Prisma.SortOrder
   bio?: Prisma.SortOrderInput | Prisma.SortOrder
   heightCm?: Prisma.SortOrderInput | Prisma.SortOrder
   languages?: Prisma.SortOrder
@@ -442,6 +451,7 @@ export type CompanionProfileWhereUniqueInput = Prisma.AtLeast<{
   AND?: Prisma.CompanionProfileWhereInput | Prisma.CompanionProfileWhereInput[]
   OR?: Prisma.CompanionProfileWhereInput[]
   NOT?: Prisma.CompanionProfileWhereInput | Prisma.CompanionProfileWhereInput[]
+  displayName?: Prisma.StringNullableFilter<"CompanionProfile"> | string | null
   bio?: Prisma.StringNullableFilter<"CompanionProfile"> | string | null
   heightCm?: Prisma.IntNullableFilter<"CompanionProfile"> | number | null
   languages?: Prisma.StringNullableListFilter<"CompanionProfile">
@@ -476,6 +486,7 @@ export type CompanionProfileWhereUniqueInput = Prisma.AtLeast<{
 export type CompanionProfileOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  displayName?: Prisma.SortOrderInput | Prisma.SortOrder
   bio?: Prisma.SortOrderInput | Prisma.SortOrder
   heightCm?: Prisma.SortOrderInput | Prisma.SortOrder
   languages?: Prisma.SortOrder
@@ -510,6 +521,7 @@ export type CompanionProfileScalarWhereWithAggregatesInput = {
   NOT?: Prisma.CompanionProfileScalarWhereWithAggregatesInput | Prisma.CompanionProfileScalarWhereWithAggregatesInput[]
   id?: Prisma.UuidWithAggregatesFilter<"CompanionProfile"> | string
   userId?: Prisma.UuidWithAggregatesFilter<"CompanionProfile"> | string
+  displayName?: Prisma.StringNullableWithAggregatesFilter<"CompanionProfile"> | string | null
   bio?: Prisma.StringNullableWithAggregatesFilter<"CompanionProfile"> | string | null
   heightCm?: Prisma.IntNullableWithAggregatesFilter<"CompanionProfile"> | number | null
   languages?: Prisma.StringNullableListFilter<"CompanionProfile">
@@ -535,6 +547,7 @@ export type CompanionProfileScalarWhereWithAggregatesInput = {
 
 export type CompanionProfileCreateInput = {
   id?: string
+  displayName?: string | null
   bio?: string | null
   heightCm?: number | null
   languages?: Prisma.CompanionProfileCreatelanguagesInput | string[]
@@ -569,6 +582,7 @@ export type CompanionProfileCreateInput = {
 export type CompanionProfileUncheckedCreateInput = {
   id?: string
   userId: string
+  displayName?: string | null
   bio?: string | null
   heightCm?: number | null
   languages?: Prisma.CompanionProfileCreatelanguagesInput | string[]
@@ -601,6 +615,7 @@ export type CompanionProfileUncheckedCreateInput = {
 
 export type CompanionProfileUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   heightCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   languages?: Prisma.CompanionProfileUpdatelanguagesInput | string[]
@@ -635,6 +650,7 @@ export type CompanionProfileUpdateInput = {
 export type CompanionProfileUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   heightCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   languages?: Prisma.CompanionProfileUpdatelanguagesInput | string[]
@@ -668,6 +684,7 @@ export type CompanionProfileUncheckedUpdateInput = {
 export type CompanionProfileCreateManyInput = {
   id?: string
   userId: string
+  displayName?: string | null
   bio?: string | null
   heightCm?: number | null
   languages?: Prisma.CompanionProfileCreatelanguagesInput | string[]
@@ -693,6 +710,7 @@ export type CompanionProfileCreateManyInput = {
 
 export type CompanionProfileUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   heightCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   languages?: Prisma.CompanionProfileUpdatelanguagesInput | string[]
@@ -719,6 +737,7 @@ export type CompanionProfileUpdateManyMutationInput = {
 export type CompanionProfileUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   heightCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   languages?: Prisma.CompanionProfileUpdatelanguagesInput | string[]
@@ -758,6 +777,7 @@ export type StringNullableListFilter<$PrismaModel = never> = {
 export type CompanionProfileCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  displayName?: Prisma.SortOrder
   bio?: Prisma.SortOrder
   heightCm?: Prisma.SortOrder
   languages?: Prisma.SortOrder
@@ -797,6 +817,7 @@ export type CompanionProfileAvgOrderByAggregateInput = {
 export type CompanionProfileMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  displayName?: Prisma.SortOrder
   bio?: Prisma.SortOrder
   heightCm?: Prisma.SortOrder
   province?: Prisma.SortOrder
@@ -822,6 +843,7 @@ export type CompanionProfileMaxOrderByAggregateInput = {
 export type CompanionProfileMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  displayName?: Prisma.SortOrder
   bio?: Prisma.SortOrder
   heightCm?: Prisma.SortOrder
   province?: Prisma.SortOrder
@@ -1023,6 +1045,7 @@ export type CompanionProfileUpdateOneRequiredWithoutBoostsNestedInput = {
 
 export type CompanionProfileCreateWithoutUserInput = {
   id?: string
+  displayName?: string | null
   bio?: string | null
   heightCm?: number | null
   languages?: Prisma.CompanionProfileCreatelanguagesInput | string[]
@@ -1055,6 +1078,7 @@ export type CompanionProfileCreateWithoutUserInput = {
 
 export type CompanionProfileUncheckedCreateWithoutUserInput = {
   id?: string
+  displayName?: string | null
   bio?: string | null
   heightCm?: number | null
   languages?: Prisma.CompanionProfileCreatelanguagesInput | string[]
@@ -1103,6 +1127,7 @@ export type CompanionProfileUpdateToOneWithWhereWithoutUserInput = {
 
 export type CompanionProfileUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   heightCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   languages?: Prisma.CompanionProfileUpdatelanguagesInput | string[]
@@ -1135,6 +1160,7 @@ export type CompanionProfileUpdateWithoutUserInput = {
 
 export type CompanionProfileUncheckedUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   heightCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   languages?: Prisma.CompanionProfileUpdatelanguagesInput | string[]
@@ -1167,6 +1193,7 @@ export type CompanionProfileUncheckedUpdateWithoutUserInput = {
 
 export type CompanionProfileCreateWithoutPhotosInput = {
   id?: string
+  displayName?: string | null
   bio?: string | null
   heightCm?: number | null
   languages?: Prisma.CompanionProfileCreatelanguagesInput | string[]
@@ -1200,6 +1227,7 @@ export type CompanionProfileCreateWithoutPhotosInput = {
 export type CompanionProfileUncheckedCreateWithoutPhotosInput = {
   id?: string
   userId: string
+  displayName?: string | null
   bio?: string | null
   heightCm?: number | null
   languages?: Prisma.CompanionProfileCreatelanguagesInput | string[]
@@ -1247,6 +1275,7 @@ export type CompanionProfileUpdateToOneWithWhereWithoutPhotosInput = {
 
 export type CompanionProfileUpdateWithoutPhotosInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   heightCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   languages?: Prisma.CompanionProfileUpdatelanguagesInput | string[]
@@ -1280,6 +1309,7 @@ export type CompanionProfileUpdateWithoutPhotosInput = {
 export type CompanionProfileUncheckedUpdateWithoutPhotosInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   heightCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   languages?: Prisma.CompanionProfileUpdatelanguagesInput | string[]
@@ -1311,6 +1341,7 @@ export type CompanionProfileUncheckedUpdateWithoutPhotosInput = {
 
 export type CompanionProfileCreateWithoutServicesInput = {
   id?: string
+  displayName?: string | null
   bio?: string | null
   heightCm?: number | null
   languages?: Prisma.CompanionProfileCreatelanguagesInput | string[]
@@ -1344,6 +1375,7 @@ export type CompanionProfileCreateWithoutServicesInput = {
 export type CompanionProfileUncheckedCreateWithoutServicesInput = {
   id?: string
   userId: string
+  displayName?: string | null
   bio?: string | null
   heightCm?: number | null
   languages?: Prisma.CompanionProfileCreatelanguagesInput | string[]
@@ -1391,6 +1423,7 @@ export type CompanionProfileUpdateToOneWithWhereWithoutServicesInput = {
 
 export type CompanionProfileUpdateWithoutServicesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   heightCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   languages?: Prisma.CompanionProfileUpdatelanguagesInput | string[]
@@ -1424,6 +1457,7 @@ export type CompanionProfileUpdateWithoutServicesInput = {
 export type CompanionProfileUncheckedUpdateWithoutServicesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   heightCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   languages?: Prisma.CompanionProfileUpdatelanguagesInput | string[]
@@ -1455,6 +1489,7 @@ export type CompanionProfileUncheckedUpdateWithoutServicesInput = {
 
 export type CompanionProfileCreateWithoutAvailabilityInput = {
   id?: string
+  displayName?: string | null
   bio?: string | null
   heightCm?: number | null
   languages?: Prisma.CompanionProfileCreatelanguagesInput | string[]
@@ -1488,6 +1523,7 @@ export type CompanionProfileCreateWithoutAvailabilityInput = {
 export type CompanionProfileUncheckedCreateWithoutAvailabilityInput = {
   id?: string
   userId: string
+  displayName?: string | null
   bio?: string | null
   heightCm?: number | null
   languages?: Prisma.CompanionProfileCreatelanguagesInput | string[]
@@ -1535,6 +1571,7 @@ export type CompanionProfileUpdateToOneWithWhereWithoutAvailabilityInput = {
 
 export type CompanionProfileUpdateWithoutAvailabilityInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   heightCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   languages?: Prisma.CompanionProfileUpdatelanguagesInput | string[]
@@ -1568,6 +1605,7 @@ export type CompanionProfileUpdateWithoutAvailabilityInput = {
 export type CompanionProfileUncheckedUpdateWithoutAvailabilityInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   heightCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   languages?: Prisma.CompanionProfileUpdatelanguagesInput | string[]
@@ -1599,6 +1637,7 @@ export type CompanionProfileUncheckedUpdateWithoutAvailabilityInput = {
 
 export type CompanionProfileCreateWithoutEarningsInput = {
   id?: string
+  displayName?: string | null
   bio?: string | null
   heightCm?: number | null
   languages?: Prisma.CompanionProfileCreatelanguagesInput | string[]
@@ -1632,6 +1671,7 @@ export type CompanionProfileCreateWithoutEarningsInput = {
 export type CompanionProfileUncheckedCreateWithoutEarningsInput = {
   id?: string
   userId: string
+  displayName?: string | null
   bio?: string | null
   heightCm?: number | null
   languages?: Prisma.CompanionProfileCreatelanguagesInput | string[]
@@ -1679,6 +1719,7 @@ export type CompanionProfileUpdateToOneWithWhereWithoutEarningsInput = {
 
 export type CompanionProfileUpdateWithoutEarningsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   heightCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   languages?: Prisma.CompanionProfileUpdatelanguagesInput | string[]
@@ -1712,6 +1753,7 @@ export type CompanionProfileUpdateWithoutEarningsInput = {
 export type CompanionProfileUncheckedUpdateWithoutEarningsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   heightCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   languages?: Prisma.CompanionProfileUpdatelanguagesInput | string[]
@@ -1743,6 +1785,7 @@ export type CompanionProfileUncheckedUpdateWithoutEarningsInput = {
 
 export type CompanionProfileCreateWithoutBankAccountsInput = {
   id?: string
+  displayName?: string | null
   bio?: string | null
   heightCm?: number | null
   languages?: Prisma.CompanionProfileCreatelanguagesInput | string[]
@@ -1776,6 +1819,7 @@ export type CompanionProfileCreateWithoutBankAccountsInput = {
 export type CompanionProfileUncheckedCreateWithoutBankAccountsInput = {
   id?: string
   userId: string
+  displayName?: string | null
   bio?: string | null
   heightCm?: number | null
   languages?: Prisma.CompanionProfileCreatelanguagesInput | string[]
@@ -1823,6 +1867,7 @@ export type CompanionProfileUpdateToOneWithWhereWithoutBankAccountsInput = {
 
 export type CompanionProfileUpdateWithoutBankAccountsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   heightCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   languages?: Prisma.CompanionProfileUpdatelanguagesInput | string[]
@@ -1856,6 +1901,7 @@ export type CompanionProfileUpdateWithoutBankAccountsInput = {
 export type CompanionProfileUncheckedUpdateWithoutBankAccountsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   heightCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   languages?: Prisma.CompanionProfileUpdatelanguagesInput | string[]
@@ -1887,6 +1933,7 @@ export type CompanionProfileUncheckedUpdateWithoutBankAccountsInput = {
 
 export type CompanionProfileCreateWithoutWithdrawalsInput = {
   id?: string
+  displayName?: string | null
   bio?: string | null
   heightCm?: number | null
   languages?: Prisma.CompanionProfileCreatelanguagesInput | string[]
@@ -1920,6 +1967,7 @@ export type CompanionProfileCreateWithoutWithdrawalsInput = {
 export type CompanionProfileUncheckedCreateWithoutWithdrawalsInput = {
   id?: string
   userId: string
+  displayName?: string | null
   bio?: string | null
   heightCm?: number | null
   languages?: Prisma.CompanionProfileCreatelanguagesInput | string[]
@@ -1967,6 +2015,7 @@ export type CompanionProfileUpdateToOneWithWhereWithoutWithdrawalsInput = {
 
 export type CompanionProfileUpdateWithoutWithdrawalsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   heightCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   languages?: Prisma.CompanionProfileUpdatelanguagesInput | string[]
@@ -2000,6 +2049,7 @@ export type CompanionProfileUpdateWithoutWithdrawalsInput = {
 export type CompanionProfileUncheckedUpdateWithoutWithdrawalsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   heightCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   languages?: Prisma.CompanionProfileUpdatelanguagesInput | string[]
@@ -2031,6 +2081,7 @@ export type CompanionProfileUncheckedUpdateWithoutWithdrawalsInput = {
 
 export type CompanionProfileCreateWithoutBoostsInput = {
   id?: string
+  displayName?: string | null
   bio?: string | null
   heightCm?: number | null
   languages?: Prisma.CompanionProfileCreatelanguagesInput | string[]
@@ -2064,6 +2115,7 @@ export type CompanionProfileCreateWithoutBoostsInput = {
 export type CompanionProfileUncheckedCreateWithoutBoostsInput = {
   id?: string
   userId: string
+  displayName?: string | null
   bio?: string | null
   heightCm?: number | null
   languages?: Prisma.CompanionProfileCreatelanguagesInput | string[]
@@ -2111,6 +2163,7 @@ export type CompanionProfileUpdateToOneWithWhereWithoutBoostsInput = {
 
 export type CompanionProfileUpdateWithoutBoostsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   heightCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   languages?: Prisma.CompanionProfileUpdatelanguagesInput | string[]
@@ -2144,6 +2197,7 @@ export type CompanionProfileUpdateWithoutBoostsInput = {
 export type CompanionProfileUncheckedUpdateWithoutBoostsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   heightCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   languages?: Prisma.CompanionProfileUpdatelanguagesInput | string[]
@@ -2261,6 +2315,7 @@ export type CompanionProfileCountOutputTypeCountWithdrawalsArgs<ExtArgs extends 
 export type CompanionProfileSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   userId?: boolean
+  displayName?: boolean
   bio?: boolean
   heightCm?: boolean
   languages?: boolean
@@ -2296,6 +2351,7 @@ export type CompanionProfileSelect<ExtArgs extends runtime.Types.Extensions.Inte
 export type CompanionProfileSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   userId?: boolean
+  displayName?: boolean
   bio?: boolean
   heightCm?: boolean
   languages?: boolean
@@ -2323,6 +2379,7 @@ export type CompanionProfileSelectCreateManyAndReturn<ExtArgs extends runtime.Ty
 export type CompanionProfileSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   userId?: boolean
+  displayName?: boolean
   bio?: boolean
   heightCm?: boolean
   languages?: boolean
@@ -2350,6 +2407,7 @@ export type CompanionProfileSelectUpdateManyAndReturn<ExtArgs extends runtime.Ty
 export type CompanionProfileSelectScalar = {
   id?: boolean
   userId?: boolean
+  displayName?: boolean
   bio?: boolean
   heightCm?: boolean
   languages?: boolean
@@ -2373,7 +2431,7 @@ export type CompanionProfileSelectScalar = {
   updatedAt?: boolean
 }
 
-export type CompanionProfileOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "bio" | "heightCm" | "languages" | "province" | "district" | "hourlyRate" | "halfDayRate" | "fullDayRate" | "ratingAvg" | "ratingCount" | "totalBookings" | "completedBookings" | "verificationStatus" | "isFeatured" | "isActive" | "isHidden" | "responseRate" | "acceptanceRate" | "deletedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["companionProfile"]>
+export type CompanionProfileOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "displayName" | "bio" | "heightCm" | "languages" | "province" | "district" | "hourlyRate" | "halfDayRate" | "fullDayRate" | "ratingAvg" | "ratingCount" | "totalBookings" | "completedBookings" | "verificationStatus" | "isFeatured" | "isActive" | "isHidden" | "responseRate" | "acceptanceRate" | "deletedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["companionProfile"]>
 export type CompanionProfileInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   photos?: boolean | Prisma.CompanionProfile$photosArgs<ExtArgs>
@@ -2407,6 +2465,7 @@ export type $CompanionProfilePayload<ExtArgs extends runtime.Types.Extensions.In
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     userId: string
+    displayName: string | null
     bio: string | null
     heightCm: number | null
     languages: string[]
@@ -2861,6 +2920,7 @@ export interface Prisma__CompanionProfileClient<T, Null = never, ExtArgs extends
 export interface CompanionProfileFieldRefs {
   readonly id: Prisma.FieldRef<"CompanionProfile", 'String'>
   readonly userId: Prisma.FieldRef<"CompanionProfile", 'String'>
+  readonly displayName: Prisma.FieldRef<"CompanionProfile", 'String'>
   readonly bio: Prisma.FieldRef<"CompanionProfile", 'String'>
   readonly heightCm: Prisma.FieldRef<"CompanionProfile", 'Int'>
   readonly languages: Prisma.FieldRef<"CompanionProfile", 'String[]'>

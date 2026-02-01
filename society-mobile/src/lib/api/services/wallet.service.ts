@@ -1,4 +1,11 @@
 import { apiClient } from '../client';
+import type {
+  PaymentRequestStatus,
+  PaymentRequestType,
+} from '../enums';
+
+// Re-export enums for convenience
+export { PaymentRequestStatus, PaymentRequestType } from '../enums';
 
 // ============ Types ============
 
@@ -40,9 +47,9 @@ export interface WalletBalanceResponse {
 export interface PaymentRequestItem {
   id: string;
   code: string;
-  type: 'TOPUP' | 'BOOKING';
+  type: PaymentRequestType;
   amount: number;
-  status: 'PENDING' | 'COMPLETED' | 'EXPIRED' | 'FAILED';
+  status: PaymentRequestStatus;
   bookingId: string | null;
   gateway: string | null;
   createdAt: string;
@@ -95,7 +102,7 @@ export const walletService = {
   getTransactions: async (
     page: number = 1,
     limit: number = 20,
-    type?: 'TOPUP' | 'BOOKING' | 'all',
+    type?: PaymentRequestType | 'all',
   ): Promise<TransactionsResponse> => {
     const params = new URLSearchParams({
       page: page.toString(),

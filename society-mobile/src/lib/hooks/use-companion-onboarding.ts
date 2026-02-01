@@ -6,8 +6,10 @@ import type {
   RecurringAvailabilitySlot,
 } from '../api/services/companions.service';
 import { companionsService } from '../api/services/companions.service';
-import { FILE_VALIDATION, filesService } from '../api/services/files.service';
 import type { FileInfo } from '../api/services/files.service';
+import { FILE_VALIDATION, filesService } from '../api/services/files.service';
+import { usersService } from '../api/services/users.service';
+import { setUser } from '../stores/user';
 
 /**
  * Full onboarding data structure
@@ -38,9 +40,10 @@ export interface CompanionOnboardingData {
 export function useUploadOnboardingPhotos() {
   return useMutation({
     mutationFn: async (localUris: string[]): Promise<string[]> => {
+      // Use direct upload to backend (backend handles R2 upload)
       const results = await filesService.uploadMultiple(
         localUris.map((uri) => ({ uri, category: 'profile_photo' as const })),
-        { usePresignedUrl: true }
+        { usePresignedUrl: false }
       );
 
       // Extract URLs from successful uploads
@@ -182,12 +185,14 @@ export function useSubmitCompanionOnboarding() {
       if (data.localPhotoUris.length > maxPhotos) {
         throw new Error(`Maximum ${maxPhotos} photos allowed`);
       }
-
-      // Step 1: Upload photos (validation happens inside uploadMultiple via uploadWithPresignedUrl)
+      console.log('uploading photos', data.localPhotoUris);
+      // Step 1: Upload photos directly to backend (backend handles R2 upload)
       const photoResults = await filesService.uploadMultiple(
         data.localPhotoUris.map((uri) => ({ uri, category: 'profile_photo' as const })),
-        { usePresignedUrl: true }
+        { usePresignedUrl: false }
       );
+
+      console.log('photoResults', photoResults);
 
       const uploadedUrls = photoResults
         .filter((r): r is { success: true; file: FileInfo } => r.success)
@@ -214,18 +219,13 @@ export function useSubmitCompanionOnboarding() {
         await companionsService.addPhotoByUrl(uploadedUrls[i], i === 0);
       }
 
-      // Step 4: Set services
-      if (data.services.length > 0) {
-        await companionsService.setServices(data.services);
-      }
-
-      // Step 5: Set availability
-      if (data.availability.length > 0) {
-        await companionsService.setAvailability({ recurring: data.availability });
-      }
-
       // Step 6: Complete onboarding
       await companionsService.completeOnboarding();
+
+      // Step 7: Refetch user data and update Zustand store
+      // This ensures the needsOnboarding check gets the updated profile
+      const updatedUser = await usersService.getCurrentUser();
+      setUser(updatedUser);
 
       return {
         success: true,

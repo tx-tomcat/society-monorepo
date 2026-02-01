@@ -317,7 +317,7 @@ export class CompanionsService {
           },
         },
         photos: {
-          orderBy: { position: "asc" },
+          orderBy: [{ isPrimary: "desc" }, { position: "asc" }],
         },
         services: {
           where: { isEnabled: true },
@@ -373,12 +373,12 @@ export class CompanionsService {
     return {
       id: companion.id,
       userId: companion.userId,
-      displayName: companion.user.fullName,
+      displayName: companion.displayName || "Anonymous",
       age: companion.user.dateOfBirth
         ? DateUtils.calculateAge(companion.user.dateOfBirth)
         : null,
       bio: companion.bio,
-      avatar: companion.user.avatarUrl,
+      avatar: companion.photos[0]?.url || companion.user.avatarUrl,
       photos: companion.photos.map((p) => p.url),
       gender: companion.user.gender,
       heightCm: companion.heightCm,
@@ -547,6 +547,7 @@ export class CompanionsService {
     const updated = await this.prisma.companionProfile.update({
       where: { userId },
       data: {
+        ...(dto.displayName !== undefined && { displayName: dto.displayName }),
         ...(dto.bio !== undefined && { bio: dto.bio }),
         ...(dto.heightCm !== undefined && { heightCm: dto.heightCm }),
         ...(dto.languages !== undefined && { languages: dto.languages }),
@@ -555,6 +556,9 @@ export class CompanionsService {
         ...(dto.fullDayRate !== undefined && { fullDayRate: dto.fullDayRate }),
       },
     });
+
+    // Invalidate user cache since getMyCompanionProfile queries user with companionProfile include
+    await this.prisma.invalidateCache('user', { where: { id: userId } });
 
     return updated;
   }
@@ -596,7 +600,7 @@ export class CompanionsService {
     return {
       id: profile.id,
       userId: profile.userId,
-      displayName: user.fullName,
+      displayName: profile.displayName || user.fullName,
       bio: profile.bio,
       heightCm: profile.heightCm,
       languages: profile.languages,
@@ -642,6 +646,34 @@ export class CompanionsService {
         accountHolder: b.accountHolder,
         isPrimary: b.isPrimary,
         isVerified: b.isVerified,
+      })),
+    };
+  }
+
+  /**
+   * Get own companion availability (authenticated)
+   */
+  async getMyAvailability(userId: string) {
+    const profile = await this.prisma.companionProfile.findUnique({
+      where: { userId },
+      include: {
+        availability: {
+          where: { isRecurring: true },
+          orderBy: [{ dayOfWeek: 'asc' }, { startTime: 'asc' }],
+        },
+      },
+    });
+
+    if (!profile) {
+      throw new NotFoundException("Companion profile not found");
+    }
+
+    return {
+      recurring: profile.availability.map((a) => ({
+        dayOfWeek: a.dayOfWeek,
+        startTime: a.startTime,
+        endTime: a.endTime,
+        isAvailable: a.isAvailable,
       })),
     };
   }
@@ -755,6 +787,10 @@ export class CompanionsService {
         });
       }
     }
+
+    // Invalidate cache for companion profile (which includes availability)
+    await this.prisma.invalidateCache('companionProfile', { where: { userId } });
+    await this.prisma.invalidateModelCache('companionAvailability');
 
     return { success: true, message: "Availability updated" };
   }

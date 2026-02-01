@@ -202,6 +202,13 @@ export interface OccasionInfo {
   name: string;
 }
 
+export interface CompanionPhoto {
+  id: string;
+  url: string;
+  isPrimary: boolean;
+  position: number;
+}
+
 export interface BookingListItem {
   id: string;
   bookingNumber: string;
@@ -212,12 +219,15 @@ export interface BookingListItem {
   durationHours: number;
   locationAddress: string;
   totalPrice: number;
+  createdAt: string;
   companion?: {
     id: string;
     userId: string;
     displayName: string;
     avatar: string | null;
+    photos?: CompanionPhoto[];
     rating: number;
+    reviewCount?: number;
   };
   hirer?: {
     id: string;
@@ -249,7 +259,10 @@ export interface BookingDetailResponse {
     userId: string;
     displayName: string;
     avatar: string | null;
+    photos?: CompanionPhoto[];
     rating: number;
+    reviewCount?: number;
+    isVerified?: boolean;
     phone: string | null;
   };
   hirer: {

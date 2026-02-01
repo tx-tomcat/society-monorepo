@@ -72,7 +72,6 @@ export interface AddBankAccountData {
   bankName: string;
   accountNumber: string;
   accountHolder: string;
-  isPrimary?: boolean;
 }
 
 export interface Withdrawal {
@@ -121,7 +120,7 @@ export const earningsService = {
   /**
    * Get bank accounts
    */
-  async getBankAccounts(): Promise<BankAccount[]> {
+  async getBankAccounts(): Promise<{ accounts: BankAccount[] }> {
     return apiClient.get('/companion/earnings/bank-accounts');
   },
 

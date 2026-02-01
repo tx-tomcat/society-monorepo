@@ -345,6 +345,7 @@ model UserSession {
 model CompanionProfile {
   id                 String             @id @default(uuid()) @db.Uuid
   userId             String             @unique @map("user_id") @db.Uuid
+  displayName        String?            @map("display_name") // Public display name for the companion
   bio                String?
   heightCm           Int?               @map("height_cm")
   languages          String[]           @default(["vi"])

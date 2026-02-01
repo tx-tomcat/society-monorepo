@@ -1,7 +1,6 @@
 /* eslint-disable max-lines-per-function */
 import * as ImagePicker from 'expo-image-picker';
-import type { Href } from 'expo-router';
-import { useRouter } from 'expo-router';
+import { Href, useRouter } from 'expo-router';
 import { MotiView } from 'moti';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -11,23 +10,20 @@ import Toast from 'react-native-toast-message';
 import {
   Button,
   colors,
+  CompanionHeader,
   FocusAwareStatusBar,
   Image,
   SafeAreaView,
   Text,
   View,
 } from '@/components/ui';
-import { ArrowLeft, Camera, ChevronDown, MapPin, Plus, X } from '@/components/ui/icons';
-import { VIETNAM_PROVINCES, getProvinceName } from '@/lib/constants';
-import { usePhoneVerificationStatus } from '@/lib/hooks';
+import { Camera, ChevronDown, MapPin, Plus, X } from '@/components/ui/icons';
+import { getProvinceName, VIETNAM_PROVINCES } from '@/lib/constants';
 import { useCompanionOnboarding } from '@/lib/stores';
 
 export default function CreateProfile() {
   const router = useRouter();
   const { t } = useTranslation();
-
-  // Phone verification status
-  const { data: phoneStatus } = usePhoneVerificationStatus();
 
   // Get data from store
   const displayName = useCompanionOnboarding.use.displayName();
@@ -49,15 +45,15 @@ export default function CreateProfile() {
     router.back();
   }, [router]);
 
-  const pickImage = async (useCamera = false): Promise<string | null> => {
+  const pickSingleImage = async (useCamera = false): Promise<string | null> => {
     if (useCamera) {
       const permissionResult =
         await ImagePicker.requestCameraPermissionsAsync();
 
       if (!permissionResult.granted) {
         Alert.alert(
-          t('permissions.camera_required'),
-          t('permissions.camera_description'),
+          t('auth.verification.camera_permission_required'),
+          t('auth.verification.camera_description'),
           [{ text: t('common.ok') }]
         );
         return null;
@@ -79,8 +75,8 @@ export default function CreateProfile() {
 
       if (!permissionResult.granted) {
         Alert.alert(
-          t('permissions.photos_required'),
-          t('permissions.photos_description'),
+          t('auth.verification.photos_required'),
+          t('auth.verification.photos_description'),
           [{ text: t('common.ok') }]
         );
         return null;
@@ -100,16 +96,83 @@ export default function CreateProfile() {
     return null;
   };
 
-  const handleAddPhoto = React.useCallback(
-    async (index: number) => {
-      if (photos.length >= 6 && index >= photos.length) {
-        Toast.show({
-          type: 'info',
-          text1: t('companion.onboard.create_profile.max_photos'),
-        });
-        return;
-      }
+  const pickMultipleImages = async (): Promise<string[]> => {
+    const permissionResult =
+      await ImagePicker.requestMediaLibraryPermissionsAsync();
 
+    if (!permissionResult.granted) {
+      Alert.alert(
+        t('auth.verification.photos_required'),
+        t('auth.verification.photos_description'),
+        [{ text: t('common.ok') }]
+      );
+      return [];
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: 'images',
+      allowsMultipleSelection: true,
+      selectionLimit: 6 - photos.length,
+      quality: 0.8,
+    });
+
+    if (!result.canceled && result.assets.length > 0) {
+      return result.assets.map((asset) => asset.uri);
+    }
+    return [];
+  };
+
+  const handleAddMainPhoto = React.useCallback(async () => {
+    Alert.alert(
+      t('companion.onboard.create_profile.add_photo'),
+      t('companion.onboard.create_profile.choose_source'),
+      [
+        {
+          text: t('common.camera'),
+          onPress: async () => {
+            const uri = await pickSingleImage(true);
+            if (uri) {
+              const newPhotos = [...photos];
+              newPhotos[0] = uri;
+              setPhotos(newPhotos);
+            }
+          },
+        },
+        {
+          text: t('common.gallery'),
+          onPress: async () => {
+            const uri = await pickSingleImage(false);
+            if (uri) {
+              const newPhotos = [...photos];
+              newPhotos[0] = uri;
+              setPhotos(newPhotos);
+            }
+          },
+        },
+        { text: t('common.cancel'), style: 'cancel' },
+      ]
+    );
+  }, [photos, t, pickSingleImage]);
+
+  const handleAddAdditionalPhotos = React.useCallback(async () => {
+    if (photos.length >= 6) {
+      Toast.show({
+        type: 'info',
+        text1: t('companion.onboard.create_profile.max_photos'),
+      });
+      return;
+    }
+
+    const uris = await pickMultipleImages();
+    if (uris.length > 0) {
+      const availableSlots = 6 - photos.length;
+      const newUris = uris.slice(0, availableSlots);
+      setPhotos([...photos, ...newUris]);
+    }
+  }, [photos, t, pickMultipleImages]);
+
+  const handleReplacePhoto = React.useCallback(
+    async (index: number) => {
       Alert.alert(
         t('companion.onboard.create_profile.add_photo'),
         t('companion.onboard.create_profile.choose_source'),
@@ -117,14 +180,10 @@ export default function CreateProfile() {
           {
             text: t('common.camera'),
             onPress: async () => {
-              const uri = await pickImage(true);
+              const uri = await pickSingleImage(true);
               if (uri) {
                 const newPhotos = [...photos];
-                if (index < photos.length) {
-                  newPhotos[index] = uri;
-                } else {
-                  newPhotos.push(uri);
-                }
+                newPhotos[index] = uri;
                 setPhotos(newPhotos);
               }
             },
@@ -132,14 +191,10 @@ export default function CreateProfile() {
           {
             text: t('common.gallery'),
             onPress: async () => {
-              const uri = await pickImage(false);
+              const uri = await pickSingleImage(false);
               if (uri) {
                 const newPhotos = [...photos];
-                if (index < photos.length) {
-                  newPhotos[index] = uri;
-                } else {
-                  newPhotos.push(uri);
-                }
+                newPhotos[index] = uri;
                 setPhotos(newPhotos);
               }
             },
@@ -148,7 +203,7 @@ export default function CreateProfile() {
         ]
       );
     },
-    [photos, t]
+    [photos, t, pickSingleImage]
   );
 
   const handleRemovePhoto = React.useCallback(
@@ -168,10 +223,10 @@ export default function CreateProfile() {
 
   const handleContinue = React.useCallback(() => {
     // Check phone verification - redirect if not verified
-    if (!phoneStatus?.isVerified) {
-      router.push('/phone-verification' as Href);
-      return;
-    }
+    // if (!phoneStatus?.isVerified) {
+    //   router.push('/phone-verification' as Href);
+    //   return;
+    // }
 
     // Save to store
     setProfileData({
@@ -181,8 +236,8 @@ export default function CreateProfile() {
     });
     setLocationData({ province });
     markStepComplete('create-profile');
-    router.push('/companion/onboard/set-services' as Href);
-  }, [name, bioText, photos, province, phoneStatus, setProfileData, setLocationData, markStepComplete, router]);
+    router.push('/companion/onboard/set-pricing' as Href);
+  }, [name, bioText, photos, province, setProfileData, setLocationData, markStepComplete]);
 
   // Validation states
   const MIN_NAME_LENGTH = 2;
@@ -204,19 +259,15 @@ export default function CreateProfile() {
     <View className="flex-1 bg-warmwhite">
       <FocusAwareStatusBar />
 
-      <SafeAreaView edges={['top']}>
-        <View className="flex-row items-center gap-4 border-b border-border-light px-4 py-3">
-          <Pressable onPress={handleBack}>
-            <ArrowLeft color={colors.midnight.DEFAULT} width={24} height={24} />
-          </Pressable>
-          <Text className="font-urbanist-bold flex-1 text-xl text-midnight">
-            {t('companion.onboard.create_profile.header')}
-          </Text>
+      <CompanionHeader
+        title={t('companion.onboard.create_profile.header')}
+        onBack={handleBack}
+        rightElement={
           <Text className="text-sm text-text-tertiary">
-            {t('companion.onboard.step', { current: 1, total: 4 })}
+            {t('companion.onboard.step', { current: 1, total: 3 })}
           </Text>
-        </View>
-      </SafeAreaView>
+        }
+      />
 
       <ScrollView
         className="flex-1"
@@ -241,7 +292,7 @@ export default function CreateProfile() {
           <View className="flex-row flex-wrap gap-3">
             {/* Main Photo */}
             <Pressable
-              onPress={() => handleAddPhoto(0)}
+              onPress={handleAddMainPhoto}
               className="relative h-40 w-[48%] overflow-hidden rounded-2xl bg-softpink"
             >
               {photos[0] ? (
@@ -279,7 +330,11 @@ export default function CreateProfile() {
             {[1, 2, 3, 4, 5].map((index) => (
               <Pressable
                 key={index}
-                onPress={() => handleAddPhoto(index)}
+                onPress={() =>
+                  photos[index]
+                    ? handleReplacePhoto(index)
+                    : handleAddAdditionalPhotos()
+                }
                 className="relative h-24 w-[30%] overflow-hidden rounded-xl bg-softpink"
               >
                 {photos[index] ? (
@@ -310,13 +365,13 @@ export default function CreateProfile() {
           >
             {needsMorePhotos
               ? t('companion.onboard.create_profile.need_more_photos', {
-                  count: MIN_PHOTOS - photos.length,
-                })
+                count: MIN_PHOTOS - photos.length,
+              })
               : t('companion.onboard.create_profile.photos_count', {
-                  count: photos.length,
-                  max: 6,
-                  min: MIN_PHOTOS,
-                })}
+                count: photos.length,
+                max: 6,
+                min: MIN_PHOTOS,
+              })}
           </Text>
         </MotiView>
 
@@ -337,9 +392,8 @@ export default function CreateProfile() {
               'companion.onboard.create_profile.display_name_placeholder'
             )}
             placeholderTextColor={colors.text.tertiary}
-            className={`rounded-xl border bg-white p-4 text-base ${
-              isNameTooShort ? 'border-danger-400' : 'border-border-light'
-            }`}
+            className={`rounded-xl border bg-white p-4 text-base ${isNameTooShort ? 'border-danger-400' : 'border-border-light'
+              }`}
             style={{ fontFamily: 'Urbanist_500Medium', color: colors.midnight.DEFAULT }}
             maxLength={30}
           />
@@ -376,9 +430,8 @@ export default function CreateProfile() {
             placeholderTextColor={colors.text.tertiary}
             multiline
             numberOfLines={4}
-            className={`min-h-[120px] rounded-xl border bg-white p-4 text-base ${
-              isBioTooShort ? 'border-danger-400' : 'border-border-light'
-            }`}
+            className={`min-h-[120px] rounded-xl border bg-white p-4 text-base ${isBioTooShort ? 'border-danger-400' : 'border-border-light'
+              }`}
             style={{
               fontFamily: 'Urbanist_500Medium',
               textAlignVertical: 'top',
@@ -420,9 +473,8 @@ export default function CreateProfile() {
           </Text>
           <Pressable
             onPress={() => setShowProvincePicker(true)}
-            className={`flex-row items-center rounded-xl border bg-white p-4 ${
-              needsProvince ? 'border-border-light' : 'border-lavender-400'
-            }`}
+            className={`flex-row items-center rounded-xl border bg-white p-4 ${needsProvince ? 'border-border-light' : 'border-lavender-400'
+              }`}
           >
             <MapPin
               color={province ? colors.lavender[400] : colors.text.tertiary}
@@ -430,9 +482,8 @@ export default function CreateProfile() {
               height={20}
             />
             <Text
-              className={`flex-1 pl-3 text-base ${
-                province ? 'text-midnight' : 'text-text-tertiary'
-              }`}
+              className={`flex-1 pl-3 text-base ${province ? 'text-midnight' : 'text-text-tertiary'
+                }`}
               style={{ fontFamily: 'Urbanist_500Medium' }}
             >
               {province
@@ -472,16 +523,14 @@ export default function CreateProfile() {
                       setProvince(p.code);
                       setShowProvincePicker(false);
                     }}
-                    className={`mb-2 rounded-xl border p-4 ${
-                      province === p.code
-                        ? 'border-lavender-400 bg-lavender-400/10'
-                        : 'border-border-light bg-white'
-                    }`}
+                    className={`mb-2 rounded-xl border p-4 ${province === p.code
+                      ? 'border-lavender-400 bg-lavender-400/10'
+                      : 'border-border-light bg-white'
+                      }`}
                   >
                     <Text
-                      className={`text-base ${
-                        province === p.code ? 'text-lavender-400 font-semibold' : 'text-midnight'
-                      }`}
+                      className={`text-base ${province === p.code ? 'text-lavender-400 font-semibold' : 'text-midnight'
+                        }`}
                     >
                       {p.name}
                     </Text>
@@ -532,7 +581,7 @@ export default function CreateProfile() {
             disabled={!isValid}
             variant="default"
             size="lg"
-            className="w-full bg-lavender-400"
+            className="w-full bg-lavender-900"
           />
         </View>
       </SafeAreaView>

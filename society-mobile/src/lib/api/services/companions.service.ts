@@ -63,6 +63,8 @@ export interface CreateCompanionProfileInput {
   bio?: string;
   heightCm?: number;
   languages?: string[];
+  province?: string;
+  district?: string;
   hourlyRate: number;
   halfDayRate?: number;
   fullDayRate?: number;
@@ -190,25 +192,64 @@ export interface CompanionReviewsResponse {
 }
 
 export interface UpdateCompanionProfileData {
+  displayName?: string;
   bio?: string;
   heightCm?: number;
   languages?: string[];
   hourlyRate?: number;
-  halfDayRate?: number;
-  fullDayRate?: number;
 }
 
+// Boost tier enum matching backend
+export const BoostTier = {
+  STANDARD: 'STANDARD',
+  PREMIUM: 'PREMIUM',
+  SUPER: 'SUPER',
+} as const;
+export type BoostTier = (typeof BoostTier)[keyof typeof BoostTier];
+
+export const BoostStatus = {
+  PENDING: 'PENDING',
+  ACTIVE: 'ACTIVE',
+  EXPIRED: 'EXPIRED',
+  CANCELLED: 'CANCELLED',
+} as const;
+export type BoostStatus = (typeof BoostStatus)[keyof typeof BoostStatus];
+
 export interface BoostPricing {
-  duration: number;
+  tier: BoostTier;
+  name: string;
+  durationHours: number;
   price: number;
-  label: string;
+  multiplier: number;
+  description: string;
 }
 
 export interface ActiveBoost {
   id: string;
-  startedAt: string;
-  expiresAt: string;
-  durationHours: number;
+  tier: BoostTier;
+  status: BoostStatus;
+  multiplier: number;
+  startedAt: string | null;
+  expiresAt: string | null;
+  remainingHours: number | null;
+}
+
+export interface BoostHistoryItem {
+  id: string;
+  tier: BoostTier;
+  status: BoostStatus;
+  price: number;
+  startedAt: string | null;
+  expiresAt: string | null;
+  createdAt: string;
+}
+
+export interface BoostPurchaseResult {
+  boostId: string;
+  tier: BoostTier;
+  price: number;
+  paymentUrl?: string;
+  message: string;
 }
 
 /**
@@ -321,6 +362,13 @@ export const companionsService = {
   },
 
   /**
+   * Get my availability (authenticated)
+   */
+  async getMyAvailability(): Promise<{ recurring: CompanionAvailability[] }> {
+    return apiClient.get('/companions/me/availability');
+  },
+
+  /**
    * Update my companion profile (authenticated)
    */
   async updateMyProfile(data: UpdateCompanionProfileData): Promise<Companion> {
@@ -363,7 +411,8 @@ export const companionsService = {
    * Get boost pricing (public)
    */
   async getBoostPricing(): Promise<BoostPricing[]> {
-    return apiClient.get('/companions/boosts/pricing');
+    const response = await apiClient.get<{ pricing: BoostPricing[] }>('/companions/boosts/pricing');
+    return response.pricing;
   },
 
   /**
@@ -374,9 +423,26 @@ export const companionsService = {
   },
 
   /**
+   * Get boost history (authenticated)
+   */
+  async getBoostHistory(limit = 10): Promise<BoostHistoryItem[]> {
+    return apiClient.get(`/companions/me/boost/history?limit=${limit}`);
+  },
+
+  /**
    * Purchase boost (authenticated)
    */
-  async purchaseBoost(durationHours: number): Promise<ActiveBoost> {
-    return apiClient.post('/companions/me/boost', { durationHours });
+  async purchaseBoost(
+    tier: BoostTier,
+    returnUrl?: string
+  ): Promise<BoostPurchaseResult> {
+    return apiClient.post('/companions/me/boost', { tier, returnUrl });
+  },
+
+  /**
+   * Cancel active boost (authenticated, no refund)
+   */
+  async cancelBoost(boostId: string): Promise<{ success: boolean }> {
+    return apiClient.delete(`/companions/me/boost/${boostId}`);
   },
 };

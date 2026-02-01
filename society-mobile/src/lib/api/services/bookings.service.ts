@@ -1,24 +1,10 @@
 import { apiClient } from '../client';
+import { BookingStatus, type PaymentStatus } from '../enums';
 import type { Companion } from './companions.service';
 import type { Occasion } from './occasions.service';
 
-export type BookingStatus =
-  | 'PENDING'
-  | 'CONFIRMED'
-  | 'ACTIVE'
-  | 'COMPLETED'
-  | 'CANCELLED'
-  | 'DISPUTED'
-  | 'EXPIRED';
-
-export type PaymentStatus =
-  | 'pending'
-  | 'paid'
-  | 'held'
-  | 'released'
-  | 'refunded'
-  | 'partial_refund'
-  | 'failed';
+// Re-export enums for convenience
+export { BookingStatus, PaymentStatus } from '../enums';
 
 export interface BookingPricing {
   hourlyRate: number;
@@ -55,12 +41,11 @@ export interface Booking {
   createdAt: string;
   updatedAt: string;
   companion: Companion;
-  hirer: {
+  hirer?: {
     id: string;
-    fullName: string;
-    avatarUrl?: string;
-    isVerified: boolean;
-    trustScore: number;
+    displayName: string;
+    avatar?: string | null;
+    rating: number;
   };
 }
 
@@ -156,7 +141,10 @@ export const bookingsService = {
   /**
    * Get pending booking requests (companion)
    */
-  async getBookingRequests(): Promise<{ requests: Booking[]; nextCursor: string | null }> {
+  async getBookingRequests(): Promise<{
+    requests: Booking[];
+    nextCursor: string | null;
+  }> {
     return apiClient.get('/bookings/companion/requests');
   },
 
@@ -167,9 +155,10 @@ export const bookingsService = {
     startDate: string,
     endDate: string
   ): Promise<BookingScheduleItem[]> {
-    return apiClient.get(
+    const response = await apiClient.get<{ schedule: BookingScheduleItem[] }>(
       `/bookings/companion/schedule?startDate=${startDate}&endDate=${endDate}`
     );
+    return response.schedule;
   },
 
   /**
@@ -194,7 +183,7 @@ export const bookingsService = {
    */
   async acceptBooking(bookingId: string): Promise<Booking> {
     return apiClient.put(`/bookings/${bookingId}/status`, {
-      status: 'CONFIRMED',
+      status: BookingStatus.CONFIRMED,
     });
   },
 
@@ -210,7 +199,7 @@ export const bookingsService = {
    */
   async cancelBooking(bookingId: string, reason?: string): Promise<Booking> {
     return apiClient.put(`/bookings/${bookingId}/status`, {
-      status: 'CANCELLED',
+      status: BookingStatus.CANCELLED,
       reason,
     });
   },
@@ -220,7 +209,7 @@ export const bookingsService = {
    */
   async completeBooking(bookingId: string): Promise<Booking> {
     return apiClient.put(`/bookings/${bookingId}/status`, {
-      status: 'COMPLETED',
+      status: BookingStatus.COMPLETED,
     });
   },
 

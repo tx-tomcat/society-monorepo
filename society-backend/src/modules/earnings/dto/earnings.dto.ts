@@ -37,6 +37,10 @@ export class GetTransactionsQueryDto {
   type?: string;
 
   @IsOptional()
+  @IsEnum(['week', 'month', 'year'])
+  period?: 'week' | 'month' | 'year';
+
+  @IsOptional()
   @Transform(({ value }) => parseInt(value, 10))
   @IsNumber()
   @Min(1)

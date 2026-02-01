@@ -1,9 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import type {
-  CompanionAvailability,
   CompanionFilters,
-  CompanionService,
+  CompanionServiceInput,
+  UpdateAvailabilityInput,
   UpdateCompanionProfileData,
 } from '../api/services/companions.service';
 import { companionsService } from '../api/services/companions.service';
@@ -106,16 +106,31 @@ export function useUpdateCompanionProfile() {
 }
 
 /**
+ * React Query hook to fetch companion's own availability
+ */
+export function useMyCompanionAvailability() {
+  const { isSignedIn } = useAuth();
+
+  return useQuery({
+    queryKey: ['companion', 'me', 'availability'],
+    queryFn: () => companionsService.getMyAvailability(),
+    enabled: isSignedIn,
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
+/**
  * React Query mutation hook to update companion availability
  */
 export function useUpdateCompanionAvailability() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (availability: CompanionAvailability[]) =>
-      companionsService.updateAvailability(availability),
+    mutationFn: (data: UpdateAvailabilityInput) =>
+      companionsService.setAvailability(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['companion', 'me'] });
+      queryClient.invalidateQueries({ queryKey: ['companion', 'me', 'availability'] });
     },
   });
 }
@@ -127,7 +142,7 @@ export function useUpdateCompanionServices() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (services: CompanionService[]) =>
+    mutationFn: (services: CompanionServiceInput[]) =>
       companionsService.updateServices(services),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['companion', 'me'] });
@@ -173,14 +188,49 @@ export function useActiveBoost() {
 }
 
 /**
+ * React Query hook to fetch boost history
+ */
+export function useBoostHistory(limit = 10) {
+  const { isSignedIn } = useAuth();
+
+  return useQuery({
+    queryKey: ['companions', 'me', 'boost', 'history', limit],
+    queryFn: () => companionsService.getBoostHistory(limit),
+    enabled: isSignedIn,
+    staleTime: 1 * 60 * 1000,
+  });
+}
+
+/**
  * React Query mutation hook to purchase a boost
  */
 export function usePurchaseBoost() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (durationHours: number) =>
-      companionsService.purchaseBoost(durationHours),
+    mutationFn: ({
+      tier,
+      returnUrl,
+    }: {
+      tier: Parameters<typeof companionsService.purchaseBoost>[0];
+      returnUrl?: string;
+    }) => companionsService.purchaseBoost(tier, returnUrl),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['companions', 'me', 'boost'],
+      });
+    },
+  });
+}
+
+/**
+ * React Query mutation hook to cancel a boost
+ */
+export function useCancelBoost() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (boostId: string) => companionsService.cancelBoost(boostId),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ['companions', 'me', 'boost'],

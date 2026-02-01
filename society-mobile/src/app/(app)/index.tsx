@@ -25,6 +25,7 @@ import {
   Search,
   Star,
 } from '@/components/ui/icons';
+import { BookingStatus } from '@/lib/api/enums';
 import type { Booking } from '@/lib/api/services/bookings.service';
 import { bookingsService } from '@/lib/api/services/bookings.service';
 import { getPrimaryPhotoUrl } from '@/lib/api/services/companions.service';
@@ -55,12 +56,13 @@ export default function HirerDashboard() {
   const fetchDashboardData = React.useCallback(async () => {
     try {
       // Fetch all dashboard data in parallel
-      const [pendingRes, confirmedRes, completedRes, favoritesRes] = await Promise.all([
-        bookingsService.getHirerBookings('PENDING', 1, 10),
-        bookingsService.getHirerBookings('CONFIRMED', 1, 10),
-        bookingsService.getHirerBookings('COMPLETED', 1, 1),
-        favoritesService.getFavorites(1, 1),
-      ]);
+      const [pendingRes, confirmedRes, completedRes, favoritesRes] =
+        await Promise.all([
+          bookingsService.getHirerBookings(BookingStatus.PENDING, 1, 10),
+          bookingsService.getHirerBookings(BookingStatus.CONFIRMED, 1, 10),
+          bookingsService.getHirerBookings(BookingStatus.COMPLETED, 1, 1),
+          favoritesService.getFavorites(1, 1),
+        ]);
 
       // Filter upcoming bookings (today and future)
       const now = new Date();
@@ -96,12 +98,17 @@ export default function HirerDashboard() {
 
       // Combine and sort by start date, show max 3
       const allUpcoming = [...pendingBookings, ...confirmedBookings]
-        .sort((a, b) => new Date(a.startDatetime).getTime() - new Date(b.startDatetime).getTime())
+        .sort(
+          (a, b) =>
+            new Date(a.startDatetime).getTime() -
+            new Date(b.startDatetime).getTime()
+        )
         .slice(0, 3);
 
       setUpcomingBookings(allUpcoming);
       setUpcomingCount(
-        (pendingRes.pagination?.total || 0) + (confirmedRes.pagination?.total || 0)
+        (pendingRes.pagination?.total || 0) +
+          (confirmedRes.pagination?.total || 0)
       );
       setCompletedBookingsCount(completedRes.pagination?.total || 0);
       setFavoritesCount(favoritesRes.total || 0);
@@ -284,10 +291,16 @@ export default function HirerDashboard() {
           className="px-4"
         >
           <View className="mb-3 flex-row items-center justify-between">
-            <Text style={{ fontFamily: 'Urbanist_700Bold' }} className="text-lg text-midnight">
+            <Text
+              style={{ fontFamily: 'Urbanist_700Bold' }}
+              className="text-lg text-midnight"
+            >
               {t('hirer.dashboard.upcoming_bookings')}
             </Text>
-            <Pressable onPress={handleViewAllBookings} testID="view-all-bookings">
+            <Pressable
+              onPress={handleViewAllBookings}
+              testID="view-all-bookings"
+            >
               <Text className="text-sm font-semibold text-rose-400">
                 {t('common.view_all')}
               </Text>
@@ -306,10 +319,10 @@ export default function HirerDashboard() {
                 const dateString = isToday
                   ? t('common.today')
                   : startTime.toLocaleDateString('en-US', {
-                    weekday: 'short',
-                    month: 'short',
-                    day: 'numeric',
-                  });
+                      weekday: 'short',
+                      month: 'short',
+                      day: 'numeric',
+                    });
 
                 const timeString = `${startTime.toLocaleTimeString('en-US', {
                   hour: 'numeric',
@@ -370,7 +383,9 @@ export default function HirerDashboard() {
                           />
                         </View>
                         <Text className="mt-1 text-sm text-rose-400">
-                          {booking.occasion ? `${booking.occasion.emoji} ${booking.occasion.name}` : t('common.occasion')}
+                          {booking.occasion
+                            ? `${booking.occasion.emoji} ${booking.occasion.name}`
+                            : t('common.occasion')}
                         </Text>
                         <View className="mt-2 flex-row items-center gap-4">
                           <View className="flex-row items-center gap-1">
@@ -483,4 +498,3 @@ export default function HirerDashboard() {
     </View>
   );
 }
-

@@ -230,23 +230,38 @@ export class NotificationsService {
   }
 
   async registerPushToken(userId: string, dto: RegisterPushTokenDto) {
-    // Deactivate existing tokens with same token value
+    // Find existing token for this user with same token value
+    const existingToken = await this.prisma.pushToken.findFirst({
+      where: {
+        userId,
+        token: dto.token,
+      },
+    });
+
+    if (existingToken) {
+      // Update existing token
+      const token = await this.prisma.pushToken.update({
+        where: { id: existingToken.id },
+        data: {
+          platform: dto.platform,
+          isActive: true,
+        },
+      });
+      return { tokenId: token.id };
+    }
+
+    // Deactivate other tokens for this user (optional: keep only one active)
     await this.prisma.pushToken.updateMany({
-      where: { token: dto.token },
+      where: {
+        userId,
+        isActive: true,
+      },
       data: { isActive: false },
     });
 
-    // Create or update token
-    const token = await this.prisma.pushToken.upsert({
-      where: {
-        id: dto.deviceId || 'new',
-      },
-      update: {
-        token: dto.token,
-        platform: dto.platform,
-        isActive: true,
-      },
-      create: {
+    // Create new token
+    const token = await this.prisma.pushToken.create({
+      data: {
         userId,
         token: dto.token,
         platform: dto.platform,

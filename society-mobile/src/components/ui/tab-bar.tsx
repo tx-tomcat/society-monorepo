@@ -158,8 +158,8 @@ const iconMap: Record<string, React.FC<{ focused: boolean; color: string }>> = {
   settings: ProfileIcon,
 };
 
-// Label mapping by route name
-const labelMap: Record<string, string> = {
+// Fallback label mapping by route name (used when options.title is not provided)
+const fallbackLabelMap: Record<string, string> = {
   index: 'Home',
   home: 'Home',
   'for-you': 'For You',
@@ -200,8 +200,8 @@ export function TabBar({
           // Get icon component
           const IconComponent = iconMap[route.name] || HomeIcon;
 
-          // Get label
-          const label = labelMap[route.name] || route.name;
+          // Get label from options.title (i18n) or fallback to route name mapping
+          const label = (options.title as string) || fallbackLabelMap[route.name] || route.name;
 
           const onPress = () => {
             const event = navigation.emit({
@@ -276,7 +276,7 @@ function CustomTabButton({
   const focused = isFocused ?? false;
   const color = focused ? accentColor : colors.text.tertiary;
   const IconComponent = iconMap[name] || HomeIcon;
-  const label = labelMap[name] || name;
+  const label = fallbackLabelMap[name] || name;
 
   return (
     <Pressable

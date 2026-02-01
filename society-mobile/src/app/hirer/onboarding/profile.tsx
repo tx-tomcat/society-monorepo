@@ -130,11 +130,6 @@ export default function HirerOnboardingProfile() {
     setTouched({ dateOfBirth: true, gender: true, province: true });
 
     if (!isFormValid || !dateOfBirth || !gender || !province) return;
-    // Check phone verification - redirect if not verified
-    // if (!phoneStatus?.isVerified) {
-    //   router.push('/phone-verification' as Href);
-    //   return;
-    // }
 
     try {
       // Update the user profile with the provided information

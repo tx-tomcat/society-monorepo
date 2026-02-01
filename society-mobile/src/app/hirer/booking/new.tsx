@@ -101,6 +101,8 @@ export default function BookingFormScreen() {
     dateRange.endDate
   );
 
+  console.log('companionData', companionData)
+
   // Get occasions from store (prefetched at app startup)
   // Use React Query as fallback if store is empty
   const storeOccasions = useOccasionsStore.use.occasions();

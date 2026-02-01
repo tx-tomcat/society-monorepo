@@ -72,6 +72,8 @@ export function CompanionCard({
   onBookPress?: (companionId: string) => void;
   onCardPress?: (companionId: string) => void;
 }) {
+
+  console.log('recommendation', recommendation);
   const { t, i18n } = useTranslation();
   const router = useRouter();
 

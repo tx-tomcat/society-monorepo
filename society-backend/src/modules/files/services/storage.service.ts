@@ -1,14 +1,14 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import {
-  S3Client,
-  PutObjectCommand,
-  GetObjectCommand,
   DeleteObjectCommand,
-  ListObjectsV2Command,
+  GetObjectCommand,
   HeadObjectCommand,
+  ListObjectsV2Command,
+  PutObjectCommand,
+  S3Client,
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import { Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { SignedUrlOptions } from '../interfaces/file.interface';
 
 @Injectable()
@@ -19,20 +19,38 @@ export class StorageService {
   private readonly publicUrl: string;
 
   constructor(private readonly configService: ConfigService) {
-    const accountId = this.configService.get<string>('R2_ACCOUNT_ID');
     const accessKeyId = this.configService.get<string>('R2_ACCESS_KEY_ID') || '';
     const secretAccessKey = this.configService.get<string>('R2_SECRET_ACCESS_KEY') || '';
 
-    this.bucket = this.configService.get<string>('R2_BUCKET') || 'society-files';
+    // Support both R2_ENDPOINT (full URL) and R2_ACCOUNT_ID (just the ID)
+    let endpoint = this.configService.get<string>('R2_ENDPOINT');
+    if (!endpoint) {
+      const accountId = this.configService.get<string>('R2_ACCOUNT_ID');
+      if (accountId) {
+        endpoint = `https://${accountId}.r2.cloudflarestorage.com`;
+      }
+    }
+
+    if (!endpoint) {
+      this.logger.error('R2 storage not configured: Missing R2_ENDPOINT or R2_ACCOUNT_ID');
+    }
+
+    // Support both R2_BUCKET and R2_BUCKET_NAME
+    this.bucket = this.configService.get<string>('R2_BUCKET')
+      || this.configService.get<string>('R2_BUCKET_NAME')
+      || 'hireme-files';
     this.publicUrl = this.configService.get<string>('R2_PUBLIC_URL') || '';
+
+    this.logger.log(`R2 Config: endpoint=${endpoint}, bucket=${this.bucket}, hasAccessKey=${!!accessKeyId}, hasSecretKey=${!!secretAccessKey}`);
 
     this.s3Client = new S3Client({
       region: 'auto',
-      endpoint: `https://${accountId}.r2.cloudflarestorage.com`,
+      endpoint: endpoint || '',
       credentials: {
         accessKeyId,
         secretAccessKey,
       },
+      forcePathStyle: true, // Required for R2 compatibility
     });
   }
 

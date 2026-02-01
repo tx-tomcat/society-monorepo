@@ -36,18 +36,27 @@ export class RecommendationsService {
   ): Promise<RecommendationsResult> {
     const cacheKey = `${CACHE_PREFIX}${userId}`;
 
-    // Check cache first (only for first page)
-    if (offset === 0) {
-      const cached = await this.cacheService.get<ScoredCompanion[]>(cacheKey);
-      if (cached) {
-        const paginated = cached.slice(offset, offset + limit);
-        return {
-          companions: paginated,
-          hasMore: offset + limit < cached.length,
-          total: cached.length,
-          strategy: 'hybrid',
-        };
-      }
+    // Check cache first for all pages
+    const cached = await this.cacheService.get<ScoredCompanion[]>(cacheKey);
+    if (cached && cached.length > 0) {
+      const paginated = cached.slice(offset, offset + limit);
+      return {
+        companions: paginated,
+        hasMore: offset + limit < cached.length,
+        total: cached.length,
+        strategy: 'hybrid',
+      };
+    }
+
+    // If not cached and requesting a subsequent page, return empty
+    // (cache should have been populated by first page request)
+    if (offset > 0) {
+      return {
+        companions: [],
+        hasMore: false,
+        total: 0,
+        strategy: 'cold_start',
+      };
     }
 
     // Determine strategy based on user's interaction count
@@ -236,7 +245,6 @@ export class RecommendationsService {
         user: {
           select: {
             id: true,
-            fullName: true,
             avatarUrl: true,
             dateOfBirth: true,
             gender: true,
@@ -244,7 +252,6 @@ export class RecommendationsService {
           },
         },
         photos: {
-          where: { isVerified: true },
           select: { id: true, url: true, isPrimary: true, position: true },
           orderBy: [{ isPrimary: 'desc' }, { position: 'asc' }],
         },
@@ -288,10 +295,10 @@ export class RecommendationsService {
         companion: {
           id: c.id,
           userId: c.userId,
-          displayName: c.user.fullName || 'Anonymous',
+          displayName: c.displayName || 'Anonymous',
           age,
           bio: c.bio,
-          avatar: c.user.avatarUrl,
+          avatar: c.photos[0]?.url || c.user.avatarUrl,
           heightCm: c.heightCm,
           gender: c.user.gender,
           languages: c.languages || [],

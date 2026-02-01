@@ -14,6 +14,7 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 // Using Express.Multer.File type from multer
 import { Roles } from '@/common/decorators/roles.decorator';
 import { Role } from '@/common/enums/roles.enum';
@@ -38,7 +39,7 @@ export class FilesController {
   }
 
   @Post('upload')
-  @UseInterceptors()
+  @UseInterceptors(FileInterceptor('file'))
   async uploadFile(
     @Request() req: any,
     @UploadedFile(

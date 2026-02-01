@@ -1,5 +1,6 @@
 /* eslint-disable max-lines-per-function */
 import { useRouter } from 'expo-router';
+import { useSafeBack } from '@/lib/hooks';
 import { MotiView } from 'moti';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -16,23 +17,23 @@ import {
   Badge,
   Button,
   colors,
+  CompanionHeader,
   FocusAwareStatusBar,
   SafeAreaView,
   Text,
   View,
 } from '@/components/ui';
 import {
-  ArrowLeft,
   Bank,
   CheckCircle,
   Info,
   Wallet,
 } from '@/components/ui/icons';
 import {
-  type BankAccount,
-  type EarningsOverview,
-  earningsService,
-} from '@/lib/api/services/earnings.service';
+  useBankAccounts,
+  useEarningsOverview,
+  useRequestWithdrawal,
+} from '@/lib/hooks';
 import { formatVND } from '@/lib/utils';
 
 const QUICK_AMOUNTS = [500000, 1000000, 2000000, 3000000];
@@ -42,40 +43,26 @@ export default function WithdrawFunds() {
   const { t } = useTranslation();
   const [amount, setAmount] = React.useState('');
   const [selectedBank, setSelectedBank] = React.useState('');
-  const [bankAccounts, setBankAccounts] = React.useState<BankAccount[]>([]);
-  const [overview, setOverview] = React.useState<EarningsOverview | null>(null);
-  const [isLoading, setIsLoading] = React.useState(true);
-  const [isSubmitting, setIsSubmitting] = React.useState(false);
 
+  // React Query hooks
+  const { data: bankAccountsData, isLoading: isLoadingBanks } = useBankAccounts();
+  const { data: overview, isLoading: isLoadingOverview } = useEarningsOverview();
+  const requestWithdrawal = useRequestWithdrawal();
+
+  const bankAccounts = bankAccountsData?.accounts ?? [];
+  const isLoading = isLoadingBanks || isLoadingOverview;
+
+  // Set default selected bank when data loads
   React.useEffect(() => {
-    async function fetchData() {
-      try {
-        const [accountsData, overviewData] = await Promise.all([
-          earningsService.getBankAccounts(),
-          earningsService.getEarningsOverview(),
-        ]);
-        setBankAccounts(accountsData);
-        setOverview(overviewData);
-        // Set default selected bank
-        const primary = accountsData.find((b) => b.isPrimary);
-        if (primary) {
-          setSelectedBank(primary.id);
-        } else if (accountsData.length > 0) {
-          setSelectedBank(accountsData[0].id);
-        }
-      } catch (error) {
-        console.error('Failed to fetch withdrawal data:', error);
-        Toast.show({
-          type: 'error',
-          text1: t('companion.withdraw.load_error'),
-          text2: t('companion.withdraw.load_error_description'),
-        });
-      } finally {
-        setIsLoading(false);
+    if (bankAccounts.length > 0 && !selectedBank) {
+      const primary = bankAccounts.find((b) => b.isPrimary);
+      if (primary) {
+        setSelectedBank(primary.id);
+      } else {
+        setSelectedBank(bankAccounts[0].id);
       }
     }
-    fetchData();
-  }, [t]);
+  }, [bankAccounts, selectedBank]);
 
   const availableBalance = overview?.availableBalance || 0;
 
@@ -113,34 +100,36 @@ export default function WithdrawFunds() {
         { text: t('common.cancel'), style: 'cancel' },
         {
           text: t('common.confirm'),
-          onPress: async () => {
-            setIsSubmitting(true);
-            try {
-              await earningsService.requestWithdrawal({
+          onPress: () => {
+            requestWithdrawal.mutate(
+              {
                 bankAccountId: selectedBank,
                 amount: withdrawAmount,
-              });
-              Toast.show({
-                type: 'success',
-                text1: t('companion.withdraw.success'),
-                text2: t('companion.withdraw.success_description'),
-              });
-              router.back();
-            } catch (error) {
-              console.error('Withdrawal request failed:', error);
-              Toast.show({
-                type: 'error',
-                text1: t('companion.withdraw.request_failed'),
-                text2: t('companion.withdraw.request_failed_description'),
-              });
-            } finally {
-              setIsSubmitting(false);
-            }
+              },
+              {
+                onSuccess: () => {
+                  Toast.show({
+                    type: 'success',
+                    text1: t('companion.withdraw.success'),
+                    text2: t('companion.withdraw.success_description'),
+                  });
+                  router.back();
+                },
+                onError: (error) => {
+                  console.error('Withdrawal request failed:', error);
+                  Toast.show({
+                    type: 'error',
+                    text1: t('companion.withdraw.request_failed'),
+                    text2: t('companion.withdraw.request_failed_description'),
+                  });
+                },
+              }
+            );
           },
         },
       ]
     );
-  }, [amount, availableBalance, selectedBank, router, t]);
+  }, [amount, availableBalance, selectedBank, router, t, requestWithdrawal]);
 
   const amountNum = parseInt(amount, 10) || 0;
 
@@ -153,7 +142,7 @@ export default function WithdrawFunds() {
     amountNum >= 100000 &&
     amountNum <= availableBalance &&
     selectedBank &&
-    !isSubmitting;
+    !requestWithdrawal.isPending;
 
   if (isLoading) {
     return (
@@ -167,16 +156,7 @@ export default function WithdrawFunds() {
     <View className="flex-1 bg-warmwhite">
       <FocusAwareStatusBar />
 
-      <SafeAreaView edges={['top']}>
-        <View className="flex-row items-center gap-4 border-b border-border-light px-4 py-3">
-          <Pressable onPress={handleBack} testID="back-button">
-            <ArrowLeft color={colors.midnight.DEFAULT} width={24} height={24} />
-          </Pressable>
-          <Text className="font-urbanist-bold flex-1 text-xl text-midnight">
-            {t('companion.withdraw.header')}
-          </Text>
-        </View>
-      </SafeAreaView>
+      <CompanionHeader title={t('companion.withdraw.header')} onBack={handleBack} />
 
       <ScrollView
         className="flex-1"
@@ -406,6 +386,7 @@ export default function WithdrawFunds() {
             label={t('companion.withdraw.submit_button')}
             onPress={handleWithdraw}
             disabled={!isValid}
+            loading={requestWithdrawal.isPending}
             variant="default"
             size="lg"
             testID="submit-withdraw-button"

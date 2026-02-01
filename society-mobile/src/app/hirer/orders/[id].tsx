@@ -4,12 +4,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { MotiView } from 'moti';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  ActivityIndicator,
-  Alert,
-  Pressable,
-  ScrollView,
-} from 'react-native';
+import { ActivityIndicator, Alert, Pressable, ScrollView } from 'react-native';
 
 import {
   Badge,
@@ -32,10 +27,11 @@ import {
   ShieldCheck,
   Star,
 } from '@/components/ui/icons';
+import { BookingStatus } from '@/lib/api/enums';
 import { getPhotoUrl } from '@/lib/api/services/companions.service';
 import { useBooking, useCancelBooking } from '@/lib/hooks';
 
-type BookingStatus =
+type DisplayBookingStatus =
   | 'upcoming'
   | 'active'
   | 'completed'
@@ -43,7 +39,7 @@ type BookingStatus =
   | 'pending';
 
 const STATUS_CONFIG: Record<
-  BookingStatus,
+  DisplayBookingStatus,
   { variant: 'lavender' | 'teal' | 'secondary' | 'rose'; labelKey: string }
 > = {
   upcoming: { variant: 'lavender', labelKey: 'hirer.orders.status.upcoming' },
@@ -60,10 +56,31 @@ const STATUS_CONFIG: Record<
 };
 
 // Day of week keys for i18n
-const DAY_KEYS = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'] as const;
+const DAY_KEYS = [
+  'sunday',
+  'monday',
+  'tuesday',
+  'wednesday',
+  'thursday',
+  'friday',
+  'saturday',
+] as const;
 
 // Month keys for i18n
-const MONTH_KEYS = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'] as const;
+const MONTH_KEYS = [
+  'jan',
+  'feb',
+  'mar',
+  'apr',
+  'may',
+  'jun',
+  'jul',
+  'aug',
+  'sep',
+  'oct',
+  'nov',
+  'dec',
+] as const;
 
 export default function BookingDetail() {
   const router = useRouter();
@@ -92,20 +109,20 @@ export default function BookingDetail() {
       });
     };
 
-    // Map API status to local status
-    const mapStatus = (apiStatus: string): BookingStatus => {
+    // Map API status to local display status
+    const mapStatus = (apiStatus: BookingStatus): DisplayBookingStatus => {
       switch (apiStatus) {
-        case 'PENDING':
+        case BookingStatus.PENDING:
           return 'pending';
-        case 'CONFIRMED':
+        case BookingStatus.CONFIRMED:
           return 'upcoming';
-        case 'ACTIVE':
+        case BookingStatus.ACTIVE:
           return 'active';
-        case 'COMPLETED':
+        case BookingStatus.COMPLETED:
           return 'completed';
-        case 'CANCELLED':
-        case 'DISPUTED':
-        case 'EXPIRED':
+        case BookingStatus.CANCELLED:
+        case BookingStatus.DISPUTED:
+        case BookingStatus.EXPIRED:
           return 'cancelled';
         default:
           return 'upcoming';
@@ -117,30 +134,34 @@ export default function BookingDetail() {
       companion: {
         id: b.companion?.id || b.companionId || '',
         name: b.companion?.displayName || '',
-        image: b.companion?.avatar || getPhotoUrl(b.companion?.photos?.[0]) || '',
+        image:
+          b.companion?.avatar || getPhotoUrl(b.companion?.photos?.[0]) || '',
         rating: b.companion?.rating ?? 0,
         reviewCount: b.companion?.reviewCount ?? 0,
-        isVerified: b.companion?.isVerified ?? b.companion?.verificationStatus === 'verified',
+        isVerified:
+          b.companion?.isVerified ??
+          b.companion?.verificationStatus === 'verified',
       },
       occasion: b.occasion?.name || 'Meeting',
       occasionEmoji: b.occasion?.emoji || '📅',
       date: startDate
         ? (() => {
-          const dayKey = DAY_KEYS[startDate.getDay()];
-          const monthKey = MONTH_KEYS[startDate.getMonth()];
-          const day = startDate.getDate();
-          const year = startDate.getFullYear();
-          const weekday = t(`common.days.${dayKey}`);
-          const month = t(`common.months.${monthKey}`);
-          // Vietnamese: "Thứ 6, 30 Tháng 1 2026", English: "Friday, Jan 30, 2026"
-          return i18n.language === 'vi'
-            ? `${weekday}, ${day} ${month} ${year}`
-            : `${weekday}, ${month} ${day}, ${year}`;
-        })()
+            const dayKey = DAY_KEYS[startDate.getDay()];
+            const monthKey = MONTH_KEYS[startDate.getMonth()];
+            const day = startDate.getDate();
+            const year = startDate.getFullYear();
+            const weekday = t(`common.days.${dayKey}`);
+            const month = t(`common.months.${monthKey}`);
+            // Vietnamese: "Thứ 6, 30 Tháng 1 2026", English: "Friday, Jan 30, 2026"
+            return i18n.language === 'vi'
+              ? `${weekday}, ${day} ${month} ${year}`
+              : `${weekday}, ${month} ${day}, ${year}`;
+          })()
         : '',
-      time: startDate && endDate
-        ? `${formatTime(startDate)} - ${formatTime(endDate)}`
-        : '',
+      time:
+        startDate && endDate
+          ? `${formatTime(startDate)} - ${formatTime(endDate)}`
+          : '',
       duration: `${hours} ${t('common.hours')}`,
       location: b.locationAddress || '',
       status: mapStatus(b.status),
@@ -153,16 +174,16 @@ export default function BookingDetail() {
       bookingCode: b.bookingNumber || `SOC-${b.id.slice(0, 8).toUpperCase()}`,
       createdAt: b.createdAt
         ? (() => {
-          const date = new Date(b.createdAt);
-          const monthKey = MONTH_KEYS[date.getMonth()];
-          const day = date.getDate();
-          const year = date.getFullYear();
-          const month = t(`common.months.${monthKey}`);
-          // Vietnamese: "30 Tháng 1 2026", English: "Jan 30, 2026"
-          return i18n.language === 'vi'
-            ? `${day} ${month} ${year}`
-            : `${month} ${day}, ${year}`;
-        })()
+            const date = new Date(b.createdAt);
+            const monthKey = MONTH_KEYS[date.getMonth()];
+            const day = date.getDate();
+            const year = date.getFullYear();
+            const month = t(`common.months.${monthKey}`);
+            // Vietnamese: "30 Tháng 1 2026", English: "Jan 30, 2026"
+            return i18n.language === 'vi'
+              ? `${day} ${month} ${year}`
+              : `${month} ${day}, ${year}`;
+          })()
         : '',
     };
   }, [bookingData, t, i18n.language]);
@@ -335,7 +356,11 @@ export default function BookingDetail() {
                 onPress={handleMessageCompanion}
                 className="flex-1 flex-row items-center justify-center gap-2 rounded-xl bg-softpink py-3"
               >
-                <MessageCircle color={colors.rose[400]} width={20} height={20} />
+                <MessageCircle
+                  color={colors.rose[400]}
+                  width={20}
+                  height={20}
+                />
                 <Text className="font-semibold text-rose-400">
                   {t('hirer.booking_detail.message')}
                 </Text>
@@ -497,10 +522,8 @@ export default function BookingDetail() {
               loading={cancelBookingMutation.isPending}
             />
           )}
-
         </View>
       </SafeAreaView>
     </View>
   );
 }
-

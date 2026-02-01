@@ -65,8 +65,6 @@ export interface CompanionOnboardingState {
   // Pricing data
   hourlyRate: number;
   minimumHours: number;
-  halfDayRate?: number;
-  fullDayRate?: number;
 
   // Availability data
   selectedDays: DayOfWeek[];
@@ -199,8 +197,6 @@ const _useCompanionOnboarding = create<CompanionOnboardingState>()(
         set({
           hourlyRate: data.hourlyRate,
           minimumHours: data.minimumHours,
-          halfDayRate: data.halfDayRate,
-          fullDayRate: data.fullDayRate,
         }),
 
       setAvailabilityData: (data) =>
@@ -319,5 +315,4 @@ const _useCompanionOnboarding = create<CompanionOnboardingState>()(
 export const useCompanionOnboarding = createSelectors(_useCompanionOnboarding);
 
 // Export direct access functions
-export const resetCompanionOnboarding = () =>
-  _useCompanionOnboarding.getState().reset();
+export const resetCompanionOnboarding = () => _useCompanionOnboarding.getState().reset();

@@ -111,6 +111,11 @@ export class GetAvailabilityQueryDto {
 export class UpdateCompanionProfileDto {
   @IsOptional()
   @IsString()
+  @MaxLength(50)
+  displayName?: string;
+
+  @IsOptional()
+  @IsString()
   @MaxLength(2000)
   bio?: string;
 

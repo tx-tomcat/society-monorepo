@@ -9,12 +9,13 @@ import { Pressable, ScrollView, TextInput } from 'react-native';
 import {
   Button,
   colors,
+  CompanionHeader,
   FocusAwareStatusBar,
   SafeAreaView,
   Text,
   View,
 } from '@/components/ui';
-import { ArrowLeft, Info, PriceTag } from '@/components/ui/icons';
+import { Info, PriceTag } from '@/components/ui/icons';
 import { usePlatformConfigStore } from '@/lib/hooks';
 import { useCompanionOnboarding } from '@/lib/stores';
 import { formatVND } from '@/lib/utils';
@@ -63,7 +64,9 @@ export default function SetPricing() {
       fullDayRate,
     });
     markStepComplete('set-pricing');
-    router.push('/companion/onboard/set-availability' as Href);
+
+    // Navigate to verify identity (last step)
+    router.push('/companion/onboard/verify-identity' as Href);
   }, [hourlyRate, minimumHours, setPricingData, markStepComplete, router]);
 
   const hourlyRateNum = parseInt(hourlyRate, 10) || 0;
@@ -74,8 +77,8 @@ export default function SetPricing() {
   const estimatedMonthly = yourEarnings * minHoursNum * 20; // 20 bookings per month estimate
 
   // Validation states
-  const MIN_RATE = 200000;
-  const MAX_RATE = 5000000;
+  const MIN_RATE = 100000; // 100k
+  const MAX_RATE = 50000000; // 50m
   const isBelowMinimum = hourlyRateNum > 0 && hourlyRateNum < MIN_RATE;
   const isAboveMaximum = hourlyRateNum > MAX_RATE;
 
@@ -86,19 +89,15 @@ export default function SetPricing() {
     <View className="flex-1 bg-warmwhite">
       <FocusAwareStatusBar />
 
-      <SafeAreaView edges={['top']}>
-        <View className="flex-row items-center gap-4 border-b border-border-light px-4 py-3">
-          <Pressable onPress={handleBack}>
-            <ArrowLeft color={colors.midnight.DEFAULT} width={24} height={24} />
-          </Pressable>
-          <Text className="font-urbanist-bold flex-1 text-xl text-midnight">
-            {t('companion.onboard.set_pricing.header')}
-          </Text>
+      <CompanionHeader
+        title={t('companion.onboard.set_pricing.header')}
+        onBack={handleBack}
+        rightElement={
           <Text className="text-sm text-text-tertiary">
-            {t('companion.onboard.step', { current: 3, total: 4 })}
+            {t('companion.onboard.step', { current: 2, total: 3 })}
           </Text>
-        </View>
-      </SafeAreaView>
+        }
+      />
 
       <ScrollView
         className="flex-1"
@@ -117,11 +116,10 @@ export default function SetPricing() {
             {t('companion.onboard.set_pricing.hourly_rate')}
           </Text>
           <View
-            className={`flex-row items-center gap-2 rounded-xl border bg-white px-4 ${
-              isBelowMinimum || isAboveMaximum
-                ? 'border-danger-400'
-                : 'border-border-light'
-            }`}
+            className={`flex-row items-center gap-2 rounded-xl border bg-white px-4 ${isBelowMinimum || isAboveMaximum
+              ? 'border-danger-400'
+              : 'border-border-light'
+              }`}
           >
             <PriceTag
               color={
@@ -168,16 +166,14 @@ export default function SetPricing() {
               <Pressable
                 key={rate}
                 onPress={() => handleSelectRate(rate)}
-                className={`rounded-full px-4 py-2 ${
-                  hourlyRateNum === rate
-                    ? 'bg-lavender-400'
-                    : 'border border-border-light bg-white'
-                }`}
+                className={`rounded-full px-4 py-2 ${hourlyRateNum === rate
+                  ? 'bg-lavender-400'
+                  : 'border border-border-light bg-white'
+                  }`}
               >
                 <Text
-                  className={`text-sm font-medium ${
-                    hourlyRateNum === rate ? 'text-white' : 'text-midnight'
-                  }`}
+                  className={`text-sm font-medium ${hourlyRateNum === rate ? 'text-white' : 'text-midnight'
+                    }`}
                 >
                   {formatVND(rate)}
                 </Text>
@@ -201,18 +197,16 @@ export default function SetPricing() {
               <Pressable
                 key={hours}
                 onPress={() => setMinimumHours(hours.toString())}
-                className={`flex-1 items-center rounded-xl border py-3 ${
-                  minHoursNum === hours
-                    ? 'border-lavender-400 bg-lavender-400/10'
-                    : 'border-border-light bg-white'
-                }`}
+                className={`flex-1 items-center rounded-xl border py-3 ${minHoursNum === hours
+                  ? 'border-lavender-400 bg-lavender-400/10'
+                  : 'border-border-light bg-white'
+                  }`}
               >
                 <Text
-                  className={`text-lg font-semibold ${
-                    minHoursNum === hours
-                      ? 'text-lavender-400'
-                      : 'text-midnight'
-                  }`}
+                  className={`text-lg font-semibold ${minHoursNum === hours
+                    ? 'text-lavender-400'
+                    : 'text-midnight'
+                    }`}
                 >
                   {hours}h
                 </Text>
@@ -312,7 +306,7 @@ export default function SetPricing() {
             disabled={!isValid}
             variant="default"
             size="lg"
-            className="w-full bg-lavender-400"
+            className="w-full bg-lavender-900"
           />
         </View>
       </SafeAreaView>

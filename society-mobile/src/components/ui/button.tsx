@@ -1,14 +1,28 @@
+/* eslint-disable max-lines-per-function */
 import React from 'react';
 import type { PressableProps, View } from 'react-native';
-import { ActivityIndicator, Pressable, Text } from 'react-native';
+import {
+  ActivityIndicator,
+  Pressable,
+  Text,
+  View as RNView,
+} from 'react-native';
 import type { VariantProps } from 'tailwind-variants';
 import { tv } from 'tailwind-variants';
+
+// Icon component type
+type IconComponent = React.ComponentType<{
+  color?: string;
+  width?: number;
+  height?: number;
+}>;
 
 const button = tv({
   slots: {
     container: 'flex flex-row items-center justify-center rounded-full',
     label: 'font-bold tracking-[0.2px]',
     indicator: 'h-6 text-white',
+    iconWrapper: 'flex-row items-center gap-2',
   },
 
   variants: {
@@ -103,7 +117,30 @@ interface Props extends ButtonVariants, Omit<PressableProps, 'disabled'> {
   loading?: boolean;
   className?: string;
   textClassName?: string;
+  icon?: IconComponent;
+  iconPosition?: 'left' | 'right';
+  iconSize?: number;
+  iconColor?: string;
 }
+
+// Icon color mapping based on variant
+const getIconColor = (variant: string, disabled: boolean): string => {
+  if (disabled) return '#a3a3a3'; // neutral-400
+  switch (variant) {
+    case 'default':
+    case 'destructive':
+    case 'coral':
+    case 'teal':
+      return '#FFFFFF';
+    case 'secondary':
+    case 'outline':
+    case 'ghost':
+    case 'link':
+      return '#f87171'; // rose-400
+    default:
+      return '#FFFFFF';
+  }
+};
 
 export const Button = React.forwardRef<View, Props>(
   (
@@ -116,6 +153,10 @@ export const Button = React.forwardRef<View, Props>(
       className = '',
       testID,
       textClassName = '',
+      icon: Icon,
+      iconPosition = 'left',
+      iconSize,
+      iconColor,
       ...props
     },
     ref
@@ -125,6 +166,63 @@ export const Button = React.forwardRef<View, Props>(
       [variant, disabled, size]
     );
 
+    // Determine icon size based on button size
+    const defaultIconSize = size === 'sm' ? 16 : size === 'lg' ? 22 : 20;
+    const finalIconSize = iconSize ?? defaultIconSize;
+    const finalIconColor =
+      iconColor ?? getIconColor(variant ?? 'default', disabled ?? false);
+
+    const renderContent = () => {
+      if (loading) {
+        return (
+          <ActivityIndicator
+            size="small"
+            className={styles.indicator()}
+            testID={testID ? `${testID}-activity-indicator` : undefined}
+          />
+        );
+      }
+
+      const iconElement = Icon ? (
+        <Icon
+          color={finalIconColor}
+          width={finalIconSize}
+          height={finalIconSize}
+        />
+      ) : null;
+
+      // Icon-only button (no label)
+      if (!text && iconElement) {
+        return iconElement;
+      }
+
+      // Text with icon
+      if (text && iconElement) {
+        return (
+          <RNView className={styles.iconWrapper()}>
+            {iconPosition === 'left' && iconElement}
+            <Text
+              testID={testID ? `${testID}-label` : undefined}
+              className={styles.label({ className: textClassName })}
+            >
+              {text}
+            </Text>
+            {iconPosition === 'right' && iconElement}
+          </RNView>
+        );
+      }
+
+      // Text only
+      return (
+        <Text
+          testID={testID ? `${testID}-label` : undefined}
+          className={styles.label({ className: textClassName })}
+        >
+          {text}
+        </Text>
+      );
+    };
+
     return (
       <Pressable
         disabled={disabled || loading}
@@ -133,26 +231,7 @@ export const Button = React.forwardRef<View, Props>(
         ref={ref}
         testID={testID}
       >
-        {props.children ? (
-          props.children
-        ) : (
-          <>
-            {loading ? (
-              <ActivityIndicator
-                size="small"
-                className={styles.indicator()}
-                testID={testID ? `${testID}-activity-indicator` : undefined}
-              />
-            ) : (
-              <Text
-                testID={testID ? `${testID}-label` : undefined}
-                className={styles.label({ className: textClassName })}
-              >
-                {text}
-              </Text>
-            )}
-          </>
-        )}
+        {props.children ? props.children : renderContent()}
       </Pressable>
     );
   }

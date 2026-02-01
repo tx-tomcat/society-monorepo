@@ -1,10 +1,15 @@
 /* eslint-disable max-lines-per-function */
 import type { Href } from 'expo-router';
-import { useFocusEffect, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { MotiView } from 'moti';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, RefreshControl, ScrollView } from 'react-native';
+import {
+  ActivityIndicator,
+  Pressable,
+  RefreshControl,
+  ScrollView,
+} from 'react-native';
 
 import {
   Badge,
@@ -25,18 +30,14 @@ import {
   Star,
   Wallet,
 } from '@/components/ui/icons';
+import { BookingStatus } from '@/lib/api/enums';
+import type { Booking } from '@/lib/api/services/bookings.service';
 import {
-  type Booking,
-  bookingsService,
-} from '@/lib/api/services/bookings.service';
-import {
-  type Companion,
-  companionsService,
-} from '@/lib/api/services/companions.service';
-import {
-  type EarningsOverview,
-  earningsService,
-} from '@/lib/api/services/earnings.service';
+  useBookingRequests,
+  useCompanionBookings,
+  useEarningsOverview,
+  useMyCompanionProfile,
+} from '@/lib/hooks';
 import { formatVND } from '@/lib/utils';
 
 type TodayBooking = Booking & {
@@ -47,72 +48,67 @@ export default function CompanionDashboard() {
   const router = useRouter();
   const { t } = useTranslation();
 
-  const [isLoading, setIsLoading] = React.useState(true);
-  const [isRefreshing, setIsRefreshing] = React.useState(false);
-  const [todayBookings, setTodayBookings] = React.useState<TodayBooking[]>([]);
-  const [earnings, setEarnings] = React.useState<EarningsOverview | null>(null);
-  const [profile, setProfile] = React.useState<Companion | null>(null);
-  const [pendingRequestsCount, setPendingRequestsCount] = React.useState(0);
+  // React Query hooks
+  const { data: profile, isLoading: isProfileLoading } =
+    useMyCompanionProfile();
+  const { data: earnings, isLoading: isEarningsLoading } =
+    useEarningsOverview();
+  const {
+    data: bookingsData,
+    isLoading: isBookingsLoading,
+    refetch: refetchBookings,
+    isRefetching: isRefetchingBookings,
+  } = useCompanionBookings(BookingStatus.CONFIRMED, 1, 10);
+  const {
+    data: requestsData,
+    isLoading: isRequestsLoading,
+    refetch: refetchRequests,
+    isRefetching: isRefetchingRequests,
+  } = useBookingRequests();
 
-  const fetchDashboardData = React.useCallback(async () => {
-    try {
-      // Fetch all dashboard data in parallel
-      const [bookingsRes, earningsRes, profileRes, requestsRes] =
-        await Promise.all([
-          bookingsService.getCompanionBookings('CONFIRMED', 1, 10),
-          earningsService.getEarningsOverview(),
-          companionsService.getMyProfile(),
-          bookingsService.getBookingRequests(),
-        ]);
+  const isLoading =
+    isProfileLoading ||
+    isEarningsLoading ||
+    isBookingsLoading ||
+    isRequestsLoading;
+  const isRefreshing = isRefetchingBookings || isRefetchingRequests;
 
-      // Filter today's bookings
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const todayEnd = new Date(today);
-      todayEnd.setHours(23, 59, 59, 999);
+  const pendingRequestsCount = requestsData?.requests?.length ?? 0;
 
-      const todaysBookings = (bookingsRes.bookings || [])
-        .filter((booking) => {
-          const startDate = new Date(booking.startDatetime);
-          return startDate >= today && startDate <= todayEnd;
-        })
-        .map((booking) => {
-          const now = new Date();
-          const startDate = new Date(booking.startDatetime);
-          const endDate = new Date(booking.endDatetime);
+  // Filter today's bookings
+  const todayBookings = React.useMemo((): TodayBooking[] => {
+    if (!bookingsData?.bookings) return [];
 
-          let displayStatus: 'upcoming' | 'active' | 'completed' = 'upcoming';
-          if (now >= startDate && now <= endDate) {
-            displayStatus = 'active';
-          } else if (now > endDate) {
-            displayStatus = 'completed';
-          }
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const todayEnd = new Date(today);
+    todayEnd.setHours(23, 59, 59, 999);
 
-          return { ...booking, displayStatus };
-        });
+    return bookingsData.bookings
+      .filter((booking) => {
+        const startDate = new Date(booking.startDatetime);
+        return startDate >= today && startDate <= todayEnd;
+      })
+      .map((booking) => {
+        const now = new Date();
+        const startDate = new Date(booking.startDatetime);
+        const endDate = new Date(booking.endDatetime);
 
-      setTodayBookings(todaysBookings);
-      setEarnings(earningsRes);
-      setProfile(profileRes);
-      setPendingRequestsCount(requestsRes.requests?.length ?? 0);
-    } catch (error) {
-      console.error('Failed to fetch dashboard data:', error);
-    } finally {
-      setIsLoading(false);
-      setIsRefreshing(false);
-    }
-  }, []);
+        let displayStatus: 'upcoming' | 'active' | 'completed' = 'upcoming';
+        if (now >= startDate && now <= endDate) {
+          displayStatus = 'active';
+        } else if (now > endDate) {
+          displayStatus = 'completed';
+        }
 
-  useFocusEffect(
-    React.useCallback(() => {
-      fetchDashboardData();
-    }, [fetchDashboardData])
-  );
+        return { ...booking, displayStatus };
+      });
+  }, [bookingsData]);
 
   const handleRefresh = React.useCallback(() => {
-    setIsRefreshing(true);
-    fetchDashboardData();
-  }, [fetchDashboardData]);
+    refetchBookings();
+    refetchRequests();
+  }, [refetchBookings, refetchRequests]);
 
   const handleNotificationPress = React.useCallback(() => {
     router.push('/companion/bookings/requests' as Href);
@@ -158,6 +154,14 @@ export default function CompanionDashboard() {
     [earnings, profile]
   );
 
+  if (isLoading) {
+    return (
+      <View className="flex-1 items-center justify-center bg-warmwhite">
+        <ActivityIndicator color={colors.lavender[400]} size="large" />
+      </View>
+    );
+  }
+
   return (
     <View className="flex-1 bg-warmwhite">
       <FocusAwareStatusBar />
@@ -195,7 +199,11 @@ export default function CompanionDashboard() {
         className="flex-1"
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} />
+          <RefreshControl
+            refreshing={isRefreshing}
+            onRefresh={handleRefresh}
+            tintColor={colors.lavender[400]}
+          />
         }
       >
         {/* Stats Cards */}
@@ -206,7 +214,7 @@ export default function CompanionDashboard() {
           className="p-4"
         >
           <View className="flex-row gap-3">
-            {stats.map((stat, index) => (
+            {stats.map((stat) => (
               <Pressable
                 key={stat.labelKey}
                 onPress={
@@ -324,7 +332,7 @@ export default function CompanionDashboard() {
                       <Image
                         source={{
                           uri:
-                            booking.hirer.avatarUrl ||
+                            booking.hirer?.avatar ||
                             'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120',
                         }}
                         className="size-14 rounded-full"
@@ -333,7 +341,7 @@ export default function CompanionDashboard() {
                       <View className="flex-1">
                         <View className="flex-row items-center justify-between">
                           <Text className="font-semibold text-midnight">
-                            {booking.hirer.fullName}
+                            {booking.hirer?.displayName || 'Anonymous'}
                           </Text>
                           <Badge
                             label={
@@ -354,7 +362,9 @@ export default function CompanionDashboard() {
                           />
                         </View>
                         <Text className="mt-1 text-sm text-rose-400">
-                          {booking.occasion ? `${booking.occasion.emoji} ${booking.occasion.name}` : t('common.occasion')}
+                          {booking.occasion
+                            ? `${booking.occasion.emoji} ${booking.occasion.name}`
+                            : t('common.occasion')}
                         </Text>
                         <View className="mt-2 flex-row items-center gap-4">
                           <View className="flex-row items-center gap-1">
@@ -407,7 +417,7 @@ export default function CompanionDashboard() {
           transition={{ type: 'timing', duration: 500, delay: 400 }}
           className="px-4 py-6"
         >
-          <Text className="font-urbanist-bold mb-3 text-lg text-midnight">
+          <Text className="mb-3 font-urbanist-bold text-lg text-midnight">
             {t('companion.dashboard.quick_actions')}
           </Text>
           <View className="flex-row gap-3">

@@ -126,6 +126,9 @@
     },
     "verification": {
       "camera_permission_required": "Cần quyền truy cập máy ảnh để chụp ảnh selfie.",
+      "camera_description": "Mình cần quyền truy cập máy ảnh để chụp ảnh cho hồ sơ của bạn",
+      "photos_required": "Cần quyền truy cập thư viện ảnh",
+      "photos_description": "Mình cần quyền truy cập thư viện ảnh để chọn ảnh cho hồ sơ của bạn",
       "gallery_permission_required": "Cần quyền truy cập thư viện ảnh để chọn ảnh CCCD.",
       "missing_documents": "Vui lòng hoàn thành tất cả các bước xác minh cần thiết.",
       "skip_confirm": "Bỏ qua tạm thời",
@@ -194,12 +197,12 @@
       },
       "find_companion": "Tìm partner",
       "get_started": "Bắt đầu",
-      "hero_subtitle": "Đặt partner đã xác minh cho đám cưới, sự kiện gia đình,\nhội nghị doanh nghiệp, và nhiều hơn nữa.",
+      "hero_subtitle": "Book a partner đã xác minh cho đám cưới, sự kiện gia đình,\nhội nghị doanh nghiệp, và nhiều hơn nữa.",
       "hero_title": "Kết nối với\nsự tin tưởng",
       "hirer_login": "Khách hàng?",
       "id_verified": "Đã xác minh",
       "sign_in": "Đăng nhập",
-      "tagline": "Nền tảng thuê partner uy tín Việt Nam",
+      "tagline": "Nền tảng booking partner uy tín Việt Nam",
       "users_count": "1000+ người dùng"
     }
   },
@@ -207,9 +210,11 @@
     "add": "Thêm",
     "and": "và",
     "back": "Quay lại",
+    "camera": "Máy ảnh",
     "copy": "Sao chép",
     "coming_soon": "Sắp ra mắt",
     "error": "Lỗi",
+    "gallery": "Thư viện",
     "go_back": "Quay lại",
     "cancel": "Hủy",
     "change": "Thay đổi",
@@ -219,7 +224,7 @@
     "continue": "Tiếp tục",
     "yes": "Có",
     "no": "Không",
-    "loading": "Đang tải...",
+    "loading": "Đang xử lý...",
     "retry": "Thử lại",
     "days": {
       "fri_short": "Thứ 6",
@@ -262,6 +267,7 @@
     "reviews": "đánh giá",
     "save": "Lưu",
     "save_changes": "Lưu thay đổi",
+    "saving": "Đang lưu...",
     "see_all": "Xem tất cả",
     "skip": "Bỏ qua",
     "status": {
@@ -270,7 +276,17 @@
       "completed": "Hoàn thành",
       "confirmed": "Đã xác nhận",
       "pending": "Đang chờ",
-      "upcoming": "Sắp tới"
+      "upcoming": "Sắp tới",
+      "unknown": "Không xác định"
+    },
+    "occasion": "Dịp chung",
+    "anonymous": "Ẩn danh",
+    "client": "Khách hàng",
+    "time": {
+      "just_now": "vừa xong",
+      "minutes_ago": "phút trước",
+      "hours_ago": "giờ trước",
+      "days_ago": "ngày trước"
     },
     "success": "Thành công",
     "today": "Hôm nay",
@@ -287,6 +303,10 @@
   },
   "errors": {
     "accept_failed": "Không thể chấp nhận yêu cầu",
+    "booking_not_found": "Không tìm thấy yêu cầu",
+    "cancel_failed": "Không thể hủy yêu cầu",
+    "check_in_failed": "Không thể điểm danh",
+    "complete_failed": "Không thể hoàn thành yêu cầu",
     "decline_failed": "Không thể từ chối yêu cầu",
     "not_found": "Không tìm thấy",
     "try_again": "Vui lòng thử lại"
@@ -320,6 +340,10 @@
       "safety_reminder": "Nhắc nhở an toàn",
       "safety_reminder_text": "Sử dụng nút SOS nếu bạn cảm thấy không an toàn. Theo dõi GPS hoạt động trong yêu cầu.",
       "special_requests": "Yêu cầu đặc biệt",
+      "complete_booking": "Hoàn thành yêu cầu",
+      "complete_confirmation": "Bạn có chắc muốn hoàn thành yêu cầu này? Điều này sẽ đánh dấu buổi hẹn đã kết thúc.",
+      "completed": "Đã hoàn thành yêu cầu!",
+      "cancelled": "Đã hủy yêu cầu thành công",
       "yes_cancel": "Có, hủy",
       "you_will_earn": "Bạn sẽ nhận",
       "your_earnings": "Thu nhập của bạn"
@@ -357,22 +381,22 @@
       "requests": {
         "accept": "Chấp nhận",
         "accept_booking": "Chấp nhận yêu cầu",
-        "accept_confirmation": "Bạn có chắc muốn chấp nhận yêu cầu yêu cầu này?",
-        "accept_message": "Bạn có chắc muốn chấp nhận yêu cầu yêu cầu này?",
+        "accept_confirmation": "Bạn có chắc muốn chấp nhận yêu cầu này?",
+        "accept_message": "Bạn có chắc muốn chấp nhận yêu cầu này?",
         "accept_success": "Đã chấp nhận yêu cầu! Kiểm tra lịch trình của bạn nhé.",
         "accept_title": "Chấp nhận yêu cầu",
         "decline": "Từ chối",
         "decline_booking": "Từ chối yêu cầu",
         "decline_confirmation": "Bạn có chắc muốn từ chối yêu cầu này?",
         "decline_message": "Bạn có chắc muốn từ chối yêu cầu này?",
-        "decline_success": "Đã từ chối yêu cầu yêu cầu",
+        "decline_success": "Đã từ chối yêu cầu",
         "decline_title": "Từ chối yêu cầu",
-        "empty_message": "Bạn sẽ được thông báo khi khách hàng gửi yêu cầu yêu cầu",
+        "empty_message": "Bạn sẽ được thông báo khi khách hàng gửi yêu cầu",
         "empty_title": "Chưa có yêu cầu mới",
-        "header": "Yêu cầu yêu cầu",
+        "header": "Yêu cầu",
         "new_badge": "Mới",
         "no_requests": "Chưa có yêu cầu mới",
-        "no_requests_description": "Bạn sẽ được thông báo khi khách hàng gửi yêu cầu yêu cầu",
+        "no_requests_description": "Bạn sẽ được thông báo khi khách hàng gửi yêu cầu",
         "your_earnings": "Thu nhập của bạn"
       },
       "schedule": {
@@ -458,6 +482,8 @@
       "hourly_rate": "Giá theo giờ",
       "main": "Chính",
       "main_badge": "Chính",
+      "manage_photos": "Quản lý ảnh",
+      "manage_photos_description": "Thêm, xóa hoặc sắp xếp lại ảnh hồ sơ của bạn",
       "occasions_i_accept": "Dịp tôi nhận",
       "occasions_title": "Dịp tôi nhận",
       "per_hour": "/giờ",
@@ -471,19 +497,55 @@
       "update_availability": "Cập nhật lịch rảnh"
     },
     "onboard": {
+      "error_message": "Không thể hoàn thành đăng ký. Vui lòng thử lại.",
+      "step": "Bước {{current}}/{{total}}",
+      "success_message": "Hồ sơ của bạn đã sẵn sàng! Khách hàng có thể bắt đầu đặt lịch với bạn.",
+      "success_title": "Chào mừng bạn!",
+      "verify_identity": {
+        "header": "Xác minh danh tính",
+        "why_verify": "Tại sao cần xác minh danh tính?",
+        "why_verify_description": "Chúng tôi cần CCCD để xác minh danh tính và xử lý thu nhập cho bạn. Thông tin của bạn được mã hóa và lưu trữ an toàn.",
+        "front_side": "Mặt trước CCCD",
+        "front_description": "Chụp ảnh rõ nét mặt trước căn cước công dân của bạn",
+        "back_side": "Mặt sau CCCD",
+        "back_description": "Chụp ảnh rõ nét mặt sau căn cước công dân của bạn",
+        "tap_to_upload": "Nhấn để tải ảnh lên",
+        "upload_title": "Tải ảnh CCCD",
+        "upload_description": "Chọn cách tải ảnh CCCD của bạn",
+        "uploaded": "Đã tải lên",
+        "tips_title": "Mẹo chụp ảnh",
+        "tip_1": "Đặt CCCD trên bề mặt phẳng, tối màu",
+        "tip_2": "Đảm bảo tất cả chữ và ảnh đều rõ ràng",
+        "tip_3": "Tránh ánh sáng chói và bóng đổ trên thẻ"
+      },
       "create_profile": {
         "about_placeholder": "Kể cho khách hàng về bản thân bạn, tính cách và điều gì khiến bạn trở thành partner tuyệt vời...",
         "about_you": "Giới thiệu bản thân",
+        "about_you_placeholder": "Viết giới thiệu ngắn về bản thân, sở thích và điều gì khiến bạn đặc biệt...",
         "add_main": "Thêm ảnh chính",
+        "add_photo": "Thêm ảnh",
+        "bio_count": "{{count}}/{{max}} (tối thiểu {{min}})",
+        "bio_too_short": "Cần thêm {{remaining}} ký tự nữa",
         "char_count": "{{count}}/{{max}}",
         "char_count_min": "{{count}}/{{max}} (tối thiểu {{min}})",
+        "choose_source": "Chọn nguồn ảnh",
         "display_name": "Tên hiển thị",
         "display_name_placeholder": "Khách hàng nên gọi bạn là gì?",
         "header": "Tạo hồ sơ",
+        "main": "Chính",
         "main_badge": "Chính",
-        "photos_count": "{{count}}/6 ảnh đã thêm (tối thiểu 3)",
+        "max_photos": "Tối đa 6 ảnh",
+        "name_too_short": "Tên phải có ít nhất {{min}} ký tự",
+        "need_main_photo": "Bạn cần ít nhất một ảnh chính",
+        "need_more_photos": "Cần thêm {{count}} ảnh nữa",
+        "photos_count": "{{count}}/{{max}} ảnh (tối thiểu {{min}})",
+        "photos_description": "Thêm ít nhất 3 ảnh chất lượng cao thể hiện bản thân bạn tốt nhất",
         "photos_instruction": "Thêm ít nhất 3 ảnh. Ảnh đầu tiên là ảnh đại diện chính.",
         "photos_title": "Ảnh hồ sơ",
+        "tip_1": "Sử dụng ảnh rõ nét, đủ sáng để thấy rõ khuôn mặt",
+        "tip_2": "Thêm ít nhất một ảnh toàn thân",
+        "tip_3": "Đa dạng hóa - trang phục và bối cảnh khác nhau",
+        "tip_4": "Viết tiểu sử hấp dẫn thể hiện cá tính của bạn",
         "tips": {
           "authentic": "Hãy chân thật - khách hàng đánh giá cao hồ sơ thật",
           "highlights": "Nêu bật sở thích và chủ đề trò chuyện của bạn",
@@ -529,15 +591,23 @@
       },
       "set_pricing": {
         "earnings_breakdown": "Chi tiết thu nhập",
+        "estimate_basis": "Dựa trên {{bookings}} yêu cầu/tháng với {{hours}} giờ mỗi lần",
         "estimated_monthly": "Thu nhập ước tính/tháng",
         "estimation_note": "Dựa trên 20 yêu cầu/tháng với {{hours}} giờ mỗi lần",
         "header": "Đặt giá của bạn",
         "hourly_rate": "Giá theo giờ",
+        "maximum_rate_error": "Giá tối đa là {{amount}}",
         "min_hours": "Số giờ đặt tối thiểu",
+        "minimum_hours": "Số giờ đặt tối thiểu",
+        "minimum_rate_error": "Giá tối thiểu là {{amount}}",
+        "per_hour": "₫/giờ",
         "platform_fee": "Phí nền tảng (18%)",
         "pro_tip": "Mẹo: Bắt đầu với mức giá cạnh tranh để xây dựng uy tín. Bạn có thể tăng giá khi có nhiều đánh giá tích cực.",
+        "pro_tip_label": "Mẹo: ",
+        "pro_tip_text": "Bắt đầu với mức giá cạnh tranh để xây dựng uy tín. Bạn có thể tăng giá khi có nhiều đánh giá tích cực.",
         "rate_unit": "₫/giờ",
-        "you_earn": "Bạn nhận mỗi giờ",
+        "you_earn": "Bạn nhận",
+        "your_hourly_rate": "Giá theo giờ của bạn",
         "your_rate": "Giá của bạn"
       },
       "set_services": {
@@ -601,14 +671,28 @@
     "requests": {
       "accept": "Chấp nhận",
       "accept_booking": "Chấp nhận yêu cầu",
-      "accept_confirmation": "Bạn có chắc muốn chấp nhận yêu cầu yêu cầu này?",
+      "accept_confirmation": "Bạn có chắc muốn chấp nhận yêu cầu này?",
       "accept_success": "Đã chấp nhận yêu cầu! Kiểm tra lịch trình của bạn nhé.",
       "decline": "Từ chối",
       "decline_booking": "Từ chối yêu cầu",
       "decline_confirmation": "Bạn có chắc muốn từ chối yêu cầu này?",
-      "header": "Yêu cầu yêu cầu",
+      "decline_success": "Đã từ chối yêu cầu",
+      "header": "Yêu cầu",
+      "subtitle": "Quản lý tất cả yêu cầu đặt lịch",
       "no_requests": "Chưa có yêu cầu mới",
-      "no_requests_description": "Bạn sẽ được thông báo khi khách hàng gửi yêu cầu yêu cầu",
+      "no_requests_description": "Bạn sẽ được thông báo khi khách hàng gửi yêu cầu",
+      "no_pending": "Chưa có yêu cầu chờ xử lý",
+      "no_pending_desc": "Yêu cầu đặt lịch mới sẽ xuất hiện ở đây",
+      "no_confirmed": "Chưa có lịch đã xác nhận",
+      "no_confirmed_desc": "Các yêu cầu đã chấp nhận sẽ xuất hiện ở đây",
+      "no_active": "Chưa có lịch đang diễn ra",
+      "no_active_desc": "Các buổi hẹn đang diễn ra sẽ xuất hiện ở đây",
+      "no_completed": "Chưa có lịch hoàn thành",
+      "no_completed_desc": "Các buổi hẹn đã hoàn thành sẽ xuất hiện ở đây",
+      "no_cancelled": "Chưa có lịch bị hủy",
+      "no_cancelled_desc": "Các yêu cầu bị hủy sẽ xuất hiện ở đây",
+      "cancelled_booking": "Đã hủy",
+      "earned": "Đã nhận",
       "your_earnings": "Thu nhập của bạn"
     },
     "splash": {
@@ -619,7 +703,7 @@
         "top_rated": "Đánh giá cao",
         "verified": "Đã xác minh"
       },
-      "hero_subtitle": "Tham gia nền tảng thuê partner hàng đầu Việt Nam. Đặt giá của bạn, chọn yêu cầu, tăng thu nhập.",
+      "hero_subtitle": "Tham gia nền tảng booking partner hàng đầu Việt Nam. Đặt giá của bạn, chọn yêu cầu, tăng thu nhập.",
       "hero_title": "Biến thời gian thành thu nhập",
       "start_earning": "Bắt đầu kiếm tiền",
       "stats": {
@@ -671,6 +755,93 @@
       "verified_companion": "Partner đã xác minh",
       "view_public_profile": "Xem hồ sơ công khai"
     },
+    "photos": {
+      "header": "Ảnh của tôi",
+      "main": "Chính",
+      "info_message": "Ảnh của bạn là chìa khóa để thu hút khách hàng. Đảm bảo ảnh rõ nét, đủ sáng và thể hiện cá tính của bạn.",
+      "tips_title": "Mẹo chụp ảnh",
+      "tip_1": "Sử dụng ảnh rõ nét, đủ sáng để thấy rõ khuôn mặt",
+      "tip_2": "Thêm ít nhất một ảnh toàn thân",
+      "tip_3": "Đa dạng hóa - trang phục và bối cảnh khác nhau",
+      "max_photos_title": "Tối đa ảnh",
+      "max_photos_message": "Bạn chỉ có thể tải lên tối đa 6 ảnh",
+      "min_photos_title": "Tối thiểu ảnh",
+      "min_photos_message": "Bạn cần ít nhất 1 ảnh trong hồ sơ",
+      "upload_failed": "Không thể tải ảnh lên. Vui lòng thử lại.",
+      "delete_title": "Xóa ảnh",
+      "delete_message": "Bạn có chắc muốn xóa ảnh này?",
+      "delete_failed": "Không thể xóa ảnh. Vui lòng thử lại."
+    },
+    "availability": {
+      "header": "Lịch trống",
+      "summary_title": "Lịch trống của bạn",
+      "summary_description": "{{days}} ngày mỗi tuần, {{slots}} khung giờ",
+      "days_title": "Ngày rảnh",
+      "time_slots_title": "Khung giờ",
+      "time_slots_description": "Chọn khung giờ cho mỗi ngày rảnh",
+      "morning": "Sáng (8:00-12:00)",
+      "afternoon": "Chiều (12:00-17:00)",
+      "evening": "Tối (17:00-22:00)",
+      "midnight": "Đêm khuya (22:00-02:00)",
+      "no_days_selected": "Chọn ít nhất một ngày để đặt lịch trống",
+      "info_message": "Bạn có thể điều chỉnh lịch trống bất cứ lúc nào. Khách hàng chỉ thấy bạn khi bạn rảnh.",
+      "saved_message": "Lịch trống đã được cập nhật!"
+    },
+    "bank_accounts": {
+      "header": "Tài khoản ngân hàng",
+      "info_message": "Thêm tài khoản ngân hàng để nhận tiền rút. Đảm bảo thông tin tài khoản chính xác.",
+      "saved_accounts": "Tài khoản đã lưu",
+      "primary": "Chính",
+      "add_new": "Thêm tài khoản mới",
+      "add_account": "Thêm tài khoản ngân hàng",
+      "bank_name": "Tên ngân hàng",
+      "select_bank": "Chọn ngân hàng của bạn",
+      "account_number": "Số tài khoản",
+      "account_number_placeholder": "Nhập số tài khoản",
+      "account_holder": "Tên chủ tài khoản",
+      "account_holder_placeholder": "Nhập tên như trên tài khoản ngân hàng",
+      "holder_hint": "Tên phải khớp chính xác với tài khoản ngân hàng (chữ in hoa)",
+      "fill_all_fields": "Vui lòng điền đầy đủ các trường bắt buộc",
+      "invalid_account_number": "Số tài khoản phải có ít nhất 8 chữ số",
+      "added_success": "Đã thêm tài khoản ngân hàng thành công!",
+      "add_failed": "Không thể thêm tài khoản ngân hàng. Vui lòng thử lại.",
+      "cannot_delete_primary_title": "Không thể xóa",
+      "cannot_delete_primary_message": "Vui lòng đặt tài khoản khác làm chính trước khi xóa",
+      "delete_title": "Xóa tài khoản ngân hàng",
+      "delete_message": "Bạn có chắc muốn xóa tài khoản {{bank}}?",
+      "security_title": "Bảo mật ngân hàng",
+      "security_message": "Thông tin ngân hàng của bạn được mã hóa và lưu trữ an toàn. Mình không bao giờ chia sẻ thông tin tài chính của bạn."
+    },
+    "verification": {
+      "header": "Xác minh",
+      "status": {
+        "verified": "Đã xác minh đầy đủ",
+        "verified_desc": "Danh tính của bạn đã được xác minh. Bạn có quyền truy cập tất cả tính năng.",
+        "pending": "Đang chờ xác minh",
+        "pending_desc": "Xác minh của bạn đang được xem xét. Thường mất 1-2 ngày làm việc.",
+        "rejected": "Xác minh bị từ chối",
+        "rejected_desc": "Xác minh của bạn không được phê duyệt. Vui lòng liên hệ hỗ trợ để được giúp đỡ.",
+        "not_started": "Chưa xác minh",
+        "not_started_desc": "Hoàn thành xác minh để mở khóa tất cả tính năng và xây dựng niềm tin với khách hàng."
+      },
+      "steps_completed": "bước hoàn thành",
+      "benefits_title": "Tại sao cần xác minh?",
+      "benefit_1": "Xuất hiện cao hơn trong kết quả tìm kiếm",
+      "benefit_2": "Xây dựng niềm tin với khách hàng tiềm năng",
+      "benefit_3": "Truy cập các tính năng cao cấp",
+      "steps_title": "Các bước xác minh",
+      "steps": {
+        "identity": "Xác minh danh tính",
+        "identity_desc": "Tải lên CMND/CCCD của bạn",
+        "selfie": "Xác minh selfie",
+        "selfie_desc": "Chụp ảnh selfie để đối chiếu với CMND",
+        "background": "Kiểm tra lý lịch",
+        "background_desc": "Xác minh lý lịch nhanh (1-2 ngày)"
+      },
+      "privacy_title": "Quyền riêng tư được bảo vệ",
+      "privacy_message": "Mình sử dụng mã hóa an toàn cho tất cả tài liệu. Thông tin cá nhân của bạn không bao giờ được chia sẻ mà không có sự đồng ý.",
+      "contact_support": "Liên hệ hỗ trợ"
+    },
     "withdraw": {
       "add_bank": "+ Thêm tài khoản ngân hàng",
       "add_bank_account": "Thêm tài khoản ngân hàng",
@@ -706,6 +877,32 @@
       "withdraw_to": "Rút về",
       "you_receive": "Bạn sẽ nhận",
       "you_will_receive": "Bạn sẽ nhận"
+    },
+    "boost": {
+      "header": "Đẩy hồ sơ",
+      "why_boost": "Tại sao nên đẩy hồ sơ?",
+      "benefit_1": "Xuất hiện đầu tiên trong kết quả tìm kiếm",
+      "benefit_2": "Tăng khả năng hiển thị với khách hàng",
+      "benefit_3": "Tăng tỷ lệ nhận booking",
+      "choose_package": "Chọn gói",
+      "visibility": "hiển thị",
+      "active_boost": "Đang đẩy hồ sơ",
+      "time_remaining": "Thời gian còn lại",
+      "history": "Lịch sử đẩy",
+      "confirm_title": "Xác nhận mua",
+      "confirm_message": "Mua gói {{tier}} với giá {{price}}?",
+      "purchase": "Mua",
+      "purchase_now": "Mua gói đẩy",
+      "purchase_success": "Đã kích hoạt! Hồ sơ của bạn đang được đẩy.",
+      "purchase_failed": "Không thể mua gói đẩy. Vui lòng thử lại.",
+      "payment_redirect": "Cần thanh toán",
+      "payment_redirect_message": "Bạn sẽ được chuyển hướng để hoàn tất thanh toán.",
+      "status": {
+        "active": "Đang hoạt động",
+        "pending": "Đang chờ",
+        "expired": "Đã hết hạn",
+        "cancelled": "Đã hủy"
+      }
     }
   },
   "hirer": {
@@ -904,7 +1101,7 @@
       "estimated_total": "Tổng ước tính",
       "how_it_works": "Cách hoạt động",
       "step_1_title": "Gửi yêu cầu",
-      "step_1_desc": "Yêu cầu yêu cầu sẽ được gửi đến partner để xác nhận.",
+      "step_1_desc": "Yêu cầu sẽ được gửi đến partner để xác nhận.",
       "step_2_title": "Partner xác nhận",
       "step_2_desc": "Partner sẽ xem xét và chấp nhận yêu cầu trong vòng 24 giờ.",
       "step_3_title": "Hoàn tất thanh toán",
@@ -913,7 +1110,7 @@
       "secure_booking_desc": "Yêu cầu của bạn được bảo vệ. Thanh toán chỉ được thu sau khi xác nhận.",
       "terms_agreement": "Tôi đồng ý với điều khoản yêu cầu và chính sách hủy. Tôi hiểu rằng thanh toán sẽ được yêu cầu sau khi partner xác nhận.",
       "submitting": "Đang gửi...",
-      "confirm_booking": "Gửi yêu cầu yêu cầu"
+      "confirm_booking": "Gửi yêu cầu"
     },
     "payment": {
       "title": "Thanh toán",
@@ -937,7 +1134,7 @@
     },
     "confirmation": {
       "success_title": "Đã gửi yêu cầu!",
-      "success_subtitle": "Yêu cầu yêu cầu đã được gửi đến partner để xác nhận.",
+      "success_subtitle": "Yêu cầu đã được gửi đến partner để xác nhận.",
       "booking_id": "Mã yêu cầu",
       "date_time": "Ngày & giờ",
       "hours": "giờ",
@@ -1019,9 +1216,9 @@
         "verified": "Đã xác minh"
       },
       "get_started": "Bắt đầu",
-      "hero_subtitle": "Đặt partner đã xác minh cho đám cưới, sự kiện gia đình, hội nghị doanh nghiệp và nhiều hơn nữa.",
+      "hero_subtitle": "Booking partner đã xác minh cho đám cưới, sự kiện gia đình, hội nghị doanh nghiệp và nhiều hơn nữa.",
       "hero_title": "Tìm partner hoàn hảo",
-      "tagline": "Nền tảng thuê partner uy tín Việt Nam"
+      "tagline": "Nền tảng booking partner uy tín Việt Nam"
     },
     "settings": {
       "title": "Cài đặt",
@@ -1272,5 +1469,20 @@
     "vietnamese": "Tiếng Việt",
     "website": "Website"
   },
-  "welcome": "Xin chào"
+  "welcome": "Xin chào",
+  "tabs": {
+    "hirer": {
+      "home": "Trang chủ",
+      "for_you": "Dành cho bạn",
+      "bookings": "Đặt chỗ",
+      "account": "Tài khoản"
+    },
+    "companion": {
+      "home": "Trang chủ",
+      "requests": "Yêu cầu",
+      "schedule": "Lịch trình",
+      "earnings": "Thu nhập",
+      "account": "Tài khoản"
+    }
+  }
 }

@@ -91,7 +91,6 @@ export class ScoringService {
         user: {
           select: {
             id: true,
-            fullName: true,
             avatarUrl: true,
             dateOfBirth: true,
             gender: true,
@@ -99,7 +98,6 @@ export class ScoringService {
           },
         },
         photos: {
-          where: { isVerified: true },
           select: { id: true, url: true, isPrimary: true, position: true },
           orderBy: [{ isPrimary: 'desc' }, { position: 'asc' }],
         },
@@ -245,10 +243,10 @@ export class ScoringService {
         companion: {
           id: companion.id,
           userId: companion.userId,
-          displayName: companion.user.fullName || 'Anonymous',
+          displayName: companion.displayName || 'Anonymous',
           age,
           bio: companion.bio,
-          avatar: companion.user.avatarUrl,
+          avatar: companion.photos[0]?.url || companion.user.avatarUrl,
           heightCm: companion.heightCm,
           gender: companion.user.gender,
           languages: companion.languages || [],

@@ -27,6 +27,10 @@ import {
   Wallet,
   XCircle,
 } from '@/components/ui/icons';
+import {
+  PaymentRequestStatus,
+  PaymentRequestType,
+} from '@/lib/api/enums';
 import { useWalletBalance, useWalletTransactions } from '@/lib/hooks';
 import { formatVND } from '@/lib/utils';
 
@@ -71,24 +75,24 @@ export default function WalletScreen() {
   }, [router]);
 
   const getTransactionIcon = (
-    type: 'TOPUP' | 'BOOKING',
-    status: 'PENDING' | 'COMPLETED' | 'EXPIRED' | 'FAILED'
+    type: PaymentRequestType,
+    status: PaymentRequestStatus
   ) => {
-    if (status === 'PENDING') {
+    if (status === PaymentRequestStatus.PENDING) {
       return {
         icon: Clock,
         color: colors.yellow[400],
         bg: 'bg-yellow-400/10',
       };
     }
-    if (status === 'EXPIRED' || status === 'FAILED') {
+    if (status === PaymentRequestStatus.EXPIRED || status === PaymentRequestStatus.FAILED) {
       return {
         icon: XCircle,
         color: colors.rose[400],
         bg: 'bg-rose-400/10',
       };
     }
-    if (type === 'TOPUP') {
+    if (type === PaymentRequestType.TOPUP) {
       return {
         icon: Plus,
         color: colors.teal[400],
@@ -102,14 +106,14 @@ export default function WalletScreen() {
     };
   };
 
-  const getStatusColor = (status: 'PENDING' | 'COMPLETED' | 'EXPIRED' | 'FAILED') => {
+  const getStatusColor = (status: PaymentRequestStatus) => {
     switch (status) {
-      case 'COMPLETED':
+      case PaymentRequestStatus.COMPLETED:
         return 'text-teal-400';
-      case 'PENDING':
+      case PaymentRequestStatus.PENDING:
         return 'text-yellow-500';
-      case 'EXPIRED':
-      case 'FAILED':
+      case PaymentRequestStatus.EXPIRED:
+      case PaymentRequestStatus.FAILED:
         return 'text-rose-400';
       default:
         return 'text-text-secondary';

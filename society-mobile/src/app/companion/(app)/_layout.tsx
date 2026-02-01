@@ -1,15 +1,18 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { CompanionTabBar } from '@/components/ui/tab-bar';
 
 export default function CompanionTabLayout() {
+  const { t } = useTranslation();
+
   return (
     <Tabs tabBar={(props) => <CompanionTabBar {...props} />}>
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
+          title: t('tabs.companion.home'),
           headerShown: false,
           tabBarButtonTestID: 'companion-home-tab',
         }}
@@ -18,7 +21,7 @@ export default function CompanionTabLayout() {
       <Tabs.Screen
         name="requests"
         options={{
-          title: 'Requests',
+          title: t('tabs.companion.requests'),
           headerShown: false,
           tabBarButtonTestID: 'companion-requests-tab',
         }}
@@ -27,7 +30,7 @@ export default function CompanionTabLayout() {
       <Tabs.Screen
         name="schedule"
         options={{
-          title: 'Schedule',
+          title: t('tabs.companion.schedule'),
           headerShown: false,
           tabBarButtonTestID: 'companion-schedule-tab',
         }}
@@ -36,7 +39,7 @@ export default function CompanionTabLayout() {
       <Tabs.Screen
         name="earnings"
         options={{
-          title: 'Earnings',
+          title: t('tabs.companion.earnings'),
           headerShown: false,
           tabBarButtonTestID: 'companion-earnings-tab',
         }}
@@ -45,7 +48,7 @@ export default function CompanionTabLayout() {
       <Tabs.Screen
         name="account"
         options={{
-          title: 'Account',
+          title: t('tabs.companion.account'),
           headerShown: false,
           tabBarButtonTestID: 'companion-account-tab',
         }}

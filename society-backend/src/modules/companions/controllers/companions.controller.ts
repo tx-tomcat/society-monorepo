@@ -47,49 +47,9 @@ export class CompanionsController {
     return this.companionsService.browseCompanions(query, user?.id);
   }
 
-  /**
-   * Get companion profile by ID (Public)
-   */
-  @Public()
-  @Get(':companionId')
-  async getCompanionProfile(
-    @Param('companionId', ParseUUIDPipe) companionId: string,
-  ) {
-    return this.companionsService.getCompanionProfile(companionId);
-  }
-
-  /**
-   * Get companion availability for date range (Public)
-   */
-  @Public()
-  @Get(':companionId/availability')
-  async getCompanionAvailability(
-    @Param('companionId', ParseUUIDPipe) companionId: string,
-    @Query() query: GetAvailabilityQueryDto,
-  ) {
-    return this.companionsService.getCompanionAvailability(
-      companionId,
-      query.startDate,
-      query.endDate,
-    );
-  }
-
-  /**
-   * Get companion reviews (Public)
-   */
-  @Public()
-  @Get(':companionId/reviews')
-  async getCompanionReviews(
-    @Param('companionId', ParseUUIDPipe) companionId: string,
-    @Query('page') page?: number,
-    @Query('limit') limit?: number,
-  ) {
-    return this.companionsService.getCompanionReviews(
-      companionId,
-      page ? Number(page) : 1,
-      limit ? Number(limit) : 20,
-    );
-  }
+  // ============================================
+  // "me" routes - MUST be defined before :companionId routes
+  // ============================================
 
   /**
    * Get own companion profile (Protected)
@@ -110,6 +70,15 @@ export class CompanionsController {
     @Body() dto: UpdateCompanionProfileDto,
   ) {
     return this.companionsService.updateCompanionProfile(user.id, dto);
+  }
+
+  /**
+   * Get own availability (Protected)
+   */
+  @Get('me/availability')
+  @UseGuards(JwtAuthGuard)
+  async getMyAvailability(@CurrentUser() user: CurrentUserData) {
+    return this.companionsService.getMyAvailability(user.id);
   }
 
   /**
@@ -164,21 +133,6 @@ export class CompanionsController {
       isEnabled: s.isEnabled,
     }));
     return this.companionsService.updateServices(user.id, services);
-  }
-
-  // ============================================
-  // Profile Boost Endpoints
-  // ============================================
-
-  /**
-   * Get boost pricing options (Public)
-   */
-  @Public()
-  @Get('boosts/pricing')
-  async getBoostPricing() {
-    return {
-      pricing: this.companionsService.getBoostPricing(),
-    };
   }
 
   /**
@@ -248,5 +202,65 @@ export class CompanionsController {
     @Param('boostId', ParseUUIDPipe) boostId: string,
   ) {
     return this.companionsService.cancelBoost(user.id, boostId);
+  }
+
+  // ============================================
+  // Public routes with :companionId parameter
+  // These MUST come after "me" routes to avoid "me" being matched as companionId
+  // ============================================
+
+  /**
+   * Get boost pricing options (Public)
+   */
+  @Public()
+  @Get('boosts/pricing')
+  async getBoostPricing() {
+    return {
+      pricing: this.companionsService.getBoostPricing(),
+    };
+  }
+
+  /**
+   * Get companion profile by ID (Public)
+   */
+  @Public()
+  @Get(':companionId')
+  async getCompanionProfile(
+    @Param('companionId', ParseUUIDPipe) companionId: string,
+  ) {
+    return this.companionsService.getCompanionProfile(companionId);
+  }
+
+  /**
+   * Get companion availability for date range (Public)
+   */
+  @Public()
+  @Get(':companionId/availability')
+  async getCompanionAvailability(
+    @Param('companionId', ParseUUIDPipe) companionId: string,
+    @Query() query: GetAvailabilityQueryDto,
+  ) {
+    return this.companionsService.getCompanionAvailability(
+      companionId,
+      query.startDate,
+      query.endDate,
+    );
+  }
+
+  /**
+   * Get companion reviews (Public)
+   */
+  @Public()
+  @Get(':companionId/reviews')
+  async getCompanionReviews(
+    @Param('companionId', ParseUUIDPipe) companionId: string,
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+  ) {
+    return this.companionsService.getCompanionReviews(
+      companionId,
+      page ? Number(page) : 1,
+      limit ? Number(limit) : 20,
+    );
   }
 }
