@@ -67,6 +67,99 @@ const TIER_CONFIG: Record<BoostTier, TierConfig> = {
   },
 };
 
+// Memoized pricing card component to prevent unnecessary re-renders
+const PricingCard = React.memo(function PricingCard({
+  item,
+  index,
+  isSelected,
+  isDisabled,
+  onSelect,
+  t,
+}: {
+  item: BoostPricing;
+  index: number;
+  isSelected: boolean;
+  isDisabled: boolean;
+  onSelect: (tier: BoostTier) => void;
+  t: (key: string) => string;
+}) {
+  const config = TIER_CONFIG[item.tier];
+  const IconComponent = config.icon;
+
+  const handlePress = React.useCallback(() => {
+    onSelect(item.tier);
+  }, [item.tier, onSelect]);
+
+  return (
+    <MotiView
+      from={{ opacity: 0, translateY: 20 }}
+      animate={{ opacity: 1, translateY: 0 }}
+      transition={{ type: 'timing', duration: 400, delay: 100 + index * 100 }}
+    >
+      <Pressable
+        onPress={handlePress}
+        disabled={isDisabled}
+        className={`relative mb-3 rounded-2xl border-2 p-4 ${
+          isSelected
+            ? 'border-lavender-400 bg-lavender-400/5'
+            : 'border-border-light bg-white'
+        } ${isDisabled ? 'opacity-50' : ''}`}
+      >
+        {config.popular && !isDisabled && (
+          <View className="absolute -top-2.5 right-4 rounded-full bg-rose-400 px-3 py-1">
+            <Text className="text-xs font-semibold text-white">
+              {t('common.popular')}
+            </Text>
+          </View>
+        )}
+
+        <View className="flex-row items-center">
+          <View
+            className={`mr-4 size-14 items-center justify-center rounded-2xl ${config.bgColor}`}
+          >
+            <IconComponent color={config.iconColor} width={28} height={28} />
+          </View>
+
+          <View className="flex-1">
+            <Text className="font-urbanist-bold text-lg text-midnight">
+              {item.name}
+            </Text>
+            <View className="mt-1 flex-row items-center gap-2">
+              <View className="flex-row items-center gap-1">
+                <Clock color={colors.text.tertiary} width={14} height={14} />
+                <Text className="text-xs text-text-secondary">
+                  {item.durationHours}h
+                </Text>
+              </View>
+              <View className="flex-row items-center gap-1">
+                <Chart color={colors.text.tertiary} width={14} height={14} />
+                <Text className="text-xs text-text-secondary">
+                  {item.multiplier}x {t('companion.boost.visibility')}
+                </Text>
+              </View>
+            </View>
+          </View>
+
+          <View className="items-end">
+            <Text className="font-urbanist-bold text-xl text-midnight">
+              {formatVND(item.price)}
+            </Text>
+            {isSelected && (
+              <CheckCircle color={colors.lavender[400]} width={20} height={20} />
+            )}
+          </View>
+        </View>
+
+        {item.description && (
+          <Text className="mt-3 text-sm text-text-secondary">
+            {item.description}
+          </Text>
+        )}
+      </Pressable>
+    </MotiView>
+  );
+});
+
 export default function BoostScreen() {
   const { t } = useTranslation();
   const goBack = useSafeBack('/companion/(app)/account');
@@ -157,81 +250,9 @@ export default function BoostScreen() {
     );
   }, [selectedTier, pricing, t, purchaseBoostMutation, handleRefresh]);
 
-  const renderPricingCard = (item: BoostPricing, index: number) => {
-    const config = TIER_CONFIG[item.tier];
-    const isSelected = selectedTier === item.tier;
-    const IconComponent = config.icon;
-
-    return (
-      <MotiView
-        key={item.tier}
-        from={{ opacity: 0, translateY: 20 }}
-        animate={{ opacity: 1, translateY: 0 }}
-        transition={{ type: 'timing', duration: 400, delay: 100 + index * 100 }}
-      >
-        <Pressable
-          onPress={() => setSelectedTier(item.tier)}
-          disabled={!!activeBoost}
-          className={`relative mb-3 rounded-2xl border-2 p-4 ${
-            isSelected
-              ? 'border-lavender-400 bg-lavender-400/5'
-              : `border-border-light bg-white`
-          } ${activeBoost ? 'opacity-50' : ''}`}
-        >
-          {config.popular && !activeBoost && (
-            <View className="absolute -top-2.5 right-4 rounded-full bg-rose-400 px-3 py-1">
-              <Text className="text-xs font-semibold text-white">
-                {t('common.popular')}
-              </Text>
-            </View>
-          )}
-
-          <View className="flex-row items-center">
-            <View
-              className={`mr-4 size-14 items-center justify-center rounded-2xl ${config.bgColor}`}
-            >
-              <IconComponent color={config.iconColor} width={28} height={28} />
-            </View>
-
-            <View className="flex-1">
-              <Text className="font-urbanist-bold text-lg text-midnight">
-                {item.name}
-              </Text>
-              <View className="mt-1 flex-row items-center gap-2">
-                <View className="flex-row items-center gap-1">
-                  <Clock color={colors.text.tertiary} width={14} height={14} />
-                  <Text className="text-xs text-text-secondary">
-                    {item.durationHours}h
-                  </Text>
-                </View>
-                <View className="flex-row items-center gap-1">
-                  <Chart color={colors.text.tertiary} width={14} height={14} />
-                  <Text className="text-xs text-text-secondary">
-                    {item.multiplier}x {t('companion.boost.visibility')}
-                  </Text>
-                </View>
-              </View>
-            </View>
-
-            <View className="items-end">
-              <Text className="font-urbanist-bold text-xl text-midnight">
-                {formatVND(item.price)}
-              </Text>
-              {isSelected && (
-                <CheckCircle color={colors.lavender[400]} width={20} height={20} />
-              )}
-            </View>
-          </View>
-
-          {item.description && (
-            <Text className="mt-3 text-sm text-text-secondary">
-              {item.description}
-            </Text>
-          )}
-        </Pressable>
-      </MotiView>
-    );
-  };
+  const handleSelectTier = React.useCallback((tier: BoostTier) => {
+    setSelectedTier(tier);
+  }, []);
 
   if (isLoading) {
     return (
@@ -337,7 +358,17 @@ export default function BoostScreen() {
           <Text className="font-urbanist-bold mb-3 text-lg text-midnight">
             {t('companion.boost.choose_package')}
           </Text>
-          {pricing?.map((item, index) => renderPricingCard(item, index))}
+          {pricing?.map((item, index) => (
+            <PricingCard
+              key={item.tier}
+              item={item}
+              index={index}
+              isSelected={selectedTier === item.tier}
+              isDisabled={!!activeBoost}
+              onSelect={handleSelectTier}
+              t={t}
+            />
+          ))}
         </View>
 
         {/* Boost History */}

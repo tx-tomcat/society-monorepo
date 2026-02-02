@@ -1,6 +1,5 @@
 /* eslint-disable max-lines-per-function */
 import { useRouter } from 'expo-router';
-import { useSafeBack } from '@/lib/hooks';
 import { MotiView } from 'moti';
 import React from 'react';
 import { useTranslation } from 'react-i18next';

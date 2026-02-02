@@ -31,6 +31,30 @@ import { formatVND } from '@/lib/utils';
 
 type Period = 'week' | 'month' | 'year';
 
+// Move outside component to avoid recreation on each render
+const TRANSACTION_ICON_CONFIG = {
+    earning: {
+        icon: Calendar,
+        color: colors.teal[400],
+        bg: 'bg-teal-400/10',
+    },
+    withdrawal: {
+        icon: Withdraw,
+        color: colors.rose[400],
+        bg: 'bg-rose-400/10',
+    },
+    bonus: {
+        icon: Chart,
+        color: colors.yellow[400],
+        bg: 'bg-yellow-400/10',
+    },
+    refund: {
+        icon: Withdraw,
+        color: colors.rose[400],
+        bg: 'bg-rose-400/10',
+    },
+} as const;
+
 export default function EarningsOverview() {
     const router = useRouter();
     const { t } = useTranslation();
@@ -79,34 +103,10 @@ export default function EarningsOverview() {
         }
     }, [overview, selectedPeriod]);
 
-    const getTransactionIcon = (type: EarningsTransaction['type']) => {
-        switch (type) {
-            case 'earning':
-                return {
-                    icon: Calendar,
-                    color: colors.teal[400],
-                    bg: 'bg-teal-400/10',
-                };
-            case 'withdrawal':
-                return {
-                    icon: Withdraw,
-                    color: colors.rose[400],
-                    bg: 'bg-rose-400/10',
-                };
-            case 'bonus':
-                return {
-                    icon: Chart,
-                    color: colors.yellow[400],
-                    bg: 'bg-yellow-400/10',
-                };
-            case 'refund':
-                return {
-                    icon: Withdraw,
-                    color: colors.rose[400],
-                    bg: 'bg-rose-400/10',
-                };
-        }
-    };
+    const getTransactionIcon = React.useCallback(
+        (type: EarningsTransaction['type']) => TRANSACTION_ICON_CONFIG[type],
+        []
+    );
 
     if (isLoading) {
         return (
