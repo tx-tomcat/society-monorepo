@@ -59,7 +59,7 @@ type Props = {
   testID?: string;
 };
 
-export function CompanionCard({
+export const CompanionCard = React.memo(function CompanionCard({
   companion,
   onPress,
   onBookPress,
@@ -93,7 +93,7 @@ export function CompanionCard({
               )}
             </View>
             <Text className="text-xs text-text-secondary">
-              ⭐ {companion.rating.toFixed(1)} · {t('hirer.home.bookings_count', { count: companion.reviewCount })}
+              {`⭐ ${companion.rating.toFixed(1)} · ${companion.reviewCount}+ ${t('hirer.home.bookings_count')}`}
             </Text>
           </View>
 
@@ -236,4 +236,4 @@ export function CompanionCard({
       </View>
     </Pressable>
   );
-}
+});
