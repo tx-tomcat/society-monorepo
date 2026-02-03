@@ -182,6 +182,31 @@ export function TabBar({
   navigation,
   accentColor = colors.rose[400],
 }: TabBarProps) {
+  const handleTabPress = React.useCallback(
+    (route: (typeof state.routes)[0], index: number) => {
+      const event = navigation.emit({
+        type: 'tabPress',
+        target: route.key,
+        canPreventDefault: true,
+      });
+
+      if (state.index !== index && !event.defaultPrevented) {
+        navigation.navigate(route.name, route.params);
+      }
+    },
+    [navigation, state.index]
+  );
+
+  const handleTabLongPress = React.useCallback(
+    (route: (typeof state.routes)[0]) => {
+      navigation.emit({
+        type: 'tabLongPress',
+        target: route.key,
+      });
+    },
+    [navigation]
+  );
+
   return (
     <SafeAreaView
       edges={['bottom']}
@@ -201,26 +226,10 @@ export function TabBar({
           const IconComponent = iconMap[route.name] || HomeIcon;
 
           // Get label from options.title (i18n) or fallback to route name mapping
-          const label = (options.title as string) || fallbackLabelMap[route.name] || route.name;
-
-          const onPress = () => {
-            const event = navigation.emit({
-              type: 'tabPress',
-              target: route.key,
-              canPreventDefault: true,
-            });
-
-            if (!isFocused && !event.defaultPrevented) {
-              navigation.navigate(route.name, route.params);
-            }
-          };
-
-          const onLongPress = () => {
-            navigation.emit({
-              type: 'tabLongPress',
-              target: route.key,
-            });
-          };
+          const label =
+            (options.title as string) ||
+            fallbackLabelMap[route.name] ||
+            route.name;
 
           return (
             <Pressable
@@ -229,15 +238,16 @@ export function TabBar({
               accessibilityState={isFocused ? { selected: true } : {}}
               accessibilityLabel={options.tabBarAccessibilityLabel}
               testID={options.tabBarButtonTestID}
-              onPress={onPress}
-              onLongPress={onLongPress}
+              onPress={() => handleTabPress(route, index)}
+              onLongPress={() => handleTabLongPress(route)}
               className="flex-1 items-center justify-center py-2"
             >
               <View className="items-center gap-0.5">
                 <IconComponent focused={isFocused} color={color} />
                 <Text
-                  className={`text-xs leading-[1.6] tracking-[0.2px] ${isFocused ? 'font-urbanist-bold' : 'font-urbanist-medium'
-                    }`}
+                  className={`text-xs leading-[1.6] tracking-[0.2px] ${
+                    isFocused ? 'font-urbanist-bold' : 'font-urbanist-medium'
+                  }`}
                   style={{ color: isFocused ? color : colors.text.tertiary }}
                 >
                   {label}
@@ -257,7 +267,7 @@ export function HirerTabBar(props: BottomTabBarProps) {
 }
 
 export function CompanionTabBar(props: BottomTabBarProps) {
-  return <TabBar {...props} accentColor={colors.lavender[400]} />;
+  return <TabBar {...props} accentColor={colors.lavender[900]} />;
 }
 
 // Custom Tab Button for expo-router/ui
