@@ -9,7 +9,7 @@ import { Text } from './text';
 const badge = tv({
   slots: {
     container: 'flex-row items-center justify-center rounded-full px-3 py-1',
-    label: 'text-xs font-semibold leading-[1.6] tracking-[0.2px]',
+    label: 'text-xs font-semibold leading-[1.6] tracking-[0.2px] text-white',
   },
 
   variants: {
@@ -47,8 +47,8 @@ const badge = tv({
         label: 'text-white',
       },
       lavender: {
-        container: 'bg-lavender-400',
-        label: 'text-midnight',
+        container: 'bg-lavender-900',
+        label: 'text-white',
       },
       teal: {
         container: 'bg-teal-400',
@@ -80,6 +80,10 @@ const badge = tv({
         container: 'bg-softpink',
         label: 'text-rose-500',
       },
+      active: {
+        container: 'bg-teal-400',
+        label: 'text-white',
+      },
     },
     size: {
       sm: {
@@ -110,7 +114,7 @@ interface Props extends BadgeVariants, Omit<ViewProps, 'children'> {
   testID?: string;
 }
 
-export function Badge({
+export const Badge = React.memo(function Badge({
   label,
   icon,
   variant = 'default',
@@ -120,7 +124,6 @@ export function Badge({
   ...props
 }: Props) {
   const styles = React.useMemo(() => badge({ variant, size }), [variant, size]);
-
   return (
     <View
       className={styles.container({ className })}
@@ -136,4 +139,4 @@ export function Badge({
       </Text>
     </View>
   );
-}
+});
