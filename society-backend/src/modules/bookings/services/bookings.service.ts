@@ -1178,6 +1178,7 @@ export class BookingsService {
 
   /**
    * Get pending booking requests (Companion) with cursor-based pagination
+   * @deprecated Use BookingScheduleService.getBookingRequests() instead for new code.
    */
   async getBookingRequests(
     companionUserId: string,
@@ -1248,6 +1249,7 @@ export class BookingsService {
 
   /**
    * Get companion schedule
+   * @deprecated Use BookingScheduleService.getCompanionSchedule() instead for new code.
    */
   async getCompanionSchedule(
     companionUserId: string,
@@ -1302,6 +1304,8 @@ export class BookingsService {
 
   /**
    * Submit review (Hirer)
+   * @deprecated Use BookingReviewsService.submitReview() instead for new code.
+   * This method will be removed in a future version.
    */
   async submitReview(bookingId: string, hirerId: string, dto: SubmitReviewDto) {
     const booking = await this.prisma.booking.findUnique({
@@ -1422,6 +1426,7 @@ export class BookingsService {
   /**
    * Edit review (Hirer only)
    * Must be done within 24 hours of review creation
+   * @deprecated Use BookingReviewsService.editReview() instead for new code.
    */
   async editReview(reviewId: string, hirerId: string, dto: EditReviewDto) {
     const EDIT_WINDOW_HOURS = 24;
@@ -1571,6 +1576,7 @@ export class BookingsService {
 
   /**
    * Decline a pending booking request (Companion only)
+   * @deprecated Use BookingCancellationService.declineBooking() instead for new code.
    */
   async declineBooking(
     bookingId: string,
@@ -1631,6 +1637,7 @@ export class BookingsService {
   /**
    * Dispute a review (Companion only)
    * Enforces 7-day window from review creation
+   * @deprecated Use BookingReviewsService.disputeReview() instead for new code.
    */
   async disputeReview(
     reviewId: string,
@@ -1702,6 +1709,7 @@ export class BookingsService {
 
   /**
    * Check if a review can still be disputed (for UI purposes)
+   * @deprecated Use BookingReviewsService.canDisputeReview() instead for new code.
    */
   async canDisputeReview(
     reviewId: string,
@@ -1751,6 +1759,7 @@ export class BookingsService {
    * - Emergency cancellations are tracked separately
    * - May waive late cancellation strikes if verified
    * - Both hirer and companion can use this
+   * @deprecated Use BookingCancellationService.emergencyCancellation() instead for new code.
    */
   async emergencyCancellation(
     bookingId: string,
@@ -1850,6 +1859,7 @@ export class BookingsService {
 
   /**
    * Get user's emergency cancellation history (for admin/support)
+   * @deprecated Use BookingCancellationService.getEmergencyCancellationHistory() instead.
    */
   async getEmergencyCancellationHistory(userId: string): Promise<{
     total: number;
