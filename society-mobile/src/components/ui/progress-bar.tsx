@@ -33,14 +33,14 @@ export const ProgressBar = forwardRef<ProgressBarRef, Props>(
 
     const style = useAnimatedStyle(() => {
       return {
-        width: `${progress.value}%`,
+        transform: [{ scaleX: progress.value / 100 }],
         backgroundColor: '#FF6B8A', // Rose Pink
         height: 2,
       };
     });
     return (
       <View className={twMerge(` bg-[#EAEAEA]`, className)}>
-        <Animated.View style={style} />
+        <Animated.View style={[style, { width: '100%', transformOrigin: 'left' }]} />
       </View>
     );
   }
