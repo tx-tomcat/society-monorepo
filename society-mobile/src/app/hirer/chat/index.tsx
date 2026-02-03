@@ -4,12 +4,8 @@ import { useRouter } from 'expo-router';
 import { MotiView } from 'moti';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  ActivityIndicator,
-  FlatList,
-  Pressable,
-  RefreshControl,
-} from 'react-native';
+import { FlashList } from '@shopify/flash-list';
+import { ActivityIndicator, Pressable, RefreshControl } from 'react-native';
 
 import {
   colors,
@@ -195,17 +191,11 @@ export default function ChatList() {
   );
 
   const renderItem = React.useCallback(
-    ({ item, index }: { item: ConversationItem; index: number }) => (
-      <MotiView
-        from={{ opacity: 0, translateX: -20 }}
-        animate={{ opacity: 1, translateX: 0 }}
-        transition={{ type: 'timing', duration: 300, delay: index * 50 }}
-      >
-        <ConversationCard
-          conversation={item}
-          onPress={() => handleConversationPress(item.id)}
-        />
-      </MotiView>
+    ({ item }: { item: ConversationItem }) => (
+      <ConversationCard
+        conversation={item}
+        onPress={() => handleConversationPress(item.id)}
+      />
     ),
     [handleConversationPress]
   );
@@ -239,7 +229,7 @@ export default function ChatList() {
       {conversations.length === 0 ? (
         <EmptyState />
       ) : (
-        <FlatList
+        <FlashList
           data={conversations}
           renderItem={renderItem}
           keyExtractor={(item) => item.id}
