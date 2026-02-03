@@ -9,12 +9,19 @@ export { PaymentRequestStatus, PaymentRequestType } from '../enums';
 
 // ============ Types ============
 
+export interface BankDeeplinkInfo {
+  appId: string;
+  name: string;
+  logo: string;
+  deeplink: string;
+}
+
 export interface TopupResponse {
   id: string;
   code: string;
   amount: number;
   qrUrl: string;
-  deeplinks: Record<string, string>;
+  deeplinks: BankDeeplinkInfo[];
   accountInfo: {
     bankCode: string;
     accountNumber: string;
@@ -29,7 +36,7 @@ export interface BookingPaymentRequestResponse {
   amount: number;
   bookingId: string;
   qrUrl: string;
-  deeplinks: Record<string, string>;
+  deeplinks: BankDeeplinkInfo[];
   accountInfo: {
     bankCode: string;
     accountNumber: string;
@@ -70,6 +77,15 @@ export interface TransactionsResponse {
 export interface CanPayResponse {
   canPay: boolean;
   balance: number;
+}
+
+export interface PaymentRequestStatusResponse {
+  id: string;
+  code: string;
+  status: 'PENDING' | 'COMPLETED' | 'EXPIRED' | 'FAILED';
+  amount: number;
+  bookingId: string | null;
+  completedAt: string | null;
 }
 
 // ============ API Service ============
@@ -117,5 +133,16 @@ export const walletService = {
    */
   canPayFromWallet: async (amount: number): Promise<CanPayResponse> => {
     return apiClient.get<CanPayResponse>(`/wallet/can-pay?amount=${amount}`);
+  },
+
+  /**
+   * Get payment request status (for polling)
+   */
+  getPaymentRequestStatus: async (
+    requestId: string
+  ): Promise<PaymentRequestStatusResponse> => {
+    return apiClient.get<PaymentRequestStatusResponse>(
+      `/wallet/payment-request/${requestId}/status`
+    );
   },
 };

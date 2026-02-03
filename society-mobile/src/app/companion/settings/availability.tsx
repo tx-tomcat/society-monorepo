@@ -197,7 +197,7 @@ export default function CompanionAvailabilityScreen() {
           className="mx-4 mt-4 rounded-xl bg-lavender-50 p-4"
         >
           <View className="flex-row items-center gap-3">
-            <View className="size-10 items-center justify-center rounded-full bg-lavender-400">
+            <View className="size-10 items-center justify-center rounded-full bg-lavender-900">
               <Calendar color="white" width={20} height={20} />
             </View>
             <View className="flex-1">
@@ -205,10 +205,7 @@ export default function CompanionAvailabilityScreen() {
                 {t('companion.availability.summary_title')}
               </Text>
               <Text className="text-sm text-text-secondary">
-                {t('companion.availability.summary_description', {
-                  days: enabledDaysCount,
-                  slots: totalSlotsCount,
-                })}
+                {`${enabledDaysCount} ${t('companion.availability.summary_description')} ${totalSlotsCount} ${t('companion.availability.summary_description_suffix')}`}
               </Text>
             </View>
           </View>
@@ -232,9 +229,8 @@ export default function CompanionAvailabilityScreen() {
               return (
                 <View
                   key={day.dayOfWeek}
-                  className={`flex-row items-center justify-between p-4 ${
-                    index < DAYS.length - 1 ? 'border-b border-border-light' : ''
-                  }`}
+                  className={`flex-row items-center justify-between p-4 ${index < DAYS.length - 1 ? 'border-b border-border-light' : ''
+                    }`}
                 >
                   <Text className="font-urbanist-medium text-base text-midnight">
                     {t(day.labelKey)}
@@ -284,14 +280,12 @@ export default function CompanionAvailabilityScreen() {
                       <Pressable
                         key={slot.id}
                         onPress={() => handleToggleSlot(day.dayOfWeek, slot.id)}
-                        className={`rounded-full px-4 py-2 ${
-                          isSelected ? 'bg-lavender-400' : 'border border-border-light bg-white'
-                        }`}
+                        className={`rounded-full px-4 py-2 ${isSelected ? 'bg-lavender-900' : 'border border-border-light bg-white'
+                          }`}
                       >
                         <Text
-                          className={`text-sm font-medium ${
-                            isSelected ? 'text-white' : 'text-midnight'
-                          }`}
+                          className={`text-sm font-medium ${isSelected ? 'text-white' : 'text-midnight'
+                            }`}
                         >
                           {t(slot.labelKey)}
                         </Text>
@@ -335,7 +329,7 @@ export default function CompanionAvailabilityScreen() {
             loading={updateAvailabilityMutation.isPending}
             variant="default"
             size="lg"
-            className={`w-full ${hasChanges ? 'bg-lavender-400' : 'bg-neutral-300'}`}
+            className={`w-full ${hasChanges ? 'bg-lavender-900' : 'bg-neutral-300'}`}
           />
         </View>
       </SafeAreaView>

@@ -402,7 +402,7 @@ export default function BookingFormScreen() {
                     <Pressable
                       key={time}
                       onPress={() => setSelectedTime(time)}
-                      className={`rounded-lg px-5 py-3 ${isSelected ? 'bg-lavender-400' : 'bg-white'
+                      className={`rounded-lg px-5 py-3 ${isSelected ? 'bg-lavender-900' : 'bg-white'
                         }`}
                     >
                       <Text
@@ -512,7 +512,7 @@ export default function BookingFormScreen() {
             from={{ opacity: 0, translateY: 10 }}
             animate={{ opacity: 1, translateY: 0 }}
             transition={{ type: 'timing', duration: 400, delay: 350 }}
-            className="mx-4 mt-6 rounded-2xl bg-lavender-400/10 p-4"
+            className="mx-4 mt-6 rounded-2xl bg-lavender-900/10 p-4"
           >
             <View className="mb-3 flex-row items-center justify-between">
               <Text className="text-text-secondary">
@@ -530,7 +530,7 @@ export default function BookingFormScreen() {
                 {selectedDurationObj?.hours || 3} {t('hirer.booking.hours')}
               </Text>
             </View>
-            <View className="mb-2 border-t border-lavender-400/20 pt-3">
+            <View className="mb-2 border-t border-lavender-900/20 pt-3">
               <View className="flex-row items-center justify-between">
                 <Text className="font-urbanist-semibold text-base text-midnight">
                   {t('hirer.booking.estimated_total')}

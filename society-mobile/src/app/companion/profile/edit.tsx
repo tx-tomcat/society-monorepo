@@ -122,10 +122,10 @@ export default function EditCompanionProfile() {
           <Pressable
             onPress={() => router.push('/companion/settings/photos')}
             testID="manage-photos-button"
-            className="flex-row items-center justify-between rounded-xl bg-lavender-400/10 p-4"
+            className="flex-row items-center justify-between rounded-xl bg-lavender-900/10 p-4"
           >
             <View>
-              <Text className="font-semibold text-lavender-400">
+              <Text className="font-semibold text-lavender-900">
                 {t('companion.edit_profile.manage_photos')}
               </Text>
               <Text className="text-sm text-text-secondary">

@@ -161,7 +161,7 @@ export default function PaymentMethodsScreen() {
 
       Alert.alert(
         t('hirer.payment_methods.delete_title'),
-        t('hirer.payment_methods.delete_message', { name: method.name }),
+        t('hirer.payment_methods.delete_message'),
         [
           { text: t('common.cancel'), style: 'cancel' },
           {

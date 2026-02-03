@@ -225,13 +225,16 @@ export interface BoostPricing {
 }
 
 export interface ActiveBoost {
-  id: string;
-  tier: BoostTier;
-  status: BoostStatus;
-  multiplier: number;
-  startedAt: string | null;
-  expiresAt: string | null;
-  remainingHours: number | null;
+  boost: {
+    id: string;
+    tier: BoostTier;
+    status: BoostStatus;
+    multiplier: number;
+    startedAt: string | null;
+    expiresAt: string | null;
+    remainingHours: number | null;
+  }
+  hasActiveBoost: boolean;
 }
 
 export interface BoostHistoryItem {

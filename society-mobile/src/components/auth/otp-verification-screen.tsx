@@ -32,11 +32,11 @@ export type OTPVerificationScreenProps = {
 const themeConfig = {
   companion: {
     accentColor: colors.lavender[400],
-    accentBgClass: 'bg-lavender-400/20',
-    accentBorderClass: 'border-lavender-400',
-    accentInputBgClass: 'bg-lavender-400/10',
-    accentTextClass: 'text-lavender-400',
-    buttonClassName: 'w-full bg-lavender-400',
+    accentBgClass: 'bg-lavender-900/20',
+    accentBorderClass: 'border-lavender-900',
+    accentInputBgClass: 'bg-lavender-900/10',
+    accentTextClass: 'text-lavender-900',
+    buttonClassName: 'w-full bg-lavender-900',
   },
   hirer: {
     accentColor: colors.rose[400],
@@ -199,11 +199,10 @@ export function OTPVerificationScreen({
                 onKeyPress={(e) => handleKeyPress(e, index)}
                 keyboardType="number-pad"
                 maxLength={1}
-                className={`size-14 rounded-xl border-2 text-center font-urbanist-bold text-2xl ${
-                  digit
+                className={`size-14 rounded-xl border-2 text-center font-urbanist-bold text-2xl ${digit
                     ? `${theme.accentBorderClass} ${theme.accentInputBgClass}`
                     : 'border-border-light bg-white'
-                }`}
+                  }`}
                 style={{ color: digit ? colors.midnight.DEFAULT : colors.text.tertiary }}
               />
             </MotiView>

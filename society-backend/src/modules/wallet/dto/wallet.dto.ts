@@ -33,12 +33,19 @@ export class GetTransactionsQueryDto {
 
 // ============ Response DTOs ============
 
+export interface BankDeeplinkInfo {
+  appId: string;
+  name: string;
+  logo: string;
+  deeplink: string;
+}
+
 export interface TopupResponse {
   id: string;
   code: string;
   amount: number;
   qrUrl: string;
-  deeplinks: Record<string, string>;
+  deeplinks: BankDeeplinkInfo[];
   accountInfo: {
     bankCode: string;
     accountNumber: string;
@@ -53,7 +60,7 @@ export interface BookingPaymentRequestResponse {
   amount: number;
   bookingId: string;
   qrUrl: string;
-  deeplinks: Record<string, string>;
+  deeplinks: BankDeeplinkInfo[];
   accountInfo: {
     bankCode: string;
     accountNumber: string;
@@ -89,6 +96,15 @@ export interface TransactionsResponse {
     total: number;
     totalPages: number;
   };
+}
+
+export interface PaymentRequestStatusResponse {
+  id: string;
+  code: string;
+  status: 'PENDING' | 'COMPLETED' | 'EXPIRED' | 'FAILED';
+  amount: number;
+  bookingId: string | null;
+  completedAt: string | null;
 }
 
 // ============ SePay Webhook DTO ============

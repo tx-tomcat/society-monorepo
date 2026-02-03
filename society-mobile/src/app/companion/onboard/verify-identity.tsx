@@ -5,7 +5,6 @@ import { MotiView } from 'moti';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, Pressable, ScrollView } from 'react-native';
-import Toast from 'react-native-toast-message';
 
 import {
   Button,
@@ -17,6 +16,7 @@ import {
   Text,
   View,
 } from '@/components/ui';
+import { showErrorMessage, showSuccessMessage } from '@/components/ui/utils';
 import { Camera, CheckCircle, IdCard, X } from '@/components/ui/icons';
 import { useSubmitCompanionOnboarding } from '@/lib/hooks';
 import { useCompanionOnboarding } from '@/lib/stores';
@@ -175,18 +175,15 @@ export default function VerifyIdentity() {
       resetStore();
 
       // Navigate to companion dashboard
-      Toast.show({
-        type: 'success',
-        text1: t('companion.onboard.success_title'),
-        text2: t('companion.onboard.success_message'),
-      });
+      showSuccessMessage(
+        t('companion.onboard.success_title'),
+        t('companion.onboard.success_message')
+      );
       router.replace('/companion/(app)' as Href);
     } catch (error) {
-      Toast.show({
-        type: 'error',
-        text1: t('common.error'),
-        text2: error instanceof Error ? error.message : t('companion.onboard.error_message'),
-      });
+      showErrorMessage(
+        error instanceof Error ? error.message : t('companion.onboard.error_message')
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -220,11 +217,11 @@ export default function VerifyIdentity() {
 
       <CompanionHeader
         title={t('companion.onboard.verify_identity.header')}
-        subtitle={t('companion.onboard.step', { current: 3, total: 3 })}
+        subtitle={`${t('companion.onboard.step')} 3/3`}
         onBack={handleBack}
         rightElement={
           <Pressable onPress={handleSkip}>
-            <Text className="text-sm text-lavender-400">
+            <Text className="text-sm text-lavender-900">
               {t('common.skip')}
             </Text>
           </Pressable>
@@ -241,7 +238,7 @@ export default function VerifyIdentity() {
           from={{ opacity: 0, translateY: 20 }}
           animate={{ opacity: 1, translateY: 0 }}
           transition={{ type: 'timing', duration: 500 }}
-          className="mb-6 rounded-2xl bg-lavender-400/10 p-4"
+          className="mb-6 rounded-2xl bg-lavender-900/10 p-4"
         >
           <View className="flex-row items-start gap-3">
             <IdCard color={colors.lavender[400]} width={24} height={24} />
@@ -296,10 +293,10 @@ export default function VerifyIdentity() {
               </>
             ) : (
               <View className="size-full items-center justify-center">
-                <View className="mb-2 rounded-full bg-lavender-400/20 p-3">
+                <View className="mb-2 rounded-full bg-lavender-900/20 p-3">
                   <Camera color={colors.lavender[400]} width={28} height={28} />
                 </View>
-                <Text className="text-sm font-medium text-lavender-400">
+                <Text className="text-sm font-medium text-lavender-900">
                   {t('companion.onboard.verify_identity.tap_to_upload')}
                 </Text>
               </View>
@@ -347,10 +344,10 @@ export default function VerifyIdentity() {
               </>
             ) : (
               <View className="size-full items-center justify-center">
-                <View className="mb-2 rounded-full bg-lavender-400/20 p-3">
+                <View className="mb-2 rounded-full bg-lavender-900/20 p-3">
                   <Camera color={colors.lavender[400]} width={28} height={28} />
                 </View>
-                <Text className="text-sm font-medium text-lavender-400">
+                <Text className="text-sm font-medium text-lavender-900">
                   {t('companion.onboard.verify_identity.tap_to_upload')}
                 </Text>
               </View>

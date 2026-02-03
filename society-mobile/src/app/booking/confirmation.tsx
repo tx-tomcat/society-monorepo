@@ -86,7 +86,7 @@ export default function BookingConfirmation() {
           </View>
 
           {/* Safety Reminder */}
-          <View className="mb-6 w-full rounded-xl bg-lavender-400/20 p-4">
+          <View className="mb-6 w-full rounded-xl bg-lavender-900/20 p-4">
             <Text className="text-center text-sm text-midnight">
               Remember to check in when you meet using the GPS feature for your
               safety.

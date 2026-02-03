@@ -10,7 +10,6 @@ import {
   ScrollView,
   TextInput,
 } from 'react-native';
-import Toast from 'react-native-toast-message';
 
 import {
   Badge,
@@ -28,6 +27,7 @@ import {
   Info,
   Wallet,
 } from '@/components/ui/icons';
+import { showErrorMessage, showSuccessMessage } from '@/components/ui/utils';
 import {
   useBankAccounts,
   useEarningsOverview,
@@ -92,9 +92,7 @@ export default function WithdrawFunds() {
 
     Alert.alert(
       t('companion.withdraw.confirm_title'),
-      t('companion.withdraw.confirm_message', {
-        amount: formatVND(withdrawAmount, { symbolPosition: 'suffix' }),
-      }),
+      t('companion.withdraw.confirm_message'),
       [
         { text: t('common.cancel'), style: 'cancel' },
         {
@@ -107,20 +105,15 @@ export default function WithdrawFunds() {
               },
               {
                 onSuccess: () => {
-                  Toast.show({
-                    type: 'success',
-                    text1: t('companion.withdraw.success'),
-                    text2: t('companion.withdraw.success_description'),
-                  });
+                  showSuccessMessage(
+                    t('companion.withdraw.success'),
+                    t('companion.withdraw.success_description')
+                  );
                   router.back();
                 },
                 onError: (error) => {
                   console.error('Withdrawal request failed:', error);
-                  Toast.show({
-                    type: 'error',
-                    text1: t('companion.withdraw.request_failed'),
-                    text2: t('companion.withdraw.request_failed_description'),
-                  });
+                  showErrorMessage(t('companion.withdraw.request_failed'));
                 },
               }
             );
@@ -168,7 +161,7 @@ export default function WithdrawFunds() {
           from={{ opacity: 0, translateY: 20 }}
           animate={{ opacity: 1, translateY: 0 }}
           transition={{ type: 'timing', duration: 500 }}
-          className="mb-6 flex-row items-center justify-between rounded-2xl bg-lavender-400 p-4"
+          className="mb-6 flex-row items-center justify-between rounded-2xl bg-lavender-900 p-4"
         >
           <View className="flex-row items-center gap-3">
             <View className="size-10 items-center justify-center rounded-full bg-white/20">
@@ -196,13 +189,11 @@ export default function WithdrawFunds() {
             {t('companion.withdraw.amount_label')}
           </Text>
           <View
-            className={`flex-row items-center rounded-xl border bg-white px-4 ${
-              isBelowMinimum || isAboveBalance
-                ? 'border-danger-400'
-                : 'border-border-light'
-            }`}
+            className={`flex-row items-center rounded-xl border bg-white px-4 ${isBelowMinimum || isAboveBalance
+              ? 'border-danger-400'
+              : 'border-border-light'
+              }`}
           >
-            <Text className="text-xl text-text-tertiary">₫</Text>
             <TextInput
               value={amount ? parseInt(amount, 10).toLocaleString('vi-VN') : ''}
               onChangeText={(text) => setAmount(text.replace(/\D/g, ''))}
@@ -210,26 +201,24 @@ export default function WithdrawFunds() {
               placeholderTextColor={colors.text.tertiary}
               keyboardType="number-pad"
               testID="amount-input"
-              className="flex-1 py-4 text-right text-2xl font-bold"
+              className="flex-1 py-4 text-left text-2xl font-bold"
               style={{ fontFamily: 'Urbanist_700Bold', color: colors.midnight.DEFAULT }}
             />
+            <Text className="text-xl text-text-tertiary">₫</Text>
+
           </View>
 
           {/* Validation Messages */}
           {isBelowMinimum && (
             <Text className="mt-2 text-sm text-danger-400">
-              {t('companion.withdraw.minimum_error', {
-                amount: formatVND(100000, { symbolPosition: 'suffix' }),
-              })}
+              {`${t('companion.withdraw.minimum_error')} ${formatVND(300000, { symbolPosition: 'suffix' })}`}
             </Text>
           )}
           {isAboveBalance && (
             <Text className="mt-2 text-sm text-danger-400">
-              {t('companion.withdraw.exceeds_balance_error', {
-                amount: formatVND(availableBalance, {
-                  symbolPosition: 'suffix',
-                }),
-              })}
+              {`${t('companion.withdraw.exceeds_balance_error')} ${formatVND(availableBalance, {
+                symbolPosition: 'suffix',
+              })}`}
             </Text>
           )}
 
@@ -240,16 +229,14 @@ export default function WithdrawFunds() {
                 key={value}
                 onPress={() => handleSelectAmount(value)}
                 testID={`quick-amount-${value}`}
-                className={`rounded-full px-4 py-2 ${
-                  amountNum === value
-                    ? 'bg-lavender-400'
-                    : 'border border-border-light bg-white'
-                }`}
+                className={`rounded-full px-4 py-2 ${amountNum === value
+                  ? 'bg-lavender-900'
+                  : 'border border-border-light bg-white'
+                  }`}
               >
                 <Text
-                  className={`text-sm font-medium ${
-                    amountNum === value ? 'text-white' : 'text-midnight'
-                  }`}
+                  className={`text-sm font-medium ${amountNum === value ? 'text-white' : 'text-midnight'
+                    }`}
                 >
                   {formatVND(value, { symbolPosition: 'suffix' })}
                 </Text>
@@ -258,9 +245,9 @@ export default function WithdrawFunds() {
             <Pressable
               onPress={() => handleSelectAmount(availableBalance)}
               testID="withdraw-all-button"
-              className="rounded-full border border-lavender-400 bg-lavender-400/10 px-4 py-2"
+              className="rounded-full border border-lavender-900 bg-lavender-900/10 px-4 py-2"
             >
-              <Text className="text-sm font-medium text-lavender-400">
+              <Text className="text-sm font-medium text-lavender-900">
                 {t('companion.withdraw.withdraw_all')}
               </Text>
             </Pressable>
@@ -285,13 +272,12 @@ export default function WithdrawFunds() {
                   key={bank.id}
                   onPress={() => setSelectedBank(bank.id)}
                   testID={`bank-account-${bank.id}`}
-                  className={`flex-row items-center gap-4 rounded-xl p-4 ${
-                    selectedBank === bank.id
-                      ? 'border border-lavender-400 bg-lavender-400/10'
-                      : 'border border-border-light bg-white'
-                  }`}
+                  className={`flex-row items-center gap-4 rounded-xl p-4 ${selectedBank === bank.id
+                    ? 'border border-lavender-900 bg-lavender-900/10'
+                    : 'border border-border-light bg-white'
+                    }`}
                 >
-                  <View className="size-12 items-center justify-center rounded-full bg-lavender-400/20">
+                  <View className="size-12 items-center justify-center rounded-full bg-lavender-900/20">
                     <Bank color={colors.lavender[400]} width={24} height={24} />
                   </View>
                   <View className="flex-1">
@@ -312,11 +298,10 @@ export default function WithdrawFunds() {
                     </Text>
                   </View>
                   <View
-                    className={`size-6 items-center justify-center rounded-full border-2 ${
-                      selectedBank === bank.id
-                        ? 'border-lavender-400 bg-lavender-400'
-                        : 'border-border-light'
-                    }`}
+                    className={`size-6 items-center justify-center rounded-full border-2 ${selectedBank === bank.id
+                      ? 'border-lavender-900 bg-lavender-900'
+                      : 'border-border-light'
+                      }`}
                   >
                     {selectedBank === bank.id && (
                       <CheckCircle color="#FFFFFF" width={16} height={16} />
@@ -340,7 +325,7 @@ export default function WithdrawFunds() {
           )}
 
           <Pressable testID="add-bank-account" className="mt-3 items-center">
-            <Text className="text-sm font-semibold text-lavender-400">
+            <Text className="text-sm font-semibold text-lavender-900">
               + {t('companion.withdraw.add_bank_account')}
             </Text>
           </Pressable>
@@ -389,7 +374,7 @@ export default function WithdrawFunds() {
             variant="default"
             size="lg"
             testID="submit-withdraw-button"
-            className="w-full bg-lavender-400"
+            className="w-full bg-lavender-900"
           />
         </View>
       </SafeAreaView>

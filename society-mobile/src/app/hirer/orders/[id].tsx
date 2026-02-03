@@ -20,6 +20,7 @@ import {
   ArrowLeft,
   Calendar,
   Clock,
+  CreditCard,
   MapPin,
   MessageCircle,
   Phone,
@@ -27,32 +28,30 @@ import {
   ShieldCheck,
   Star,
 } from '@/components/ui/icons';
-import { BookingStatus } from '@/lib/api/enums';
+import { BookingStatus, PaymentStatus } from '@/lib/api/enums';
 import { getPhotoUrl } from '@/lib/api/services/companions.service';
 import { useBooking, useCancelBooking } from '@/lib/hooks';
 
 type DisplayBookingStatus =
-  | 'upcoming'
+  | 'pending'
+  | 'awaiting_payment'
+  | 'confirmed'
   | 'active'
   | 'completed'
   | 'cancelled'
-  | 'pending';
+  | 'expired';
 
 const STATUS_CONFIG: Record<
   DisplayBookingStatus,
-  { variant: 'lavender' | 'teal' | 'secondary' | 'rose'; labelKey: string }
+  { variant: 'pending' | 'confirmed' | 'completed' | 'cancelled' | 'lavender' | 'rose'; labelKey: string }
 > = {
-  upcoming: { variant: 'lavender', labelKey: 'hirer.orders.status.upcoming' },
-  pending: { variant: 'rose', labelKey: 'hirer.orders.status.pending' },
-  active: { variant: 'teal', labelKey: 'hirer.orders.status.in_progress' },
-  completed: {
-    variant: 'secondary',
-    labelKey: 'hirer.orders.status.completed',
-  },
-  cancelled: {
-    variant: 'secondary',
-    labelKey: 'hirer.orders.status.cancelled',
-  },
+  pending: { variant: 'pending', labelKey: 'hirer.orders.status.pending' },
+  awaiting_payment: { variant: 'rose', labelKey: 'hirer.orders.status.awaiting_payment' },
+  confirmed: { variant: 'confirmed', labelKey: 'hirer.orders.status.confirmed' },
+  active: { variant: 'lavender', labelKey: 'hirer.orders.status.in_progress' },
+  completed: { variant: 'completed', labelKey: 'hirer.orders.status.completed' },
+  cancelled: { variant: 'cancelled', labelKey: 'hirer.orders.status.cancelled' },
+  expired: { variant: 'cancelled', labelKey: 'hirer.orders.status.expired' },
 };
 
 // Day of week keys for i18n
@@ -109,23 +108,31 @@ export default function BookingDetail() {
       });
     };
 
-    // Map API status to local display status
-    const mapStatus = (apiStatus: BookingStatus): DisplayBookingStatus => {
-      switch (apiStatus) {
+    // Map API status to local display status based on booking AND payment status
+    const mapStatus = (
+      bookingStatus: BookingStatus,
+      paymentStatus: PaymentStatus
+    ): DisplayBookingStatus => {
+      switch (bookingStatus) {
         case BookingStatus.PENDING:
           return 'pending';
         case BookingStatus.CONFIRMED:
-          return 'upcoming';
+          // If confirmed but payment is pending, show awaiting_payment
+          if (paymentStatus === PaymentStatus.PENDING) {
+            return 'awaiting_payment';
+          }
+          return 'confirmed';
         case BookingStatus.ACTIVE:
           return 'active';
         case BookingStatus.COMPLETED:
           return 'completed';
         case BookingStatus.CANCELLED:
         case BookingStatus.DISPUTED:
-        case BookingStatus.EXPIRED:
           return 'cancelled';
+        case BookingStatus.EXPIRED:
+          return 'expired';
         default:
-          return 'upcoming';
+          return 'pending';
       }
     };
 
@@ -146,17 +153,17 @@ export default function BookingDetail() {
       occasionEmoji: b.occasion?.emoji || '📅',
       date: startDate
         ? (() => {
-            const dayKey = DAY_KEYS[startDate.getDay()];
-            const monthKey = MONTH_KEYS[startDate.getMonth()];
-            const day = startDate.getDate();
-            const year = startDate.getFullYear();
-            const weekday = t(`common.days.${dayKey}`);
-            const month = t(`common.months.${monthKey}`);
-            // Vietnamese: "Thứ 6, 30 Tháng 1 2026", English: "Friday, Jan 30, 2026"
-            return i18n.language === 'vi'
-              ? `${weekday}, ${day} ${month} ${year}`
-              : `${weekday}, ${month} ${day}, ${year}`;
-          })()
+          const dayKey = DAY_KEYS[startDate.getDay()];
+          const monthKey = MONTH_KEYS[startDate.getMonth()];
+          const day = startDate.getDate();
+          const year = startDate.getFullYear();
+          const weekday = t(`common.days.${dayKey}`);
+          const month = t(`common.months.${monthKey}`);
+          // Vietnamese: "Thứ 6, 30 Tháng 1 2026", English: "Friday, Jan 30, 2026"
+          return i18n.language === 'vi'
+            ? `${weekday}, ${day} ${month} ${year}`
+            : `${weekday}, ${month} ${day}, ${year}`;
+        })()
         : '',
       time:
         startDate && endDate
@@ -164,7 +171,8 @@ export default function BookingDetail() {
           : '',
       duration: `${hours} ${t('common.hours')}`,
       location: b.locationAddress || '',
-      status: mapStatus(b.status),
+      status: mapStatus(b.status, b.paymentStatus),
+      rawStatus: b.status,
       specialRequests: b.specialRequests || '',
       pricing: {
         hourlyRate,
@@ -174,17 +182,19 @@ export default function BookingDetail() {
       bookingCode: b.bookingNumber || `SOC-${b.id.slice(0, 8).toUpperCase()}`,
       createdAt: b.createdAt
         ? (() => {
-            const date = new Date(b.createdAt);
-            const monthKey = MONTH_KEYS[date.getMonth()];
-            const day = date.getDate();
-            const year = date.getFullYear();
-            const month = t(`common.months.${monthKey}`);
-            // Vietnamese: "30 Tháng 1 2026", English: "Jan 30, 2026"
-            return i18n.language === 'vi'
-              ? `${day} ${month} ${year}`
-              : `${month} ${day}, ${year}`;
-          })()
+          const date = new Date(b.createdAt);
+          const monthKey = MONTH_KEYS[date.getMonth()];
+          const day = date.getDate();
+          const year = date.getFullYear();
+          const month = t(`common.months.${monthKey}`);
+          // Vietnamese: "30 Tháng 1 2026", English: "Jan 30, 2026"
+          return i18n.language === 'vi'
+            ? `${day} ${month} ${year}`
+            : `${month} ${day}, ${year}`;
+        })()
         : '',
+      paymentStatus: b.paymentStatus,
+      paymentDeadline: b.paymentDeadline ? new Date(b.paymentDeadline) : null,
     };
   }, [bookingData, t, i18n.language]);
 
@@ -242,6 +252,12 @@ export default function BookingDetail() {
     Alert.alert('Receipt', 'Downloading receipt...');
   }, []);
 
+  const handleMakePayment = React.useCallback(() => {
+    if (id) {
+      router.push(`/hirer/booking/payment/${id}` as Href);
+    }
+  }, [id, router]);
+
   // Loading state
   if (isLoading) {
     return (
@@ -279,7 +295,7 @@ export default function BookingDetail() {
     );
   }
 
-  const statusConfig = STATUS_CONFIG[booking.status] || STATUS_CONFIG.upcoming;
+  const statusConfig = STATUS_CONFIG[booking.status] || STATUS_CONFIG.pending;
 
   return (
     <View className="flex-1 bg-warmwhite">
@@ -302,6 +318,35 @@ export default function BookingDetail() {
       </SafeAreaView>
 
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
+        {/* Payment Required Banner - Show when booking is confirmed but payment is still pending */}
+        {booking.rawStatus === BookingStatus.CONFIRMED &&
+          booking.paymentStatus === PaymentStatus.PENDING && (
+            <MotiView
+              from={{ opacity: 0, translateY: -10 }}
+              animate={{ opacity: 1, translateY: 0 }}
+              transition={{ type: 'timing', duration: 400 }}
+              className="mx-4 mt-4 flex-row items-center gap-3 rounded-2xl bg-yellow-400/10 p-4"
+            >
+              <View className="size-10 items-center justify-center rounded-full bg-yellow-400/20">
+                <CreditCard color={colors.yellow[600]} width={20} height={20} />
+              </View>
+              <View className="flex-1">
+                <Text className="font-semibold text-yellow-700">
+                  {t('hirer.booking_detail.payment_required')}
+                </Text>
+                <Text className="text-sm text-yellow-600">
+                  {booking.paymentDeadline
+                    ? `${t('hirer.booking_detail.payment_deadline')} ${booking.paymentDeadline.toLocaleTimeString('en-US', {
+                      hour: 'numeric',
+                      minute: '2-digit',
+                      hour12: true,
+                    })} ${t('hirer.booking_detail.payment_deadline_suffix')}`
+                    : t('hirer.booking_detail.payment_required_desc')}
+                </Text>
+              </View>
+            </MotiView>
+          )}
+
         {/* Companion Card */}
         <MotiView
           from={{ opacity: 0, translateY: 20 }}
@@ -340,33 +385,34 @@ export default function BookingDetail() {
             </View>
           </View>
 
-          {/* Quick Actions - only show when booking is confirmed/upcoming or active */}
-          {(booking.status === 'upcoming' || booking.status === 'active') && (
-            <View className="mt-4 flex-row gap-3">
-              <Pressable
-                onPress={handleCallCompanion}
-                className="flex-1 flex-row items-center justify-center gap-2 rounded-xl bg-softpink py-3"
-              >
-                <Phone color={colors.rose[400]} width={20} height={20} />
-                <Text className="font-semibold text-rose-400">
-                  {t('hirer.booking_detail.call')}
-                </Text>
-              </Pressable>
-              <Pressable
-                onPress={handleMessageCompanion}
-                className="flex-1 flex-row items-center justify-center gap-2 rounded-xl bg-softpink py-3"
-              >
-                <MessageCircle
-                  color={colors.rose[400]}
-                  width={20}
-                  height={20}
-                />
-                <Text className="font-semibold text-rose-400">
-                  {t('hirer.booking_detail.message')}
-                </Text>
-              </Pressable>
-            </View>
-          )}
+          {/* Quick Actions - only show when booking is confirmed or active */}
+          {(booking.rawStatus === BookingStatus.CONFIRMED ||
+            booking.rawStatus === BookingStatus.ACTIVE) && (
+              <View className="mt-4 flex-row gap-3">
+                <Pressable
+                  onPress={handleCallCompanion}
+                  className="flex-1 flex-row items-center justify-center gap-2 rounded-xl bg-softpink py-3"
+                >
+                  <Phone color={colors.rose[400]} width={20} height={20} />
+                  <Text className="font-semibold text-rose-400">
+                    {t('hirer.booking_detail.call')}
+                  </Text>
+                </Pressable>
+                <Pressable
+                  onPress={handleMessageCompanion}
+                  className="flex-1 flex-row items-center justify-center gap-2 rounded-xl bg-softpink py-3"
+                >
+                  <MessageCircle
+                    color={colors.rose[400]}
+                    width={20}
+                    height={20}
+                  />
+                  <Text className="font-semibold text-rose-400">
+                    {t('hirer.booking_detail.message')}
+                  </Text>
+                </Pressable>
+              </View>
+            )}
         </MotiView>
 
         {/* Booking Info */}
@@ -398,7 +444,7 @@ export default function BookingDetail() {
 
             {/* Date & Time */}
             <View className="flex-row items-start gap-3">
-              <View className="size-10 items-center justify-center rounded-lg bg-lavender-400/10">
+              <View className="size-10 items-center justify-center rounded-lg bg-lavender-900/10">
                 <Clock color={colors.lavender[400]} width={20} height={20} />
               </View>
               <View className="flex-1">
@@ -512,16 +558,30 @@ export default function BookingDetail() {
         className="border-t border-border-light bg-white"
       >
         <View className="flex-row gap-3 p-4">
-          {booking.status !== 'cancelled' && booking.status !== 'completed' && (
-            <Button
-              label={t('hirer.booking_detail.cancel_booking')}
-              onPress={handleCancelBooking}
-              variant="outline"
-              size="lg"
-              className="flex-1"
-              loading={cancelBookingMutation.isPending}
-            />
-          )}
+          {/* Show Make Payment button when booking is confirmed but payment is still pending */}
+          {booking.rawStatus === BookingStatus.CONFIRMED &&
+            booking.paymentStatus === PaymentStatus.PENDING && (
+              <Button
+                label={t('hirer.booking_detail.make_payment')}
+                onPress={handleMakePayment}
+                variant="default"
+                size="lg"
+                className="flex-1 bg-rose-400"
+                icon={CreditCard}
+              />
+            )}
+          {booking.rawStatus !== BookingStatus.CANCELLED &&
+            booking.rawStatus !== BookingStatus.COMPLETED &&
+            booking.rawStatus !== BookingStatus.DISPUTED && (
+              <Button
+                label={t('hirer.booking_detail.cancel_booking')}
+                onPress={handleCancelBooking}
+                variant="outline"
+                size="lg"
+                className="flex-1"
+                loading={cancelBookingMutation.isPending}
+              />
+            )}
         </View>
       </SafeAreaView>
     </View>

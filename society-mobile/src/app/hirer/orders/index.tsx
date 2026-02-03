@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Pressable, RefreshControl } from 'react-native';
 
 import {
+  Button,
   colors,
   FocusAwareStatusBar,
   Image,
@@ -15,12 +16,19 @@ import {
   Text,
   View,
 } from '@/components/ui';
-import { Calendar, Clock, MapPin } from '@/components/ui/icons';
-import { BookingStatus } from '@/lib/api/enums';
+import { Calendar, Clock, CreditCard, MapPin } from '@/components/ui/icons';
+import { BookingStatus, PaymentStatus } from '@/lib/api/enums';
 import { getPhotoUrl } from '@/lib/api/services/companions.service';
 import { useBookings } from '@/lib/hooks';
 
-type DisplayBookingStatus = 'pending' | 'confirmed' | 'completed' | 'cancelled';
+type DisplayBookingStatus =
+  | 'pending'
+  | 'awaiting_payment'
+  | 'confirmed'
+  | 'active'
+  | 'completed'
+  | 'cancelled'
+  | 'expired';
 
 type Booking = {
   id: string;
@@ -34,6 +42,8 @@ type Booking = {
   time: string;
   location: string;
   status: DisplayBookingStatus;
+  rawStatus: BookingStatus;
+  paymentStatus: PaymentStatus;
 };
 
 const TABS = [
@@ -41,31 +51,84 @@ const TABS = [
   { id: 'past', labelKey: 'hirer.orders.tabs.past' },
 ];
 
-const getStatusConfig = (status: DisplayBookingStatus) => {
+// Move status mapping outside component to avoid recreation on each render
+// For upcoming: fetch both PENDING (waiting for companion) and CONFIRMED (waiting for payment or ready)
+const API_STATUS_MAP: Record<string, string | undefined> = {
+  upcoming: `${BookingStatus.PENDING},${BookingStatus.CONFIRMED},${BookingStatus.ACTIVE}`,
+  past: BookingStatus.COMPLETED,
+};
+
+// Map booking status + payment status to display status
+const getDisplayStatus = (
+  bookingStatus: BookingStatus,
+  paymentStatus: PaymentStatus
+): DisplayBookingStatus => {
+  switch (bookingStatus) {
+    case BookingStatus.PENDING:
+      return 'pending';
+    case BookingStatus.CONFIRMED:
+      // If confirmed but payment is pending, show awaiting_payment
+      if (paymentStatus === PaymentStatus.PENDING) {
+        return 'awaiting_payment';
+      }
+      return 'confirmed';
+    case BookingStatus.ACTIVE:
+      return 'active';
+    case BookingStatus.COMPLETED:
+      return 'completed';
+    case BookingStatus.CANCELLED:
+    case BookingStatus.DISPUTED:
+      return 'cancelled';
+    case BookingStatus.EXPIRED:
+      return 'expired';
+    default:
+      return 'pending';
+  }
+};
+
+const getStatusConfig = (status: DisplayBookingStatus, t: (key: string) => string) => {
   switch (status) {
     case 'pending':
       return {
-        label: 'Pending',
+        label: t('hirer.orders.status.pending'),
         bgColor: '#FFFBEB',
         textColor: '#E6C337',
       };
+    case 'awaiting_payment':
+      return {
+        label: t('hirer.orders.status.awaiting_payment'),
+        bgColor: '#FFF1F2',
+        textColor: colors.rose[500],
+      };
     case 'confirmed':
       return {
-        label: 'Confirmed',
+        label: t('hirer.orders.status.confirmed'),
         bgColor: '#EDFCFB',
         textColor: '#46B9B1',
       };
+    case 'active':
+      return {
+        label: t('hirer.orders.status.in_progress'),
+        bgColor: '#F3E8FF',
+        textColor: colors.lavender[600],
+      };
     case 'completed':
       return {
-        label: 'Completed',
+        label: t('hirer.orders.status.completed'),
         bgColor: '#F0EEF2',
         textColor: colors.text.secondary,
       };
     case 'cancelled':
       return {
-        label: 'Cancelled',
+        label: t('hirer.orders.status.cancelled'),
         bgColor: '#FEE2E2',
         textColor: '#EF4444',
+      };
+    case 'expired':
+      return {
+        label: t('hirer.orders.status.expired'),
+        bgColor: '#F0EEF2',
+        textColor: colors.text.secondary,
       };
     default:
       return {
@@ -79,11 +142,19 @@ const getStatusConfig = (status: DisplayBookingStatus) => {
 function BookingCard({
   booking,
   onPress,
+  onPayPress,
+  t,
 }: {
   booking: Booking;
   onPress: () => void;
+  onPayPress: () => void;
+  t: (key: string) => string;
 }) {
-  const statusConfig = getStatusConfig(booking.status);
+  const statusConfig = getStatusConfig(booking.status, t);
+  // Show pay button when booking is confirmed but payment is still pending
+  const needsPayment =
+    booking.rawStatus === BookingStatus.CONFIRMED &&
+    booking.paymentStatus === PaymentStatus.PENDING;
 
   return (
     <Pressable onPress={onPress}>
@@ -146,6 +217,26 @@ function BookingCard({
             </Text>
           </View>
         </View>
+
+        {/* Payment Button - Show when booking is confirmed but payment is pending */}
+        {needsPayment && (
+          <>
+            <View className="mx-4 h-px bg-border-light" />
+            <View className="p-3">
+              <Button
+                label={t('hirer.orders.pay_now')}
+                onPress={(e) => {
+                  e?.stopPropagation?.();
+                  onPayPress();
+                }}
+                variant="default"
+                size="sm"
+                icon={CreditCard}
+                className="bg-rose-400"
+              />
+            </View>
+          </>
+        )}
       </MotiView>
     </Pressable>
   );
@@ -156,40 +247,13 @@ export default function MyBookings() {
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = React.useState('upcoming');
 
-  // Map local tab to API status
-  const getApiStatus = (tab: string): BookingStatus | undefined => {
-    if (tab === 'upcoming') return BookingStatus.CONFIRMED;
-    if (tab === 'past') return BookingStatus.COMPLETED;
-    return undefined;
-  };
-
   // API hook
   const {
     data: bookingsData,
     isLoading,
     refetch,
     isRefetching,
-  } = useBookings(getApiStatus(activeTab));
-
-  // Map API status to local display status
-  const mapStatus = (apiStatus: BookingStatus): DisplayBookingStatus => {
-    switch (apiStatus) {
-      case BookingStatus.PENDING:
-        return 'pending';
-      case BookingStatus.CONFIRMED:
-        return 'confirmed';
-      case BookingStatus.ACTIVE:
-        return 'confirmed';
-      case BookingStatus.COMPLETED:
-        return 'completed';
-      case BookingStatus.CANCELLED:
-      case BookingStatus.DISPUTED:
-      case BookingStatus.EXPIRED:
-        return 'cancelled';
-      default:
-        return 'pending';
-    }
-  };
+  } = useBookings(API_STATUS_MAP[activeTab]);
 
   // Transform bookings data from API Booking type
   const bookings = React.useMemo(() => {
@@ -206,19 +270,21 @@ export default function MyBookings() {
         occasionEmoji: b.occasion?.emoji || '👋',
         date: b.startDatetime
           ? new Date(b.startDatetime).toLocaleDateString('en-US', {
-              month: 'short',
-              day: 'numeric',
-            })
+            month: 'short',
+            day: 'numeric',
+          })
           : '',
         time: b.startDatetime
           ? new Date(b.startDatetime).toLocaleTimeString('en-US', {
-              hour: 'numeric',
-              minute: '2-digit',
-              hour12: true,
-            })
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: true,
+          })
           : `${b.durationHours}h`,
         location: b.locationAddress?.split(',')[0] || '',
-        status: mapStatus(b.status),
+        status: getDisplayStatus(b.status, b.paymentStatus),
+        rawStatus: b.status,
+        paymentStatus: b.paymentStatus,
       };
     }) as Booking[];
   }, [bookingsData]);
@@ -230,15 +296,27 @@ export default function MyBookings() {
     [router]
   );
 
+  const handlePayPress = React.useCallback(
+    (booking: Booking) => {
+      router.push(`/hirer/booking/payment/${booking.id}` as Href);
+    },
+    [router]
+  );
+
   const handleRefresh = React.useCallback(() => {
     refetch();
   }, [refetch]);
 
   const renderBooking = React.useCallback(
     ({ item }: { item: Booking }) => (
-      <BookingCard booking={item} onPress={() => handleBookingPress(item)} />
+      <BookingCard
+        booking={item}
+        onPress={() => handleBookingPress(item)}
+        onPayPress={() => handlePayPress(item)}
+        t={t}
+      />
     ),
-    [handleBookingPress]
+    [handleBookingPress, handlePayPress, t]
   );
 
   return (
@@ -264,14 +342,12 @@ export default function MyBookings() {
                 className="flex-1"
               >
                 <View
-                  className={`items-center rounded-lg py-2 ${
-                    isActive ? 'bg-teal-400' : 'bg-neutral-100'
-                  }`}
+                  className={`items-center rounded-lg py-2 ${isActive ? 'bg-teal-400' : 'bg-neutral-100'
+                    }`}
                 >
                   <Text
-                    className={`text-xs font-semibold ${
-                      isActive ? 'text-white' : 'text-text-secondary'
-                    }`}
+                    className={`text-xs font-semibold ${isActive ? 'text-white' : 'text-text-secondary'
+                      }`}
                   >
                     {t(tab.labelKey)}
                   </Text>

@@ -146,10 +146,10 @@ export default function CompanionProfile() {
           <Pressable
             onPress={handleEditProfile}
             testID="edit-profile-button"
-            className="mt-4 flex-row items-center gap-2 rounded-full bg-lavender-400/10 px-6 py-2"
+            className="mt-4 flex-row items-center gap-2 rounded-full bg-lavender-900/10 px-6 py-2"
           >
             <Edit color={colors.lavender[400]} width={18} height={18} />
-            <Text className="font-semibold text-lavender-400">
+            <Text className="font-semibold text-lavender-900">
               {t('companion.profile.edit_profile')}
             </Text>
           </Pressable>
@@ -246,7 +246,7 @@ export default function CompanionProfile() {
               testID="edit-photos-button"
               className="flex-row items-center gap-1"
             >
-              <Text className="text-sm font-medium text-lavender-400">
+              <Text className="text-sm font-medium text-lavender-900">
                 {t('common.edit')}
               </Text>
               <ArrowRight color={colors.lavender[400]} width={16} height={16} />

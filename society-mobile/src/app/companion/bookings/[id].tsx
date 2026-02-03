@@ -8,10 +8,8 @@ import {
   ActivityIndicator,
   Alert,
   Linking,
-  Pressable,
-  ScrollView,
+  ScrollView
 } from 'react-native';
-import Toast from 'react-native-toast-message';
 
 import {
   Badge,
@@ -24,6 +22,11 @@ import {
   Text,
   View,
 } from '@/components/ui';
+import {
+  showErrorMessage,
+  showInfoMessage,
+  showSuccessMessage,
+} from '@/components/ui/utils';
 import {
   Calendar,
   Clock,
@@ -115,19 +118,12 @@ export default function CompanionBookingDetail() {
               { bookingId: booking.id, reason: undefined },
               {
                 onSuccess: () => {
-                  Toast.show({
-                    type: 'info',
-                    text1: t('companion.booking_detail.cancelled'),
-                  });
+                  showInfoMessage(t('companion.booking_detail.cancelled'));
                   router.back();
                 },
                 onError: (error) => {
                   console.error('Failed to cancel booking:', error);
-                  Toast.show({
-                    type: 'error',
-                    text1: t('errors.cancel_failed'),
-                    text2: t('errors.try_again'),
-                  });
+                  showErrorMessage(t('errors.cancel_failed'));
                 },
               }
             );
@@ -143,18 +139,11 @@ export default function CompanionBookingDetail() {
       { bookingId: booking.id, status: 'ACTIVE' },
       {
         onSuccess: () => {
-          Toast.show({
-            type: 'success',
-            text1: t('companion.booking_detail.checked_in'),
-          });
+          showSuccessMessage(t('companion.booking_detail.checked_in'));
         },
         onError: (error) => {
           console.error('Failed to check in:', error);
-          Toast.show({
-            type: 'error',
-            text1: t('errors.check_in_failed'),
-            text2: t('errors.try_again'),
-          });
+          showErrorMessage(t('errors.check_in_failed'));
         },
       }
     );
@@ -172,18 +161,11 @@ export default function CompanionBookingDetail() {
           onPress: () => {
             completeBooking.mutate(booking.id, {
               onSuccess: () => {
-                Toast.show({
-                  type: 'success',
-                  text1: t('companion.booking_detail.completed'),
-                });
+                showSuccessMessage(t('companion.booking_detail.completed'));
               },
               onError: (error) => {
                 console.error('Failed to complete booking:', error);
-                Toast.show({
-                  type: 'error',
-                  text1: t('errors.complete_failed'),
-                  text2: t('errors.try_again'),
-                });
+                showErrorMessage(t('errors.complete_failed'));
               },
             });
           },
@@ -278,23 +260,23 @@ export default function CompanionBookingDetail() {
           {/* <View className="mt-4 flex-row gap-3">
             <Pressable
               onPress={handleCallClient}
-              className="flex-1 flex-row items-center justify-center gap-2 rounded-xl bg-lavender-400/10 py-3"
+              className="flex-1 flex-row items-center justify-center gap-2 rounded-xl bg-lavender-900/10 py-3"
             >
               <Phone color={colors.lavender[400]} width={20} height={20} />
-              <Text className="font-semibold text-lavender-400">
+              <Text className="font-semibold text-lavender-900">
                 {t('companion.booking_detail.call')}
               </Text>
             </Pressable>
             <Pressable
               onPress={handleMessageClient}
-              className="flex-1 flex-row items-center justify-center gap-2 rounded-xl bg-lavender-400/10 py-3"
+              className="flex-1 flex-row items-center justify-center gap-2 rounded-xl bg-lavender-900/10 py-3"
             >
               <MessageCircle
                 color={colors.lavender[400]}
                 width={20}
                 height={20}
               />
-              <Text className="font-semibold text-lavender-400">
+              <Text className="font-semibold text-lavender-900">
                 {t('companion.booking_detail.message')}
               </Text>
             </Pressable>
@@ -332,7 +314,7 @@ export default function CompanionBookingDetail() {
 
             {/* Date & Time */}
             <View className="flex-row items-start gap-3">
-              <View className="size-10 items-center justify-center rounded-lg bg-lavender-400/10">
+              <View className="size-10 items-center justify-center rounded-lg bg-lavender-900/10">
                 <Clock color={colors.lavender[400]} width={20} height={20} />
               </View>
               <View className="flex-1">
@@ -425,8 +407,8 @@ export default function CompanionBookingDetail() {
             </View>
           </View>
 
-          <View className="mt-4 rounded-lg bg-lavender-400/10 p-3">
-            <Text className="text-center text-sm text-lavender-400">
+          <View className="mt-4 rounded-lg bg-lavender-900/10 p-3">
+            <Text className="text-center text-sm text-lavender-900">
               {t('companion.booking_detail.payment_release_notice')}
             </Text>
           </View>
@@ -508,7 +490,7 @@ export default function CompanionBookingDetail() {
                   disabled={
                     cancelBooking.isPending || updateBookingStatus.isPending
                   }
-                  className="flex-1 bg-lavender-400"
+                  className="flex-1 bg-lavender-900"
                 />
               )}
             </>

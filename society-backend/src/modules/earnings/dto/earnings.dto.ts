@@ -81,7 +81,7 @@ export interface TransactionItem {
   type: 'earning' | 'withdrawal' | 'bonus' | 'refund';
   description: string;
   amount: number;
-  date: string;
+  createdAt: string;
   status: 'completed' | 'pending' | 'failed';
   bookingId?: string;
 }

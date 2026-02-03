@@ -11,7 +11,6 @@ import {
   CreateBankAccountDto,
   WithdrawFundsDto,
   GetTransactionsQueryDto,
-  EarningsOverviewResponse,
   TransactionItem,
   BankAccountItem,
   WithdrawalResponse,
@@ -32,8 +31,9 @@ export class EarningsService {
 
   /**
    * Get earnings overview
+   * Returns flat structure matching mobile app expectations
    */
-  async getEarningsOverview(userId: string): Promise<EarningsOverviewResponse> {
+  async getEarningsOverview(userId: string) {
     const companion = await this.prisma.companionProfile.findUnique({
       where: { userId },
     });
@@ -81,11 +81,17 @@ export class EarningsService {
     // Calculate period stats
     const periodStats = await this.calculatePeriodStats(companion.id);
 
+    // Return flat structure for mobile app compatibility
     return {
       availableBalance,
       pendingBalance,
       totalEarnings,
-      periodStats,
+      totalWithdrawn,
+      thisWeek: periodStats.thisWeek.amount,
+      thisMonth: periodStats.thisMonth.amount,
+      thisYear: periodStats.thisYear.amount,
+      weeklyChange: periodStats.thisWeek.change,
+      monthlyChange: periodStats.thisMonth.change,
     };
   }
 
@@ -187,13 +193,13 @@ export class EarningsService {
   async getTransactions(
     userId: string,
     query: GetTransactionsQueryDto,
-  ): Promise<{ transactions: TransactionItem[]; pagination: { page: number; limit: number; total: number; totalPages: number } }> {
+  ): Promise<{ transactions: TransactionItem[]; total: number; page: number; limit: number }> {
     const companion = await this.prisma.companionProfile.findUnique({
       where: { userId },
     });
 
     if (!companion) {
-      return { transactions: [], pagination: { page: 1, limit: 20, total: 0, totalPages: 0 } };
+      return { transactions: [], total: 0, page: 1, limit: 20 };
     }
 
     const { page = 1, limit = 20, period } = query;
@@ -225,20 +231,21 @@ export class EarningsService {
       dateFilter = { gte: startDate, lte: now };
     }
 
-    // Get earnings as transactions
+    // Get earnings as transactions (both AVAILABLE and PENDING)
     const earnings = await this.prisma.earning.findMany({
       where: {
         companionId: companion.id,
-        status: EarningsStatus.AVAILABLE,
-        ...(dateFilter && { releasedAt: dateFilter }),
+        status: { in: [EarningsStatus.AVAILABLE, EarningsStatus.PENDING] },
+        ...(dateFilter && { createdAt: dateFilter }),
       },
-      orderBy: { releasedAt: 'desc' },
+      orderBy: { createdAt: 'desc' },
       skip: (page - 1) * limit,
       take: limit,
       include: {
         booking: {
           include: {
             hirer: true,
+            occasion: true,
           },
         },
       },
@@ -247,29 +254,33 @@ export class EarningsService {
     const total = await this.prisma.earning.count({
       where: {
         companionId: companion.id,
-        status: EarningsStatus.AVAILABLE,
-        ...(dateFilter && { releasedAt: dateFilter }),
+        status: { in: [EarningsStatus.AVAILABLE, EarningsStatus.PENDING] },
+        ...(dateFilter && { createdAt: dateFilter }),
       },
     });
 
-    const transactions: TransactionItem[] = earnings.map((e) => ({
-      id: e.id,
-      type: 'earning' as const,
-      description: `${e.booking.occasionType.toLowerCase().replace('_', ' ')} - ${e.booking.hirer?.fullName || 'Anonymous'}`,
-      amount: e.netAmount,
-      date: e.releasedAt?.toISOString().split('T')[0] || e.createdAt.toISOString().split('T')[0],
-      status: 'completed' as const,
-      bookingId: e.bookingId,
-    }));
+    const transactions: TransactionItem[] = earnings.map((e) => {
+      // Use occasion name if available, fall back to occasionType
+      const occasionName = e.booking.occasion?.nameEn
+        || e.booking.occasionType?.toLowerCase().replace('_', ' ')
+        || 'Booking';
+      return {
+        id: e.id,
+        type: 'earning' as const,
+        description: `${occasionName} - ${e.booking.hirer?.fullName || 'Anonymous'}`,
+        amount: e.netAmount,
+        createdAt: e.releasedAt?.toISOString() || e.createdAt.toISOString(),
+        status: e.status === EarningsStatus.AVAILABLE ? 'completed' : 'pending',
+        bookingId: e.bookingId,
+      };
+    });
 
+    // Return flat structure matching mobile app's EarningsHistoryResponse
     return {
       transactions,
-      pagination: {
-        page,
-        limit,
-        total,
-        totalPages: Math.ceil(total / limit),
-      },
+      total,
+      page,
+      limit,
     };
   }
 

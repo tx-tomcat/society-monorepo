@@ -33,7 +33,7 @@ const inputTv = tv({
   variants: {
     focused: {
       true: {
-        input: 'border-lavender-400',
+        input: 'border-lavender-900',
       },
     },
     error: {

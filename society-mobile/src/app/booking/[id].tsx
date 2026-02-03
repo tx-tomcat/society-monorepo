@@ -3,7 +3,6 @@ import type { Href } from 'expo-router';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React from 'react';
 import { ActivityIndicator, Pressable, ScrollView } from 'react-native';
-import Toast from 'react-native-toast-message';
 
 import {
   Badge,
@@ -15,6 +14,7 @@ import {
   Text,
   View,
 } from '@/components/ui';
+import { showErrorMessage } from '@/components/ui/utils';
 import { ArrowLeft, Clock, MapPin, ShieldCheck } from '@/components/ui/icons';
 import type { Occasion } from '@/lib/api/services/occasions.service';
 import { useCompanion, useCreateBooking, useOccasions } from '@/lib/hooks';
@@ -129,11 +129,7 @@ export default function BookingFlow() {
         router.push('/booking/confirmation' as Href);
       } catch (error) {
         console.error('Booking error:', error);
-        Toast.show({
-          type: 'error',
-          text1: 'Booking Failed',
-          text2: 'Unable to create booking. Please try again.',
-        });
+        showErrorMessage('Unable to create booking. Please try again.');
       }
     }
   };
@@ -320,16 +316,14 @@ export default function BookingFlow() {
                   <Pressable
                     key={hours}
                     onPress={() => setDuration(hours)}
-                    className={`flex-1 items-center rounded-xl border py-3 ${
-                      duration === hours
+                    className={`flex-1 items-center rounded-xl border py-3 ${duration === hours
                         ? 'border-rose-400 bg-softpink'
                         : 'border-border-light bg-white'
-                    }`}
+                      }`}
                   >
                     <Text
-                      className={`font-semibold ${
-                        duration === hours ? 'text-rose-400' : 'text-midnight'
-                      }`}
+                      className={`font-semibold ${duration === hours ? 'text-rose-400' : 'text-midnight'
+                        }`}
                     >
                       {hours}h
                     </Text>
@@ -369,23 +363,20 @@ export default function BookingFlow() {
                     <Pressable
                       key={date.toISOString()}
                       onPress={() => setSelectedDate(date)}
-                      className={`flex-1 items-center rounded-xl border py-3 ${
-                        isSelected
+                      className={`flex-1 items-center rounded-xl border py-3 ${isSelected
                           ? 'border-rose-400 bg-softpink'
                           : 'border-border-light bg-white'
-                      }`}
+                        }`}
                     >
                       <Text
-                        className={`text-xs ${
-                          isSelected ? 'text-rose-400' : 'text-text-tertiary'
-                        }`}
+                        className={`text-xs ${isSelected ? 'text-rose-400' : 'text-text-tertiary'
+                          }`}
                       >
                         {day}
                       </Text>
                       <Text
-                        className={`text-lg font-semibold ${
-                          isSelected ? 'text-rose-400' : 'text-midnight'
-                        }`}
+                        className={`text-lg font-semibold ${isSelected ? 'text-rose-400' : 'text-midnight'
+                          }`}
                       >
                         {dateNum}
                       </Text>
@@ -405,18 +396,16 @@ export default function BookingFlow() {
                   <Pressable
                     key={time}
                     onPress={() => setSelectedTime(time)}
-                    className={`rounded-xl border px-4 py-2 ${
-                      selectedTime === time
+                    className={`rounded-xl border px-4 py-2 ${selectedTime === time
                         ? 'border-rose-400 bg-softpink'
                         : 'border-border-light bg-white'
-                    }`}
+                      }`}
                   >
                     <Text
-                      className={`font-medium ${
-                        selectedTime === time
+                      className={`font-medium ${selectedTime === time
                           ? 'text-rose-400'
                           : 'text-midnight'
-                      }`}
+                        }`}
                     >
                       {time}
                     </Text>
@@ -426,7 +415,7 @@ export default function BookingFlow() {
             </View>
 
             {/* Duration Display */}
-            <View className="flex-row items-center gap-2 rounded-xl bg-lavender-400/20 p-4">
+            <View className="flex-row items-center gap-2 rounded-xl bg-lavender-900/20 p-4">
               <Clock color={colors.lavender[400]} width={20} height={20} />
               <Text className="text-midnight">
                 Duration:{' '}

@@ -215,7 +215,7 @@ export default function CompanionPhotosScreen() {
                     contentFit="cover"
                   />
                   {isPrimary && (
-                    <View className="absolute bottom-1 left-1 rounded bg-lavender-400 px-1.5 py-0.5">
+                    <View className="absolute bottom-1 left-1 rounded bg-lavender-900 px-1.5 py-0.5">
                       <Text className="text-xs font-semibold text-white">
                         {t('companion.photos.main')}
                       </Text>
@@ -244,7 +244,7 @@ export default function CompanionPhotosScreen() {
             <Pressable
               onPress={handleAddPhoto}
               disabled={isUploading}
-              className="w-[31%] items-center justify-center rounded-xl border-2 border-dashed border-lavender-400 bg-lavender-50/50"
+              className="w-[31%] items-center justify-center rounded-xl border-2 border-dashed border-lavender-900 bg-lavender-50/50"
               style={{ aspectRatio: 3 / 4 }}
             >
               {isUploading ? (
@@ -252,7 +252,7 @@ export default function CompanionPhotosScreen() {
               ) : (
                 <>
                   <Plus color={colors.lavender[400]} width={24} height={24} />
-                  <Text className="mt-1 text-xs text-lavender-400">
+                  <Text className="mt-1 text-xs text-lavender-900">
                     {t('common.add')}
                   </Text>
                 </>

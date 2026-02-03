@@ -125,14 +125,12 @@ export default function CompanionVerificationScreen() {
           from={{ opacity: 0, translateY: 10 }}
           animate={{ opacity: 1, translateY: 0 }}
           transition={{ type: 'timing', duration: 400 }}
-          className={`mx-4 mt-4 items-center rounded-xl p-6 ${
-            isVerified ? 'bg-teal-50' : isPending ? 'bg-yellow-50' : isRejected ? 'bg-danger-50' : 'bg-neutral-100'
-          }`}
+          className={`mx-4 mt-4 items-center rounded-xl p-6 ${isVerified ? 'bg-teal-50' : isPending ? 'bg-yellow-50' : isRejected ? 'bg-danger-50' : 'bg-neutral-100'
+            }`}
         >
           <View
-            className={`mb-3 size-16 items-center justify-center rounded-full ${
-              isVerified ? 'bg-teal-100' : isPending ? 'bg-yellow-100' : isRejected ? 'bg-danger-100' : 'bg-neutral-200'
-            }`}
+            className={`mb-3 size-16 items-center justify-center rounded-full ${isVerified ? 'bg-teal-100' : isPending ? 'bg-yellow-100' : isRejected ? 'bg-danger-100' : 'bg-neutral-200'
+              }`}
           >
             {isVerified ? (
               <VerifiedBadge color={colors.teal[400]} width={32} height={32} />
@@ -145,26 +143,25 @@ export default function CompanionVerificationScreen() {
             )}
           </View>
           <Text
-            className={`font-urbanist-bold text-xl ${
-              isVerified ? 'text-teal-700' : isPending ? 'text-yellow-700' : isRejected ? 'text-danger-500' : 'text-midnight'
-            }`}
+            className={`font-urbanist-bold text-xl ${isVerified ? 'text-teal-700' : isPending ? 'text-yellow-700' : isRejected ? 'text-danger-500' : 'text-midnight'
+              }`}
           >
             {isVerified
               ? t('companion.verification.status.verified')
               : isPending
-              ? t('companion.verification.status.pending')
-              : isRejected
-              ? t('companion.verification.status.rejected')
-              : t('companion.verification.status.not_started')}
+                ? t('companion.verification.status.pending')
+                : isRejected
+                  ? t('companion.verification.status.rejected')
+                  : t('companion.verification.status.not_started')}
           </Text>
           <Text className="mt-1 text-center text-sm text-text-secondary">
             {isVerified
               ? t('companion.verification.status.verified_desc')
               : isPending
-              ? t('companion.verification.status.pending_desc')
-              : isRejected
-              ? t('companion.verification.status.rejected_desc')
-              : t('companion.verification.status.not_started_desc')}
+                ? t('companion.verification.status.pending_desc')
+                : isRejected
+                  ? t('companion.verification.status.rejected_desc')
+                  : t('companion.verification.status.not_started_desc')}
           </Text>
           {!isVerified && (
             <View className="mt-3 flex-row items-center gap-1">
@@ -228,20 +225,18 @@ export default function CompanionVerificationScreen() {
                   key={step.id}
                   onPress={() => handleStepPress(step)}
                   disabled={step.status === 'completed'}
-                  className={`flex-row items-center p-4 ${
-                    index < steps.length - 1 ? 'border-b border-border-light' : ''
-                  }`}
+                  className={`flex-row items-center p-4 ${index < steps.length - 1 ? 'border-b border-border-light' : ''
+                    }`}
                 >
                   <View
-                    className={`mr-3 size-10 items-center justify-center rounded-full ${
-                      step.status === 'completed'
+                    className={`mr-3 size-10 items-center justify-center rounded-full ${step.status === 'completed'
                         ? 'bg-teal-100'
                         : step.status === 'in_progress'
-                        ? 'bg-yellow-100'
-                        : step.status === 'rejected'
-                        ? 'bg-danger-50'
-                        : 'bg-neutral-100'
-                    }`}
+                          ? 'bg-yellow-100'
+                          : step.status === 'rejected'
+                            ? 'bg-danger-50'
+                            : 'bg-neutral-100'
+                      }`}
                   >
                     <StatusIcon.icon
                       color={StatusIcon.color}
@@ -291,7 +286,7 @@ export default function CompanionVerificationScreen() {
           >
             <Pressable
               onPress={() => Alert.alert(t('common.coming_soon'))}
-              className="flex-row items-center justify-center gap-2 rounded-xl bg-lavender-400 p-4"
+              className="flex-row items-center justify-center gap-2 rounded-xl bg-lavender-900 p-4"
             >
               <Text className="font-urbanist-semibold text-base text-white">
                 {t('companion.verification.contact_support')}

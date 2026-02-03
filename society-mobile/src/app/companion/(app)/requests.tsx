@@ -12,7 +12,6 @@ import {
     RefreshControl,
     ScrollView,
 } from 'react-native';
-import Toast from 'react-native-toast-message';
 
 import {
     Badge,
@@ -24,6 +23,11 @@ import {
     Text,
     View,
 } from '@/components/ui';
+import {
+    showErrorMessage,
+    showInfoMessage,
+    showSuccessMessage,
+} from '@/components/ui/utils';
 import {
     Calendar,
     CheckCircle,
@@ -185,7 +189,7 @@ function RequestCard({
 
             {/* Message */}
             {request.specialRequests && (
-                <View className="mt-3 rounded-lg bg-lavender-400/10 p-3">
+                <View className="mt-3 rounded-lg bg-lavender-900/10 p-3">
                     <Text className="text-sm italic text-text-secondary">
                         &ldquo;{request.specialRequests}&rdquo;
                     </Text>
@@ -227,7 +231,7 @@ function RequestCard({
                         loading={isAccepting}
                         disabled={isAccepting || isDeclining}
                         icon={CheckCircle}
-                        className="flex-1 bg-lavender-400"
+                        className="flex-1 bg-lavender-900"
                     />
                 </View>
             )}
@@ -249,7 +253,7 @@ function StatusTab({
     return (
         <Pressable
             onPress={onPress}
-            className={`flex-row items-center gap-2 rounded-full px-4 py-2 ${isActive ? 'bg-lavender-400' : 'bg-white'
+            className={`flex-row items-center gap-2 rounded-full px-4 py-2 ${isActive ? 'bg-lavender-900' : 'bg-white'
                 }`}
         >
             <Text
@@ -259,11 +263,11 @@ function StatusTab({
             </Text>
             {count > 0 && (
                 <View
-                    className={`min-w-[20px] items-center rounded-full px-1.5 py-0.5 ${isActive ? 'bg-white/20' : 'bg-lavender-400/20'
+                    className={`min-w-[20px] items-center rounded-full px-1.5 py-0.5 ${isActive ? 'bg-white/20' : 'bg-lavender-900/20'
                         }`}
                 >
                     <Text
-                        className={`text-xs font-semibold ${isActive ? 'text-white' : 'text-lavender-400'}`}
+                        className={`text-xs font-semibold ${isActive ? 'text-white' : 'text-lavender-900'}`}
                     >
                         {count}
                     </Text>
@@ -307,7 +311,7 @@ function EmptyState({
 
     return (
         <View className="flex-1 items-center justify-center px-6">
-            <View className="size-20 items-center justify-center rounded-full bg-lavender-400/20">
+            <View className="size-20 items-center justify-center rounded-full bg-lavender-900/20">
                 <Calendar color={colors.lavender[400]} width={40} height={40} />
             </View>
             <Text className="mt-4 font-urbanist-bold text-xl text-midnight">
@@ -383,18 +387,11 @@ export default function BookingRequests() {
                         onPress: () => {
                             acceptBooking.mutate(requestId, {
                                 onSuccess: () => {
-                                    Toast.show({
-                                        type: 'success',
-                                        text1: t('companion.requests.accept_success'),
-                                    });
+                                    showSuccessMessage(t('companion.requests.accept_success'));
                                 },
                                 onError: (error) => {
                                     console.error('Failed to accept booking:', error);
-                                    Toast.show({
-                                        type: 'error',
-                                        text1: t('errors.accept_failed'),
-                                        text2: t('errors.try_again'),
-                                    });
+                                    showErrorMessage(t('errors.accept_failed'));
                                 },
                             });
                         },
@@ -420,18 +417,11 @@ export default function BookingRequests() {
                                 { bookingId: requestId },
                                 {
                                     onSuccess: () => {
-                                        Toast.show({
-                                            type: 'info',
-                                            text1: t('companion.requests.decline_success'),
-                                        });
+                                        showInfoMessage(t('companion.requests.decline_success'));
                                     },
                                     onError: (error) => {
                                         console.error('Failed to decline booking:', error);
-                                        Toast.show({
-                                            type: 'error',
-                                            text1: t('errors.decline_failed'),
-                                            text2: t('errors.try_again'),
-                                        });
+                                        showErrorMessage(t('errors.decline_failed'));
                                     },
                                 }
                             );
@@ -549,7 +539,18 @@ export default function BookingRequests() {
                     }
                 />
             ) : (
-                <EmptyState statusKey={activeTab} t={t} />
+                <ScrollView
+                    contentContainerStyle={{ flexGrow: 1 }}
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={isRefetching}
+                            onRefresh={handleRefresh}
+                            tintColor={colors.lavender[400]}
+                        />
+                    }
+                >
+                    <EmptyState statusKey={activeTab} t={t} />
+                </ScrollView>
             )}
         </View>
     );

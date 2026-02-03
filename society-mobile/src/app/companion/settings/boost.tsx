@@ -27,6 +27,7 @@ import {
   Star,
   Zap,
 } from '@/components/ui/icons';
+import { showErrorMessage, showSuccessMessage } from '@/components/ui/utils';
 import type { BoostPricing, BoostTier } from '@/lib/api/services/companions.service';
 import { useSafeBack } from '@/lib/hooks';
 import {
@@ -49,8 +50,8 @@ const TIER_CONFIG: Record<BoostTier, TierConfig> = {
   STANDARD: {
     icon: Zap,
     iconColor: colors.lavender[400],
-    bgColor: 'bg-lavender-400/10',
-    borderColor: 'border-lavender-400/30',
+    bgColor: 'bg-lavender-900/10',
+    borderColor: 'border-lavender-900/30',
   },
   PREMIUM: {
     icon: Fire,
@@ -99,11 +100,10 @@ const PricingCard = React.memo(function PricingCard({
       <Pressable
         onPress={handlePress}
         disabled={isDisabled}
-        className={`relative mb-3 rounded-2xl border-2 p-4 ${
-          isSelected
-            ? 'border-lavender-400 bg-lavender-400/5'
-            : 'border-border-light bg-white'
-        } ${isDisabled ? 'opacity-50' : ''}`}
+        className={`relative mb-3 rounded-2xl border-2 p-4 ${isSelected
+          ? 'border-lavender-900 bg-lavender-900/5'
+          : 'border-border-light bg-white'
+          } ${isDisabled ? 'opacity-50' : ''}`}
       >
         {config.popular && !isDisabled && (
           <View className="absolute -top-2.5 right-4 rounded-full bg-rose-400 px-3 py-1">
@@ -207,10 +207,7 @@ export default function BoostScreen() {
 
     Alert.alert(
       t('companion.boost.confirm_title'),
-      t('companion.boost.confirm_message', {
-        tier: tierPricing.name,
-        price: formatVND(tierPricing.price),
-      }),
+      `${t('companion.boost.confirm_message')} ${formatVND(tierPricing.price)}`,
       [
         {
           text: t('common.cancel'),
@@ -220,29 +217,21 @@ export default function BoostScreen() {
           text: t('companion.boost.purchase'),
           onPress: async () => {
             try {
-              const result = await purchaseBoostMutation.mutateAsync({
+              await purchaseBoostMutation.mutateAsync({
                 tier: selectedTier,
               });
 
-              // If there's a payment URL (VNPay), we would open it
-              if (result.paymentUrl) {
-                // In a real app, open the payment URL
-                Alert.alert(
-                  t('companion.boost.payment_redirect'),
-                  t('companion.boost.payment_redirect_message')
-                );
+              showSuccessMessage(t('companion.boost.purchase_success'));
+              setSelectedTier(null);
+              handleRefresh();
+            } catch (error: unknown) {
+              // Check for insufficient balance error
+              const apiError = error as { response?: { data?: { error?: string } } };
+              if (apiError?.response?.data?.error === 'INSUFFICIENT_BALANCE') {
+                showErrorMessage(t('companion.boost.insufficient_balance'));
               } else {
-                Alert.alert(
-                  t('common.success'),
-                  t('companion.boost.purchase_success')
-                );
-                handleRefresh();
+                showErrorMessage(t('companion.boost.purchase_failed'));
               }
-            } catch (error) {
-              Alert.alert(
-                t('common.error'),
-                t('companion.boost.purchase_failed')
-              );
             }
           },
         },
@@ -281,12 +270,12 @@ export default function BoostScreen() {
         }
       >
         {/* Active Boost Banner */}
-        {activeBoost && activeBoost.status === 'ACTIVE' && (
+        {activeBoost && activeBoost.boost.status === 'ACTIVE' && (
           <MotiView
             from={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ type: 'timing', duration: 400 }}
-            className="m-4 rounded-2xl bg-gradient-to-r from-lavender-400 to-rose-400 bg-lavender-400 p-5"
+            className="m-4 rounded-2xl bg-gradient-to-r from-lavender-900 to-rose-400 bg-lavender-900 p-5"
           >
             <View className="flex-row items-center gap-3">
               <View className="size-12 items-center justify-center rounded-full bg-white/20">
@@ -297,19 +286,19 @@ export default function BoostScreen() {
                   {t('companion.boost.active_boost')}
                 </Text>
                 <Text className="text-sm text-white/80">
-                  {activeBoost.multiplier}x {t('companion.boost.visibility')}
+                  {activeBoost.boost.multiplier}x {t('companion.boost.visibility')}
                 </Text>
               </View>
             </View>
 
-            {activeBoost.remainingHours !== null && (
+            {activeBoost.boost.remainingHours !== null && (
               <View className="mt-4 flex-row items-center gap-2 rounded-xl bg-white/20 px-4 py-3">
                 <Clock color="#FFFFFF" width={18} height={18} />
                 <Text className="flex-1 text-sm font-medium text-white">
                   {t('companion.boost.time_remaining')}
                 </Text>
                 <Text className="font-urbanist-bold text-white">
-                  {activeBoost.remainingHours}h
+                  {activeBoost.boost.remainingHours}h
                 </Text>
               </View>
             )}
@@ -334,11 +323,10 @@ export default function BoostScreen() {
             ].map((benefit, index) => (
               <View
                 key={benefit.key}
-                className={`flex-row items-center gap-3 ${
-                  index < 2 ? 'mb-4 border-b border-border-light pb-4' : ''
-                }`}
+                className={`flex-row items-center gap-3 ${index < 2 ? 'mb-4 border-b border-border-light pb-4' : ''
+                  }`}
               >
-                <View className="size-10 items-center justify-center rounded-full bg-lavender-400/10">
+                <View className="size-10 items-center justify-center rounded-full bg-lavender-900/10">
                   <benefit.icon
                     color={colors.lavender[400]}
                     width={20}
@@ -364,7 +352,7 @@ export default function BoostScreen() {
               item={item}
               index={index}
               isSelected={selectedTier === item.tier}
-              isDisabled={!!activeBoost}
+              isDisabled={!!activeBoost?.hasActiveBoost}
               onSelect={handleSelectTier}
               t={t}
             />
@@ -388,19 +376,18 @@ export default function BoostScreen() {
                 const IconComponent = config.icon;
                 const dateStr = item.createdAt
                   ? new Date(item.createdAt).toLocaleDateString('vi-VN', {
-                      day: 'numeric',
-                      month: 'short',
-                    })
+                    day: 'numeric',
+                    month: 'short',
+                  })
                   : '';
 
                 return (
                   <View
                     key={item.id}
-                    className={`flex-row items-center gap-3 ${
-                      index < boostHistory.length - 1
-                        ? 'mb-3 border-b border-border-light pb-3'
-                        : ''
-                    }`}
+                    className={`flex-row items-center gap-3 ${index < boostHistory.length - 1
+                      ? 'mb-3 border-b border-border-light pb-3'
+                      : ''
+                      }`}
                   >
                     <View
                       className={`size-10 items-center justify-center rounded-full ${config.bgColor}`}
@@ -420,22 +407,20 @@ export default function BoostScreen() {
                       </Text>
                     </View>
                     <View
-                      className={`rounded-lg px-2 py-1 ${
-                        item.status === 'ACTIVE'
-                          ? 'bg-teal-400/10'
-                          : item.status === 'EXPIRED'
-                            ? 'bg-text-tertiary/10'
-                            : 'bg-yellow-400/10'
-                      }`}
+                      className={`rounded-lg px-2 py-1 ${item.status === 'ACTIVE'
+                        ? 'bg-teal-400/10'
+                        : item.status === 'EXPIRED'
+                          ? 'bg-text-tertiary/10'
+                          : 'bg-yellow-400/10'
+                        }`}
                     >
                       <Text
-                        className={`text-xs font-medium ${
-                          item.status === 'ACTIVE'
-                            ? 'text-teal-400'
-                            : item.status === 'EXPIRED'
-                              ? 'text-text-tertiary'
-                              : 'text-yellow-500'
-                        }`}
+                        className={`text-xs font-medium ${item.status === 'ACTIVE'
+                          ? 'text-teal-400'
+                          : item.status === 'EXPIRED'
+                            ? 'text-text-tertiary'
+                            : 'text-yellow-500'
+                          }`}
                       >
                         {t(`companion.boost.status.${item.status.toLowerCase()}`)}
                       </Text>
@@ -449,7 +434,7 @@ export default function BoostScreen() {
       </ScrollView>
 
       {/* Purchase Button */}
-      {!activeBoost && selectedTier && (
+      {!activeBoost?.hasActiveBoost && selectedTier && (
         <SafeAreaView edges={['bottom']} className="bg-white">
           <View className="border-t border-border-light px-4 py-4">
             <Button
@@ -457,7 +442,7 @@ export default function BoostScreen() {
               loading={purchaseBoostMutation.isPending}
               className="w-full"
             >
-              {t('companion.boost.purchase_now')}
+              <Text className="text-white">{t('companion.boost.purchase_now')}</Text>
             </Button>
           </View>
         </SafeAreaView>

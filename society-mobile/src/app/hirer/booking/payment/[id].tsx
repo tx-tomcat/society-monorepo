@@ -1,7 +1,7 @@
 /* eslint-disable max-lines-per-function */
 import * as Clipboard from 'expo-clipboard';
 import * as FileSystem from 'expo-file-system/legacy';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { MotiView } from 'moti';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -14,9 +14,7 @@ import {
   Pressable,
   ScrollView,
   Share,
-  TextInput,
 } from 'react-native';
-
 import {
   Button,
   colors,
@@ -37,18 +35,14 @@ import {
   Copy,
   Download,
   ExternalLink,
-  Info,
   QrCode,
+  ShieldCheck,
 } from '@/components/ui/icons';
 import { walletService } from '@/lib/api/services/wallet.service';
-import { useCreateTopup } from '@/lib/hooks';
+import { useBooking, useCreateBookingPaymentRequest } from '@/lib/hooks';
 import { formatVND } from '@/lib/utils';
 
 const POLLING_INTERVAL = 3000; // 3 seconds
-
-const QUICK_AMOUNTS = [100000, 200000, 500000, 1000000, 2000000, 5000000];
-const MIN_AMOUNT = 100000;
-const MAX_AMOUNT = 50000000;
 
 // Bank code to display name mapping
 const BANK_CODE_NAMES: Record<string, string> = {
@@ -65,8 +59,6 @@ const BANK_CODE_NAMES: Record<string, string> = {
   LPB: 'LienVietPostBank',
 };
 
-type TopupStep = 'amount' | 'payment';
-
 type BankDeeplink = {
   appId: string;
   name: string;
@@ -74,10 +66,11 @@ type BankDeeplink = {
   deeplink: string;
 };
 
-type TopupData = {
+type PaymentData = {
   id: string;
   code: string;
   amount: number;
+  bookingId: string;
   qrUrl: string;
   expiresAt: string;
   bankDeeplinks: BankDeeplink[];
@@ -89,76 +82,106 @@ type TopupData = {
   };
 };
 
-export default function TopupScreen() {
+export default function BookingPaymentScreen() {
   const router = useRouter();
   const { t } = useTranslation();
-  const [step, setStep] = React.useState<TopupStep>('amount');
-  const [amount, setAmount] = React.useState('');
-  const [topupData, setTopupData] = React.useState<TopupData | null>(null);
+  const { id: bookingId } = useLocalSearchParams<{ id: string }>();
+
+  const [paymentData, setPaymentData] = React.useState<PaymentData | null>(
+    null
+  );
   const [timeLeft, setTimeLeft] = React.useState(0);
+  const [isInitializing, setIsInitializing] = React.useState(true);
+  const hasInitialized = React.useRef(false);
+  const hasHandledExpiry = React.useRef(false);
 
-  const createTopupMutation = useCreateTopup();
+  const { data: bookingData, isLoading: isBookingLoading } = useBooking(
+    bookingId || ''
+  );
+  const createPaymentMutation = useCreateBookingPaymentRequest();
 
-  // Countdown timer
+  // Initialize payment request on mount
   React.useEffect(() => {
-    if (!topupData?.expiresAt) return;
+    if (!bookingId || hasInitialized.current) return;
+    hasInitialized.current = true;
 
-    const updateTimer = () => {
-      const now = Date.now();
-      const expiry = new Date(topupData.expiresAt).getTime();
-      const remaining = Math.max(0, Math.floor((expiry - now) / 1000));
-      setTimeLeft(remaining);
+    const initializePayment = async () => {
+      try {
+        const result = await createPaymentMutation.mutateAsync(bookingId);
 
-      if (remaining === 0) {
-        Alert.alert(
-          t('hirer.wallet.topup_expired_title'),
-          t('hirer.wallet.topup_expired_message'),
-          [{ text: t('common.ok'), onPress: () => setStep('amount') }]
-        );
+        // API now returns deeplinks as array with logo info
+        const transformedData: PaymentData = {
+          id: result.id,
+          code: result.code,
+          amount: result.amount,
+          bookingId: result.bookingId,
+          qrUrl: result.qrUrl,
+          expiresAt: result.expiresAt,
+          bankDeeplinks: result.deeplinks,
+          accountInfo: {
+            bankCode: result.accountInfo.bankCode,
+            bankName:
+              BANK_CODE_NAMES[result.accountInfo.bankCode] ||
+              result.accountInfo.bankCode,
+            accountNumber: result.accountInfo.accountNumber,
+            accountName: result.accountInfo.accountName,
+          },
+        };
+
+        setPaymentData(transformedData);
+      } catch (error) {
+        console.error('Failed to create booking payment:', error);
+        showErrorMessage(t('hirer.booking_payment.create_failed'));
+        router.back();
+      } finally {
+        setIsInitializing(false);
       }
     };
 
-    updateTimer();
-    const interval = setInterval(updateTimer, 1000);
-    return () => clearInterval(interval);
-  }, [topupData?.expiresAt, t]);
+    initializePayment();
+  }, [bookingId, createPaymentMutation, router, t]);
 
   // Poll for payment status
   React.useEffect(() => {
-    if (!topupData?.id) return;
+    if (!paymentData?.id) return;
 
     // Check if payment is still valid (not expired)
-    const isExpired = topupData.expiresAt
-      ? new Date(topupData.expiresAt).getTime() < Date.now()
+    const isExpired = paymentData.expiresAt
+      ? new Date(paymentData.expiresAt).getTime() < Date.now()
       : false;
     if (isExpired) return;
 
     const pollStatus = async () => {
       try {
-        const status = await walletService.getPaymentRequestStatus(topupData.id);
+        const status = await walletService.getPaymentRequestStatus(paymentData.id);
 
         if (status.status === 'COMPLETED') {
           showSuccessMessage(
-            t('hirer.wallet.topup_success'),
-            t('hirer.wallet.topup_success_description')
+            t('hirer.booking_payment.payment_success'),
+            t('hirer.booking_payment.payment_success_description')
           );
-          // Navigate back to wallet
-          router.back();
+          // Navigate to booking detail after successful payment
+          router.replace(`/hirer/orders/${bookingId}`);
+          clearInterval(interval)
           return;
         }
 
         if (status.status === 'EXPIRED' || status.status === 'FAILED') {
-          Alert.alert(
-            t('hirer.wallet.topup_failed_title'),
-            status.status === 'EXPIRED'
-              ? t('hirer.wallet.topup_expired_message')
-              : t('hirer.wallet.topup_failed_message'),
-            [{ text: t('common.ok'), onPress: () => setStep('amount') }]
-          );
+          if (!hasHandledExpiry.current) {
+            hasHandledExpiry.current = true;
+            Alert.alert(
+              t('hirer.booking_payment.payment_failed_title'),
+              status.status === 'EXPIRED'
+                ? t('hirer.booking_payment.expired_message')
+                : t('hirer.booking_payment.payment_failed_message'),
+              [{ text: t('common.ok'), onPress: () => router.back() }]
+            );
+          }
+          clearInterval(interval);
           return;
         }
       } catch (error) {
-        console.error('Failed to poll topup status:', error);
+        console.error('Failed to poll payment status:', error);
       }
     };
 
@@ -166,7 +189,35 @@ export default function TopupScreen() {
     pollStatus();
     const interval = setInterval(pollStatus, POLLING_INTERVAL);
     return () => clearInterval(interval);
-  }, [topupData?.id, topupData?.expiresAt, router, t]);
+  }, [paymentData?.id, paymentData?.expiresAt, bookingId, router, t]);
+
+  // Countdown timer
+  React.useEffect(() => {
+    if (!paymentData?.expiresAt) return;
+
+    const updateTimer = () => {
+      const now = Date.now();
+      const expiry = new Date(paymentData.expiresAt).getTime();
+      const remaining = Math.max(0, Math.floor((expiry - now) / 1000));
+      setTimeLeft(remaining);
+
+      if (remaining === 0) {
+        if (!hasHandledExpiry.current) {
+          hasHandledExpiry.current = true;
+          Alert.alert(
+            t('hirer.booking_payment.expired_title'),
+            t('hirer.booking_payment.expired_message'),
+            [{ text: t('common.ok'), onPress: () => router.back() }]
+          );
+        }
+        return;
+      }
+    };
+
+    updateTimer();
+    const interval = setInterval(updateTimer, 1000);
+    return () => clearInterval(interval);
+  }, [paymentData?.expiresAt, t, router]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -175,87 +226,30 @@ export default function TopupScreen() {
   };
 
   const handleBack = React.useCallback(() => {
-    if (step === 'payment') {
-      Alert.alert(
-        t('hirer.wallet.cancel_topup_title'),
-        t('hirer.wallet.cancel_topup_message'),
-        [
-          { text: t('common.no'), style: 'cancel' },
-          {
-            text: t('common.yes'),
-            onPress: () => {
-              setStep('amount');
-              setTopupData(null);
-            },
-          },
-        ]
-      );
-    } else {
-      router.back();
-    }
-  }, [step, router, t]);
-
-  const handleSelectAmount = React.useCallback((value: number) => {
-    setAmount(value.toString());
-  }, []);
-
-  const handleContinue = React.useCallback(async () => {
-    const topupAmount = parseInt(amount, 10);
-
-    if (topupAmount < MIN_AMOUNT) {
-      Alert.alert(
-        t('hirer.wallet.error'),
-        `${t('hirer.wallet.minimum_error')} ${formatVND(MIN_AMOUNT, { symbolPosition: 'suffix' })}`
-      );
-      return;
-    }
-
-    if (topupAmount > MAX_AMOUNT) {
-      Alert.alert(
-        t('hirer.wallet.error'),
-        `${t('hirer.wallet.maximum_error')} ${formatVND(MAX_AMOUNT, { symbolPosition: 'suffix' })}`
-      );
-      return;
-    }
-
-    try {
-      const result = await createTopupMutation.mutateAsync(topupAmount);
-
-      // API now returns deeplinks as array with logo info
-      const transformedData: TopupData = {
-        id: result.id,
-        code: result.code,
-        amount: result.amount,
-        qrUrl: result.qrUrl,
-        expiresAt: result.expiresAt,
-        bankDeeplinks: result.deeplinks,
-        accountInfo: {
-          bankCode: result.accountInfo.bankCode,
-          bankName: BANK_CODE_NAMES[result.accountInfo.bankCode] || result.accountInfo.bankCode,
-          accountNumber: result.accountInfo.accountNumber,
-          accountName: result.accountInfo.accountName,
+    Alert.alert(
+      t('hirer.booking_payment.cancel_title'),
+      t('hirer.booking_payment.cancel_message'),
+      [
+        { text: t('common.no'), style: 'cancel' },
+        {
+          text: t('common.yes'),
+          onPress: () => router.back(),
         },
-      };
-
-      setTopupData(transformedData);
-      setStep('payment');
-    } catch (error) {
-      console.error('Failed to create topup:', error);
-      showErrorMessage(t('hirer.wallet.topup_create_failed'));
-    }
-  }, [amount, createTopupMutation, t]);
+      ]
+    );
+  }, [router, t]);
 
   const handleCopyCode = React.useCallback(async () => {
-    if (!topupData?.code) return;
-    await Clipboard.setStringAsync(topupData.code);
+    if (!paymentData?.code) return;
+    await Clipboard.setStringAsync(paymentData.code);
     showSuccessMessage(t('hirer.wallet.code_copied'));
-  }, [topupData?.code, t]);
+  }, [paymentData?.code, t]);
 
   const handleCopyAmount = React.useCallback(async () => {
-    if (!topupData?.amount) return;
-    await Clipboard.setStringAsync(topupData.amount.toString());
+    if (!paymentData?.amount) return;
+    await Clipboard.setStringAsync(paymentData.amount.toString());
     showSuccessMessage(t('hirer.wallet.amount_copied'));
-  }, [topupData?.amount, t]);
+  }, [paymentData?.amount, t]);
 
   const handleOpenBank = React.useCallback(
     async (deeplink: string) => {
@@ -275,15 +269,15 @@ export default function TopupScreen() {
   );
 
   const handleDownloadQR = React.useCallback(async () => {
-    if (!topupData?.qrUrl) return;
+    if (!paymentData?.qrUrl) return;
 
     try {
       // Download QR image to cache
-      const filename = `qr-topup-${topupData.code}.png`;
+      const filename = `qr-payment-${paymentData.code}.png`;
       const fileUri = `${FileSystem.cacheDirectory}${filename}`;
 
       const downloadResult = await FileSystem.downloadAsync(
-        topupData.qrUrl,
+        paymentData.qrUrl,
         fileUri
       );
 
@@ -298,7 +292,7 @@ export default function TopupScreen() {
         });
       } else {
         await Share.share({
-          message: `${t('hirer.wallet.qr_share_message')} ${topupData.code}`,
+          message: `${t('hirer.wallet.qr_share_message')} ${paymentData.code}`,
           url: downloadResult.uri,
         });
       }
@@ -306,148 +300,54 @@ export default function TopupScreen() {
       console.error('Failed to download QR:', error);
       showErrorMessage(t('hirer.wallet.qr_download_failed'));
     }
-  }, [topupData?.qrUrl, topupData?.code, t]);
+  }, [paymentData?.qrUrl, paymentData?.code, t]);
 
-  const amountNum = parseInt(amount, 10) || 0;
-  const isBelowMinimum = amountNum > 0 && amountNum < MIN_AMOUNT;
-  const isAboveMaximum = amountNum > MAX_AMOUNT;
-  const isValid =
-    amountNum >= MIN_AMOUNT && amountNum <= MAX_AMOUNT && !createTopupMutation.isPending;
-
-  // Amount Selection Step
-  if (step === 'amount') {
+  // Loading state
+  if (isInitializing || isBookingLoading) {
     return (
-      <View className="flex-1 bg-warmwhite">
-        <FocusAwareStatusBar />
-
-        <SafeAreaView edges={['top']}>
-          <View className="flex-row items-center gap-4 border-b border-border-light px-4 py-3">
-            <Pressable onPress={handleBack} testID="back-button">
-              <ArrowLeft color={colors.midnight.DEFAULT} width={24} height={24} />
-            </Pressable>
-            <Text className="flex-1 font-urbanist-bold text-xl text-midnight">
-              {t('hirer.wallet.topup_header')}
-            </Text>
-          </View>
-        </SafeAreaView>
-
-        <ScrollView
-          className="flex-1"
-          contentContainerStyle={{ paddingHorizontal: 24, paddingVertical: 24 }}
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
-        >
-          {/* Amount Input Section */}
-          <MotiView
-            from={{ opacity: 0, translateY: 20 }}
-            animate={{ opacity: 1, translateY: 0 }}
-            transition={{ type: 'timing', duration: 500 }}
-            className="mb-6"
-          >
-            <Text className="mb-2 text-lg font-semibold text-midnight">
-              {t('hirer.wallet.enter_amount')}
-            </Text>
-            <View
-              className={`flex-row items-center rounded-2xl border bg-white px-5 ${isBelowMinimum || isAboveMaximum
-                  ? 'border-danger-400'
-                  : 'border-border-light'
-                }`}
-            >
-              <Text className="text-2xl text-text-tertiary">₫</Text>
-              <TextInput
-                value={amount ? parseInt(amount, 10).toLocaleString('vi-VN') : ''}
-                onChangeText={(text) => setAmount(text.replace(/\D/g, ''))}
-                placeholder="0"
-                placeholderTextColor={colors.text.tertiary}
-                keyboardType="number-pad"
-                testID="amount-input"
-                className="flex-1 py-5 text-right text-3xl"
-                style={{ fontFamily: 'Urbanist_700Bold', color: colors.midnight.DEFAULT }}
-              />
-            </View>
-
-            {/* Validation Messages */}
-            {isBelowMinimum && (
-              <Text className="mt-2 text-sm text-danger-400">
-                {`${t('hirer.wallet.minimum_error')} ${formatVND(MIN_AMOUNT, { symbolPosition: 'suffix' })}`}
-              </Text>
-            )}
-            {isAboveMaximum && (
-              <Text className="mt-2 text-sm text-danger-400">
-                {`${t('hirer.wallet.maximum_error')} ${formatVND(MAX_AMOUNT, { symbolPosition: 'suffix' })}`}
-              </Text>
-            )}
-
-            {/* Quick Amounts */}
-            <View className="mt-4 flex-row flex-wrap gap-2">
-              {QUICK_AMOUNTS.map((value) => (
-                <Pressable
-                  key={value}
-                  onPress={() => handleSelectAmount(value)}
-                  testID={`quick-amount-${value}`}
-                  className={`rounded-full px-4 py-2.5 ${amountNum === value
-                      ? 'bg-rose-400'
-                      : 'border border-border-light bg-white'
-                    }`}
-                >
-                  <Text
-                    className={`text-sm font-semibold ${amountNum === value ? 'text-white' : 'text-midnight'
-                      }`}
-                  >
-                    {value >= 1000000
-                      ? `${value / 1000000}M`
-                      : `${value / 1000}K`}
-                  </Text>
-                </Pressable>
-              ))}
-            </View>
-          </MotiView>
-
-          {/* Info Section */}
-          <MotiView
-            from={{ opacity: 0, translateY: 20 }}
-            animate={{ opacity: 1, translateY: 0 }}
-            transition={{ type: 'timing', duration: 500, delay: 100 }}
-            className="rounded-2xl bg-lavender-900/10 p-4"
-          >
-            <View className="flex-row items-start gap-3">
-              <Info color={colors.lavender[400]} width={20} height={20} />
-              <View className="flex-1">
-                <Text className="text-sm font-semibold text-lavender-600">
-                  {t('hirer.wallet.topup_info_title')}
-                </Text>
-                <Text className="mt-1 text-sm text-text-secondary">
-                  {t('hirer.wallet.topup_info_description')}
-                </Text>
-              </View>
-            </View>
-          </MotiView>
-        </ScrollView>
-
-        {/* Bottom CTA */}
-        <SafeAreaView edges={['bottom']} className="border-t border-border-light bg-white">
-          <View className="px-6 py-4">
-            <Button
-              label={
-                createTopupMutation.isPending
-                  ? t('common.loading')
-                  : t('hirer.wallet.continue_to_payment')
-              }
-              onPress={handleContinue}
-              disabled={!isValid}
-              loading={createTopupMutation.isPending}
-              variant="default"
-              size="lg"
-              testID="continue-button"
-              className="w-full bg-rose-400"
-            />
-          </View>
-        </SafeAreaView>
+      <View className="flex-1 items-center justify-center bg-warmwhite">
+        <ActivityIndicator size="large" color={colors.rose[400]} />
+        <Text className="mt-4 text-text-secondary">
+          {t('hirer.booking_payment.initializing')}
+        </Text>
       </View>
     );
   }
 
-  // Payment Step with QR Code
+  if (!paymentData || !bookingData) {
+    return (
+      <View className="flex-1 bg-warmwhite">
+        <FocusAwareStatusBar />
+        <SafeAreaView edges={['top']}>
+          <View className="flex-row items-center gap-4 border-b border-border-light px-4 py-3">
+            <Pressable onPress={() => router.back()}>
+              <ArrowLeft
+                color={colors.midnight.DEFAULT}
+                width={24}
+                height={24}
+              />
+            </Pressable>
+            <Text className="flex-1 font-urbanist-bold text-xl text-midnight">
+              {t('hirer.booking_payment.header')}
+            </Text>
+          </View>
+        </SafeAreaView>
+        <View className="flex-1 items-center justify-center p-8">
+          <Text className="text-center text-text-secondary">
+            {t('hirer.booking_payment.error')}
+          </Text>
+          <Button
+            label={t('common.go_back')}
+            onPress={() => router.back()}
+            variant="outline"
+            size="default"
+            className="mt-4"
+          />
+        </View>
+      </View>
+    );
+  }
+
   return (
     <View className="flex-1 bg-warmwhite">
       <FocusAwareStatusBar />
@@ -458,7 +358,7 @@ export default function TopupScreen() {
             <ArrowLeft color={colors.midnight.DEFAULT} width={24} height={24} />
           </Pressable>
           <Text className="flex-1 font-urbanist-bold text-xl text-midnight">
-            {t('hirer.wallet.complete_payment')}
+            {t('hirer.booking_payment.header')}
           </Text>
         </View>
       </SafeAreaView>
@@ -468,11 +368,57 @@ export default function TopupScreen() {
         contentContainerStyle={{ paddingHorizontal: 24, paddingVertical: 24 }}
         showsVerticalScrollIndicator={false}
       >
+        {/* Booking Summary */}
+        <MotiView
+          from={{ opacity: 0, translateY: 20 }}
+          animate={{ opacity: 1, translateY: 0 }}
+          transition={{ type: 'timing', duration: 400 }}
+          className="mb-6 rounded-2xl bg-white p-4"
+          style={styles.card}
+        >
+          <View className="flex-row items-center gap-3">
+            <Image
+              source={{ uri: bookingData.companion?.avatar || '' }}
+              className="size-14 rounded-xl"
+              resizeMode="cover"
+            />
+            <View className="flex-1">
+              <View className="flex-row items-center gap-2">
+                <Text className="font-urbanist-bold text-lg text-midnight">
+                  {bookingData.companion?.displayName}
+                </Text>
+                {bookingData.companion?.isVerified && (
+                  <ShieldCheck
+                    color={colors.teal[400]}
+                    width={16}
+                    height={16}
+                  />
+                )}
+              </View>
+              <Text className="text-sm text-text-secondary">
+                {bookingData.occasion?.name || t('common.booking')}
+              </Text>
+            </View>
+          </View>
+          <View className="mt-3 border-t border-border-light pt-3">
+            <View className="flex-row justify-between">
+              <Text className="text-text-secondary">
+                {t('hirer.booking_payment.total_amount')}
+              </Text>
+              <Text className="font-urbanist-bold text-xl text-rose-400">
+                {formatVND(bookingData.totalPrice, {
+                  symbolPosition: 'suffix',
+                })}
+              </Text>
+            </View>
+          </View>
+        </MotiView>
+
         {/* Timer Section */}
         <MotiView
           from={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ type: 'timing', duration: 400 }}
+          transition={{ type: 'timing', duration: 400, delay: 100 }}
           className="mb-6 flex-row items-center justify-center gap-3 rounded-2xl bg-yellow-400/10 p-4"
         >
           <Clock color={colors.yellow[600]} width={24} height={24} />
@@ -490,7 +436,7 @@ export default function TopupScreen() {
         <MotiView
           from={{ opacity: 0, translateY: 20 }}
           animate={{ opacity: 1, translateY: 0 }}
-          transition={{ type: 'timing', duration: 500, delay: 100 }}
+          transition={{ type: 'timing', duration: 500, delay: 200 }}
           className="mb-6 items-center rounded-3xl bg-white p-6"
           style={styles.qrCard}
         >
@@ -501,10 +447,13 @@ export default function TopupScreen() {
             </Text>
           </View>
 
-          {topupData?.qrUrl ? (
-            <View className="rounded-2xl bg-white p-4" style={styles.qrContainer}>
+          {paymentData.qrUrl ? (
+            <View
+              className="rounded-2xl bg-white p-4"
+              style={styles.qrContainer}
+            >
               <Image
-                source={{ uri: topupData.qrUrl }}
+                source={{ uri: paymentData.qrUrl }}
                 style={styles.qrImage}
                 resizeMode="contain"
               />
@@ -516,7 +465,7 @@ export default function TopupScreen() {
           )}
 
           {/* Download QR Button */}
-          {topupData?.qrUrl && (
+          {paymentData.qrUrl && (
             <Pressable
               onPress={handleDownloadQR}
               testID="download-qr-button"
@@ -532,12 +481,17 @@ export default function TopupScreen() {
           {/* Amount Display */}
           <View className="mt-4 w-full rounded-xl bg-lavender-900/10 p-4">
             <View className="flex-row items-center justify-between">
-              <Text className="text-text-secondary">{t('hirer.wallet.amount_label')}</Text>
+              <Text className="text-text-secondary">
+                {t('hirer.wallet.amount_label')}
+              </Text>
               <View className="flex-row items-center gap-2">
                 <Text className="font-urbanist-bold text-xl text-midnight">
-                  {formatVND(topupData?.amount || 0, { symbolPosition: 'suffix' })}
+                  {formatVND(paymentData.amount, { symbolPosition: 'suffix' })}
                 </Text>
-                <Pressable onPress={handleCopyAmount} testID="copy-amount-button">
+                <Pressable
+                  onPress={handleCopyAmount}
+                  testID="copy-amount-button"
+                >
                   <Copy color={colors.lavender[400]} width={18} height={18} />
                 </Pressable>
               </View>
@@ -549,9 +503,9 @@ export default function TopupScreen() {
         <MotiView
           from={{ opacity: 0, translateY: 20 }}
           animate={{ opacity: 1, translateY: 0 }}
-          transition={{ type: 'timing', duration: 500, delay: 200 }}
+          transition={{ type: 'timing', duration: 500, delay: 300 }}
           className="mb-6 rounded-2xl bg-white p-5"
-          style={styles.infoCard}
+          style={styles.card}
         >
           <Text className="mb-3 font-semibold text-midnight">
             {t('hirer.wallet.payment_code')}
@@ -565,7 +519,7 @@ export default function TopupScreen() {
               className="font-urbanist-bold text-xl text-rose-500"
               style={{ letterSpacing: 2 }}
             >
-              {topupData?.code || '---'}
+              {paymentData.code}
             </Text>
             <View className="flex-row items-center gap-2">
               <Copy color={colors.rose[400]} width={20} height={20} />
@@ -583,48 +537,54 @@ export default function TopupScreen() {
         <MotiView
           from={{ opacity: 0, translateY: 20 }}
           animate={{ opacity: 1, translateY: 0 }}
-          transition={{ type: 'timing', duration: 500, delay: 300 }}
+          transition={{ type: 'timing', duration: 500, delay: 400 }}
           className="mb-6 rounded-2xl bg-white p-5"
-          style={styles.infoCard}
+          style={styles.card}
         >
           <Text className="mb-3 font-semibold text-midnight">
             {t('hirer.wallet.bank_transfer_info')}
           </Text>
           <View className="gap-3">
             <View className="flex-row justify-between">
-              <Text className="text-text-secondary">{t('hirer.wallet.bank_name')}</Text>
+              <Text className="text-text-secondary">
+                {t('hirer.wallet.bank_name')}
+              </Text>
               <Text className="font-medium text-midnight">
-                {topupData?.accountInfo.bankName || '---'}
+                {paymentData.accountInfo.bankName}
               </Text>
             </View>
             <View className="flex-row justify-between">
-              <Text className="text-text-secondary">{t('hirer.wallet.account_number')}</Text>
+              <Text className="text-text-secondary">
+                {t('hirer.wallet.account_number')}
+              </Text>
               <Text className="font-medium text-midnight">
-                {topupData?.accountInfo.accountNumber || '---'}
+                {paymentData.accountInfo.accountNumber}
               </Text>
             </View>
             <View className="flex-row justify-between">
-              <Text className="text-text-secondary">{t('hirer.wallet.account_name')}</Text>
+              <Text className="text-text-secondary">
+                {t('hirer.wallet.account_name')}
+              </Text>
               <Text className="font-medium text-midnight">
-                {topupData?.accountInfo.accountName || '---'}
+                {paymentData.accountInfo.accountName}
               </Text>
             </View>
           </View>
         </MotiView>
 
         {/* Bank App Shortcuts */}
-        {topupData?.bankDeeplinks && topupData.bankDeeplinks.length > 0 && (
+        {paymentData.bankDeeplinks && paymentData.bankDeeplinks.length > 0 && (
           <MotiView
             from={{ opacity: 0, translateY: 20 }}
             animate={{ opacity: 1, translateY: 0 }}
-            transition={{ type: 'timing', duration: 500, delay: 400 }}
+            transition={{ type: 'timing', duration: 500, delay: 500 }}
             className="mb-6"
           >
             <Text className="mb-3 font-semibold text-midnight">
               {t('hirer.wallet.open_bank_app')}
             </Text>
             <View className="flex-row flex-wrap gap-3">
-              {topupData.bankDeeplinks.map((bank) => (
+              {paymentData.bankDeeplinks.map((bank) => (
                 <Pressable
                   key={bank.appId}
                   onPress={() => handleOpenBank(bank.deeplink)}
@@ -637,7 +597,11 @@ export default function TopupScreen() {
                     resizeMode="cover"
                   />
                   <Text className="font-medium text-midnight">{bank.name}</Text>
-                  <ExternalLink color={colors.lavender[400]} width={14} height={14} />
+                  <ExternalLink
+                    color={colors.lavender[400]}
+                    width={14}
+                    height={14}
+                  />
                 </Pressable>
               ))}
             </View>
@@ -648,7 +612,7 @@ export default function TopupScreen() {
         <MotiView
           from={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ type: 'timing', duration: 500, delay: 500 }}
+          transition={{ type: 'timing', duration: 500, delay: 600 }}
           className="rounded-2xl bg-teal-400/10 p-4"
         >
           <View className="flex-row items-start gap-3">
@@ -658,7 +622,7 @@ export default function TopupScreen() {
                 {t('hirer.wallet.auto_confirm_title')}
               </Text>
               <Text className="mt-1 text-sm text-text-secondary">
-                {t('hirer.wallet.auto_confirm_description')}
+                {t('hirer.booking_payment.auto_confirm_description')}
               </Text>
             </View>
           </View>
@@ -672,6 +636,13 @@ export default function TopupScreen() {
 }
 
 const styles = {
+  card: {
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+  },
   qrCard: {
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
@@ -695,12 +666,5 @@ const styles = {
     height: 220,
     alignItems: 'center' as const,
     justifyContent: 'center' as const,
-  },
-  infoCard: {
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
   },
 };

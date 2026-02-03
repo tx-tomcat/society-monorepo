@@ -142,7 +142,7 @@ export default function BookingConfirmationScreen() {
           transition={{ type: 'spring', damping: 15 }}
           className="items-center px-4 pt-8"
         >
-          <View className="mb-6 size-24 items-center justify-center rounded-full bg-lavender-400">
+          <View className="mb-6 size-24 items-center justify-center rounded-full bg-lavender-900">
             <MotiView
               from={{ scale: 0, rotate: '-45deg' }}
               animate={{ scale: 1, rotate: '0deg' }}
@@ -196,7 +196,7 @@ export default function BookingConfirmationScreen() {
               </View>
               <Pressable
                 onPress={handleMessage}
-                className="size-11 items-center justify-center rounded-full bg-lavender-400"
+                className="size-11 items-center justify-center rounded-full bg-lavender-900"
               >
                 <MessageCircle color="#FFFFFF" width={20} height={20} />
               </Pressable>
@@ -223,7 +223,7 @@ export default function BookingConfirmationScreen() {
             </View>
 
             <View className="flex-row items-center gap-4">
-              <View className="size-11 items-center justify-center rounded-xl bg-lavender-400/10">
+              <View className="size-11 items-center justify-center rounded-xl bg-lavender-900/10">
                 <MapPin color={colors.lavender[400]} width={22} height={22} />
               </View>
               <View className="flex-1">
@@ -260,14 +260,14 @@ export default function BookingConfirmationScreen() {
           from={{ opacity: 0, translateY: 20 }}
           animate={{ opacity: 1, translateY: 0 }}
           transition={{ type: 'timing', duration: 400, delay: 300 }}
-          className="mx-4 mt-4 rounded-2xl bg-lavender-400/10 p-5"
+          className="mx-4 mt-4 rounded-2xl bg-lavender-900/10 p-5"
         >
           <Text className="mb-4 font-urbanist-semibold text-base text-midnight">
             {t('hirer.confirmation.whats_next')}
           </Text>
           <View className="gap-3">
             <View className="flex-row items-start gap-3">
-              <View className="mt-1 size-6 items-center justify-center rounded-full bg-lavender-400">
+              <View className="mt-1 size-6 items-center justify-center rounded-full bg-lavender-900">
                 <Text className="text-xs font-bold text-white">1</Text>
               </View>
               <Text className="flex-1 text-sm leading-relaxed text-text-secondary">
@@ -275,7 +275,7 @@ export default function BookingConfirmationScreen() {
               </Text>
             </View>
             <View className="flex-row items-start gap-3">
-              <View className="mt-1 size-6 items-center justify-center rounded-full bg-lavender-400">
+              <View className="mt-1 size-6 items-center justify-center rounded-full bg-lavender-900">
                 <Text className="text-xs font-bold text-white">2</Text>
               </View>
               <Text className="flex-1 text-sm leading-relaxed text-text-secondary">
@@ -283,7 +283,7 @@ export default function BookingConfirmationScreen() {
               </Text>
             </View>
             <View className="flex-row items-start gap-3">
-              <View className="mt-1 size-6 items-center justify-center rounded-full bg-lavender-400">
+              <View className="mt-1 size-6 items-center justify-center rounded-full bg-lavender-900">
                 <Text className="text-xs font-bold text-white">3</Text>
               </View>
               <Text className="flex-1 text-sm leading-relaxed text-text-secondary">

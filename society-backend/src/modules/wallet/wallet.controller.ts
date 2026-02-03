@@ -4,6 +4,7 @@ import {
   Post,
   Body,
   Query,
+  Param,
   UseGuards,
   Headers,
   HttpCode,
@@ -24,6 +25,7 @@ import {
   BookingPaymentRequestResponse,
   WalletBalanceResponse,
   TransactionsResponse,
+  PaymentRequestStatusResponse,
   SepayWebhookDto,
 } from './dto/wallet.dto';
 
@@ -101,6 +103,18 @@ export class WalletController {
     const canPay = await this.walletService.canPayFromWallet(userId, amountNum);
     const { balance } = await this.walletService.getBalance(userId);
     return { canPay, balance };
+  }
+
+  /**
+   * Get payment request status (for polling)
+   */
+  @Get('payment-request/:id/status')
+  @UseGuards(JwtAuthGuard)
+  async getPaymentRequestStatus(
+    @CurrentUser('id') userId: string,
+    @Param('id') requestId: string,
+  ): Promise<PaymentRequestStatusResponse> {
+    return this.walletService.getPaymentRequestStatus(userId, requestId);
   }
 }
 

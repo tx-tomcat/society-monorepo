@@ -21,11 +21,10 @@ import {
 import {
   ArrowLeft,
   Calendar,
-  CheckCircle,
   Clock,
   Plus,
   Wallet,
-  XCircle,
+  XCircle
 } from '@/components/ui/icons';
 import {
   PaymentRequestStatus,
@@ -33,6 +32,47 @@ import {
 } from '@/lib/api/enums';
 import { useWalletBalance, useWalletTransactions } from '@/lib/hooks';
 import { formatVND } from '@/lib/utils';
+
+// Move outside component to avoid recreation on each render
+const TRANSACTION_ICON_CONFIG = {
+  pending: {
+    icon: Clock,
+    color: colors.yellow[400],
+    bg: 'bg-yellow-400/10',
+  },
+  failed: {
+    icon: XCircle,
+    color: colors.rose[400],
+    bg: 'bg-rose-400/10',
+  },
+  topup: {
+    icon: Plus,
+    color: colors.teal[400],
+    bg: 'bg-teal-400/10',
+  },
+  default: {
+    icon: Calendar,
+    color: colors.lavender[400],
+    bg: 'bg-lavender-900/10',
+  },
+} as const;
+
+const getTransactionIconKey = (
+  type: PaymentRequestType,
+  status: PaymentRequestStatus
+): keyof typeof TRANSACTION_ICON_CONFIG => {
+  if (status === PaymentRequestStatus.PENDING) return 'pending';
+  if (status === PaymentRequestStatus.EXPIRED || status === PaymentRequestStatus.FAILED) return 'failed';
+  if (type === PaymentRequestType.TOPUP) return 'topup';
+  return 'default';
+};
+
+const STATUS_COLORS: Record<PaymentRequestStatus, string> = {
+  [PaymentRequestStatus.COMPLETED]: 'text-teal-400',
+  [PaymentRequestStatus.PENDING]: 'text-yellow-500',
+  [PaymentRequestStatus.EXPIRED]: 'text-rose-400',
+  [PaymentRequestStatus.FAILED]: 'text-rose-400',
+};
 
 export default function WalletScreen() {
   const router = useRouter();
@@ -74,51 +114,16 @@ export default function WalletScreen() {
     router.push('/hirer/wallet/topup' as Href);
   }, [router]);
 
-  const getTransactionIcon = (
-    type: PaymentRequestType,
-    status: PaymentRequestStatus
-  ) => {
-    if (status === PaymentRequestStatus.PENDING) {
-      return {
-        icon: Clock,
-        color: colors.yellow[400],
-        bg: 'bg-yellow-400/10',
-      };
-    }
-    if (status === PaymentRequestStatus.EXPIRED || status === PaymentRequestStatus.FAILED) {
-      return {
-        icon: XCircle,
-        color: colors.rose[400],
-        bg: 'bg-rose-400/10',
-      };
-    }
-    if (type === PaymentRequestType.TOPUP) {
-      return {
-        icon: Plus,
-        color: colors.teal[400],
-        bg: 'bg-teal-400/10',
-      };
-    }
-    return {
-      icon: Calendar,
-      color: colors.lavender[400],
-      bg: 'bg-lavender-400/10',
-    };
-  };
+  const getTransactionIcon = React.useCallback(
+    (type: PaymentRequestType, status: PaymentRequestStatus) =>
+      TRANSACTION_ICON_CONFIG[getTransactionIconKey(type, status)],
+    []
+  );
 
-  const getStatusColor = (status: PaymentRequestStatus) => {
-    switch (status) {
-      case PaymentRequestStatus.COMPLETED:
-        return 'text-teal-400';
-      case PaymentRequestStatus.PENDING:
-        return 'text-yellow-500';
-      case PaymentRequestStatus.EXPIRED:
-      case PaymentRequestStatus.FAILED:
-        return 'text-rose-400';
-      default:
-        return 'text-text-secondary';
-    }
-  };
+  const getStatusColor = React.useCallback(
+    (status: PaymentRequestStatus) => STATUS_COLORS[status] || 'text-text-secondary',
+    []
+  );
 
   if (isLoading && !isRefreshing) {
     return (
@@ -157,7 +162,7 @@ export default function WalletScreen() {
           from={{ opacity: 0, translateY: 20 }}
           animate={{ opacity: 1, translateY: 0 }}
           transition={{ type: 'timing', duration: 500 }}
-          className="m-4 rounded-3xl bg-lavender-400 p-6"
+          className="m-4 rounded-3xl bg-lavender-900 p-6"
         >
           <View className="flex-row items-center gap-3">
             <View className="size-12 items-center justify-center rounded-full bg-white/20">
@@ -272,9 +277,8 @@ export default function WalletScreen() {
                         </View>
                       </View>
                       <Text
-                        className={`font-semibold ${
-                          isPositive ? 'text-teal-400' : 'text-text-secondary'
-                        }`}
+                        className={`font-semibold ${isPositive ? 'text-teal-400' : 'text-text-secondary'
+                          }`}
                       >
                         {isPositive ? '+' : ''}
                         {formatVND(Math.abs(transaction.amount), {

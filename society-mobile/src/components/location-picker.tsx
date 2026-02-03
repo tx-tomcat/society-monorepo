@@ -147,13 +147,13 @@ export function LocationPicker({
       // Bias towards Vietnam with viewbox parameter
       const response = await fetch(
         `https://nominatim.openstreetmap.org/search?` +
-          `q=${encodeURIComponent(query)}&` +
-          `format=json&` +
-          `addressdetails=1&` +
-          `limit=5&` +
-          `countrycodes=vn&` +
-          `viewbox=102.14,8.18,109.46,23.39&` + // Vietnam bounding box
-          `bounded=0`,
+        `q=${encodeURIComponent(query)}&` +
+        `format=json&` +
+        `addressdetails=1&` +
+        `limit=5&` +
+        `countrycodes=vn&` +
+        `viewbox=102.14,8.18,109.46,23.39&` + // Vietnam bounding box
+        `bounded=0`,
         {
           headers: {
             'Accept-Language': 'vi,en',
@@ -312,11 +312,10 @@ export function LocationPicker({
                   <Pressable
                     key={result.place_id}
                     onPress={() => selectPlace(result)}
-                    className={`flex-row items-center gap-3 px-4 py-3 ${
-                      index < searchResults.length - 1
+                    className={`flex-row items-center gap-3 px-4 py-3 ${index < searchResults.length - 1
                         ? 'border-b border-border-light'
                         : ''
-                    }`}
+                      }`}
                   >
                     <MapPin color={colors.rose[400]} width={20} height={20} />
                     <View className="flex-1">
@@ -395,7 +394,7 @@ export function LocationPicker({
         >
           <View className="p-4">
             {selectedLocation && (
-              <View className="mb-3 flex-row items-start gap-3 rounded-xl bg-lavender-400/10 p-3">
+              <View className="mb-3 flex-row items-start gap-3 rounded-xl bg-lavender-900/10 p-3">
                 <MapPin color={colors.rose[400]} width={20} height={20} />
                 <Text className="flex-1 text-sm text-midnight" numberOfLines={2}>
                   {selectedLocation.address}

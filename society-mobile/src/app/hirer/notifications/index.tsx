@@ -194,7 +194,7 @@ export default function NotificationsScreen() {
         <View className="flex-row items-center justify-center gap-2 bg-rose-50 py-2">
           <View className="size-2 rounded-full bg-rose-400" />
           <Text className="text-sm text-rose-500">
-            {t('notifications.unread_count', { count: unreadCount })}
+            {`${unreadCount} ${t('notifications.unread_count')}`}
           </Text>
         </View>
       )}

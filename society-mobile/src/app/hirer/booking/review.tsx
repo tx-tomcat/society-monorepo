@@ -274,7 +274,7 @@ export default function BookingReviewScreen() {
 
             {/* Time & Duration */}
             <View className="flex-row items-center gap-4">
-              <View className="size-12 items-center justify-center rounded-xl bg-lavender-400/10">
+              <View className="size-12 items-center justify-center rounded-xl bg-lavender-900/10">
                 <Clock color={colors.lavender[400]} width={22} height={22} />
               </View>
               <View className="flex-1">
@@ -364,14 +364,14 @@ export default function BookingReviewScreen() {
           from={{ opacity: 0, translateY: 10 }}
           animate={{ opacity: 1, translateY: 0 }}
           transition={{ type: 'timing', duration: 400, delay: 200 }}
-          className="mx-4 mt-4 rounded-2xl bg-lavender-400/10 p-4"
+          className="mx-4 mt-4 rounded-2xl bg-lavender-900/10 p-4"
         >
           <Text className="mb-4 font-urbanist-semibold text-base text-midnight">
             {t('hirer.review.how_it_works')}
           </Text>
           <View className="gap-3">
             <View className="flex-row items-start gap-3">
-              <View className="mt-0.5 size-6 items-center justify-center rounded-full bg-lavender-400">
+              <View className="mt-0.5 size-6 items-center justify-center rounded-full bg-lavender-900">
                 <Text className="text-xs font-bold text-white">1</Text>
               </View>
               <View className="flex-1">
@@ -384,7 +384,7 @@ export default function BookingReviewScreen() {
               </View>
             </View>
             <View className="flex-row items-start gap-3">
-              <View className="mt-0.5 size-6 items-center justify-center rounded-full bg-lavender-400">
+              <View className="mt-0.5 size-6 items-center justify-center rounded-full bg-lavender-900">
                 <Text className="text-xs font-bold text-white">2</Text>
               </View>
               <View className="flex-1">
@@ -397,7 +397,7 @@ export default function BookingReviewScreen() {
               </View>
             </View>
             <View className="flex-row items-start gap-3">
-              <View className="mt-0.5 size-6 items-center justify-center rounded-full bg-lavender-400">
+              <View className="mt-0.5 size-6 items-center justify-center rounded-full bg-lavender-900">
                 <Text className="text-xs font-bold text-white">3</Text>
               </View>
               <View className="flex-1">

@@ -180,9 +180,8 @@ export default function FilterScreen() {
                 <Pressable
                   key={occasion.id}
                   onPress={() => toggleOccasion(occasion.id)}
-                  className={`flex-row items-center gap-2 rounded-full px-4 py-2.5 ${
-                    isSelected ? 'bg-rose-400' : 'bg-white'
-                  }`}
+                  className={`flex-row items-center gap-2 rounded-full px-4 py-2.5 ${isSelected ? 'bg-rose-400' : 'bg-white'
+                    }`}
                 >
                   <occasion.icon
                     color={isSelected ? '#FFFFFF' : colors.text.secondary}
@@ -190,9 +189,8 @@ export default function FilterScreen() {
                     height={18}
                   />
                   <Text
-                    className={`text-sm font-medium ${
-                      isSelected ? 'text-white' : 'text-text-secondary'
-                    }`}
+                    className={`text-sm font-medium ${isSelected ? 'text-white' : 'text-text-secondary'
+                      }`}
                   >
                     {t(occasion.labelKey)}
                   </Text>
@@ -222,14 +220,12 @@ export default function FilterScreen() {
                 <Pressable
                   key={range.id}
                   onPress={() => setSelectedPrice(range.id)}
-                  className={`rounded-full px-4 py-2.5 ${
-                    isSelected ? 'bg-rose-400' : 'bg-white'
-                  }`}
+                  className={`rounded-full px-4 py-2.5 ${isSelected ? 'bg-rose-400' : 'bg-white'
+                    }`}
                 >
                   <Text
-                    className={`text-sm font-medium ${
-                      isSelected ? 'text-white' : 'text-text-secondary'
-                    }`}
+                    className={`text-sm font-medium ${isSelected ? 'text-white' : 'text-text-secondary'
+                      }`}
                   >
                     {range.label}
                   </Text>
@@ -259,9 +255,8 @@ export default function FilterScreen() {
                 <Pressable
                   key={rating.id}
                   onPress={() => setSelectedRating(rating.id)}
-                  className={`flex-row items-center gap-1 rounded-full px-4 py-2.5 ${
-                    isSelected ? 'bg-yellow-400' : 'bg-white'
-                  }`}
+                  className={`flex-row items-center gap-1 rounded-full px-4 py-2.5 ${isSelected ? 'bg-yellow-400' : 'bg-white'
+                    }`}
                 >
                   {rating.id !== 'any' && (
                     <Star
@@ -275,9 +270,8 @@ export default function FilterScreen() {
                     />
                   )}
                   <Text
-                    className={`text-sm font-medium ${
-                      isSelected ? 'text-midnight' : 'text-text-secondary'
-                    }`}
+                    className={`text-sm font-medium ${isSelected ? 'text-midnight' : 'text-text-secondary'
+                      }`}
                   >
                     {rating.label}
                   </Text>
@@ -307,14 +301,12 @@ export default function FilterScreen() {
                 <Pressable
                   key={location}
                   onPress={() => toggleLocation(location)}
-                  className={`rounded-full px-4 py-2.5 ${
-                    isSelected ? 'bg-lavender-400' : 'bg-white'
-                  }`}
+                  className={`rounded-full px-4 py-2.5 ${isSelected ? 'bg-lavender-900' : 'bg-white'
+                    }`}
                 >
                   <Text
-                    className={`text-sm font-medium ${
-                      isSelected ? 'text-white' : 'text-text-secondary'
-                    }`}
+                    className={`text-sm font-medium ${isSelected ? 'text-white' : 'text-text-secondary'
+                      }`}
                   >
                     {location}
                   </Text>
@@ -339,9 +331,8 @@ export default function FilterScreen() {
               {t('hirer.filter.verified_only')}
             </Text>
             <View
-              className={`size-6 items-center justify-center rounded-full ${
-                verifiedOnly ? 'bg-teal-400' : 'bg-border'
-              }`}
+              className={`size-6 items-center justify-center rounded-full ${verifiedOnly ? 'bg-teal-400' : 'bg-border'
+                }`}
             >
               {verifiedOnly && <X color="#FFFFFF" width={14} height={14} />}
             </View>
@@ -355,9 +346,8 @@ export default function FilterScreen() {
               {t('hirer.filter.online_only')}
             </Text>
             <View
-              className={`size-6 items-center justify-center rounded-full ${
-                onlineOnly ? 'bg-teal-400' : 'bg-border'
-              }`}
+              className={`size-6 items-center justify-center rounded-full ${onlineOnly ? 'bg-teal-400' : 'bg-border'
+                }`}
             >
               {onlineOnly && <X color="#FFFFFF" width={14} height={14} />}
             </View>

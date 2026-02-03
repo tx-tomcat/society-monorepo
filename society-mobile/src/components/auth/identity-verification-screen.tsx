@@ -55,15 +55,15 @@ export type IdentityVerificationScreenProps = {
 const themeConfig = {
   companion: {
     accentColor: colors.lavender[400],
-    accentBgClass: 'bg-lavender-400/10',
-    accentBorderClass: 'border-lavender-400',
-    activeItemBgClass: 'bg-lavender-400',
-    inactiveIconBgClass: 'bg-lavender-400/20',
-    progressBgClass: 'bg-lavender-400/30',
-    progressFillClass: 'bg-lavender-400',
-    accentTextClass: 'text-lavender-400',
-    buttonClassName: 'w-full bg-lavender-400',
-    requiredBadgeBgClass: 'bg-lavender-400/20',
+    accentBgClass: 'bg-lavender-900/10',
+    accentBorderClass: 'border-lavender-900',
+    activeItemBgClass: 'bg-lavender-900',
+    inactiveIconBgClass: 'bg-lavender-900/20',
+    progressBgClass: 'bg-lavender-900/30',
+    progressFillClass: 'bg-lavender-900',
+    accentTextClass: 'text-lavender-900',
+    buttonClassName: 'w-full bg-lavender-900',
+    requiredBadgeBgClass: 'bg-lavender-900/20',
   },
   hirer: {
     accentColor: colors.rose[400],
@@ -204,18 +204,16 @@ export function IdentityVerificationScreen({
               <Pressable
                 onPress={() => onStepPress(step.id)}
                 testID={testID ? `${testID}-step-${step.id}` : undefined}
-                className={`flex-row items-center gap-4 rounded-2xl border-2 p-4 ${
-                  step.completed
+                className={`flex-row items-center gap-4 rounded-2xl border-2 p-4 ${step.completed
                     ? `${theme.accentBorderClass} ${theme.accentBgClass}`
                     : 'border-border-light bg-white'
-                }`}
+                  }`}
               >
                 <View
-                  className={`size-12 items-center justify-center rounded-full ${
-                    step.completed
+                  className={`size-12 items-center justify-center rounded-full ${step.completed
                       ? theme.activeItemBgClass
                       : theme.inactiveIconBgClass
-                  }`}
+                    }`}
                 >
                   {step.completed ? (
                     <CheckCircle color="#FFFFFF" width={24} height={24} />
@@ -257,11 +255,10 @@ export function IdentityVerificationScreen({
                 )}
                 {userType === 'companion' && (
                   <View
-                    className={`size-6 items-center justify-center rounded-full border-2 ${
-                      step.completed
+                    className={`size-6 items-center justify-center rounded-full border-2 ${step.completed
                         ? `${theme.accentBorderClass} ${theme.activeItemBgClass}`
                         : 'border-border-light'
-                    }`}
+                      }`}
                   >
                     {step.completed && (
                       <CheckCircle color="#FFFFFF" width={16} height={16} />
@@ -301,7 +298,7 @@ export function IdentityVerificationScreen({
             from={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ type: 'timing', duration: 500, delay: 600 }}
-            className="mt-6 rounded-2xl bg-lavender-400/10 p-4"
+            className="mt-6 rounded-2xl bg-lavender-900/10 p-4"
           >
             <Text className="mb-3 font-semibold text-midnight">
               {t('auth.verify_identity.why_verify')}
@@ -309,7 +306,7 @@ export function IdentityVerificationScreen({
             <View className="gap-2">
               {displayBenefits.map((benefit, index) => (
                 <View key={index} className="flex-row items-center gap-2">
-                  <View className="size-2 rounded-full bg-lavender-400" />
+                  <View className="size-2 rounded-full bg-lavender-900" />
                   <Text className="text-sm text-text-secondary">{benefit}</Text>
                 </View>
               ))}

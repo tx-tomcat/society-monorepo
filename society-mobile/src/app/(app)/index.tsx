@@ -36,6 +36,105 @@ type UpcomingBooking = Booking & {
   displayStatus: 'upcoming' | 'active' | 'pending';
 };
 
+type BookingCardProps = {
+  booking: UpcomingBooking;
+  onPress: () => void;
+  t: (key: string) => string;
+};
+
+const BookingCard = React.memo(function BookingCard({
+  booking,
+  onPress,
+  t,
+}: BookingCardProps) {
+  const { dateString, timeString, companionPhoto } = React.useMemo(() => {
+    const startTime = new Date(booking.startDatetime);
+    const endTime = new Date(booking.endDatetime);
+    const now = new Date();
+
+    const isToday = startTime.toDateString() === now.toDateString();
+    const dateStr = isToday
+      ? t('common.today')
+      : startTime.toLocaleDateString('en-US', {
+          weekday: 'short',
+          month: 'short',
+          day: 'numeric',
+        });
+
+    const timeStr = `${startTime.toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+    })} - ${endTime.toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+    })}`;
+
+    const photo =
+      getPrimaryPhotoUrl(booking.companion.photos) ||
+      booking.companion.avatar ||
+      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=120';
+
+    return { dateString: dateStr, timeString: timeStr, companionPhoto: photo };
+  }, [booking.startDatetime, booking.endDatetime, booking.companion, t]);
+
+  return (
+    <Pressable
+      onPress={onPress}
+      testID={`booking-card-${booking.id}`}
+      className="flex-row gap-4 rounded-2xl bg-white p-4"
+    >
+      <Image
+        source={{ uri: companionPhoto }}
+        className="size-14 rounded-full"
+        contentFit="cover"
+      />
+      <View className="flex-1">
+        <View className="flex-row items-center justify-between">
+          <Text className="font-semibold text-midnight">
+            {booking.companion.displayName}
+          </Text>
+          <Badge
+            label={
+              booking.displayStatus === 'active'
+                ? t('common.status.active')
+                : booking.displayStatus === 'pending'
+                  ? t('common.status.pending')
+                  : t('common.status.upcoming')
+            }
+            variant={
+              booking.displayStatus === 'active'
+                ? 'teal'
+                : booking.displayStatus === 'pending'
+                  ? 'pending'
+                  : 'rose'
+            }
+            size="sm"
+          />
+        </View>
+        <Text className="mt-1 text-sm text-rose-400">
+          {booking.occasion
+            ? `${booking.occasion.emoji} ${booking.occasion.name}`
+            : t('common.occasion')}
+        </Text>
+        <View className="mt-2 flex-row items-center gap-4">
+          <View className="flex-row items-center gap-1">
+            <Clock color={colors.text.tertiary} width={14} height={14} />
+            <Text className="text-xs text-text-tertiary">
+              {dateString}, {timeString}
+            </Text>
+          </View>
+        </View>
+        <View className="mt-1 flex-row items-center gap-1">
+          <MapPin color={colors.text.tertiary} width={14} height={14} />
+          <Text className="text-xs text-text-tertiary" numberOfLines={1}>
+            {booking.locationAddress}
+          </Text>
+        </View>
+      </View>
+    </Pressable>
+  );
+});
+
 export default function HirerDashboard() {
   const router = useRouter();
   const { t } = useTranslation();
@@ -164,7 +263,7 @@ export default function HirerDashboard() {
     router.push('/hirer/favorites' as Href);
   }, [router]);
 
-  // Computed stats
+  // Computed stats with pre-computed background colors
   const stats = React.useMemo(
     () => [
       {
@@ -172,18 +271,21 @@ export default function HirerDashboard() {
         value: String(upcomingCount),
         icon: Calendar,
         color: colors.rose[400],
+        bgColor: `${colors.rose[400]}20`,
       },
       {
         labelKey: 'hirer.dashboard.stats.favorites',
         value: String(favoritesCount),
         icon: Heart,
         color: colors.lavender[400],
+        bgColor: `${colors.lavender[400]}20`,
       },
       {
         labelKey: 'hirer.dashboard.stats.completed',
         value: String(completedBookingsCount),
         icon: Star,
         color: colors.teal[400],
+        bgColor: `${colors.teal[400]}20`,
       },
     ],
     [upcomingCount, favoritesCount, completedBookingsCount]
@@ -245,7 +347,7 @@ export default function HirerDashboard() {
               >
                 <View
                   className="mb-2 size-10 items-center justify-center rounded-full"
-                  style={{ backgroundColor: `${stat.color}20` }}
+                  style={{ backgroundColor: stat.bgColor }}
                 >
                   <stat.icon color={stat.color} width={20} height={20} />
                 </View>
@@ -319,114 +421,14 @@ export default function HirerDashboard() {
 
           {upcomingBookings.length > 0 ? (
             <View className="gap-3">
-              {upcomingBookings.map((booking, index) => {
-                const startTime = new Date(booking.startDatetime);
-                const endTime = new Date(booking.endDatetime);
-
-                // Format date
-                const isToday =
-                  startTime.toDateString() === new Date().toDateString();
-                const dateString = isToday
-                  ? t('common.today')
-                  : startTime.toLocaleDateString('en-US', {
-                    weekday: 'short',
-                    month: 'short',
-                    day: 'numeric',
-                  });
-
-                const timeString = `${startTime.toLocaleTimeString('en-US', {
-                  hour: 'numeric',
-                  minute: '2-digit',
-                })} - ${endTime.toLocaleTimeString('en-US', {
-                  hour: 'numeric',
-                  minute: '2-digit',
-                })}`;
-
-                // Get companion photo
-                const companionPhoto =
-                  getPrimaryPhotoUrl(booking.companion.photos) ||
-                  booking.companion.avatar ||
-                  'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=120';
-
-                return (
-                  <MotiView
-                    key={booking.id}
-                    from={{ opacity: 0, translateX: -20 }}
-                    animate={{ opacity: 1, translateX: 0 }}
-                    transition={{
-                      type: 'timing',
-                      duration: 400,
-                      delay: 300 + index * 100,
-                    }}
-                  >
-                    <Pressable
-                      onPress={() => handleBookingPress(booking)}
-                      testID={`booking-card-${booking.id}`}
-                      className="flex-row gap-4 rounded-2xl bg-white p-4"
-                    >
-                      <Image
-                        source={{ uri: companionPhoto }}
-                        className="size-14 rounded-full"
-                        contentFit="cover"
-                      />
-                      <View className="flex-1">
-                        <View className="flex-row items-center justify-between">
-                          <Text className="font-semibold text-midnight">
-                            {booking.companion.displayName}
-                          </Text>
-                          <Badge
-                            label={
-                              booking.displayStatus === 'active'
-                                ? t('common.status.active')
-                                : booking.displayStatus === 'pending'
-                                  ? t('common.status.pending')
-                                  : t('common.status.upcoming')
-                            }
-                            variant={
-                              booking.displayStatus === 'active'
-                                ? 'teal'
-                                : booking.displayStatus === 'pending'
-                                  ? 'pending'
-                                  : 'rose'
-                            }
-                            size="sm"
-                          />
-                        </View>
-                        <Text className="mt-1 text-sm text-rose-400">
-                          {booking.occasion
-                            ? `${booking.occasion.emoji} ${booking.occasion.name}`
-                            : t('common.occasion')}
-                        </Text>
-                        <View className="mt-2 flex-row items-center gap-4">
-                          <View className="flex-row items-center gap-1">
-                            <Clock
-                              color={colors.text.tertiary}
-                              width={14}
-                              height={14}
-                            />
-                            <Text className="text-xs text-text-tertiary">
-                              {dateString}, {timeString}
-                            </Text>
-                          </View>
-                        </View>
-                        <View className="mt-1 flex-row items-center gap-1">
-                          <MapPin
-                            color={colors.text.tertiary}
-                            width={14}
-                            height={14}
-                          />
-                          <Text
-                            className="text-xs text-text-tertiary"
-                            numberOfLines={1}
-                          >
-                            {booking.locationAddress}
-                          </Text>
-                        </View>
-                      </View>
-                    </Pressable>
-                  </MotiView>
-                );
-              })}
+              {upcomingBookings.map((booking) => (
+                <BookingCard
+                  key={booking.id}
+                  booking={booking}
+                  onPress={() => handleBookingPress(booking)}
+                  t={t}
+                />
+              ))}
             </View>
           ) : (
             <View className="items-center rounded-2xl bg-white py-12">

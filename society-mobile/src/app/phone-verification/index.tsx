@@ -266,7 +266,7 @@ export default function PhoneVerificationScreen() {
                 {t('phone_verification.enter_code')}
               </Text>
               <Text className="mb-6 text-sm text-text-secondary">
-                {t('phone_verification.code_sent_sms', { phone: phoneNumber })}
+                {`${t('phone_verification.code_sent_sms')} ${phoneNumber}`}
               </Text>
 
               {/* OTP Input Boxes */}
@@ -320,7 +320,7 @@ export default function PhoneVerificationScreen() {
                 >
                   {canResend
                     ? t('phone_verification.resend_code')
-                    : t('phone_verification.resend_in', { seconds: retryAfter })}
+                    : `${t('phone_verification.resend_in')} ${retryAfter}s`}
                 </Text>
               </Pressable>
             </MotiView>

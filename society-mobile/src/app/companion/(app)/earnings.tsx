@@ -1,15 +1,11 @@
 /* eslint-disable max-lines-per-function */
+import { FlashList, type ListRenderItemInfo } from '@shopify/flash-list';
 import type { Href } from 'expo-router';
 import { useRouter } from 'expo-router';
 import { MotiView } from 'moti';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-    ActivityIndicator,
-    Pressable,
-    RefreshControl,
-    ScrollView,
-} from 'react-native';
+import { ActivityIndicator, Pressable, RefreshControl } from 'react-native';
 
 import {
     colors,
@@ -18,15 +14,9 @@ import {
     Text,
     View,
 } from '@/components/ui';
-import {
-    ArrowRight,
-    Calendar,
-    Chart,
-    Wallet,
-    Withdraw
-} from '@/components/ui/icons';
+import { Calendar, Chart, Wallet, Withdraw } from '@/components/ui/icons';
 import type { EarningsTransaction } from '@/lib/api/services/earnings.service';
-import { useEarningsOverview, useTransactionHistory } from '@/lib/hooks';
+import { useEarningsOverview, useInfiniteTransactionHistory } from '@/lib/hooks';
 import { formatVND } from '@/lib/utils';
 
 type Period = 'week' | 'month' | 'year';
@@ -55,6 +45,47 @@ const TRANSACTION_ICON_CONFIG = {
     },
 } as const;
 
+// Transaction item component for FlashList
+const TransactionItem = React.memo(function TransactionItem({
+    transaction,
+}: {
+    transaction: EarningsTransaction;
+}) {
+    const iconData = TRANSACTION_ICON_CONFIG[transaction.type];
+    const dateStr = new Date(transaction.createdAt).toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+    });
+    const isPositive =
+        transaction.type === 'earning' || transaction.type === 'bonus';
+    const displayAmount = isPositive ? transaction.amount : -transaction.amount;
+
+    return (
+        <View className="mx-4 mb-3 flex-row items-center gap-4 rounded-xl bg-white p-4">
+            <View
+                className={`size-12 items-center justify-center rounded-full ${iconData.bg}`}
+            >
+                <iconData.icon color={iconData.color} width={24} height={24} />
+            </View>
+            <View className="flex-1">
+                <Text className="font-medium text-midnight" numberOfLines={1}>
+                    {transaction.description}
+                </Text>
+                <Text className="text-xs text-text-tertiary">{dateStr}</Text>
+            </View>
+            <Text
+                className={`font-semibold ${isPositive ? 'text-teal-400' : 'text-rose-400'}`}
+            >
+                {isPositive ? '+' : '-'}
+                {formatVND(Math.abs(displayAmount), {
+                    symbolPosition: 'suffix',
+                })}
+            </Text>
+        </View>
+    );
+});
+
 export default function EarningsOverview() {
     const router = useRouter();
     const { t } = useTranslation();
@@ -68,16 +99,28 @@ export default function EarningsOverview() {
         isRefetching: isRefetchingOverview,
     } = useEarningsOverview();
 
+    console.log('overview', overview);
+
     const {
         data: transactionsData,
         isLoading: isTransactionsLoading,
         refetch: refetchTransactions,
         isRefetching: isRefetchingTransactions,
-    } = useTransactionHistory(1, 10, selectedPeriod);
+        fetchNextPage,
+        hasNextPage,
+        isFetchingNextPage,
+    } = useInfiniteTransactionHistory(20, selectedPeriod);
+
+    console.log('transactionsData', transactionsData?.pages[0].transactions);
 
     const isLoading = isOverviewLoading || isTransactionsLoading;
     const isRefreshing = isRefetchingOverview || isRefetchingTransactions;
-    const transactions = transactionsData?.transactions || [];
+
+    // Flatten paginated transactions
+    const transactions = React.useMemo(
+        () => transactionsData?.pages.flatMap((page) => page.transactions) || [],
+        [transactionsData]
+    );
 
     const handleRefresh = React.useCallback(() => {
         refetchOverview();
@@ -88,8 +131,14 @@ export default function EarningsOverview() {
         router.push('/companion/earnings/withdraw' as Href);
     }, [router]);
 
+    const handleLoadMore = React.useCallback(() => {
+        if (hasNextPage && !isFetchingNextPage) {
+            fetchNextPage();
+        }
+    }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
     // Get earnings data based on selected period
-    const getPeriodEarnings = React.useCallback(() => {
+    const periodEarnings = React.useMemo(() => {
         if (!overview) return { amount: 0, change: 0 };
         switch (selectedPeriod) {
             case 'week':
@@ -103,50 +152,27 @@ export default function EarningsOverview() {
         }
     }, [overview, selectedPeriod]);
 
-    const getTransactionIcon = React.useCallback(
-        (type: EarningsTransaction['type']) => TRANSACTION_ICON_CONFIG[type],
+    const renderTransaction = React.useCallback(
+        ({ item }: ListRenderItemInfo<EarningsTransaction>) => (
+            <TransactionItem transaction={item} />
+        ),
         []
     );
 
-    if (isLoading) {
-        return (
-            <View className="flex-1 items-center justify-center bg-warmwhite">
-                <ActivityIndicator size="large" color={colors.lavender[400]} />
-            </View>
-        );
-    }
+    const keyExtractor = React.useCallback(
+        (item: EarningsTransaction) => item.id,
+        []
+    );
 
-    const periodEarnings = getPeriodEarnings();
-
-    return (
-        <View className="flex-1 bg-warmwhite">
-            <FocusAwareStatusBar />
-
-            <SafeAreaView edges={['top']}>
-                <View className="flex-row items-center gap-4 border-b border-border-light px-4 py-3">
-                    <Text className="font-urbanist-bold flex-1 text-xl text-midnight">
-                        {t('companion.earnings.header')}
-                    </Text>
-                </View>
-            </SafeAreaView>
-
-            <ScrollView
-                className="flex-1"
-                showsVerticalScrollIndicator={false}
-                refreshControl={
-                    <RefreshControl
-                        refreshing={isRefreshing}
-                        onRefresh={handleRefresh}
-                        tintColor={colors.lavender[400]}
-                    />
-                }
-            >
+    const ListHeader = React.useCallback(
+        () => (
+            <>
                 {/* Earnings Card */}
                 <MotiView
                     from={{ opacity: 0, translateY: 20 }}
                     animate={{ opacity: 1, translateY: 0 }}
                     transition={{ type: 'timing', duration: 500 }}
-                    className="m-4 rounded-3xl bg-lavender-400 p-6"
+                    className="m-4 rounded-3xl bg-lavender-900 p-6"
                 >
                     <View className="flex-row items-center gap-3">
                         <View className="size-12 items-center justify-center rounded-full bg-white/20">
@@ -171,7 +197,7 @@ export default function EarningsOverview() {
                         className="mt-6 flex-row items-center justify-center gap-2 rounded-xl bg-white py-4"
                     >
                         <Withdraw color={colors.lavender[400]} width={20} height={20} />
-                        <Text className="font-semibold text-lavender-400">
+                        <Text className="font-semibold text-lavender-900">
                             {t('companion.earnings.withdraw_funds')}
                         </Text>
                     </Pressable>
@@ -190,7 +216,7 @@ export default function EarningsOverview() {
                             onPress={() => setSelectedPeriod(period)}
                             testID={`period-selector-${period}`}
                             className={`flex-1 items-center rounded-xl py-3 ${selectedPeriod === period
-                                ? 'bg-lavender-400'
+                                ? 'bg-lavender-900'
                                 : 'border border-border-light bg-white'
                                 }`}
                         >
@@ -249,103 +275,88 @@ export default function EarningsOverview() {
                     </Text>
                 </MotiView>
 
-                {/* Transaction History */}
-                <MotiView
-                    from={{ opacity: 0, translateY: 20 }}
-                    animate={{ opacity: 1, translateY: 0 }}
-                    transition={{ type: 'timing', duration: 500, delay: 300 }}
-                    className="mx-4 mb-4"
-                >
-                    <View className="mb-3 flex-row items-center justify-between">
-                        <Text className="font-urbanist-bold text-lg text-midnight">
-                            {t('companion.earnings.recent_transactions')}
-                        </Text>
-                        <Pressable
-                            testID="see-all-transactions"
-                            className="flex-row items-center gap-1"
-                        >
-                            <Text className="text-sm font-medium text-lavender-400">
-                                {t('common.see_all')}
-                            </Text>
-                            <ArrowRight color={colors.lavender[400]} width={16} height={16} />
-                        </Pressable>
-                    </View>
+                {/* Transaction History Header */}
+                <View className="mx-4 mb-3">
+                    <Text className="font-urbanist-bold text-lg text-midnight">
+                        {t('companion.earnings.recent_transactions')}
+                    </Text>
+                </View>
+            </>
+        ),
+        [
+            t,
+            overview,
+            handleWithdraw,
+            selectedPeriod,
+            periodEarnings,
+            setSelectedPeriod,
+        ]
+    );
 
-                    <View className="gap-3">
-                        {transactions.length > 0 ? (
-                            transactions.map((transaction, index) => {
-                                const iconData = getTransactionIcon(transaction.type);
-                                const dateStr = new Date(
-                                    transaction.createdAt
-                                ).toLocaleDateString('en-US', {
-                                    month: 'short',
-                                    day: 'numeric',
-                                    year: 'numeric',
-                                });
-                                const isPositive =
-                                    transaction.type === 'earning' ||
-                                    transaction.type === 'bonus';
-                                const displayAmount = isPositive
-                                    ? transaction.amount
-                                    : -transaction.amount;
-                                return (
-                                    <MotiView
-                                        key={transaction.id}
-                                        from={{ opacity: 0, translateX: -20 }}
-                                        animate={{ opacity: 1, translateX: 0 }}
-                                        transition={{
-                                            type: 'timing',
-                                            duration: 400,
-                                            delay: 400 + index * 50,
-                                        }}
-                                    >
-                                        <View className="flex-row items-center gap-4 rounded-xl bg-white p-4">
-                                            <View
-                                                className={`size-12 items-center justify-center rounded-full ${iconData.bg}`}
-                                            >
-                                                <iconData.icon
-                                                    color={iconData.color}
-                                                    width={24}
-                                                    height={24}
-                                                />
-                                            </View>
-                                            <View className="flex-1">
-                                                <Text
-                                                    className="font-medium text-midnight"
-                                                    numberOfLines={1}
-                                                >
-                                                    {transaction.description}
-                                                </Text>
-                                                <Text className="text-xs text-text-tertiary">
-                                                    {dateStr}
-                                                </Text>
-                                            </View>
-                                            <Text
-                                                className={`font-semibold ${isPositive ? 'text-teal-400' : 'text-rose-400'
-                                                    }`}
-                                            >
-                                                {isPositive ? '+' : '-'}
-                                                {formatVND(Math.abs(displayAmount), {
-                                                    symbolPosition: 'suffix',
-                                                })}
-                                            </Text>
-                                        </View>
-                                    </MotiView>
-                                );
-                            })
-                        ) : (
-                            <View className="items-center py-8">
-                                <Text className="text-text-secondary">
-                                    {t('companion.earnings.no_transactions')}
-                                </Text>
-                            </View>
-                        )}
-                    </View>
-                </MotiView>
+    const ListEmptyComponent = React.useCallback(
+        () => (
+            <View className="items-center py-8">
+                <Text className="text-text-secondary">
+                    {t('companion.earnings.no_transactions')}
+                </Text>
+            </View>
+        ),
+        [t]
+    );
 
+    const ListFooterComponent = React.useCallback(
+        () => (
+            <>
+                {isFetchingNextPage && (
+                    <View className="items-center py-4">
+                        <ActivityIndicator size="small" color={colors.lavender[400]} />
+                    </View>
+                )}
                 {/* Bottom spacing */}
                 <View className="h-8" />
-            </ScrollView>
+            </>
+        ),
+        [isFetchingNextPage]
+    );
+
+    if (isLoading) {
+        return (
+            <View className="flex-1 items-center justify-center bg-warmwhite">
+                <ActivityIndicator size="large" color={colors.lavender[400]} />
+            </View>
+        );
+    }
+
+    return (
+        <View className="flex-1 bg-warmwhite">
+            <FocusAwareStatusBar />
+
+            <SafeAreaView edges={['top']}>
+                <View className="flex-row items-center gap-4 border-b border-border-light px-4 py-3">
+                    <Text className="font-urbanist-bold flex-1 text-xl text-midnight">
+                        {t('companion.earnings.header')}
+                    </Text>
+                </View>
+            </SafeAreaView>
+
+            <FlashList
+                data={transactions}
+                renderItem={renderTransaction}
+                keyExtractor={keyExtractor}
+                ListHeaderComponent={ListHeader}
+                ListEmptyComponent={ListEmptyComponent}
+                ListFooterComponent={ListFooterComponent}
+                onEndReached={handleLoadMore}
+                onEndReachedThreshold={0.5}
+                showsVerticalScrollIndicator={false}
+                refreshControl={
+                    <RefreshControl
+                        refreshing={isRefreshing}
+                        onRefresh={handleRefresh}
+                        tintColor={colors.lavender[400]}
+                    />
+                }
+            />
         </View>
     );
 }

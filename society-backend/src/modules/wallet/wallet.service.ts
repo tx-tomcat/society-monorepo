@@ -14,6 +14,7 @@ import {
   CreateTopupDto,
   GetTransactionsQueryDto,
   PaymentRequestItem,
+  PaymentRequestStatusResponse,
   SepayWebhookDto,
   TopupResponse,
   TransactionsResponse,
@@ -176,12 +177,11 @@ export class WalletService {
       _sum: { amount: true },
     });
 
-    // Sum of completed wallet payments (bookings paid from wallet - marked by walletPayment flag)
-    // For now, we track spending through completed BOOKING type requests
+    // Sum of completed wallet payments (bookings and boosts paid from wallet)
     const spent = await this.prisma.paymentRequest.aggregate({
       where: {
         userId,
-        type: PaymentRequestType.BOOKING,
+        type: { in: [PaymentRequestType.BOOKING, PaymentRequestType.BOOST] },
         status: PaymentRequestStatus.COMPLETED,
       },
       _sum: { amount: true },
@@ -270,6 +270,7 @@ export class WalletService {
 
     // Extract HM code from content
     const code = this.sepayService.extractCode(payload.content);
+    console.log(code);
     if (!code) {
       this.logger.warn(`No HM code found in webhook content: ${payload.content}`);
       return;
@@ -350,6 +351,101 @@ export class WalletService {
   async canPayFromWallet(userId: string, amount: number): Promise<boolean> {
     const { balance } = await this.getBalance(userId);
     return balance >= amount;
+  }
+
+  /**
+   * Deduct amount from wallet balance (for boost purchases, etc.)
+   * Creates a payment request record for tracking
+   */
+  async deductFromWallet(
+    userId: string,
+    amount: number,
+    metadata?: { boostId?: string; description?: string },
+  ): Promise<{ success: boolean; transactionId: string }> {
+    // Verify sufficient balance
+    const { balance } = await this.getBalance(userId);
+    if (balance < amount) {
+      throw new BadRequestException('Insufficient wallet balance');
+    }
+
+    // Generate unique code
+    let code: string;
+    let attempts = 0;
+    do {
+      code = this.sepayService.generateCode();
+      const exists = await this.prisma.paymentRequest.findUnique({
+        where: { code },
+      });
+      if (!exists) break;
+      attempts++;
+    } while (attempts < 10);
+
+    if (attempts >= 10) {
+      throw new BadRequestException('Unable to generate unique payment code. Please try again.');
+    }
+
+    // Create a completed BOOST payment request to track the deduction
+    const request = await this.prisma.paymentRequest.create({
+      data: {
+        userId,
+        code,
+        type: PaymentRequestType.BOOST,
+        amount,
+        status: PaymentRequestStatus.COMPLETED,
+        completedAt: new Date(),
+        expiresAt: new Date(), // Already completed, no expiry needed
+        boostId: metadata?.boostId,
+      },
+    });
+
+    this.logger.log(`Wallet deduction of ${amount} VND for user ${userId}, transaction: ${request.id}`);
+
+    return {
+      success: true,
+      transactionId: request.id,
+    };
+  }
+
+  /**
+   * Get payment request status by ID
+   * Used for polling payment status from mobile app
+   */
+  async getPaymentRequestStatus(
+    userId: string,
+    requestId: string,
+  ): Promise<PaymentRequestStatusResponse> {
+    const request = await this.prisma.paymentRequest.findFirst({
+      where: {
+        id: requestId,
+        userId,
+      },
+    });
+
+    if (!request) {
+      throw new NotFoundException('Payment request not found');
+    }
+
+    // Check if expired
+    if (
+      request.status === PaymentRequestStatus.PENDING &&
+      request.expiresAt < new Date()
+    ) {
+      // Mark as expired
+      await this.prisma.paymentRequest.update({
+        where: { id: request.id },
+        data: { status: PaymentRequestStatus.EXPIRED },
+      });
+      request.status = PaymentRequestStatus.EXPIRED;
+    }
+
+    return {
+      id: request.id,
+      code: request.code,
+      status: request.status as 'PENDING' | 'COMPLETED' | 'EXPIRED' | 'FAILED',
+      amount: request.amount,
+      bookingId: request.bookingId,
+      completedAt: request.completedAt?.toISOString() || null,
+    };
   }
 
   /**

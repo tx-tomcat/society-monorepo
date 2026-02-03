@@ -12,7 +12,7 @@ describe('WalletService', () => {
   let sepayService: SepayService;
 
   const mockUserId = 'user-123';
-  const mockCode = 'HM-ABC1234';
+  const mockCode = 'HMABC1234';
   const mockExpiresAt = new Date(Date.now() + 30 * 60 * 1000);
 
   const mockPrismaService = {
@@ -188,7 +188,7 @@ describe('WalletService', () => {
     it('should return existing pending request if exists', async () => {
       const existingRequest = {
         id: 'existing-123',
-        code: 'HM-EXIST01',
+        code: 'HMEXIST01',
         amount: mockBooking.totalPrice,
         expiresAt: mockExpiresAt,
       };
@@ -199,7 +199,7 @@ describe('WalletService', () => {
       const result = await service.createBookingPaymentRequest(mockUserId, createDto);
 
       expect(result.id).toBe('existing-123');
-      expect(result.code).toBe('HM-EXIST01');
+      expect(result.code).toBe('HMEXIST01');
       expect(mockPrismaService.paymentRequest.create).not.toHaveBeenCalled();
     });
 
@@ -296,7 +296,7 @@ describe('WalletService', () => {
     const mockTransactions = [
       {
         id: 'tx-1',
-        code: 'HM-ABC1234',
+        code: 'HMABC1234',
         type: PaymentRequestType.TOPUP,
         amount: 500000,
         status: PaymentRequestStatus.COMPLETED,
@@ -308,7 +308,7 @@ describe('WalletService', () => {
       },
       {
         id: 'tx-2',
-        code: 'HM-DEF5678',
+        code: 'HMDEF5678',
         type: PaymentRequestType.BOOKING,
         amount: 200000,
         status: PaymentRequestStatus.PENDING,
@@ -384,7 +384,7 @@ describe('WalletService', () => {
       transactionDate: '2024-01-15',
       accountNumber: '1234567890',
       code: null,
-      content: 'Chuyen tien HM-ABC1234 nap vi',
+      content: 'Chuyen tien HMABC1234 nap vi',
       transferType: 'in' as const,
       transferAmount: 500000,
       accumulated: 1000000,

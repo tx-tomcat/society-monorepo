@@ -252,7 +252,7 @@ export default function CompanionDashboard() {
           <Pressable
             onPress={handleViewEarnings}
             testID="earnings-card"
-            className="flex-row items-center justify-between rounded-2xl bg-lavender-400 p-4"
+            className="flex-row items-center justify-between rounded-2xl bg-lavender-900 p-4"
           >
             <View className="flex-row items-center gap-3">
               <View className="size-12 items-center justify-center rounded-full bg-white/20">
@@ -294,7 +294,7 @@ export default function CompanionDashboard() {
               onPress={handleViewAllBookings}
               testID="view-all-bookings"
             >
-              <Text className="text-sm font-semibold text-lavender-400">
+              <Text className="text-sm font-semibold text-lavender-900">
                 {t('common.view_all')}
               </Text>
             </Pressable>
@@ -436,9 +436,7 @@ export default function CompanionDashboard() {
               </Text>
               {pendingRequestsCount > 0 && (
                 <Badge
-                  label={t('companion.dashboard.actions.new_count', {
-                    count: pendingRequestsCount,
-                  })}
+                  label={`${pendingRequestsCount} ${t('companion.dashboard.actions.new_count')}`}
                   variant="default"
                   size="sm"
                 />
@@ -451,7 +449,7 @@ export default function CompanionDashboard() {
               testID="quick-action-schedule"
               className="flex-1 items-center rounded-2xl bg-white p-4"
             >
-              <View className="mb-2 size-12 items-center justify-center rounded-full bg-lavender-400/10">
+              <View className="mb-2 size-12 items-center justify-center rounded-full bg-lavender-900/10">
                 <Calendar color={colors.lavender[400]} width={24} height={24} />
               </View>
               <Text className="text-sm font-medium text-midnight">

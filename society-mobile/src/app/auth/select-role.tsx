@@ -4,7 +4,6 @@ import { MotiView } from 'moti';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable } from 'react-native';
-import Toast from 'react-native-toast-message';
 
 import {
   Button,
@@ -14,6 +13,7 @@ import {
   Text,
   View,
 } from '@/components/ui';
+import { showErrorMessage } from '@/components/ui/utils';
 import {
   Briefcase,
   CheckCircle,
@@ -65,11 +65,7 @@ export default function SelectRole() {
       }
     } catch (error) {
       console.error('Set role error:', error);
-      Toast.show({
-        type: 'error',
-        text1: t('common.error'),
-        text2: t('auth.errors.set_role_failed'),
-      });
+      showErrorMessage(t('auth.errors.set_role_failed'));
     } finally {
       setIsSubmitting(false);
     }
@@ -159,15 +155,15 @@ export default function SelectRole() {
               onPress={() => setSelectedRole('companion')}
               disabled={isSubmitting}
               className={`rounded-2xl border-2 p-5 ${selectedRole === 'companion'
-                ? 'border-lavender-400 bg-lavender-400/10'
+                ? 'border-lavender-900 bg-lavender-900/10'
                 : 'border-border-light bg-white'
                 }`}
             >
               <View className="flex-row items-center gap-4">
                 <View
                   className={`size-12 items-center justify-center rounded-xl ${selectedRole === 'companion'
-                    ? 'bg-lavender-400'
-                    : 'bg-lavender-400/20'
+                    ? 'bg-lavender-900'
+                    : 'bg-lavender-900/20'
                     }`}
                 >
                   <Heart
@@ -188,7 +184,7 @@ export default function SelectRole() {
                 </View>
                 <View
                   className={`size-6 items-center justify-center rounded-full border-2 ${selectedRole === 'companion'
-                    ? 'border-lavender-400 bg-lavender-400'
+                    ? 'border-lavender-900 bg-lavender-900'
                     : 'border-border-light'
                     }`}
                 >
@@ -217,7 +213,7 @@ export default function SelectRole() {
             variant="default"
             size="lg"
             fullWidth
-            className={selectedRole === 'hirer' ? 'bg-teal-400' : 'bg-lavender-400'}
+            className={selectedRole === 'hirer' ? 'bg-teal-400' : 'bg-lavender-900'}
           />
         </View>
       </SafeAreaView>

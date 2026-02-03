@@ -38,6 +38,7 @@ export interface Booking {
   cancelledBy?: string;
   cancelReason?: string;
   requestExpiresAt?: string;
+  paymentDeadline?: string;
   createdAt: string;
   updatedAt: string;
   companion: Companion;

@@ -110,7 +110,7 @@ export default function CompanionBankAccountsScreen() {
 
       Alert.alert(
         t('companion.bank_accounts.delete_title'),
-        t('companion.bank_accounts.delete_message', { bank: account.bankName }),
+        t('companion.bank_accounts.delete_message'),
         [
           { text: t('common.cancel'), style: 'cancel' },
           {
@@ -197,7 +197,7 @@ export default function CompanionBankAccountsScreen() {
                     </Text>
                     {account.isPrimary && (
                       <View className="rounded bg-lavender-100 px-1.5 py-0.5">
-                        <Text className="text-xs font-semibold text-lavender-400">
+                        <Text className="text-xs font-semibold text-lavender-900">
                           {t('companion.bank_accounts.primary')}
                         </Text>
                       </View>
@@ -265,7 +265,7 @@ export default function CompanionBankAccountsScreen() {
                     className="rounded-lg p-3"
                   >
                     <Text
-                      className={`text-base ${bankName === bank ? 'font-semibold text-lavender-400' : 'text-midnight'
+                      className={`text-base ${bankName === bank ? 'font-semibold text-lavender-900' : 'text-midnight'
                         }`}
                     >
                       {bank}
@@ -319,7 +319,7 @@ export default function CompanionBankAccountsScreen() {
                 loading={addBankAccountMutation.isPending}
                 variant="default"
                 size="default"
-                className="flex-1 bg-lavender-400"
+                className="flex-1 bg-lavender-900"
               />
             </View>
           </MotiView>
@@ -332,10 +332,10 @@ export default function CompanionBankAccountsScreen() {
           >
             <Pressable
               onPress={() => setIsAddingAccount(true)}
-              className="flex-row items-center justify-center gap-2 rounded-xl border-2 border-dashed border-lavender-400 bg-lavender-50/50 p-4"
+              className="flex-row items-center justify-center gap-2 rounded-xl border-2 border-dashed border-lavender-900 bg-lavender-50/50 p-4"
             >
               <Plus color={colors.lavender[400]} width={20} height={20} />
-              <Text className="font-urbanist-semibold text-base text-lavender-400">
+              <Text className="font-urbanist-semibold text-base text-lavender-900">
                 {t('companion.bank_accounts.add_account')}
               </Text>
             </Pressable>

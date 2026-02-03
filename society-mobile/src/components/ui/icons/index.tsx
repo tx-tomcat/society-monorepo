@@ -9,6 +9,7 @@ export * from './caret-down';
 export * from './chevron-down';
 export * from './clock';
 export * from './copy';
+export * from './download';
 export * from './edit';
 export * from './external-link';
 export * from './eye';

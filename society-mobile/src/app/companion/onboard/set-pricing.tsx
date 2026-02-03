@@ -94,7 +94,7 @@ export default function SetPricing() {
         onBack={handleBack}
         rightElement={
           <Text className="text-sm text-text-tertiary">
-            {t('companion.onboard.step', { current: 2, total: 3 })}
+            {`${t('companion.onboard.step')} 2/3`}
           </Text>
         }
       />
@@ -147,16 +147,12 @@ export default function SetPricing() {
           {/* Validation Messages */}
           {isBelowMinimum && (
             <Text className="mt-2 text-sm text-danger-400">
-              {t('companion.onboard.set_pricing.minimum_rate_error', {
-                amount: formatVND(MIN_RATE),
-              })}
+              {`${t('companion.onboard.set_pricing.minimum_rate_error')} ${formatVND(MIN_RATE)}`}
             </Text>
           )}
           {isAboveMaximum && (
             <Text className="mt-2 text-sm text-danger-400">
-              {t('companion.onboard.set_pricing.maximum_rate_error', {
-                amount: formatVND(MAX_RATE),
-              })}
+              {`${t('companion.onboard.set_pricing.maximum_rate_error')} ${formatVND(MAX_RATE)}`}
             </Text>
           )}
 
@@ -167,7 +163,7 @@ export default function SetPricing() {
                 key={rate}
                 onPress={() => handleSelectRate(rate)}
                 className={`rounded-full px-4 py-2 ${hourlyRateNum === rate
-                  ? 'bg-lavender-400'
+                  ? 'bg-lavender-900'
                   : 'border border-border-light bg-white'
                   }`}
               >
@@ -198,13 +194,13 @@ export default function SetPricing() {
                 key={hours}
                 onPress={() => setMinimumHours(hours.toString())}
                 className={`flex-1 items-center rounded-xl border py-3 ${minHoursNum === hours
-                  ? 'border-lavender-400 bg-lavender-400/10'
+                  ? 'border-lavender-900 bg-lavender-900/10'
                   : 'border-border-light bg-white'
                   }`}
               >
                 <Text
                   className={`text-lg font-semibold ${minHoursNum === hours
-                    ? 'text-lavender-400'
+                    ? 'text-lavender-900'
                     : 'text-midnight'
                     }`}
                 >
@@ -259,11 +255,11 @@ export default function SetPricing() {
           from={{ opacity: 0, translateY: 20 }}
           animate={{ opacity: 1, translateY: 0 }}
           transition={{ type: 'timing', duration: 500, delay: 300 }}
-          className="mb-6 rounded-2xl bg-lavender-400/10 p-4"
+          className="mb-6 rounded-2xl bg-lavender-900/10 p-4"
         >
           <View className="flex-row items-center gap-2">
             <Info color={colors.lavender[400]} width={20} height={20} />
-            <Text className="text-sm font-semibold text-lavender-400">
+            <Text className="text-sm font-semibold text-lavender-900">
               {t('companion.onboard.set_pricing.estimated_monthly')}
             </Text>
           </View>
@@ -271,10 +267,7 @@ export default function SetPricing() {
             {formatVND(estimatedMonthly)}
           </Text>
           <Text className="mt-1 text-xs text-text-secondary">
-            {t('companion.onboard.set_pricing.estimate_basis', {
-              bookings: 20,
-              hours: minHoursNum,
-            })}
+            {`20 ${t('companion.onboard.set_pricing.estimate_basis')} ${minHoursNum} ${t('companion.onboard.set_pricing.estimate_basis_suffix')}`}
           </Text>
         </MotiView>
 

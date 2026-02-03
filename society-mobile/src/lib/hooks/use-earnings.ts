@@ -1,4 +1,9 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query';
 
 import type {
   AddBankAccountData,
@@ -35,6 +40,30 @@ export function useTransactionHistory(
     queryKey: ['earnings', 'transactions', { page, limit, period }],
     queryFn: () =>
       earningsService.getTransactionHistory(page, limit, period),
+    enabled: isSignedIn,
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
+/**
+ * React Query infinite query hook for paginated transaction history
+ */
+export function useInfiniteTransactionHistory(
+  limit = 20,
+  period?: 'week' | 'month' | 'year'
+) {
+  const { isSignedIn } = useAuth();
+
+  return useInfiniteQuery({
+    queryKey: ['earnings', 'transactions', 'infinite', { limit, period }],
+    queryFn: ({ pageParam = 1 }) =>
+      earningsService.getTransactionHistory(pageParam, limit, period),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => {
+      const totalPages = Math.ceil(lastPage.total / lastPage.limit);
+      const nextPage = lastPage.page + 1;
+      return nextPage <= totalPages ? nextPage : undefined;
+    },
     enabled: isSignedIn,
     staleTime: 5 * 60 * 1000,
   });

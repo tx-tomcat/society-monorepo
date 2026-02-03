@@ -52,7 +52,7 @@ describe('IdempotentInterceptor', () => {
   };
 
   const mockCallHandler: CallHandler = {
-    handle: () => of({ id: 'test-response', code: 'HM-123456' }),
+    handle: () => of({ id: 'test-response', code: 'HM123456' }),
   };
 
   beforeEach(async () => {
@@ -79,7 +79,7 @@ describe('IdempotentInterceptor', () => {
       const result = await interceptor.intercept(context, mockCallHandler);
       const response = await firstValueFrom(result);
 
-      expect(response).toEqual({ id: 'test-response', code: 'HM-123456' });
+      expect(response).toEqual({ id: 'test-response', code: 'HM123456' });
       expect(mockPrismaService.idempotencyKey.findUnique).not.toHaveBeenCalled();
     });
   });
@@ -94,7 +94,7 @@ describe('IdempotentInterceptor', () => {
       const result = await interceptor.intercept(context, mockCallHandler);
       const response = await firstValueFrom(result);
 
-      expect(response).toEqual({ id: 'test-response', code: 'HM-123456' });
+      expect(response).toEqual({ id: 'test-response', code: 'HM123456' });
       expect(mockPrismaService.idempotencyKey.findUnique).not.toHaveBeenCalled();
     });
 
@@ -106,7 +106,7 @@ describe('IdempotentInterceptor', () => {
       const result = await interceptor.intercept(context, mockCallHandler);
       const response = await firstValueFrom(result);
 
-      expect(response).toEqual({ id: 'test-response', code: 'HM-123456' });
+      expect(response).toEqual({ id: 'test-response', code: 'HM123456' });
       expect(mockPrismaService.idempotencyKey.findUnique).not.toHaveBeenCalled();
     });
 
@@ -123,7 +123,7 @@ describe('IdempotentInterceptor', () => {
       const result = await interceptor.intercept(context, mockCallHandler);
       const response = await firstValueFrom(result);
 
-      expect(response).toEqual({ id: 'test-response', code: 'HM-123456' });
+      expect(response).toEqual({ id: 'test-response', code: 'HM123456' });
       expect(mockPrismaService.idempotencyKey.findUnique).toHaveBeenCalledWith({
         where: { key: 'new-key' },
       });
@@ -137,13 +137,13 @@ describe('IdempotentInterceptor', () => {
           userId: 'user-123',
           endpoint: 'POST /wallet/topup',
           responseCode: 200,
-          responseBody: { id: 'test-response', code: 'HM-123456' },
+          responseBody: { id: 'test-response', code: 'HM123456' },
         }),
       });
     });
 
     it('should return cached response for existing valid idempotency key', async () => {
-      const cachedResponse = { id: 'cached-response', code: 'HM-CACHED' };
+      const cachedResponse = { id: 'cached-response', code: 'HMCACHED' };
       mockPrismaService.idempotencyKey.findUnique.mockResolvedValue({
         key: 'existing-key',
         userId: 'user-123',
@@ -248,7 +248,7 @@ describe('IdempotentInterceptor', () => {
       const result = await interceptor.intercept(context, mockCallHandler);
       const response = await firstValueFrom(result);
 
-      expect(response).toEqual({ id: 'test-response', code: 'HM-123456' });
+      expect(response).toEqual({ id: 'test-response', code: 'HM123456' });
       expect(mockPrismaService.idempotencyKey.delete).toHaveBeenCalledWith({
         where: { key: 'expired-key' },
       });
@@ -289,7 +289,7 @@ describe('IdempotentInterceptor', () => {
       const result = await interceptor.intercept(context, mockCallHandler);
       const response = await firstValueFrom(result);
 
-      expect(response).toEqual({ id: 'test-response', code: 'HM-123456' });
+      expect(response).toEqual({ id: 'test-response', code: 'HM123456' });
     });
   });
 });

@@ -200,7 +200,7 @@ export default function CompanionSchedule() {
                             <Pressable
                                 key={index}
                                 onPress={() => setSelectedDate(date)}
-                                className={`flex-1 items-center rounded-xl py-3 ${isSelected ? 'bg-lavender-400' : ''
+                                className={`flex-1 items-center rounded-xl py-3 ${isSelected ? 'bg-lavender-900' : ''
                                     }`}
                             >
                                 <Text
@@ -211,10 +211,10 @@ export default function CompanionSchedule() {
                                 </Text>
                                 <Text
                                     className={`mt-1 text-lg font-semibold ${isSelected
-                                            ? 'text-white'
-                                            : isToday
-                                                ? 'text-lavender-400'
-                                                : 'text-midnight'
+                                        ? 'text-white'
+                                        : isToday
+                                            ? 'text-lavender-900'
+                                            : 'text-midnight'
                                         }`}
                                 >
                                     {date.getDate()}
@@ -296,10 +296,10 @@ export default function CompanionSchedule() {
                                     >
                                         {/* Time Indicator */}
                                         <View className="items-center">
-                                            <Text className="text-sm font-semibold text-lavender-400">
+                                            <Text className="text-sm font-semibold text-lavender-900">
                                                 {startTimeStr}
                                             </Text>
-                                            <View className="my-2 h-12 w-0.5 bg-lavender-400/30" />
+                                            <View className="my-2 h-12 w-0.5 bg-lavender-900/30" />
                                             <Text className="text-xs text-text-tertiary">
                                                 {endTimeStr}
                                             </Text>
@@ -364,7 +364,7 @@ export default function CompanionSchedule() {
                     </View>
                 ) : (
                     <View className="items-center py-16">
-                        <View className="size-16 items-center justify-center rounded-full bg-lavender-400/20">
+                        <View className="size-16 items-center justify-center rounded-full bg-lavender-900/20">
                             <Calendar color={colors.lavender[400]} width={32} height={32} />
                         </View>
                         <Text className="font-urbanist-bold mt-4 text-lg text-midnight">

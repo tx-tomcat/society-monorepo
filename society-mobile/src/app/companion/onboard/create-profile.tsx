@@ -5,7 +5,6 @@ import { MotiView } from 'moti';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, Pressable, ScrollView, TextInput } from 'react-native';
-import Toast from 'react-native-toast-message';
 
 import {
   Button,
@@ -17,6 +16,7 @@ import {
   Text,
   View,
 } from '@/components/ui';
+import { showInfoMessage } from '@/components/ui/utils';
 import { Camera, ChevronDown, MapPin, Plus, X } from '@/components/ui/icons';
 import { getProvinceName, VIETNAM_PROVINCES } from '@/lib/constants';
 import { useCompanionOnboarding } from '@/lib/stores';
@@ -156,10 +156,7 @@ export default function CreateProfile() {
 
   const handleAddAdditionalPhotos = React.useCallback(async () => {
     if (photos.length >= 6) {
-      Toast.show({
-        type: 'info',
-        text1: t('companion.onboard.create_profile.max_photos'),
-      });
+      showInfoMessage(t('companion.onboard.create_profile.max_photos'));
       return;
     }
 
@@ -209,10 +206,7 @@ export default function CreateProfile() {
   const handleRemovePhoto = React.useCallback(
     (index: number) => {
       if (index === 0 && photos.length === 1) {
-        Toast.show({
-          type: 'info',
-          text1: t('companion.onboard.create_profile.need_main_photo'),
-        });
+        showInfoMessage(t('companion.onboard.create_profile.need_main_photo'));
         return;
       }
       const newPhotos = photos.filter((_, i) => i !== index);
@@ -264,7 +258,7 @@ export default function CreateProfile() {
         onBack={handleBack}
         rightElement={
           <Text className="text-sm text-text-tertiary">
-            {t('companion.onboard.step', { current: 1, total: 3 })}
+            {`${t('companion.onboard.step')} 1/3`}
           </Text>
         }
       />
@@ -302,7 +296,7 @@ export default function CreateProfile() {
                     className="size-full"
                     contentFit="cover"
                   />
-                  <View className="absolute bottom-2 left-2 rounded-full bg-lavender-400 px-2 py-1">
+                  <View className="absolute bottom-2 left-2 rounded-full bg-lavender-900 px-2 py-1">
                     <Text className="text-xs font-semibold text-white">
                       {t('companion.onboard.create_profile.main')}
                     </Text>
@@ -319,7 +313,7 @@ export default function CreateProfile() {
               ) : (
                 <View className="flex-1 items-center justify-center">
                   <Camera color={colors.lavender[400]} width={32} height={32} />
-                  <Text className="mt-2 text-sm text-lavender-400">
+                  <Text className="mt-2 text-sm text-lavender-900">
                     {t('companion.onboard.create_profile.add_main')}
                   </Text>
                 </View>
@@ -364,14 +358,8 @@ export default function CreateProfile() {
             className={`mt-2 text-xs ${needsMorePhotos ? 'text-danger-400' : 'text-text-tertiary'}`}
           >
             {needsMorePhotos
-              ? t('companion.onboard.create_profile.need_more_photos', {
-                count: MIN_PHOTOS - photos.length,
-              })
-              : t('companion.onboard.create_profile.photos_count', {
-                count: photos.length,
-                max: 6,
-                min: MIN_PHOTOS,
-              })}
+              ? `${MIN_PHOTOS - photos.length} ${t('companion.onboard.create_profile.need_more_photos')}`
+              : `${photos.length}/6 ${t('companion.onboard.create_profile.photos_count')} ${MIN_PHOTOS})`}
           </Text>
         </MotiView>
 
@@ -400,9 +388,7 @@ export default function CreateProfile() {
           <View className="mt-1 flex-row justify-between">
             {isNameTooShort ? (
               <Text className="text-xs text-danger-400">
-                {t('companion.onboard.create_profile.name_too_short', {
-                  min: MIN_NAME_LENGTH,
-                })}
+                {`${t('companion.onboard.create_profile.name_too_short')} ${MIN_NAME_LENGTH} characters`}
               </Text>
             ) : (
               <View />
@@ -442,9 +428,7 @@ export default function CreateProfile() {
           <View className="mt-1 flex-row justify-between">
             {isBioTooShort ? (
               <Text className="text-xs text-danger-400">
-                {t('companion.onboard.create_profile.bio_too_short', {
-                  remaining: MIN_BIO_LENGTH - bioText.length,
-                })}
+                {`${MIN_BIO_LENGTH - bioText.length} ${t('companion.onboard.create_profile.bio_too_short')}`}
               </Text>
             ) : (
               <View />
@@ -452,11 +436,7 @@ export default function CreateProfile() {
             <Text
               className={`text-xs ${bioText.length >= 450 ? 'text-yellow-600' : 'text-text-tertiary'}`}
             >
-              {t('companion.onboard.create_profile.bio_count', {
-                count: bioText.length,
-                max: 500,
-                min: MIN_BIO_LENGTH,
-              })}
+              {`${bioText.length}/500 ${t('companion.onboard.create_profile.bio_count')} ${MIN_BIO_LENGTH})`}
             </Text>
           </View>
         </MotiView>
@@ -473,7 +453,7 @@ export default function CreateProfile() {
           </Text>
           <Pressable
             onPress={() => setShowProvincePicker(true)}
-            className={`flex-row items-center rounded-xl border bg-white p-4 ${needsProvince ? 'border-border-light' : 'border-lavender-400'
+            className={`flex-row items-center rounded-xl border bg-white p-4 ${needsProvince ? 'border-border-light' : 'border-lavender-900'
               }`}
           >
             <MapPin
@@ -524,12 +504,12 @@ export default function CreateProfile() {
                       setShowProvincePicker(false);
                     }}
                     className={`mb-2 rounded-xl border p-4 ${province === p.code
-                      ? 'border-lavender-400 bg-lavender-400/10'
+                      ? 'border-lavender-900 bg-lavender-900/10'
                       : 'border-border-light bg-white'
                       }`}
                   >
                     <Text
-                      className={`text-base ${province === p.code ? 'text-lavender-400 font-semibold' : 'text-midnight'
+                      className={`text-base ${province === p.code ? 'text-lavender-900 font-semibold' : 'text-midnight'
                         }`}
                     >
                       {p.name}
@@ -547,9 +527,9 @@ export default function CreateProfile() {
           from={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ type: 'timing', duration: 500, delay: 400 }}
-          className="rounded-xl bg-lavender-400/10 p-4"
+          className="rounded-xl bg-lavender-900/10 p-4"
         >
-          <Text className="mb-2 text-sm font-semibold text-lavender-400">
+          <Text className="mb-2 text-sm font-semibold text-lavender-900">
             {t('companion.onboard.create_profile.tips_title')}
           </Text>
           <View className="gap-2">

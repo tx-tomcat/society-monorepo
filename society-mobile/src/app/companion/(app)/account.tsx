@@ -23,9 +23,8 @@ import {
     Gallery,
     Logout,
     Star,
-    Swap,
     User,
-    VerifiedBadge,
+    VerifiedBadge
 } from '@/components/ui/icons';
 import { getPrimaryPhotoUrl } from '@/lib/api/services/companions.service';
 import { useAuth, useMyCompanionProfile } from '@/lib/hooks';
@@ -207,7 +206,7 @@ export default function CompanionAccountScreen() {
                     </View>
                     <Pressable
                         onPress={handleViewProfile}
-                        className="mt-3 rounded-lg bg-lavender-400 px-4 py-2"
+                        className="mt-3 rounded-lg bg-lavender-900 px-4 py-2"
                     >
                         <Text className="font-urbanist-semibold text-xs text-white">
                             {t('companion.settings.view_public_profile')}
@@ -275,26 +274,7 @@ export default function CompanionAccountScreen() {
                     })}
                 </MotiView>
 
-                {/* Switch to Hirer Mode Card */}
-                <MotiView
-                    from={{ opacity: 0, translateY: 10 }}
-                    animate={{ opacity: 1, translateY: 0 }}
-                    transition={{ type: 'timing', duration: 400, delay: 200 }}
-                    className="mx-4 mt-4 rounded-2xl bg-white p-4 shadow-sm"
-                >
-                    <Pressable
-                        onPress={handleSwitchToHirer}
-                        className="flex-row items-center py-1"
-                    >
-                        <View className="mr-3 size-8 items-center justify-center">
-                            <Swap color={colors.lavender[400]} size={20} />
-                        </View>
-                        <Text className="flex-1 text-sm text-midnight">
-                            {t('companion.settings.switch_to_hirer')}
-                        </Text>
-                        <ArrowRight color={colors.text.tertiary} width={16} height={16} />
-                    </Pressable>
-                </MotiView>
+
 
                 {/* Logout Card */}
                 <MotiView

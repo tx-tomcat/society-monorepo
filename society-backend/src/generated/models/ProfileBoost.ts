@@ -261,6 +261,7 @@ export type ProfileBoostWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"ProfileBoost"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"ProfileBoost"> | Date | string
   companion?: Prisma.XOR<Prisma.CompanionProfileScalarRelationFilter, Prisma.CompanionProfileWhereInput>
+  paymentRequests?: Prisma.PaymentRequestListRelationFilter
 }
 
 export type ProfileBoostOrderByWithRelationInput = {
@@ -275,6 +276,7 @@ export type ProfileBoostOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   companion?: Prisma.CompanionProfileOrderByWithRelationInput
+  paymentRequests?: Prisma.PaymentRequestOrderByRelationAggregateInput
 }
 
 export type ProfileBoostWhereUniqueInput = Prisma.AtLeast<{
@@ -292,6 +294,7 @@ export type ProfileBoostWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"ProfileBoost"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"ProfileBoost"> | Date | string
   companion?: Prisma.XOR<Prisma.CompanionProfileScalarRelationFilter, Prisma.CompanionProfileWhereInput>
+  paymentRequests?: Prisma.PaymentRequestListRelationFilter
 }, "id">
 
 export type ProfileBoostOrderByWithAggregationInput = {
@@ -339,6 +342,7 @@ export type ProfileBoostCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   companion: Prisma.CompanionProfileCreateNestedOneWithoutBoostsInput
+  paymentRequests?: Prisma.PaymentRequestCreateNestedManyWithoutBoostInput
 }
 
 export type ProfileBoostUncheckedCreateInput = {
@@ -352,6 +356,7 @@ export type ProfileBoostUncheckedCreateInput = {
   expiresAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  paymentRequests?: Prisma.PaymentRequestUncheckedCreateNestedManyWithoutBoostInput
 }
 
 export type ProfileBoostUpdateInput = {
@@ -365,6 +370,7 @@ export type ProfileBoostUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   companion?: Prisma.CompanionProfileUpdateOneRequiredWithoutBoostsNestedInput
+  paymentRequests?: Prisma.PaymentRequestUpdateManyWithoutBoostNestedInput
 }
 
 export type ProfileBoostUncheckedUpdateInput = {
@@ -378,6 +384,7 @@ export type ProfileBoostUncheckedUpdateInput = {
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  paymentRequests?: Prisma.PaymentRequestUncheckedUpdateManyWithoutBoostNestedInput
 }
 
 export type ProfileBoostCreateManyInput = {
@@ -477,6 +484,11 @@ export type ProfileBoostSumOrderByAggregateInput = {
   price?: Prisma.SortOrder
 }
 
+export type ProfileBoostNullableScalarRelationFilter = {
+  is?: Prisma.ProfileBoostWhereInput | null
+  isNot?: Prisma.ProfileBoostWhereInput | null
+}
+
 export type ProfileBoostCreateNestedManyWithoutCompanionInput = {
   create?: Prisma.XOR<Prisma.ProfileBoostCreateWithoutCompanionInput, Prisma.ProfileBoostUncheckedCreateWithoutCompanionInput> | Prisma.ProfileBoostCreateWithoutCompanionInput[] | Prisma.ProfileBoostUncheckedCreateWithoutCompanionInput[]
   connectOrCreate?: Prisma.ProfileBoostCreateOrConnectWithoutCompanionInput | Prisma.ProfileBoostCreateOrConnectWithoutCompanionInput[]
@@ -527,6 +539,22 @@ export type EnumBoostStatusFieldUpdateOperationsInput = {
   set?: $Enums.BoostStatus
 }
 
+export type ProfileBoostCreateNestedOneWithoutPaymentRequestsInput = {
+  create?: Prisma.XOR<Prisma.ProfileBoostCreateWithoutPaymentRequestsInput, Prisma.ProfileBoostUncheckedCreateWithoutPaymentRequestsInput>
+  connectOrCreate?: Prisma.ProfileBoostCreateOrConnectWithoutPaymentRequestsInput
+  connect?: Prisma.ProfileBoostWhereUniqueInput
+}
+
+export type ProfileBoostUpdateOneWithoutPaymentRequestsNestedInput = {
+  create?: Prisma.XOR<Prisma.ProfileBoostCreateWithoutPaymentRequestsInput, Prisma.ProfileBoostUncheckedCreateWithoutPaymentRequestsInput>
+  connectOrCreate?: Prisma.ProfileBoostCreateOrConnectWithoutPaymentRequestsInput
+  upsert?: Prisma.ProfileBoostUpsertWithoutPaymentRequestsInput
+  disconnect?: Prisma.ProfileBoostWhereInput | boolean
+  delete?: Prisma.ProfileBoostWhereInput | boolean
+  connect?: Prisma.ProfileBoostWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ProfileBoostUpdateToOneWithWhereWithoutPaymentRequestsInput, Prisma.ProfileBoostUpdateWithoutPaymentRequestsInput>, Prisma.ProfileBoostUncheckedUpdateWithoutPaymentRequestsInput>
+}
+
 export type ProfileBoostCreateWithoutCompanionInput = {
   id?: string
   tier?: $Enums.BoostTier
@@ -537,6 +565,7 @@ export type ProfileBoostCreateWithoutCompanionInput = {
   expiresAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  paymentRequests?: Prisma.PaymentRequestCreateNestedManyWithoutBoostInput
 }
 
 export type ProfileBoostUncheckedCreateWithoutCompanionInput = {
@@ -549,6 +578,7 @@ export type ProfileBoostUncheckedCreateWithoutCompanionInput = {
   expiresAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  paymentRequests?: Prisma.PaymentRequestUncheckedCreateNestedManyWithoutBoostInput
 }
 
 export type ProfileBoostCreateOrConnectWithoutCompanionInput = {
@@ -593,6 +623,74 @@ export type ProfileBoostScalarWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"ProfileBoost"> | Date | string
 }
 
+export type ProfileBoostCreateWithoutPaymentRequestsInput = {
+  id?: string
+  tier?: $Enums.BoostTier
+  status?: $Enums.BoostStatus
+  multiplier?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  price: number
+  startedAt?: Date | string | null
+  expiresAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  companion: Prisma.CompanionProfileCreateNestedOneWithoutBoostsInput
+}
+
+export type ProfileBoostUncheckedCreateWithoutPaymentRequestsInput = {
+  id?: string
+  companionId: string
+  tier?: $Enums.BoostTier
+  status?: $Enums.BoostStatus
+  multiplier?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  price: number
+  startedAt?: Date | string | null
+  expiresAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type ProfileBoostCreateOrConnectWithoutPaymentRequestsInput = {
+  where: Prisma.ProfileBoostWhereUniqueInput
+  create: Prisma.XOR<Prisma.ProfileBoostCreateWithoutPaymentRequestsInput, Prisma.ProfileBoostUncheckedCreateWithoutPaymentRequestsInput>
+}
+
+export type ProfileBoostUpsertWithoutPaymentRequestsInput = {
+  update: Prisma.XOR<Prisma.ProfileBoostUpdateWithoutPaymentRequestsInput, Prisma.ProfileBoostUncheckedUpdateWithoutPaymentRequestsInput>
+  create: Prisma.XOR<Prisma.ProfileBoostCreateWithoutPaymentRequestsInput, Prisma.ProfileBoostUncheckedCreateWithoutPaymentRequestsInput>
+  where?: Prisma.ProfileBoostWhereInput
+}
+
+export type ProfileBoostUpdateToOneWithWhereWithoutPaymentRequestsInput = {
+  where?: Prisma.ProfileBoostWhereInput
+  data: Prisma.XOR<Prisma.ProfileBoostUpdateWithoutPaymentRequestsInput, Prisma.ProfileBoostUncheckedUpdateWithoutPaymentRequestsInput>
+}
+
+export type ProfileBoostUpdateWithoutPaymentRequestsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tier?: Prisma.EnumBoostTierFieldUpdateOperationsInput | $Enums.BoostTier
+  status?: Prisma.EnumBoostStatusFieldUpdateOperationsInput | $Enums.BoostStatus
+  multiplier?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  price?: Prisma.IntFieldUpdateOperationsInput | number
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  companion?: Prisma.CompanionProfileUpdateOneRequiredWithoutBoostsNestedInput
+}
+
+export type ProfileBoostUncheckedUpdateWithoutPaymentRequestsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  companionId?: Prisma.StringFieldUpdateOperationsInput | string
+  tier?: Prisma.EnumBoostTierFieldUpdateOperationsInput | $Enums.BoostTier
+  status?: Prisma.EnumBoostStatusFieldUpdateOperationsInput | $Enums.BoostStatus
+  multiplier?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  price?: Prisma.IntFieldUpdateOperationsInput | number
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
 export type ProfileBoostCreateManyCompanionInput = {
   id?: string
   tier?: $Enums.BoostTier
@@ -615,6 +713,7 @@ export type ProfileBoostUpdateWithoutCompanionInput = {
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  paymentRequests?: Prisma.PaymentRequestUpdateManyWithoutBoostNestedInput
 }
 
 export type ProfileBoostUncheckedUpdateWithoutCompanionInput = {
@@ -627,6 +726,7 @@ export type ProfileBoostUncheckedUpdateWithoutCompanionInput = {
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  paymentRequests?: Prisma.PaymentRequestUncheckedUpdateManyWithoutBoostNestedInput
 }
 
 export type ProfileBoostUncheckedUpdateManyWithoutCompanionInput = {
@@ -642,6 +742,35 @@ export type ProfileBoostUncheckedUpdateManyWithoutCompanionInput = {
 }
 
 
+/**
+ * Count Type ProfileBoostCountOutputType
+ */
+
+export type ProfileBoostCountOutputType = {
+  paymentRequests: number
+}
+
+export type ProfileBoostCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  paymentRequests?: boolean | ProfileBoostCountOutputTypeCountPaymentRequestsArgs
+}
+
+/**
+ * ProfileBoostCountOutputType without action
+ */
+export type ProfileBoostCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ProfileBoostCountOutputType
+   */
+  select?: Prisma.ProfileBoostCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * ProfileBoostCountOutputType without action
+ */
+export type ProfileBoostCountOutputTypeCountPaymentRequestsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PaymentRequestWhereInput
+}
+
 
 export type ProfileBoostSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -655,6 +784,8 @@ export type ProfileBoostSelect<ExtArgs extends runtime.Types.Extensions.Internal
   createdAt?: boolean
   updatedAt?: boolean
   companion?: boolean | Prisma.CompanionProfileDefaultArgs<ExtArgs>
+  paymentRequests?: boolean | Prisma.ProfileBoost$paymentRequestsArgs<ExtArgs>
+  _count?: boolean | Prisma.ProfileBoostCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["profileBoost"]>
 
 export type ProfileBoostSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -701,6 +832,8 @@ export type ProfileBoostSelectScalar = {
 export type ProfileBoostOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "companionId" | "tier" | "status" | "multiplier" | "price" | "startedAt" | "expiresAt" | "createdAt" | "updatedAt", ExtArgs["result"]["profileBoost"]>
 export type ProfileBoostInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   companion?: boolean | Prisma.CompanionProfileDefaultArgs<ExtArgs>
+  paymentRequests?: boolean | Prisma.ProfileBoost$paymentRequestsArgs<ExtArgs>
+  _count?: boolean | Prisma.ProfileBoostCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type ProfileBoostIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   companion?: boolean | Prisma.CompanionProfileDefaultArgs<ExtArgs>
@@ -713,6 +846,7 @@ export type $ProfileBoostPayload<ExtArgs extends runtime.Types.Extensions.Intern
   name: "ProfileBoost"
   objects: {
     companion: Prisma.$CompanionProfilePayload<ExtArgs>
+    paymentRequests: Prisma.$PaymentRequestPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1120,6 +1254,7 @@ readonly fields: ProfileBoostFieldRefs;
 export interface Prisma__ProfileBoostClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   companion<T extends Prisma.CompanionProfileDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.CompanionProfileDefaultArgs<ExtArgs>>): Prisma.Prisma__CompanionProfileClient<runtime.Types.Result.GetResult<Prisma.$CompanionProfilePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  paymentRequests<T extends Prisma.ProfileBoost$paymentRequestsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ProfileBoost$paymentRequestsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PaymentRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1552,6 +1687,30 @@ export type ProfileBoostDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.
    * Limit how many ProfileBoosts to delete.
    */
   limit?: number
+}
+
+/**
+ * ProfileBoost.paymentRequests
+ */
+export type ProfileBoost$paymentRequestsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PaymentRequest
+   */
+  select?: Prisma.PaymentRequestSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the PaymentRequest
+   */
+  omit?: Prisma.PaymentRequestOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PaymentRequestInclude<ExtArgs> | null
+  where?: Prisma.PaymentRequestWhereInput
+  orderBy?: Prisma.PaymentRequestOrderByWithRelationInput | Prisma.PaymentRequestOrderByWithRelationInput[]
+  cursor?: Prisma.PaymentRequestWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PaymentRequestScalarFieldEnum | Prisma.PaymentRequestScalarFieldEnum[]
 }
 
 /**

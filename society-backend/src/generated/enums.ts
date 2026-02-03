@@ -283,7 +283,8 @@ export type InteractionEventType = (typeof InteractionEventType)[keyof typeof In
 
 export const PaymentRequestType = {
   TOPUP: 'TOPUP',
-  BOOKING: 'BOOKING'
+  BOOKING: 'BOOKING',
+  BOOST: 'BOOST'
 } as const
 
 export type PaymentRequestType = (typeof PaymentRequestType)[keyof typeof PaymentRequestType]

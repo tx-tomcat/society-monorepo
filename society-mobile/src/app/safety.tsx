@@ -258,7 +258,7 @@ export default function SafetyCenter() {
         </View>
 
         {/* Trust & Safety Info */}
-        <View className="mx-4 mb-8 rounded-xl bg-lavender-400/20 p-4">
+        <View className="mx-4 mb-8 rounded-xl bg-lavender-900/20 p-4">
           <Text className="mb-2 font-semibold text-midnight">
             Our Commitment
           </Text>

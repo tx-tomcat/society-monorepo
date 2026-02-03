@@ -102,7 +102,7 @@ const OCCASION_ICONS: Record<
   party: Confetti,
 };
 
-function ReviewCard({ review }: { review: Review }) {
+const ReviewCard = React.memo(function ReviewCard({ review }: { review: Review }) {
   const OccasionIcon = OCCASION_ICONS[review.occasion] || Calendar;
 
   return (
@@ -134,15 +134,15 @@ function ReviewCard({ review }: { review: Review }) {
       </Text>
       <View className="flex-row items-center gap-1">
         <OccasionIcon color={colors.lavender[400]} width={14} height={14} />
-        <Text className="text-xs capitalize text-lavender-400">
+        <Text className="text-xs capitalize text-lavender-900">
           {review.occasion}
         </Text>
       </View>
     </View>
   );
-}
+});
 
-function ImageGallery({
+const ImageGallery = React.memo(function ImageGallery({
   images,
   currentIndex,
   onIndexChange,
@@ -151,18 +151,21 @@ function ImageGallery({
   currentIndex: number;
   onIndexChange: (index: number) => void;
 }) {
+  const handleMomentumScrollEnd = React.useCallback(
+    (e: { nativeEvent: { contentOffset: { x: number } } }) => {
+      const index = Math.round(e.nativeEvent.contentOffset.x / SCREEN_WIDTH);
+      onIndexChange(index);
+    },
+    [onIndexChange]
+  );
+
   return (
     <View style={{ height: IMAGE_HEIGHT }}>
       <ScrollView
         horizontal
         pagingEnabled
         showsHorizontalScrollIndicator={false}
-        onMomentumScrollEnd={(e) => {
-          const index = Math.round(
-            e.nativeEvent.contentOffset.x / SCREEN_WIDTH
-          );
-          onIndexChange(index);
-        }}
+        onMomentumScrollEnd={handleMomentumScrollEnd}
       >
         {images.map((image, index) => (
           <Image
@@ -190,7 +193,7 @@ function ImageGallery({
       />
     </View>
   );
-}
+});
 
 export default function CompanionProfileScreen() {
   const router = useRouter();

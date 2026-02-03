@@ -44,6 +44,7 @@ export type PaymentRequestMinAggregateOutputType = {
   amount: number | null
   status: $Enums.PaymentRequestStatus | null
   bookingId: string | null
+  boostId: string | null
   sepayId: number | null
   gateway: string | null
   referenceCode: string | null
@@ -62,6 +63,7 @@ export type PaymentRequestMaxAggregateOutputType = {
   amount: number | null
   status: $Enums.PaymentRequestStatus | null
   bookingId: string | null
+  boostId: string | null
   sepayId: number | null
   gateway: string | null
   referenceCode: string | null
@@ -80,6 +82,7 @@ export type PaymentRequestCountAggregateOutputType = {
   amount: number
   status: number
   bookingId: number
+  boostId: number
   sepayId: number
   gateway: number
   referenceCode: number
@@ -110,6 +113,7 @@ export type PaymentRequestMinAggregateInputType = {
   amount?: true
   status?: true
   bookingId?: true
+  boostId?: true
   sepayId?: true
   gateway?: true
   referenceCode?: true
@@ -128,6 +132,7 @@ export type PaymentRequestMaxAggregateInputType = {
   amount?: true
   status?: true
   bookingId?: true
+  boostId?: true
   sepayId?: true
   gateway?: true
   referenceCode?: true
@@ -146,6 +151,7 @@ export type PaymentRequestCountAggregateInputType = {
   amount?: true
   status?: true
   bookingId?: true
+  boostId?: true
   sepayId?: true
   gateway?: true
   referenceCode?: true
@@ -251,6 +257,7 @@ export type PaymentRequestGroupByOutputType = {
   amount: number
   status: $Enums.PaymentRequestStatus
   bookingId: string | null
+  boostId: string | null
   sepayId: number | null
   gateway: string | null
   referenceCode: string | null
@@ -292,6 +299,7 @@ export type PaymentRequestWhereInput = {
   amount?: Prisma.IntFilter<"PaymentRequest"> | number
   status?: Prisma.EnumPaymentRequestStatusFilter<"PaymentRequest"> | $Enums.PaymentRequestStatus
   bookingId?: Prisma.UuidNullableFilter<"PaymentRequest"> | string | null
+  boostId?: Prisma.UuidNullableFilter<"PaymentRequest"> | string | null
   sepayId?: Prisma.IntNullableFilter<"PaymentRequest"> | number | null
   gateway?: Prisma.StringNullableFilter<"PaymentRequest"> | string | null
   referenceCode?: Prisma.StringNullableFilter<"PaymentRequest"> | string | null
@@ -302,6 +310,7 @@ export type PaymentRequestWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"PaymentRequest"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   booking?: Prisma.XOR<Prisma.BookingNullableScalarRelationFilter, Prisma.BookingWhereInput> | null
+  boost?: Prisma.XOR<Prisma.ProfileBoostNullableScalarRelationFilter, Prisma.ProfileBoostWhereInput> | null
   webhookLog?: Prisma.XOR<Prisma.WebhookLogNullableScalarRelationFilter, Prisma.WebhookLogWhereInput> | null
 }
 
@@ -313,6 +322,7 @@ export type PaymentRequestOrderByWithRelationInput = {
   amount?: Prisma.SortOrder
   status?: Prisma.SortOrder
   bookingId?: Prisma.SortOrderInput | Prisma.SortOrder
+  boostId?: Prisma.SortOrderInput | Prisma.SortOrder
   sepayId?: Prisma.SortOrderInput | Prisma.SortOrder
   gateway?: Prisma.SortOrderInput | Prisma.SortOrder
   referenceCode?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -323,6 +333,7 @@ export type PaymentRequestOrderByWithRelationInput = {
   updatedAt?: Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
   booking?: Prisma.BookingOrderByWithRelationInput
+  boost?: Prisma.ProfileBoostOrderByWithRelationInput
   webhookLog?: Prisma.WebhookLogOrderByWithRelationInput
 }
 
@@ -337,6 +348,7 @@ export type PaymentRequestWhereUniqueInput = Prisma.AtLeast<{
   amount?: Prisma.IntFilter<"PaymentRequest"> | number
   status?: Prisma.EnumPaymentRequestStatusFilter<"PaymentRequest"> | $Enums.PaymentRequestStatus
   bookingId?: Prisma.UuidNullableFilter<"PaymentRequest"> | string | null
+  boostId?: Prisma.UuidNullableFilter<"PaymentRequest"> | string | null
   sepayId?: Prisma.IntNullableFilter<"PaymentRequest"> | number | null
   gateway?: Prisma.StringNullableFilter<"PaymentRequest"> | string | null
   referenceCode?: Prisma.StringNullableFilter<"PaymentRequest"> | string | null
@@ -347,6 +359,7 @@ export type PaymentRequestWhereUniqueInput = Prisma.AtLeast<{
   updatedAt?: Prisma.DateTimeFilter<"PaymentRequest"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   booking?: Prisma.XOR<Prisma.BookingNullableScalarRelationFilter, Prisma.BookingWhereInput> | null
+  boost?: Prisma.XOR<Prisma.ProfileBoostNullableScalarRelationFilter, Prisma.ProfileBoostWhereInput> | null
   webhookLog?: Prisma.XOR<Prisma.WebhookLogNullableScalarRelationFilter, Prisma.WebhookLogWhereInput> | null
 }, "id" | "code">
 
@@ -358,6 +371,7 @@ export type PaymentRequestOrderByWithAggregationInput = {
   amount?: Prisma.SortOrder
   status?: Prisma.SortOrder
   bookingId?: Prisma.SortOrderInput | Prisma.SortOrder
+  boostId?: Prisma.SortOrderInput | Prisma.SortOrder
   sepayId?: Prisma.SortOrderInput | Prisma.SortOrder
   gateway?: Prisma.SortOrderInput | Prisma.SortOrder
   referenceCode?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -384,6 +398,7 @@ export type PaymentRequestScalarWhereWithAggregatesInput = {
   amount?: Prisma.IntWithAggregatesFilter<"PaymentRequest"> | number
   status?: Prisma.EnumPaymentRequestStatusWithAggregatesFilter<"PaymentRequest"> | $Enums.PaymentRequestStatus
   bookingId?: Prisma.UuidNullableWithAggregatesFilter<"PaymentRequest"> | string | null
+  boostId?: Prisma.UuidNullableWithAggregatesFilter<"PaymentRequest"> | string | null
   sepayId?: Prisma.IntNullableWithAggregatesFilter<"PaymentRequest"> | number | null
   gateway?: Prisma.StringNullableWithAggregatesFilter<"PaymentRequest"> | string | null
   referenceCode?: Prisma.StringNullableWithAggregatesFilter<"PaymentRequest"> | string | null
@@ -409,6 +424,7 @@ export type PaymentRequestCreateInput = {
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutPaymentRequestsInput
   booking?: Prisma.BookingCreateNestedOneWithoutPaymentRequestsInput
+  boost?: Prisma.ProfileBoostCreateNestedOneWithoutPaymentRequestsInput
   webhookLog?: Prisma.WebhookLogCreateNestedOneWithoutPaymentRequestsInput
 }
 
@@ -420,6 +436,7 @@ export type PaymentRequestUncheckedCreateInput = {
   amount: number
   status?: $Enums.PaymentRequestStatus
   bookingId?: string | null
+  boostId?: string | null
   sepayId?: number | null
   gateway?: string | null
   referenceCode?: string | null
@@ -445,6 +462,7 @@ export type PaymentRequestUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutPaymentRequestsNestedInput
   booking?: Prisma.BookingUpdateOneWithoutPaymentRequestsNestedInput
+  boost?: Prisma.ProfileBoostUpdateOneWithoutPaymentRequestsNestedInput
   webhookLog?: Prisma.WebhookLogUpdateOneWithoutPaymentRequestsNestedInput
 }
 
@@ -456,6 +474,7 @@ export type PaymentRequestUncheckedUpdateInput = {
   amount?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumPaymentRequestStatusFieldUpdateOperationsInput | $Enums.PaymentRequestStatus
   bookingId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  boostId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sepayId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   gateway?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   referenceCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -474,6 +493,7 @@ export type PaymentRequestCreateManyInput = {
   amount: number
   status?: $Enums.PaymentRequestStatus
   bookingId?: string | null
+  boostId?: string | null
   sepayId?: number | null
   gateway?: string | null
   referenceCode?: string | null
@@ -507,6 +527,7 @@ export type PaymentRequestUncheckedUpdateManyInput = {
   amount?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumPaymentRequestStatusFieldUpdateOperationsInput | $Enums.PaymentRequestStatus
   bookingId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  boostId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sepayId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   gateway?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   referenceCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -535,6 +556,7 @@ export type PaymentRequestCountOrderByAggregateInput = {
   amount?: Prisma.SortOrder
   status?: Prisma.SortOrder
   bookingId?: Prisma.SortOrder
+  boostId?: Prisma.SortOrder
   sepayId?: Prisma.SortOrder
   gateway?: Prisma.SortOrder
   referenceCode?: Prisma.SortOrder
@@ -558,6 +580,7 @@ export type PaymentRequestMaxOrderByAggregateInput = {
   amount?: Prisma.SortOrder
   status?: Prisma.SortOrder
   bookingId?: Prisma.SortOrder
+  boostId?: Prisma.SortOrder
   sepayId?: Prisma.SortOrder
   gateway?: Prisma.SortOrder
   referenceCode?: Prisma.SortOrder
@@ -576,6 +599,7 @@ export type PaymentRequestMinOrderByAggregateInput = {
   amount?: Prisma.SortOrder
   status?: Prisma.SortOrder
   bookingId?: Prisma.SortOrder
+  boostId?: Prisma.SortOrder
   sepayId?: Prisma.SortOrder
   gateway?: Prisma.SortOrder
   referenceCode?: Prisma.SortOrder
@@ -675,6 +699,48 @@ export type PaymentRequestUncheckedUpdateManyWithoutBookingNestedInput = {
   deleteMany?: Prisma.PaymentRequestScalarWhereInput | Prisma.PaymentRequestScalarWhereInput[]
 }
 
+export type PaymentRequestCreateNestedManyWithoutBoostInput = {
+  create?: Prisma.XOR<Prisma.PaymentRequestCreateWithoutBoostInput, Prisma.PaymentRequestUncheckedCreateWithoutBoostInput> | Prisma.PaymentRequestCreateWithoutBoostInput[] | Prisma.PaymentRequestUncheckedCreateWithoutBoostInput[]
+  connectOrCreate?: Prisma.PaymentRequestCreateOrConnectWithoutBoostInput | Prisma.PaymentRequestCreateOrConnectWithoutBoostInput[]
+  createMany?: Prisma.PaymentRequestCreateManyBoostInputEnvelope
+  connect?: Prisma.PaymentRequestWhereUniqueInput | Prisma.PaymentRequestWhereUniqueInput[]
+}
+
+export type PaymentRequestUncheckedCreateNestedManyWithoutBoostInput = {
+  create?: Prisma.XOR<Prisma.PaymentRequestCreateWithoutBoostInput, Prisma.PaymentRequestUncheckedCreateWithoutBoostInput> | Prisma.PaymentRequestCreateWithoutBoostInput[] | Prisma.PaymentRequestUncheckedCreateWithoutBoostInput[]
+  connectOrCreate?: Prisma.PaymentRequestCreateOrConnectWithoutBoostInput | Prisma.PaymentRequestCreateOrConnectWithoutBoostInput[]
+  createMany?: Prisma.PaymentRequestCreateManyBoostInputEnvelope
+  connect?: Prisma.PaymentRequestWhereUniqueInput | Prisma.PaymentRequestWhereUniqueInput[]
+}
+
+export type PaymentRequestUpdateManyWithoutBoostNestedInput = {
+  create?: Prisma.XOR<Prisma.PaymentRequestCreateWithoutBoostInput, Prisma.PaymentRequestUncheckedCreateWithoutBoostInput> | Prisma.PaymentRequestCreateWithoutBoostInput[] | Prisma.PaymentRequestUncheckedCreateWithoutBoostInput[]
+  connectOrCreate?: Prisma.PaymentRequestCreateOrConnectWithoutBoostInput | Prisma.PaymentRequestCreateOrConnectWithoutBoostInput[]
+  upsert?: Prisma.PaymentRequestUpsertWithWhereUniqueWithoutBoostInput | Prisma.PaymentRequestUpsertWithWhereUniqueWithoutBoostInput[]
+  createMany?: Prisma.PaymentRequestCreateManyBoostInputEnvelope
+  set?: Prisma.PaymentRequestWhereUniqueInput | Prisma.PaymentRequestWhereUniqueInput[]
+  disconnect?: Prisma.PaymentRequestWhereUniqueInput | Prisma.PaymentRequestWhereUniqueInput[]
+  delete?: Prisma.PaymentRequestWhereUniqueInput | Prisma.PaymentRequestWhereUniqueInput[]
+  connect?: Prisma.PaymentRequestWhereUniqueInput | Prisma.PaymentRequestWhereUniqueInput[]
+  update?: Prisma.PaymentRequestUpdateWithWhereUniqueWithoutBoostInput | Prisma.PaymentRequestUpdateWithWhereUniqueWithoutBoostInput[]
+  updateMany?: Prisma.PaymentRequestUpdateManyWithWhereWithoutBoostInput | Prisma.PaymentRequestUpdateManyWithWhereWithoutBoostInput[]
+  deleteMany?: Prisma.PaymentRequestScalarWhereInput | Prisma.PaymentRequestScalarWhereInput[]
+}
+
+export type PaymentRequestUncheckedUpdateManyWithoutBoostNestedInput = {
+  create?: Prisma.XOR<Prisma.PaymentRequestCreateWithoutBoostInput, Prisma.PaymentRequestUncheckedCreateWithoutBoostInput> | Prisma.PaymentRequestCreateWithoutBoostInput[] | Prisma.PaymentRequestUncheckedCreateWithoutBoostInput[]
+  connectOrCreate?: Prisma.PaymentRequestCreateOrConnectWithoutBoostInput | Prisma.PaymentRequestCreateOrConnectWithoutBoostInput[]
+  upsert?: Prisma.PaymentRequestUpsertWithWhereUniqueWithoutBoostInput | Prisma.PaymentRequestUpsertWithWhereUniqueWithoutBoostInput[]
+  createMany?: Prisma.PaymentRequestCreateManyBoostInputEnvelope
+  set?: Prisma.PaymentRequestWhereUniqueInput | Prisma.PaymentRequestWhereUniqueInput[]
+  disconnect?: Prisma.PaymentRequestWhereUniqueInput | Prisma.PaymentRequestWhereUniqueInput[]
+  delete?: Prisma.PaymentRequestWhereUniqueInput | Prisma.PaymentRequestWhereUniqueInput[]
+  connect?: Prisma.PaymentRequestWhereUniqueInput | Prisma.PaymentRequestWhereUniqueInput[]
+  update?: Prisma.PaymentRequestUpdateWithWhereUniqueWithoutBoostInput | Prisma.PaymentRequestUpdateWithWhereUniqueWithoutBoostInput[]
+  updateMany?: Prisma.PaymentRequestUpdateManyWithWhereWithoutBoostInput | Prisma.PaymentRequestUpdateManyWithWhereWithoutBoostInput[]
+  deleteMany?: Prisma.PaymentRequestScalarWhereInput | Prisma.PaymentRequestScalarWhereInput[]
+}
+
 export type EnumPaymentRequestTypeFieldUpdateOperationsInput = {
   set?: $Enums.PaymentRequestType
 }
@@ -739,6 +805,7 @@ export type PaymentRequestCreateWithoutUserInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   booking?: Prisma.BookingCreateNestedOneWithoutPaymentRequestsInput
+  boost?: Prisma.ProfileBoostCreateNestedOneWithoutPaymentRequestsInput
   webhookLog?: Prisma.WebhookLogCreateNestedOneWithoutPaymentRequestsInput
 }
 
@@ -749,6 +816,7 @@ export type PaymentRequestUncheckedCreateWithoutUserInput = {
   amount: number
   status?: $Enums.PaymentRequestStatus
   bookingId?: string | null
+  boostId?: string | null
   sepayId?: number | null
   gateway?: string | null
   referenceCode?: string | null
@@ -796,6 +864,7 @@ export type PaymentRequestScalarWhereInput = {
   amount?: Prisma.IntFilter<"PaymentRequest"> | number
   status?: Prisma.EnumPaymentRequestStatusFilter<"PaymentRequest"> | $Enums.PaymentRequestStatus
   bookingId?: Prisma.UuidNullableFilter<"PaymentRequest"> | string | null
+  boostId?: Prisma.UuidNullableFilter<"PaymentRequest"> | string | null
   sepayId?: Prisma.IntNullableFilter<"PaymentRequest"> | number | null
   gateway?: Prisma.StringNullableFilter<"PaymentRequest"> | string | null
   referenceCode?: Prisma.StringNullableFilter<"PaymentRequest"> | string | null
@@ -820,6 +889,7 @@ export type PaymentRequestCreateWithoutBookingInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutPaymentRequestsInput
+  boost?: Prisma.ProfileBoostCreateNestedOneWithoutPaymentRequestsInput
   webhookLog?: Prisma.WebhookLogCreateNestedOneWithoutPaymentRequestsInput
 }
 
@@ -830,6 +900,7 @@ export type PaymentRequestUncheckedCreateWithoutBookingInput = {
   type: $Enums.PaymentRequestType
   amount: number
   status?: $Enums.PaymentRequestStatus
+  boostId?: string | null
   sepayId?: number | null
   gateway?: string | null
   referenceCode?: string | null
@@ -866,6 +937,68 @@ export type PaymentRequestUpdateManyWithWhereWithoutBookingInput = {
   data: Prisma.XOR<Prisma.PaymentRequestUpdateManyMutationInput, Prisma.PaymentRequestUncheckedUpdateManyWithoutBookingInput>
 }
 
+export type PaymentRequestCreateWithoutBoostInput = {
+  id?: string
+  code: string
+  type: $Enums.PaymentRequestType
+  amount: number
+  status?: $Enums.PaymentRequestStatus
+  sepayId?: number | null
+  gateway?: string | null
+  referenceCode?: string | null
+  expiresAt: Date | string
+  completedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  user: Prisma.UserCreateNestedOneWithoutPaymentRequestsInput
+  booking?: Prisma.BookingCreateNestedOneWithoutPaymentRequestsInput
+  webhookLog?: Prisma.WebhookLogCreateNestedOneWithoutPaymentRequestsInput
+}
+
+export type PaymentRequestUncheckedCreateWithoutBoostInput = {
+  id?: string
+  userId: string
+  code: string
+  type: $Enums.PaymentRequestType
+  amount: number
+  status?: $Enums.PaymentRequestStatus
+  bookingId?: string | null
+  sepayId?: number | null
+  gateway?: string | null
+  referenceCode?: string | null
+  webhookLogId?: string | null
+  expiresAt: Date | string
+  completedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type PaymentRequestCreateOrConnectWithoutBoostInput = {
+  where: Prisma.PaymentRequestWhereUniqueInput
+  create: Prisma.XOR<Prisma.PaymentRequestCreateWithoutBoostInput, Prisma.PaymentRequestUncheckedCreateWithoutBoostInput>
+}
+
+export type PaymentRequestCreateManyBoostInputEnvelope = {
+  data: Prisma.PaymentRequestCreateManyBoostInput | Prisma.PaymentRequestCreateManyBoostInput[]
+  skipDuplicates?: boolean
+}
+
+export type PaymentRequestUpsertWithWhereUniqueWithoutBoostInput = {
+  where: Prisma.PaymentRequestWhereUniqueInput
+  update: Prisma.XOR<Prisma.PaymentRequestUpdateWithoutBoostInput, Prisma.PaymentRequestUncheckedUpdateWithoutBoostInput>
+  create: Prisma.XOR<Prisma.PaymentRequestCreateWithoutBoostInput, Prisma.PaymentRequestUncheckedCreateWithoutBoostInput>
+}
+
+export type PaymentRequestUpdateWithWhereUniqueWithoutBoostInput = {
+  where: Prisma.PaymentRequestWhereUniqueInput
+  data: Prisma.XOR<Prisma.PaymentRequestUpdateWithoutBoostInput, Prisma.PaymentRequestUncheckedUpdateWithoutBoostInput>
+}
+
+export type PaymentRequestUpdateManyWithWhereWithoutBoostInput = {
+  where: Prisma.PaymentRequestScalarWhereInput
+  data: Prisma.XOR<Prisma.PaymentRequestUpdateManyMutationInput, Prisma.PaymentRequestUncheckedUpdateManyWithoutBoostInput>
+}
+
 export type PaymentRequestCreateWithoutWebhookLogInput = {
   id?: string
   code: string
@@ -881,6 +1014,7 @@ export type PaymentRequestCreateWithoutWebhookLogInput = {
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutPaymentRequestsInput
   booking?: Prisma.BookingCreateNestedOneWithoutPaymentRequestsInput
+  boost?: Prisma.ProfileBoostCreateNestedOneWithoutPaymentRequestsInput
 }
 
 export type PaymentRequestUncheckedCreateWithoutWebhookLogInput = {
@@ -891,6 +1025,7 @@ export type PaymentRequestUncheckedCreateWithoutWebhookLogInput = {
   amount: number
   status?: $Enums.PaymentRequestStatus
   bookingId?: string | null
+  boostId?: string | null
   sepayId?: number | null
   gateway?: string | null
   referenceCode?: string | null
@@ -933,6 +1068,7 @@ export type PaymentRequestCreateManyUserInput = {
   amount: number
   status?: $Enums.PaymentRequestStatus
   bookingId?: string | null
+  boostId?: string | null
   sepayId?: number | null
   gateway?: string | null
   referenceCode?: string | null
@@ -957,6 +1093,7 @@ export type PaymentRequestUpdateWithoutUserInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   booking?: Prisma.BookingUpdateOneWithoutPaymentRequestsNestedInput
+  boost?: Prisma.ProfileBoostUpdateOneWithoutPaymentRequestsNestedInput
   webhookLog?: Prisma.WebhookLogUpdateOneWithoutPaymentRequestsNestedInput
 }
 
@@ -967,6 +1104,7 @@ export type PaymentRequestUncheckedUpdateWithoutUserInput = {
   amount?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumPaymentRequestStatusFieldUpdateOperationsInput | $Enums.PaymentRequestStatus
   bookingId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  boostId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sepayId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   gateway?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   referenceCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -984,6 +1122,7 @@ export type PaymentRequestUncheckedUpdateManyWithoutUserInput = {
   amount?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumPaymentRequestStatusFieldUpdateOperationsInput | $Enums.PaymentRequestStatus
   bookingId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  boostId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sepayId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   gateway?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   referenceCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1001,6 +1140,7 @@ export type PaymentRequestCreateManyBookingInput = {
   type: $Enums.PaymentRequestType
   amount: number
   status?: $Enums.PaymentRequestStatus
+  boostId?: string | null
   sepayId?: number | null
   gateway?: string | null
   referenceCode?: string | null
@@ -1025,6 +1165,7 @@ export type PaymentRequestUpdateWithoutBookingInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutPaymentRequestsNestedInput
+  boost?: Prisma.ProfileBoostUpdateOneWithoutPaymentRequestsNestedInput
   webhookLog?: Prisma.WebhookLogUpdateOneWithoutPaymentRequestsNestedInput
 }
 
@@ -1035,6 +1176,7 @@ export type PaymentRequestUncheckedUpdateWithoutBookingInput = {
   type?: Prisma.EnumPaymentRequestTypeFieldUpdateOperationsInput | $Enums.PaymentRequestType
   amount?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumPaymentRequestStatusFieldUpdateOperationsInput | $Enums.PaymentRequestStatus
+  boostId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sepayId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   gateway?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   referenceCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1052,6 +1194,79 @@ export type PaymentRequestUncheckedUpdateManyWithoutBookingInput = {
   type?: Prisma.EnumPaymentRequestTypeFieldUpdateOperationsInput | $Enums.PaymentRequestType
   amount?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumPaymentRequestStatusFieldUpdateOperationsInput | $Enums.PaymentRequestStatus
+  boostId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sepayId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  gateway?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  referenceCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  webhookLogId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type PaymentRequestCreateManyBoostInput = {
+  id?: string
+  userId: string
+  code: string
+  type: $Enums.PaymentRequestType
+  amount: number
+  status?: $Enums.PaymentRequestStatus
+  bookingId?: string | null
+  sepayId?: number | null
+  gateway?: string | null
+  referenceCode?: string | null
+  webhookLogId?: string | null
+  expiresAt: Date | string
+  completedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type PaymentRequestUpdateWithoutBoostInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumPaymentRequestTypeFieldUpdateOperationsInput | $Enums.PaymentRequestType
+  amount?: Prisma.IntFieldUpdateOperationsInput | number
+  status?: Prisma.EnumPaymentRequestStatusFieldUpdateOperationsInput | $Enums.PaymentRequestStatus
+  sepayId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  gateway?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  referenceCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  user?: Prisma.UserUpdateOneRequiredWithoutPaymentRequestsNestedInput
+  booking?: Prisma.BookingUpdateOneWithoutPaymentRequestsNestedInput
+  webhookLog?: Prisma.WebhookLogUpdateOneWithoutPaymentRequestsNestedInput
+}
+
+export type PaymentRequestUncheckedUpdateWithoutBoostInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumPaymentRequestTypeFieldUpdateOperationsInput | $Enums.PaymentRequestType
+  amount?: Prisma.IntFieldUpdateOperationsInput | number
+  status?: Prisma.EnumPaymentRequestStatusFieldUpdateOperationsInput | $Enums.PaymentRequestStatus
+  bookingId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sepayId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  gateway?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  referenceCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  webhookLogId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type PaymentRequestUncheckedUpdateManyWithoutBoostInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumPaymentRequestTypeFieldUpdateOperationsInput | $Enums.PaymentRequestType
+  amount?: Prisma.IntFieldUpdateOperationsInput | number
+  status?: Prisma.EnumPaymentRequestStatusFieldUpdateOperationsInput | $Enums.PaymentRequestStatus
+  bookingId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sepayId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   gateway?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   referenceCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1070,6 +1285,7 @@ export type PaymentRequestCreateManyWebhookLogInput = {
   amount: number
   status?: $Enums.PaymentRequestStatus
   bookingId?: string | null
+  boostId?: string | null
   sepayId?: number | null
   gateway?: string | null
   referenceCode?: string | null
@@ -1094,6 +1310,7 @@ export type PaymentRequestUpdateWithoutWebhookLogInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutPaymentRequestsNestedInput
   booking?: Prisma.BookingUpdateOneWithoutPaymentRequestsNestedInput
+  boost?: Prisma.ProfileBoostUpdateOneWithoutPaymentRequestsNestedInput
 }
 
 export type PaymentRequestUncheckedUpdateWithoutWebhookLogInput = {
@@ -1104,6 +1321,7 @@ export type PaymentRequestUncheckedUpdateWithoutWebhookLogInput = {
   amount?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumPaymentRequestStatusFieldUpdateOperationsInput | $Enums.PaymentRequestStatus
   bookingId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  boostId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sepayId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   gateway?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   referenceCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1121,6 +1339,7 @@ export type PaymentRequestUncheckedUpdateManyWithoutWebhookLogInput = {
   amount?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumPaymentRequestStatusFieldUpdateOperationsInput | $Enums.PaymentRequestStatus
   bookingId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  boostId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sepayId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   gateway?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   referenceCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1140,6 +1359,7 @@ export type PaymentRequestSelect<ExtArgs extends runtime.Types.Extensions.Intern
   amount?: boolean
   status?: boolean
   bookingId?: boolean
+  boostId?: boolean
   sepayId?: boolean
   gateway?: boolean
   referenceCode?: boolean
@@ -1150,6 +1370,7 @@ export type PaymentRequestSelect<ExtArgs extends runtime.Types.Extensions.Intern
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   booking?: boolean | Prisma.PaymentRequest$bookingArgs<ExtArgs>
+  boost?: boolean | Prisma.PaymentRequest$boostArgs<ExtArgs>
   webhookLog?: boolean | Prisma.PaymentRequest$webhookLogArgs<ExtArgs>
 }, ExtArgs["result"]["paymentRequest"]>
 
@@ -1161,6 +1382,7 @@ export type PaymentRequestSelectCreateManyAndReturn<ExtArgs extends runtime.Type
   amount?: boolean
   status?: boolean
   bookingId?: boolean
+  boostId?: boolean
   sepayId?: boolean
   gateway?: boolean
   referenceCode?: boolean
@@ -1171,6 +1393,7 @@ export type PaymentRequestSelectCreateManyAndReturn<ExtArgs extends runtime.Type
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   booking?: boolean | Prisma.PaymentRequest$bookingArgs<ExtArgs>
+  boost?: boolean | Prisma.PaymentRequest$boostArgs<ExtArgs>
   webhookLog?: boolean | Prisma.PaymentRequest$webhookLogArgs<ExtArgs>
 }, ExtArgs["result"]["paymentRequest"]>
 
@@ -1182,6 +1405,7 @@ export type PaymentRequestSelectUpdateManyAndReturn<ExtArgs extends runtime.Type
   amount?: boolean
   status?: boolean
   bookingId?: boolean
+  boostId?: boolean
   sepayId?: boolean
   gateway?: boolean
   referenceCode?: boolean
@@ -1192,6 +1416,7 @@ export type PaymentRequestSelectUpdateManyAndReturn<ExtArgs extends runtime.Type
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   booking?: boolean | Prisma.PaymentRequest$bookingArgs<ExtArgs>
+  boost?: boolean | Prisma.PaymentRequest$boostArgs<ExtArgs>
   webhookLog?: boolean | Prisma.PaymentRequest$webhookLogArgs<ExtArgs>
 }, ExtArgs["result"]["paymentRequest"]>
 
@@ -1203,6 +1428,7 @@ export type PaymentRequestSelectScalar = {
   amount?: boolean
   status?: boolean
   bookingId?: boolean
+  boostId?: boolean
   sepayId?: boolean
   gateway?: boolean
   referenceCode?: boolean
@@ -1213,20 +1439,23 @@ export type PaymentRequestSelectScalar = {
   updatedAt?: boolean
 }
 
-export type PaymentRequestOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "code" | "type" | "amount" | "status" | "bookingId" | "sepayId" | "gateway" | "referenceCode" | "webhookLogId" | "expiresAt" | "completedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["paymentRequest"]>
+export type PaymentRequestOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "code" | "type" | "amount" | "status" | "bookingId" | "boostId" | "sepayId" | "gateway" | "referenceCode" | "webhookLogId" | "expiresAt" | "completedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["paymentRequest"]>
 export type PaymentRequestInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   booking?: boolean | Prisma.PaymentRequest$bookingArgs<ExtArgs>
+  boost?: boolean | Prisma.PaymentRequest$boostArgs<ExtArgs>
   webhookLog?: boolean | Prisma.PaymentRequest$webhookLogArgs<ExtArgs>
 }
 export type PaymentRequestIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   booking?: boolean | Prisma.PaymentRequest$bookingArgs<ExtArgs>
+  boost?: boolean | Prisma.PaymentRequest$boostArgs<ExtArgs>
   webhookLog?: boolean | Prisma.PaymentRequest$webhookLogArgs<ExtArgs>
 }
 export type PaymentRequestIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   booking?: boolean | Prisma.PaymentRequest$bookingArgs<ExtArgs>
+  boost?: boolean | Prisma.PaymentRequest$boostArgs<ExtArgs>
   webhookLog?: boolean | Prisma.PaymentRequest$webhookLogArgs<ExtArgs>
 }
 
@@ -1235,6 +1464,7 @@ export type $PaymentRequestPayload<ExtArgs extends runtime.Types.Extensions.Inte
   objects: {
     user: Prisma.$UserPayload<ExtArgs>
     booking: Prisma.$BookingPayload<ExtArgs> | null
+    boost: Prisma.$ProfileBoostPayload<ExtArgs> | null
     webhookLog: Prisma.$WebhookLogPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
@@ -1245,6 +1475,7 @@ export type $PaymentRequestPayload<ExtArgs extends runtime.Types.Extensions.Inte
     amount: number
     status: $Enums.PaymentRequestStatus
     bookingId: string | null
+    boostId: string | null
     sepayId: number | null
     gateway: string | null
     referenceCode: string | null
@@ -1649,6 +1880,7 @@ export interface Prisma__PaymentRequestClient<T, Null = never, ExtArgs extends r
   readonly [Symbol.toStringTag]: "PrismaPromise"
   user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   booking<T extends Prisma.PaymentRequest$bookingArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.PaymentRequest$bookingArgs<ExtArgs>>): Prisma.Prisma__BookingClient<runtime.Types.Result.GetResult<Prisma.$BookingPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  boost<T extends Prisma.PaymentRequest$boostArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.PaymentRequest$boostArgs<ExtArgs>>): Prisma.Prisma__ProfileBoostClient<runtime.Types.Result.GetResult<Prisma.$ProfileBoostPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   webhookLog<T extends Prisma.PaymentRequest$webhookLogArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.PaymentRequest$webhookLogArgs<ExtArgs>>): Prisma.Prisma__WebhookLogClient<runtime.Types.Result.GetResult<Prisma.$WebhookLogPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -1686,6 +1918,7 @@ export interface PaymentRequestFieldRefs {
   readonly amount: Prisma.FieldRef<"PaymentRequest", 'Int'>
   readonly status: Prisma.FieldRef<"PaymentRequest", 'PaymentRequestStatus'>
   readonly bookingId: Prisma.FieldRef<"PaymentRequest", 'String'>
+  readonly boostId: Prisma.FieldRef<"PaymentRequest", 'String'>
   readonly sepayId: Prisma.FieldRef<"PaymentRequest", 'Int'>
   readonly gateway: Prisma.FieldRef<"PaymentRequest", 'String'>
   readonly referenceCode: Prisma.FieldRef<"PaymentRequest", 'String'>
@@ -2106,6 +2339,25 @@ export type PaymentRequest$bookingArgs<ExtArgs extends runtime.Types.Extensions.
    */
   include?: Prisma.BookingInclude<ExtArgs> | null
   where?: Prisma.BookingWhereInput
+}
+
+/**
+ * PaymentRequest.boost
+ */
+export type PaymentRequest$boostArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ProfileBoost
+   */
+  select?: Prisma.ProfileBoostSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ProfileBoost
+   */
+  omit?: Prisma.ProfileBoostOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ProfileBoostInclude<ExtArgs> | null
+  where?: Prisma.ProfileBoostWhereInput
 }
 
 /**

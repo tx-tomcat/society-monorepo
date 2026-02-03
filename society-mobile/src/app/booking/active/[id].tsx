@@ -340,7 +340,7 @@ export default function ActiveBooking() {
 
             <View className="flex-row gap-3">
               <View className="items-center">
-                <View className="size-3 rounded-full bg-lavender-400" />
+                <View className="size-3 rounded-full bg-lavender-900" />
               </View>
               <View>
                 <Text className="font-medium text-midnight">Booking ends</Text>
