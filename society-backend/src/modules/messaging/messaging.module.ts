@@ -9,9 +9,10 @@ import { ConversationsService } from './services/conversations.service';
 import { MessagesService } from './services/messages.service';
 import { NotificationsModule } from '../notifications/notifications.module';
 import { PrismaModule } from '../../prisma/prisma.module';
+import { SecurityModule } from '../security/security.module';
 
 @Module({
-  imports: [ConfigModule, NotificationsModule, PrismaModule],
+  imports: [ConfigModule, NotificationsModule, PrismaModule, SecurityModule],
   controllers: [
     ConversationsController,
     MessagesController,

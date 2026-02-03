@@ -13,6 +13,9 @@ import {
 } from "@nestjs/common";
 import { JwtAuthGuard } from "../../../auth/guards/jwt.guard";
 import { CurrentUser } from "../../../common/decorators/current-user.decorator";
+import { RateLimit } from "@/modules/security/decorators/rate-limit.decorator";
+import { RateLimitType } from "@/modules/security/dto/security.dto";
+import { RateLimitGuard } from "@/modules/security/guards/rate-limit.guard";
 import {
   CreateMessageDto,
   MessageReactionDto,
@@ -42,6 +45,8 @@ export class MessagesController {
   }
 
   @Post()
+  @UseGuards(RateLimitGuard)
+  @RateLimit(RateLimitType.MESSAGE)
   async sendMessage(
     @CurrentUser("id") userId: string,
     @Param("conversationId") conversationId: string,
@@ -57,6 +62,8 @@ export class MessageActionsController {
   constructor(private readonly messagesService: MessagesService) {}
 
   @Put(":messageId")
+  @UseGuards(RateLimitGuard)
+  @RateLimit(RateLimitType.MESSAGE)
   async editMessage(
     @CurrentUser("id") userId: string,
     @Param("messageId") messageId: string,
@@ -66,6 +73,8 @@ export class MessageActionsController {
   }
 
   @Delete(":messageId")
+  @UseGuards(RateLimitGuard)
+  @RateLimit(RateLimitType.MESSAGE)
   async deleteMessage(
     @CurrentUser("id") userId: string,
     @Param("messageId") messageId: string
@@ -74,6 +83,8 @@ export class MessageActionsController {
   }
 
   @Post(":messageId/reactions")
+  @UseGuards(RateLimitGuard)
+  @RateLimit(RateLimitType.MESSAGE)
   async addReaction(
     @CurrentUser("id") userId: string,
     @Param("messageId") messageId: string,
