@@ -53,7 +53,17 @@ export default function HirerDashboard() {
 
   const userName = currentUser?.user?.fullName?.split(' ')[0] || 'there';
 
-  const fetchDashboardData = React.useCallback(async () => {
+  // Track last fetch time to prevent over-fetching
+  const lastFetchRef = React.useRef<number>(0);
+  const STALE_TIME = 30000; // 30 seconds
+
+  const fetchDashboardData = React.useCallback(async (force = false) => {
+    const now = Date.now();
+    if (!force && now - lastFetchRef.current < STALE_TIME) {
+      return; // Data is still fresh
+    }
+    lastFetchRef.current = now;
+
     try {
       // Fetch all dashboard data in parallel
       const [pendingRes, confirmedRes, completedRes, favoritesRes] =
@@ -108,7 +118,7 @@ export default function HirerDashboard() {
       setUpcomingBookings(allUpcoming);
       setUpcomingCount(
         (pendingRes.pagination?.total || 0) +
-          (confirmedRes.pagination?.total || 0)
+        (confirmedRes.pagination?.total || 0)
       );
       setCompletedBookingsCount(completedRes.pagination?.total || 0);
       setFavoritesCount(favoritesRes.total || 0);
@@ -121,13 +131,13 @@ export default function HirerDashboard() {
 
   useFocusEffect(
     React.useCallback(() => {
-      fetchDashboardData();
+      fetchDashboardData(false); // Don't force on focus
     }, [fetchDashboardData])
   );
 
   const handleRefresh = React.useCallback(() => {
     setIsRefreshing(true);
-    fetchDashboardData();
+    fetchDashboardData(true); // Force refresh
   }, [fetchDashboardData]);
 
   const handleNotificationPress = React.useCallback(() => {
@@ -319,10 +329,10 @@ export default function HirerDashboard() {
                 const dateString = isToday
                   ? t('common.today')
                   : startTime.toLocaleDateString('en-US', {
-                      weekday: 'short',
-                      month: 'short',
-                      day: 'numeric',
-                    });
+                    weekday: 'short',
+                    month: 'short',
+                    day: 'numeric',
+                  });
 
                 const timeString = `${startTime.toLocaleTimeString('en-US', {
                   hour: 'numeric',
@@ -470,7 +480,7 @@ export default function HirerDashboard() {
               testID="quick-action-bookings"
               className="flex-1 items-center rounded-2xl bg-white p-4"
             >
-              <View className="mb-2 size-12 items-center justify-center rounded-full bg-lavender-400/10">
+              <View className="mb-2 size-12 items-center justify-center rounded-full bg-lavender-900/10">
                 <Calendar color={colors.lavender[400]} width={24} height={24} />
               </View>
               <Text className="text-sm font-medium text-midnight">
