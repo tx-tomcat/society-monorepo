@@ -6,6 +6,8 @@ import {
   HttpStatus,
   Logger,
 } from '@nestjs/common';
+import { Request, Response } from 'express';
+import { DomainException } from '@/common/exceptions';
 
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
@@ -13,61 +15,75 @@ export class GlobalExceptionFilter implements ExceptionFilter {
 
   catch(exception: unknown, host: ArgumentsHost): void {
     const ctx = host.switchToHttp();
-    const response = ctx.getResponse();
-    const request = ctx.getRequest();
+    const response = ctx.getResponse<Response>();
+    const request = ctx.getRequest<Request>();
 
-    // Determine status code
-    const status =
-      exception instanceof HttpException
-        ? exception.getStatus()
-        : HttpStatus.INTERNAL_SERVER_ERROR;
+    let status: number;
+    let errorResponse: Record<string, unknown>;
 
-    // Build error response preserving context
-    const errorResponse: Record<string, unknown> = {
-      statusCode: status,
-      timestamp: new Date().toISOString(),
-      path: request.url,
-    };
+    if (exception instanceof DomainException) {
+      // Domain-specific exception with error code
+      status = exception.getStatus();
+      const exceptionResponse = exception.getResponse() as Record<string, unknown>;
+      errorResponse = {
+        ...exceptionResponse,
+        path: request.url,
+      };
 
-    if (exception instanceof HttpException) {
+      this.logger.warn(
+        `Domain exception: ${exception.errorCode} - ${exception.message}`,
+        { metadata: exception.metadata, path: request.url },
+      );
+    } else if (exception instanceof HttpException) {
+      // Standard NestJS HTTP exception
+      status = exception.getStatus();
       const exceptionResponse = exception.getResponse();
 
-      // Handle both string messages and detailed error objects
-      // This preserves validation errors, rate limit details, etc.
+      errorResponse = {
+        statusCode: status,
+        timestamp: new Date().toISOString(),
+        path: request.url,
+      };
+
       if (typeof exceptionResponse === 'string') {
         errorResponse.message = exceptionResponse;
       } else if (typeof exceptionResponse === 'object') {
         Object.assign(errorResponse, exceptionResponse);
       }
     } else if (exception instanceof Error) {
-      errorResponse.message = exception.message;
+      // Unhandled error
+      status = HttpStatus.INTERNAL_SERVER_ERROR;
+      errorResponse = {
+        statusCode: status,
+        timestamp: new Date().toISOString(),
+        path: request.url,
+        message: 'Internal server error',
+      };
 
-      // Include stack trace in development for debugging
+      // Log full error for debugging
+      this.logger.error(
+        `Unhandled exception: ${exception.message}`,
+        exception.stack,
+      );
+
+      // Include stack trace in non-production
       if (process.env.NODE_ENV !== 'production') {
+        errorResponse.message = exception.message;
         errorResponse.stack = exception.stack;
       }
     } else {
-      errorResponse.message = 'Internal server error';
+      // Unknown error type
+      status = HttpStatus.INTERNAL_SERVER_ERROR;
+      errorResponse = {
+        statusCode: status,
+        timestamp: new Date().toISOString(),
+        path: request.url,
+        message: 'Internal server error',
+      };
+
+      this.logger.error('Unknown exception type', exception);
     }
 
-    // Log error details for monitoring
-    const logContext = {
-      status,
-      url: request.url,
-      method: request.method,
-      ip: request.ip,
-    };
-
-    if (status >= 500) {
-      this.logger.error(
-        `${request.method} ${request.url} - ${status}`,
-        exception instanceof Error ? exception.stack : JSON.stringify(exception),
-        logContext,
-      );
-    } else if (status >= 400) {
-      this.logger.warn(`${request.method} ${request.url} - ${status}`, logContext);
-    }
-
-    response.status(status).send(errorResponse);
+    response.status(status).json(errorResponse);
   }
-} 
+}
