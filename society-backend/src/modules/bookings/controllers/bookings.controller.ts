@@ -1,5 +1,8 @@
 import { JwtAuthGuard } from '@/auth/guards/jwt.guard';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
+import { RateLimit } from '@/modules/security/decorators/rate-limit.decorator';
+import { RateLimitType } from '@/modules/security/dto/security.dto';
+import { RateLimitGuard } from '@/modules/security/guards/rate-limit.guard';
 import {
   Body,
   Controller,
@@ -13,6 +16,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import {
+  CompleteEarlyDto,
   CreateBookingDto,
   DeclineBookingDto,
   DisputeReviewDto,
@@ -20,6 +24,7 @@ import {
   EmergencyCancellationDto,
   GetBookingRequestsQueryDto,
   GetBookingsQueryDto,
+  ReportNoShowDto,
   SubmitReviewDto,
   UpdateBookingStatusDto,
   UpdateLocationDto,
@@ -35,6 +40,8 @@ export class BookingsController {
    * Create a new booking (Hirer)
    */
   @Post()
+  @UseGuards(RateLimitGuard)
+  @RateLimit(RateLimitType.API)
   async createBooking(
     @CurrentUser('id') userId: string,
     @Body() dto: CreateBookingDto,
@@ -102,6 +109,8 @@ export class BookingsController {
    * Update booking status
    */
   @Put(':bookingId/status')
+  @UseGuards(RateLimitGuard)
+  @RateLimit(RateLimitType.API)
   async updateBookingStatus(
     @Param('bookingId') bookingId: string,
     @CurrentUser('id') userId: string,
@@ -114,6 +123,8 @@ export class BookingsController {
    * Submit review (Hirer)
    */
   @Post(':bookingId/review')
+  @UseGuards(RateLimitGuard)
+  @RateLimit(RateLimitType.API)
   async submitReview(
     @Param('bookingId') bookingId: string,
     @CurrentUser('id') userId: string,
@@ -127,6 +138,8 @@ export class BookingsController {
    * Must be done within 24 hours of review creation
    */
   @Put('reviews/:reviewId')
+  @UseGuards(RateLimitGuard)
+  @RateLimit(RateLimitType.API)
   async editReview(
     @Param('reviewId') reviewId: string,
     @CurrentUser('id') userId: string,
@@ -139,6 +152,8 @@ export class BookingsController {
    * Update booking location (for tracking)
    */
   @Post(':bookingId/location')
+  @UseGuards(RateLimitGuard)
+  @RateLimit(RateLimitType.API)
   async updateBookingLocation(
     @Param('bookingId') bookingId: string,
     @CurrentUser('id') userId: string,
@@ -152,6 +167,8 @@ export class BookingsController {
    */
   @Post(':bookingId/decline')
   @HttpCode(HttpStatus.OK)
+  @UseGuards(RateLimitGuard)
+  @RateLimit(RateLimitType.API)
   async declineBooking(
     @Param('bookingId') bookingId: string,
     @CurrentUser('id') userId: string,
@@ -166,6 +183,8 @@ export class BookingsController {
    */
   @Post('reviews/:reviewId/dispute')
   @HttpCode(HttpStatus.OK)
+  @UseGuards(RateLimitGuard)
+  @RateLimit(RateLimitType.API)
   async disputeReview(
     @Param('reviewId') reviewId: string,
     @CurrentUser('id') userId: string,
@@ -191,6 +210,8 @@ export class BookingsController {
    */
   @Post(':bookingId/emergency-cancel')
   @HttpCode(HttpStatus.OK)
+  @UseGuards(RateLimitGuard)
+  @RateLimit(RateLimitType.API)
   async emergencyCancellation(
     @Param('bookingId') bookingId: string,
     @CurrentUser('id') userId: string,
@@ -205,5 +226,37 @@ export class BookingsController {
   @Get('emergency-cancellations/history')
   async getEmergencyCancellationHistory(@CurrentUser('id') userId: string) {
     return this.bookingsService.getEmergencyCancellationHistory(userId);
+  }
+
+  /**
+   * Report no-show for an active booking
+   * Both hirer and companion can report if the other party didn't show up
+   */
+  @Post(':bookingId/report-no-show')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(RateLimitGuard)
+  @RateLimit(RateLimitType.API)
+  async reportNoShow(
+    @Param('bookingId') bookingId: string,
+    @CurrentUser('id') userId: string,
+    @Body() dto: ReportNoShowDto,
+  ) {
+    return this.bookingsService.reportNoShow(bookingId, userId, dto.description || '');
+  }
+
+  /**
+   * Complete a booking early
+   * Both hirer and companion can mark a booking as completed before the scheduled end time
+   */
+  @Post(':bookingId/complete-early')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(RateLimitGuard)
+  @RateLimit(RateLimitType.API)
+  async completeEarly(
+    @Param('bookingId') bookingId: string,
+    @CurrentUser('id') userId: string,
+    @Body() dto: CompleteEarlyDto,
+  ) {
+    return this.bookingsService.completeEarly(bookingId, userId, dto.reason);
   }
 }

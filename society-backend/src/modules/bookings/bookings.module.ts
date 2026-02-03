@@ -7,9 +7,17 @@ import { ModerationModule } from '../moderation/moderation.module';
 import { NotificationsModule } from '../notifications/notifications.module';
 import { OccasionsModule } from '../occasions/occasions.module';
 import { PlatformConfigModule } from '../config/config.module';
+import { SecurityModule } from '../security/security.module';
 
 @Module({
-  imports: [ConfigModule, ModerationModule, NotificationsModule, OccasionsModule, PlatformConfigModule],
+  imports: [
+    ConfigModule,
+    ModerationModule,
+    NotificationsModule,
+    OccasionsModule,
+    PlatformConfigModule,
+    SecurityModule,
+  ],
   controllers: [BookingsController],
   providers: [BookingsService, BookingTasks],
   exports: [BookingsService],

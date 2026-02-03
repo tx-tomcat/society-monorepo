@@ -5,8 +5,10 @@ import { OccasionTrackingService } from "@/modules/occasions/services/occasion-t
 import { PrismaService } from "@/prisma/prisma.service";
 import {
   BookingStatus,
+  EarningsStatus,
   PaymentStatus,
   Prisma,
+  ReportType,
   StrikeType,
 } from "@generated/client";
 import {
@@ -374,6 +376,44 @@ export class BookingsService {
   }
 
   /**
+   * Create earning record for companion (fire-and-forget)
+   */
+  private async createEarningForBooking(
+    bookingId: string,
+    companionUserId: string,
+    totalPrice: number,
+  ): Promise<void> {
+    const companionProfile = await this.prisma.companionProfile.findUnique({
+      where: { userId: companionUserId },
+      select: { id: true },
+    });
+
+    if (!companionProfile) {
+      this.logger.error(`Companion profile not found for user ${companionUserId}`);
+      return;
+    }
+
+    // Get platform fee from config (stored as decimal, e.g., 0.18 = 18%)
+    const platformConfig = await this.platformConfigService.getPlatformConfig();
+    const platformFee = Math.floor(totalPrice * platformConfig.platformFeePercent);
+    const netAmount = totalPrice - platformFee;
+
+    await this.prisma.earning.create({
+      data: {
+        companionId: companionProfile.id,
+        bookingId,
+        grossAmount: totalPrice,
+        platformFee,
+        netAmount,
+        status: EarningsStatus.AVAILABLE,
+        releasedAt: new Date(),
+      },
+    });
+
+    this.logger.log(`Earning created for booking ${bookingId}, companion profile ${companionProfile.id}`);
+  }
+
+  /**
    * Create a new booking (Hirer)
    * Uses serializable transaction to prevent double-booking race conditions
    */
@@ -640,6 +680,7 @@ export class BookingsService {
       id: b.id,
       bookingNumber: b.bookingNumber,
       status: b.status,
+      paymentStatus: b.paymentStatus,
       occasion: BookingUtils.mapOccasion(b.occasion),
       startDatetime: b.startDatetime instanceof Date ? b.startDatetime.toISOString() : String(b.startDatetime),
       endDatetime: b.endDatetime instanceof Date ? b.endDatetime.toISOString() : String(b.endDatetime),
@@ -726,6 +767,7 @@ export class BookingsService {
       id: b.id,
       bookingNumber: b.bookingNumber,
       status: b.status,
+      paymentStatus: b.paymentStatus,
       occasion: BookingUtils.mapOccasion(b.occasion),
       startDatetime: b.startDatetime instanceof Date ? b.startDatetime.toISOString() : String(b.startDatetime),
       endDatetime: b.endDatetime instanceof Date ? b.endDatetime.toISOString() : String(b.endDatetime),
@@ -897,6 +939,11 @@ export class BookingsService {
           ? booking.requestExpiresAt.toISOString()
           : String(booking.requestExpiresAt))
         : null,
+      paymentDeadline: booking.paymentDeadline
+        ? (booking.paymentDeadline instanceof Date
+          ? booking.paymentDeadline.toISOString()
+          : String(booking.paymentDeadline))
+        : null,
       confirmedAt: booking.confirmedAt
         ? (booking.confirmedAt instanceof Date
           ? booking.confirmedAt.toISOString()
@@ -994,8 +1041,16 @@ export class BookingsService {
 
     // Update payment status based on booking status
     if (status === BookingStatus.CONFIRMED) {
-      updateData.paymentStatus = PaymentStatus.HELD;
+      // Payment status stays PENDING until hirer pays - don't set HELD here
       updateData.confirmedAt = new Date();
+
+      // Calculate payment deadline: earlier of 2h after confirmation OR 2h before start
+      const now = new Date();
+      const twoHoursFromNow = new Date(now.getTime() + 2 * 60 * 60 * 1000);
+      const twoHoursBeforeStart = new Date(booking.startDatetime.getTime() - 2 * 60 * 60 * 1000);
+      updateData.paymentDeadline = twoHoursFromNow < twoHoursBeforeStart
+        ? twoHoursFromNow
+        : twoHoursBeforeStart;
 
       // Notify hirer that booking is confirmed
       this.notificationsService
@@ -1006,6 +1061,12 @@ export class BookingsService {
     } else if (status === BookingStatus.COMPLETED) {
       updateData.paymentStatus = PaymentStatus.RELEASED;
       updateData.completedAt = new Date();
+
+      // Create earning record for companion (async, don't block the response)
+      this.createEarningForBooking(bookingId, booking.companionId, booking.totalPrice)
+        .catch((err) =>
+          this.logger.error(`Failed to create earning for booking ${bookingId}: ${err.message}`),
+        );
 
       // Schedule auto-archive of conversation (async, don't block the response)
       this.scheduleConversationArchive(
@@ -1846,6 +1907,214 @@ export class BookingsService {
               ? "denied"
               : "pending",
       })),
+    };
+  }
+
+  /**
+   * Early completion of an active booking
+   * - Only available for ACTIVE bookings
+   * - Both parties can request early completion
+   * - Companion's earning is released immediately
+   */
+  async completeEarly(
+    bookingId: string,
+    userId: string,
+    reason?: string,
+  ) {
+    const booking = await this.prisma.booking.findUnique({
+      where: { id: bookingId },
+      include: {
+        payment: true,
+        earning: true,
+      },
+    });
+
+    if (!booking) {
+      throw new NotFoundException("Booking not found");
+    }
+
+    const isHirer = booking.hirerId === userId;
+    const isCompanion = booking.companionId === userId;
+
+    if (!isHirer && !isCompanion) {
+      throw new ForbiddenException("Access denied");
+    }
+
+    // Early completion can only be done for ACTIVE bookings
+    if (booking.status !== BookingStatus.ACTIVE) {
+      throw new BadRequestException(
+        "Early completion can only be done for active bookings"
+      );
+    }
+
+    // Update booking to COMPLETED
+    const updatedBooking = await this.prisma.$transaction(async (tx) => {
+      const updated = await tx.booking.update({
+        where: { id: bookingId },
+        data: {
+          status: BookingStatus.COMPLETED,
+          paymentStatus: PaymentStatus.RELEASED,
+          completedAt: new Date(),
+          cancelReason: reason ? `EARLY_COMPLETION: ${reason}` : 'EARLY_COMPLETION',
+        },
+      });
+
+      // Release payment if held
+      if (booking.payment && booking.payment.status === PaymentStatus.HELD) {
+        await tx.payment.update({
+          where: { id: booking.payment.id },
+          data: {
+            status: PaymentStatus.RELEASED,
+            releasedAt: new Date(),
+          },
+        });
+      }
+
+      // Create earning record for companion
+      const companionProfile = await tx.companionProfile.findUnique({
+        where: { userId: booking.companionId },
+        select: { id: true },
+      });
+
+      if (companionProfile) {
+        // Get platform fee from config (stored as decimal, e.g., 0.18 = 18%)
+        const platformConfig = await this.platformConfigService.getPlatformConfig();
+        const platformFee = Math.floor(booking.totalPrice * platformConfig.platformFeePercent);
+        const netAmount = booking.totalPrice - platformFee;
+
+        await tx.earning.create({
+          data: {
+            companionId: companionProfile.id,
+            bookingId,
+            grossAmount: booking.totalPrice,
+            platformFee,
+            netAmount,
+            status: EarningsStatus.AVAILABLE,
+            releasedAt: new Date(),
+          },
+        });
+      }
+
+      return updated;
+    });
+
+    // Schedule auto-archive of conversation
+    this.scheduleConversationArchive(
+      booking.hirerId,
+      booking.companionId,
+      bookingId,
+    ).catch((err) =>
+      this.logger.error(
+        `Failed to schedule conversation archive: ${err.message}`,
+      ),
+    );
+
+    this.logger.log(
+      `Early completion: booking=${bookingId}, completedBy=${userId}`,
+    );
+
+    return {
+      id: updatedBooking.id,
+      bookingNumber: updatedBooking.bookingNumber,
+      status: updatedBooking.status,
+      paymentStatus: updatedBooking.paymentStatus,
+      completedAt: updatedBooking.completedAt,
+      message: "Booking has been completed successfully.",
+    };
+  }
+
+  /**
+   * Report a no-show for an active booking
+   * - Only available for ACTIVE bookings (booking has started)
+   * - Reporter must be part of the booking (hirer or companion)
+   * - Creates a dispute/report record
+   * - Transitions booking to DISPUTED status for admin review
+   */
+  async reportNoShow(
+    bookingId: string,
+    reporterId: string,
+    description: string,
+  ) {
+    const booking = await this.prisma.booking.findUnique({
+      where: { id: bookingId },
+      include: {
+        hirer: { select: { fullName: true } },
+        companion: { select: { fullName: true } },
+      },
+    });
+
+    if (!booking) {
+      throw new NotFoundException("Booking not found");
+    }
+
+    const isHirer = booking.hirerId === reporterId;
+    const isCompanion = booking.companionId === reporterId;
+
+    if (!isHirer && !isCompanion) {
+      throw new ForbiddenException("Access denied");
+    }
+
+    // No-show can only be reported for ACTIVE bookings
+    if (booking.status !== BookingStatus.ACTIVE) {
+      throw new BadRequestException(
+        "No-show can only be reported for active bookings"
+      );
+    }
+
+    // Determine who is being reported
+    const reportedId = isHirer ? booking.companionId : booking.hirerId;
+    const reporterName = isHirer ? booking.hirer?.fullName : booking.companion?.fullName;
+    const reportedName = isHirer ? booking.companion?.fullName : booking.hirer?.fullName;
+
+    // Create a report record
+    const report = await this.prisma.report.create({
+      data: {
+        reporterId,
+        reportedId,
+        bookingId,
+        type: ReportType.NO_SHOW,
+        description: description || `${reportedName} did not show up for the booking`,
+      },
+    });
+
+    // Transition booking to DISPUTED status
+    const updatedBooking = await this.prisma.booking.update({
+      where: { id: bookingId },
+      data: {
+        status: BookingStatus.DISPUTED,
+        cancelReason: `NO_SHOW: Reported by ${reporterName}`,
+      },
+    });
+
+    // Issue a pending strike to the reported party
+    await this.prisma.userStrike.create({
+      data: {
+        userId: reportedId,
+        type: StrikeType.NO_SHOW,
+        reason: `No-show reported for booking ${booking.bookingNumber} - pending verification`,
+        bookingId: booking.id,
+        expiresAt: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000), // 90 days
+      },
+    });
+
+    this.logger.log(
+      `No-show reported: booking=${bookingId}, reporter=${reporterId}, reported=${reportedId}`,
+    );
+
+    return {
+      id: updatedBooking.id,
+      bookingNumber: updatedBooking.bookingNumber,
+      status: updatedBooking.status,
+      reportId: report.id,
+      message:
+        "No-show has been reported. Our team will review this dispute within 24 hours.",
+      nextSteps: [
+        "The booking has been marked as disputed.",
+        "Our support team will contact both parties.",
+        isHirer
+          ? "If verified, you will receive a full refund."
+          : "If verified, compensation will be discussed with support.",
+      ],
     };
   }
 }

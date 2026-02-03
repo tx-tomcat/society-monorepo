@@ -191,6 +191,20 @@ export class DisputeReviewDto {
   reason: string;
 }
 
+export class ReportNoShowDto {
+  @IsOptional()
+  @IsString()
+  @MaxLength(1000)
+  description?: string;
+}
+
+export class CompleteEarlyDto {
+  @IsOptional()
+  @IsString()
+  @MaxLength(500)
+  reason?: string;
+}
+
 // ============================================
 // Response Types
 // ============================================
@@ -213,6 +227,7 @@ export interface BookingListItem {
   id: string;
   bookingNumber: string;
   status: BookingStatus;
+  paymentStatus: PaymentStatus;
   occasion: OccasionInfo | null;
   startDatetime: string;
   endDatetime: string;
@@ -274,6 +289,7 @@ export interface BookingDetailResponse {
   };
   review: ReviewInfo | null;
   requestExpiresAt: string | null;
+  paymentDeadline: string | null;
   confirmedAt: string | null;
   completedAt: string | null;
   cancelledAt: string | null;
