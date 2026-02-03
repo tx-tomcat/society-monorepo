@@ -37,7 +37,7 @@ type ConversationItem = {
   unreadCount: number;
 };
 
-function ConversationCard({
+const ConversationCard = React.memo(function ConversationCard({
   conversation,
   onPress,
 }: {
@@ -130,7 +130,7 @@ function ConversationCard({
       </View>
     </Pressable>
   );
-}
+});
 
 function EmptyState() {
   const { t } = useTranslation();
