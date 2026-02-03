@@ -1,4 +1,7 @@
 import { CurrentUser, CurrentUserData } from '@/common/decorators/current-user.decorator';
+import { RateLimit } from '@/modules/security/decorators/rate-limit.decorator';
+import { RateLimitType } from '@/modules/security/dto/security.dto';
+import { RateLimitGuard } from '@/modules/security/guards/rate-limit.guard';
 import {
   Body,
   Controller,
@@ -21,6 +24,8 @@ export class PaymentsController {
    * Create payment for a booking
    */
   @Post('booking')
+  @UseGuards(RateLimitGuard)
+  @RateLimit(RateLimitType.PAYMENT)
   async createBookingPayment(
     @CurrentUser() user: CurrentUserData,
     @Body() dto: CreateBookingPaymentDto,
@@ -56,6 +61,8 @@ export class PaymentsController {
    * Request refund for a payment
    */
   @Post(':id/refund')
+  @UseGuards(RateLimitGuard)
+  @RateLimit(RateLimitType.PAYMENT)
   async requestRefund(
     @CurrentUser() user: CurrentUserData,
     @Param('id') id: string,

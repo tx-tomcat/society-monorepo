@@ -277,6 +277,7 @@ export class PaymentsService {
 
     if (success) {
       // Payment successful - hold in escrow
+      // Earning will be created when booking is completed
       await this.prisma.payment.update({
         where: { id: paymentId },
         data: {
@@ -286,22 +287,7 @@ export class PaymentsService {
         },
       });
 
-      // Create earning record for companion (pending release)
-      const platformFee = Math.floor(payment.amount * PLATFORM_FEE_PERCENT / 100);
-      const netAmount = payment.amount - platformFee;
-
-      await this.prisma.earning.create({
-        data: {
-          companionId: payment.booking.companionId,
-          bookingId: payment.bookingId,
-          grossAmount: payment.amount,
-          platformFee,
-          netAmount,
-          status: EarningsStatus.PENDING,
-        },
-      });
-
-      this.logger.log(`Payment ${paymentId} held in escrow, earning created`);
+      this.logger.log(`Payment ${paymentId} held in escrow`);
     } else {
       await this.prisma.payment.update({
         where: { id: paymentId },
