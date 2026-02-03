@@ -4,12 +4,8 @@ import { useRouter } from 'expo-router';
 import { MotiView } from 'moti';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  ActivityIndicator,
-  FlatList,
-  Pressable,
-  RefreshControl,
-} from 'react-native';
+import { FlashList } from '@shopify/flash-list';
+import { ActivityIndicator, Pressable, RefreshControl } from 'react-native';
 
 import {
   colors,
@@ -44,7 +40,7 @@ type FavoriteItem = {
   };
 };
 
-function FavoriteCard({
+const FavoriteCard = React.memo(function FavoriteCard({
   favorite,
   onPress,
   onRemove,
@@ -115,7 +111,7 @@ function FavoriteCard({
       </View>
     </Pressable>
   );
-}
+});
 
 function EmptyState() {
   const { t } = useTranslation();
@@ -211,18 +207,12 @@ export default function Favorites() {
   );
 
   const renderItem = React.useCallback(
-    ({ item, index }: { item: FavoriteItem; index: number }) => (
-      <MotiView
-        from={{ opacity: 0, translateY: 20 }}
-        animate={{ opacity: 1, translateY: 0 }}
-        transition={{ type: 'timing', duration: 300, delay: index * 50 }}
-      >
-        <FavoriteCard
-          favorite={item}
-          onPress={() => handleCompanionPress(item.companion.id)}
-          onRemove={() => handleRemoveFavorite(item.companionId)}
-        />
-      </MotiView>
+    ({ item }: { item: FavoriteItem }) => (
+      <FavoriteCard
+        favorite={item}
+        onPress={() => handleCompanionPress(item.companion.id)}
+        onRemove={() => handleRemoveFavorite(item.companionId)}
+      />
     ),
     [handleCompanionPress, handleRemoveFavorite]
   );
@@ -258,7 +248,7 @@ export default function Favorites() {
       {favorites.length === 0 ? (
         <EmptyState />
       ) : (
-        <FlatList
+        <FlashList
           data={favorites}
           renderItem={renderItem}
           keyExtractor={(item) => item.id}
