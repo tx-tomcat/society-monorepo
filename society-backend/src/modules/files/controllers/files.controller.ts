@@ -18,6 +18,9 @@ import { FileInterceptor } from '@nestjs/platform-express';
 // Using Express.Multer.File type from multer
 import { Roles } from '@/common/decorators/roles.decorator';
 import { Role } from '@/common/enums/roles.enum';
+import { RateLimit } from '@/modules/security/decorators/rate-limit.decorator';
+import { RateLimitType } from '@/modules/security/dto/security.dto';
+import { RateLimitGuard } from '@/modules/security/guards/rate-limit.guard';
 import { JwtAuthGuard } from '../../../auth/guards/jwt.guard';
 import { RolesGuard } from '../../../auth/guards/roles.guard';
 import {
@@ -34,11 +37,15 @@ export class FilesController {
   constructor(private readonly filesService: FilesService) { }
 
   @Post('upload-url')
+  @UseGuards(RateLimitGuard)
+  @RateLimit(RateLimitType.UPLOAD)
   async getUploadUrl(@Request() req: any, @Body() dto: GetUploadUrlDto) {
     return this.filesService.getUploadUrl(req.user.id, dto);
   }
 
   @Post('upload')
+  @UseGuards(RateLimitGuard)
+  @RateLimit(RateLimitType.UPLOAD)
   @UseInterceptors(FileInterceptor('file'))
   async uploadFile(
     @Request() req: any,
@@ -61,6 +68,8 @@ export class FilesController {
   }
 
   @Post('process')
+  @UseGuards(RateLimitGuard)
+  @RateLimit(RateLimitType.UPLOAD)
   async processImage(@Body() dto: ProcessImageDto) {
     return this.filesService.processImage(dto);
   }
