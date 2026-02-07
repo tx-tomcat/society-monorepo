@@ -230,7 +230,7 @@ export default function CreateProfile() {
     });
     setLocationData({ province });
     markStepComplete('create-profile');
-    router.push('/companion/onboard/set-pricing' as Href);
+    router.push('/companion/onboard/phone' as Href);
   }, [name, bioText, photos, province, setProfileData, setLocationData, markStepComplete]);
 
   // Validation states
@@ -258,7 +258,7 @@ export default function CreateProfile() {
         onBack={handleBack}
         rightElement={
           <Text className="text-sm text-text-tertiary">
-            {`${t('companion.onboard.step')} 1/3`}
+            {`${t('companion.onboard.step')} 1/4`}
           </Text>
         }
       />

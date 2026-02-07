@@ -8,11 +8,15 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { BoostPaymentCompletedEvent, MembershipPaymentCompletedEvent, WALLET_EVENTS } from './events/wallet.events';
 import {
   BookingPaymentRequestResponse,
+  BoostPaymentResponse,
   CreateBookingPaymentRequestDto,
   CreateTopupDto,
   GetTransactionsQueryDto,
+  MembershipPaymentResponse,
   PaymentRequestItem,
   PaymentRequestStatusResponse,
   SepayWebhookDto,
@@ -30,6 +34,7 @@ export class WalletService {
     private readonly prisma: PrismaService,
     private readonly sepayService: SepayService,
     private readonly configService: ConfigService,
+    private readonly eventEmitter: EventEmitter2,
   ) {
     this.expiryMinutes = this.configService.get<number>('TOPUP_EXPIRY_MINUTES', 30);
   }
@@ -164,6 +169,150 @@ export class WalletService {
   }
 
   /**
+   * Create a boost payment request (QR payment for boost purchase)
+   */
+  async createBoostPaymentRequest(
+    userId: string,
+    boostId: string,
+    amount: number,
+  ): Promise<BoostPaymentResponse> {
+    // Check for existing pending payment for this boost (idempotent)
+    const existingRequest = await this.prisma.paymentRequest.findFirst({
+      where: {
+        boostId,
+        status: PaymentRequestStatus.PENDING,
+        expiresAt: { gt: new Date() },
+      },
+    });
+
+    if (existingRequest) {
+      return {
+        id: existingRequest.id,
+        boostId,
+        code: existingRequest.code,
+        amount: existingRequest.amount,
+        qrUrl: this.sepayService.generateQrUrl(existingRequest.amount, existingRequest.code),
+        deeplinks: this.sepayService.getBankDeeplinks(existingRequest.amount, existingRequest.code),
+        accountInfo: this.sepayService.getAccountInfo(),
+        expiresAt: existingRequest.expiresAt.toISOString(),
+      };
+    }
+
+    // Generate unique code with retry
+    let code: string;
+    let attempts = 0;
+    do {
+      code = this.sepayService.generateCode();
+      const exists = await this.prisma.paymentRequest.findUnique({
+        where: { code },
+      });
+      if (!exists) break;
+      attempts++;
+    } while (attempts < 10);
+
+    if (attempts >= 10) {
+      throw new BadRequestException('Unable to generate unique payment code. Please try again.');
+    }
+
+    const expiresAt = new Date(Date.now() + this.expiryMinutes * 60 * 1000);
+
+    const request = await this.prisma.paymentRequest.create({
+      data: {
+        userId,
+        code,
+        type: PaymentRequestType.BOOST,
+        amount,
+        status: PaymentRequestStatus.PENDING,
+        boostId,
+        expiresAt,
+      },
+    });
+
+    return {
+      id: request.id,
+      boostId,
+      code: request.code,
+      amount: request.amount,
+      qrUrl: this.sepayService.generateQrUrl(amount, code),
+      deeplinks: this.sepayService.getBankDeeplinks(amount, code),
+      accountInfo: this.sepayService.getAccountInfo(),
+      expiresAt: request.expiresAt.toISOString(),
+    };
+  }
+
+  /**
+   * Create a membership payment request (QR payment for membership purchase)
+   */
+  async createMembershipPaymentRequest(
+    userId: string,
+    membershipId: string,
+    amount: number,
+  ): Promise<MembershipPaymentResponse> {
+    // Check for existing pending payment for this membership (idempotent)
+    const existingRequest = await this.prisma.paymentRequest.findFirst({
+      where: {
+        membershipId,
+        status: PaymentRequestStatus.PENDING,
+        expiresAt: { gt: new Date() },
+      },
+    });
+
+    if (existingRequest) {
+      return {
+        id: existingRequest.id,
+        membershipId,
+        code: existingRequest.code,
+        amount: existingRequest.amount,
+        qrUrl: this.sepayService.generateQrUrl(existingRequest.amount, existingRequest.code),
+        deeplinks: this.sepayService.getBankDeeplinks(existingRequest.amount, existingRequest.code),
+        accountInfo: this.sepayService.getAccountInfo(),
+        expiresAt: existingRequest.expiresAt.toISOString(),
+      };
+    }
+
+    // Generate unique code with retry
+    let code: string;
+    let attempts = 0;
+    do {
+      code = this.sepayService.generateCode();
+      const exists = await this.prisma.paymentRequest.findUnique({
+        where: { code },
+      });
+      if (!exists) break;
+      attempts++;
+    } while (attempts < 10);
+
+    if (attempts >= 10) {
+      throw new BadRequestException('Unable to generate unique payment code. Please try again.');
+    }
+
+    const expiresAt = new Date(Date.now() + this.expiryMinutes * 60 * 1000);
+
+    const request = await this.prisma.paymentRequest.create({
+      data: {
+        userId,
+        code,
+        type: PaymentRequestType.MEMBERSHIP,
+        amount,
+        status: PaymentRequestStatus.PENDING,
+        membershipId,
+        expiresAt,
+      },
+    });
+
+    return {
+      id: request.id,
+      membershipId,
+      code: request.code,
+      amount: request.amount,
+      qrUrl: this.sepayService.generateQrUrl(amount, code),
+      deeplinks: this.sepayService.getBankDeeplinks(amount, code),
+      accountInfo: this.sepayService.getAccountInfo(),
+      expiresAt: request.expiresAt.toISOString(),
+    };
+  }
+
+  /**
    * Get wallet balance for a user
    */
   async getBalance(userId: string): Promise<WalletBalanceResponse> {
@@ -177,11 +326,11 @@ export class WalletService {
       _sum: { amount: true },
     });
 
-    // Sum of completed wallet payments (bookings and boosts paid from wallet)
+    // Sum of completed wallet payments (bookings, boosts, and memberships paid from wallet)
     const spent = await this.prisma.paymentRequest.aggregate({
       where: {
         userId,
-        type: { in: [PaymentRequestType.BOOKING, PaymentRequestType.BOOST] },
+        type: { in: [PaymentRequestType.BOOKING, PaymentRequestType.BOOST, PaymentRequestType.MEMBERSHIP] },
         status: PaymentRequestStatus.COMPLETED,
       },
       _sum: { amount: true },
@@ -270,7 +419,6 @@ export class WalletService {
 
     // Extract HM code from content
     const code = this.sepayService.extractCode(payload.content);
-    console.log(code);
     if (!code) {
       this.logger.warn(`No HM code found in webhook content: ${payload.content}`);
       return;
@@ -319,27 +467,67 @@ export class WalletService {
       return;
     }
 
-    // Complete the payment request
-    await this.prisma.paymentRequest.update({
-      where: { id: request.id },
-      data: {
-        status: PaymentRequestStatus.COMPLETED,
-        completedAt: new Date(),
-        sepayId: payload.id,
-        gateway: payload.gateway,
-        referenceCode: payload.referenceCode,
-      },
+    // Use transaction to atomically complete payment + update related entities
+    // Prevents race conditions from duplicate webhook deliveries
+    await this.prisma.$transaction(async (tx) => {
+      // Optimistic concurrency: only update if still PENDING
+      const updated = await tx.paymentRequest.updateMany({
+        where: {
+          id: request.id,
+          status: PaymentRequestStatus.PENDING,
+        },
+        data: {
+          status: PaymentRequestStatus.COMPLETED,
+          completedAt: new Date(),
+          sepayId: payload.id,
+          gateway: payload.gateway,
+          referenceCode: payload.referenceCode,
+        },
+      });
+
+      // If no rows updated, another webhook already completed this payment
+      if (updated.count === 0) {
+        this.logger.log(`Payment request ${code} already processed by concurrent webhook`);
+        return;
+      }
+
+      this.logger.log(`Payment request ${code} completed successfully`);
+
+      // If booking payment, update booking status
+      if (request.type === PaymentRequestType.BOOKING && request.bookingId) {
+        await tx.booking.update({
+          where: { id: request.bookingId },
+          data: { paymentStatus: 'PAID' },
+        });
+        this.logger.log(`Booking ${request.bookingId} marked as paid`);
+      }
+
+      // If boost payment, emit event for CompanionsService to activate boost
+      if (request.type === PaymentRequestType.BOOST && request.boostId) {
+        this.eventEmitter.emit(
+          WALLET_EVENTS.BOOST_PAYMENT_COMPLETED,
+          new BoostPaymentCompletedEvent(request.boostId),
+        );
+        this.logger.log(`Boost payment completed event emitted for boost ${request.boostId}`);
+      }
+
+      // If membership payment, emit event for MembershipService to activate
+      if (request.type === PaymentRequestType.MEMBERSHIP && request.membershipId) {
+        this.eventEmitter.emit(
+          WALLET_EVENTS.MEMBERSHIP_PAYMENT_COMPLETED,
+          new MembershipPaymentCompletedEvent(request.membershipId),
+        );
+        this.logger.log(`Membership payment completed event emitted for membership ${request.membershipId}`);
+      }
     });
 
-    this.logger.log(`Payment request ${code} completed successfully`);
+    // Invalidate paymentRequest cache so polling endpoint returns fresh status
+    // ($transaction bypasses the cache proxy, so mutations inside it don't auto-invalidate)
+    await this.prisma.invalidateCache('paymentRequest', { where: { id: request.id } });
 
-    // If booking payment, update booking status
+    // Also invalidate booking cache if booking payment
     if (request.type === PaymentRequestType.BOOKING && request.bookingId) {
-      await this.prisma.booking.update({
-        where: { id: request.bookingId },
-        data: { paymentStatus: 'PAID' },
-      });
-      this.logger.log(`Booking ${request.bookingId} marked as paid`);
+      await this.prisma.invalidateCache('booking', { where: { id: request.bookingId } });
     }
 
     // TODO: Send push notification to user

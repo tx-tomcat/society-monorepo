@@ -1,4 +1,5 @@
 /* eslint-disable max-lines-per-function */
+import { useRouter } from 'expo-router';
 import { MotiView } from 'moti';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -27,7 +28,7 @@ import {
   Star,
   Zap,
 } from '@/components/ui/icons';
-import { showErrorMessage, showSuccessMessage } from '@/components/ui/utils';
+import { showErrorMessage } from '@/components/ui/utils';
 import type { BoostPricing, BoostTier } from '@/lib/api/services/companions.service';
 import { useSafeBack } from '@/lib/hooks';
 import {
@@ -162,6 +163,7 @@ const PricingCard = React.memo(function PricingCard({
 
 export default function BoostScreen() {
   const { t } = useTranslation();
+  const router = useRouter();
   const goBack = useSafeBack('/companion/(app)/account');
   const [selectedTier, setSelectedTier] = React.useState<BoostTier | null>(null);
 
@@ -217,18 +219,31 @@ export default function BoostScreen() {
           text: t('companion.boost.purchase'),
           onPress: async () => {
             try {
-              await purchaseBoostMutation.mutateAsync({
+              const result = await purchaseBoostMutation.mutateAsync({
                 tier: selectedTier,
               });
 
-              showSuccessMessage(t('companion.boost.purchase_success'));
+              // Navigate to QR payment screen
+              router.push({
+                pathname: '/companion/settings/boost-payment',
+                params: {
+                  paymentRequestId: result.paymentRequestId,
+                  boostId: result.boostId,
+                  tier: result.tier,
+                  amount: result.price.toString(),
+                  code: result.code,
+                  qrUrl: result.qrUrl,
+                  deeplinks: JSON.stringify(result.deeplinks),
+                  accountInfo: JSON.stringify(result.accountInfo),
+                  expiresAt: result.expiresAt,
+                },
+              } as never);
+
               setSelectedTier(null);
-              handleRefresh();
             } catch (error: unknown) {
-              // Check for insufficient balance error
-              const apiError = error as { response?: { data?: { error?: string } } };
-              if (apiError?.response?.data?.error === 'INSUFFICIENT_BALANCE') {
-                showErrorMessage(t('companion.boost.insufficient_balance'));
+              const apiError = error as { data?: { error?: string } };
+              if (apiError?.data?.error === 'BOOST_ALREADY_ACTIVE') {
+                showErrorMessage(t('companion.boost.already_active_error'));
               } else {
                 showErrorMessage(t('companion.boost.purchase_failed'));
               }
@@ -237,7 +252,7 @@ export default function BoostScreen() {
         },
       ]
     );
-  }, [selectedTier, pricing, t, purchaseBoostMutation, handleRefresh]);
+  }, [selectedTier, pricing, t, purchaseBoostMutation, router]);
 
   const handleSelectTier = React.useCallback((tier: BoostTier) => {
     setSelectedTier(tier);
@@ -270,7 +285,7 @@ export default function BoostScreen() {
         }
       >
         {/* Active Boost Banner */}
-        {activeBoost && activeBoost.boost.status === 'ACTIVE' && (
+        {activeBoost && activeBoost.boost?.status === 'ACTIVE' && (
           <MotiView
             from={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -286,19 +301,19 @@ export default function BoostScreen() {
                   {t('companion.boost.active_boost')}
                 </Text>
                 <Text className="text-sm text-white/80">
-                  {activeBoost.boost.multiplier}x {t('companion.boost.visibility')}
+                  {activeBoost.boost?.multiplier}x {t('companion.boost.visibility')}
                 </Text>
               </View>
             </View>
 
-            {activeBoost.boost.remainingHours !== null && (
+            {activeBoost.boost?.remainingHours !== null && (
               <View className="mt-4 flex-row items-center gap-2 rounded-xl bg-white/20 px-4 py-3">
                 <Clock color="#FFFFFF" width={18} height={18} />
                 <Text className="flex-1 text-sm font-medium text-white">
                   {t('companion.boost.time_remaining')}
                 </Text>
                 <Text className="font-urbanist-bold text-white">
-                  {activeBoost.boost.remainingHours}h
+                  {activeBoost.boost?.remainingHours}h
                 </Text>
               </View>
             )}

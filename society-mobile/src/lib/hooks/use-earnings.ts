@@ -70,6 +70,20 @@ export function useInfiniteTransactionHistory(
 }
 
 /**
+ * React Query hook to fetch withdrawal history (for companions)
+ */
+export function useWithdrawalHistory() {
+  const { isSignedIn } = useAuth();
+
+  return useQuery({
+    queryKey: ['earnings', 'withdrawals'],
+    queryFn: () => earningsService.getWithdrawalHistory(),
+    enabled: isSignedIn,
+    staleTime: 2 * 60 * 1000, // 2 minutes
+  });
+}
+
+/**
  * React Query mutation hook to request a withdrawal (for companions)
  */
 export function useRequestWithdrawal() {

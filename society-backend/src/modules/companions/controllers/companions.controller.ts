@@ -1,14 +1,15 @@
 import {
+  Body,
   Controller,
+  Delete,
   Get,
+  Param,
+  ParseUUIDPipe,
+  Patch,
   Post,
   Put,
-  Delete,
-  Param,
   Query,
-  Body,
   UseGuards,
-  ParseUUIDPipe,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../../../auth/guards/jwt.guard';
 import {
@@ -16,24 +17,23 @@ import {
   CurrentUserData,
 } from '../../../common/decorators/current-user.decorator';
 import { Public } from '../../../common/decorators/public.decorator';
-import { CompanionsService } from '../services/companions.service';
-import { VnpayService } from '../../payments/services/vnpay.service';
 import {
+  AddPhotoDto,
   BrowseCompanionsQueryDto,
   GetAvailabilityQueryDto,
-  UpdateCompanionProfileDto,
-  UpdateAvailabilityDto,
-  AddPhotoDto,
-  UpdateServicesDto,
   PurchaseBoostDto,
+  SubmitPhotoVerificationDto,
+  UpdateAvailabilityDto,
+  UpdateCompanionProfileDto,
+  UpdateServicesDto,
 } from '../dto/companion.dto';
+import { CompanionsService } from '../services/companions.service';
 
 @Controller('companions')
 export class CompanionsController {
   constructor(
     private readonly companionsService: CompanionsService,
-    private readonly vnpayService: VnpayService,
-  ) {}
+  ) { }
 
   /**
    * Browse companions with filters (Public, but filters blocked users if authenticated)
@@ -106,6 +106,18 @@ export class CompanionsController {
   }
 
   /**
+   * Set photo as primary (Protected)
+   */
+  @Patch('me/photos/:photoId/primary')
+  @UseGuards(JwtAuthGuard)
+  async setPrimaryPhoto(
+    @CurrentUser() user: CurrentUserData,
+    @Param('photoId', ParseUUIDPipe) photoId: string,
+  ) {
+    return this.companionsService.setPrimaryPhoto(user.id, photoId);
+  }
+
+  /**
    * Remove photo from profile (Protected)
    */
   @Delete('me/photos/:photoId')
@@ -166,7 +178,7 @@ export class CompanionsController {
 
   /**
    * Purchase a profile boost (Protected)
-   * Creates a pending boost and returns payment URL for VNPay
+   * Creates a pending boost and returns QR payment data
    */
   @Post('me/boost')
   @UseGuards(JwtAuthGuard)
@@ -174,22 +186,7 @@ export class CompanionsController {
     @CurrentUser() user: CurrentUserData,
     @Body() dto: PurchaseBoostDto,
   ) {
-    // Create pending boost
-    const result = await this.companionsService.purchaseBoost(user.id, dto);
-
-    // Generate payment URL via VNPay
-    const paymentInit = await this.vnpayService.createPayment(
-      `boost-${result.boostId}`, // Prefix with 'boost-' to identify in webhook
-      result.price,
-      `Profile Boost - ${dto.tier}`,
-      dto.returnUrl,
-    );
-
-    return {
-      ...result,
-      paymentUrl: paymentInit.paymentUrl,
-      paymentExpiresAt: paymentInit.expiresAt,
-    };
+    return this.companionsService.purchaseBoost(user.id, dto);
   }
 
   /**
@@ -205,6 +202,31 @@ export class CompanionsController {
   }
 
   // ============================================
+  // Photo Verification
+  // ============================================
+
+  /**
+   * Submit photo verification (Protected)
+   */
+  @Post('me/verification')
+  @UseGuards(JwtAuthGuard)
+  async submitPhotoVerification(
+    @CurrentUser() user: CurrentUserData,
+    @Body() dto: SubmitPhotoVerificationDto,
+  ) {
+    return this.companionsService.submitPhotoVerification(user.id, dto);
+  }
+
+  /**
+   * Get own verification status (Protected)
+   */
+  @Get('me/verification')
+  @UseGuards(JwtAuthGuard)
+  async getMyPhotoVerification(@CurrentUser() user: CurrentUserData) {
+    return this.companionsService.getMyPhotoVerification(user.id);
+  }
+
+  // ============================================
   // Public routes with :companionId parameter
   // These MUST come after "me" routes to avoid "me" being matched as companionId
   // ============================================
@@ -216,7 +238,7 @@ export class CompanionsController {
   @Get('boosts/pricing')
   async getBoostPricing() {
     return {
-      pricing: this.companionsService.getBoostPricing(),
+      pricing: await this.companionsService.getBoostPricing(),
     };
   }
 

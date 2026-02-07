@@ -85,6 +85,19 @@ export interface Withdrawal {
   bankAccount: BankAccount;
 }
 
+export interface WithdrawalHistoryItem {
+  id: string;
+  amount: number;
+  status: WithdrawalStatus;
+  bankAccount: {
+    bankName: string;
+    accountNumber: string;
+    accountHolder: string;
+  };
+  requestedAt: string;
+  completedAt: string | null;
+}
+
 export interface WithdrawRequest {
   bankAccountId: string;
   amount: number;
@@ -136,6 +149,13 @@ export const earningsService = {
    */
   async deleteBankAccount(accountId: string): Promise<{ success: boolean }> {
     return apiClient.delete(`/companion/earnings/bank-accounts/${accountId}`);
+  },
+
+  /**
+   * Get withdrawal history
+   */
+  async getWithdrawalHistory(): Promise<{ withdrawals: WithdrawalHistoryItem[] }> {
+    return apiClient.get('/companion/earnings/withdrawals');
   },
 
   /**

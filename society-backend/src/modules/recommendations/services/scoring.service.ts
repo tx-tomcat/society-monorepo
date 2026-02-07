@@ -71,10 +71,12 @@ export class ScoringService {
   /**
    * Calculate recommendation scores for a user
    * candidateCompanionIds are CompanionProfile IDs (not User IDs)
+   * boostMultipliers maps CompanionProfile.id to their active boost multiplier
    */
   async calculateScores(
     userId: string,
     candidateCompanionIds: string[],
+    boostMultipliers: Map<string, number> = new Map(),
   ): Promise<ScoredCompanion[]> {
     if (candidateCompanionIds.length === 0) {
       return [];
@@ -198,15 +200,22 @@ export class ScoringService {
       );
 
       // Calculate weighted total
-      const score =
+      const baseScore =
         SCORING_WEIGHTS.preferenceMatch * preferenceMatch +
         SCORING_WEIGHTS.profileQuality * profileQuality +
         SCORING_WEIGHTS.availability * availability +
         SCORING_WEIGHTS.popularity * popularity +
         SCORING_WEIGHTS.behavioralAffinity * behavioralAffinity;
 
+      // Apply boost multiplier if companion has an active boost
+      const boostMultiplier = boostMultipliers.get(companion.id) ?? 0;
+      const score = boostMultiplier > 0 ? baseScore * boostMultiplier : baseScore;
+
       // Determine primary reason
       const reasons = [
+        ...(boostMultiplier > 0
+          ? [{ key: 'boosted', value: 1.0, label: 'Featured profile' }]
+          : []),
         {
           key: 'preference',
           value: preferenceMatch,

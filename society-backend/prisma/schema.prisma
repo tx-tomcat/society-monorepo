@@ -276,6 +276,9 @@ model User {
   emergencyEvents     EmergencyEvent[]   @relation("UserEmergencies")
   resolvedEmergencies EmergencyEvent[]   @relation("ResolvedEmergencies")
 
+  // VIP Memberships
+  memberships HirerMembership[]
+
   // OPTIMIZED: Removed redundant @@index([zaloId]) - @unique already creates index
   @@index([phone])
   @@index([phoneHash])
@@ -343,30 +346,33 @@ model UserSession {
 // ============================================
 
 model CompanionProfile {
-  id                 String             @id @default(uuid()) @db.Uuid
-  userId             String             @unique @map("user_id") @db.Uuid
-  displayName        String?            @map("display_name") // Public display name for the companion
+  id                 String              @id @default(uuid()) @db.Uuid
+  userId             String              @unique @map("user_id") @db.Uuid
+  displayName        String?             @map("display_name") // Public display name for the companion
   bio                String?
-  heightCm           Int?               @map("height_cm")
-  languages          String[]           @default(["vi"])
+  heightCm           Int?                @map("height_cm")
+  languages          String[]            @default(["vi"])
   province           String? // Vietnamese province/city code (e.g., "HCM", "HN")
   district           String? // District within province (optional)
-  hourlyRate         Int                @map("hourly_rate") // in VND
-  halfDayRate        Int?               @map("half_day_rate")
-  fullDayRate        Int?               @map("full_day_rate")
-  ratingAvg          Decimal            @default(0.0) @map("rating_avg") @db.Decimal(3, 2) // FIXED: Was (2,1), now allows 4.85
-  ratingCount        Int                @default(0) @map("rating_count")
-  totalBookings      Int                @default(0) @map("total_bookings")
-  completedBookings  Int                @default(0) @map("completed_bookings")
-  verificationStatus VerificationStatus @default(PENDING) @map("verification_status")
-  isFeatured         Boolean            @default(false) @map("is_featured")
-  isActive           Boolean            @default(true) @map("is_active")
-  isHidden           Boolean            @default(false) @map("is_hidden")
-  responseRate       Int                @default(100) @map("response_rate")
-  acceptanceRate     Int                @default(100) @map("acceptance_rate")
-  deletedAt          DateTime?          @map("deleted_at") // Soft delete support
-  createdAt          DateTime           @default(now()) @map("created_at")
-  updatedAt          DateTime           @updatedAt @map("updated_at")
+  hourlyRate         Int                 @map("hourly_rate") // in VND
+  halfDayRate        Int?                @map("half_day_rate")
+  fullDayRate        Int?                @map("full_day_rate")
+  ratingAvg          Decimal             @default(0.0) @map("rating_avg") @db.Decimal(3, 2) // FIXED: Was (2,1), now allows 4.85
+  ratingCount        Int                 @default(0) @map("rating_count")
+  totalBookings      Int                 @default(0) @map("total_bookings")
+  completedBookings  Int                 @default(0) @map("completed_bookings")
+  verificationStatus VerificationStatus? @map("verification_status")
+  isFeatured         Boolean             @default(false) @map("is_featured")
+  isActive           Boolean             @default(true) @map("is_active")
+  isHidden           Boolean             @default(false) @map("is_hidden")
+  responseRate       Int                 @default(100) @map("response_rate")
+  acceptanceRate     Int                 @default(100) @map("acceptance_rate")
+  locationLat        Decimal?            @map("location_lat") @db.Decimal(9, 6)
+  locationLng        Decimal?            @map("location_lng") @db.Decimal(9, 6)
+  locationUpdatedAt  DateTime?           @map("location_updated_at")
+  deletedAt          DateTime?           @map("deleted_at") // Soft delete support
+  createdAt          DateTime            @default(now()) @map("created_at")
+  updatedAt          DateTime            @updatedAt @map("updated_at")
 
   user         User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
   photos       CompanionPhoto[]
@@ -485,19 +491,23 @@ model Verification {
 }
 
 model PhotoVerification {
-  id             String   @id @default(uuid()) @db.Uuid
-  userId         String   @map("user_id") @db.Uuid
-  photoUrl       String   @map("photo_url")
-  selfieUrl      String   @map("selfie_url")
-  livenessScore  Decimal? @map("liveness_score") @db.Decimal(5, 2)
-  faceMatchScore Decimal? @map("face_match_score") @db.Decimal(5, 2)
-  status         String   @default("pending")
-  failureReason  String?  @map("failure_reason")
-  createdAt      DateTime @default(now()) @map("created_at")
+  id             String             @id @default(uuid()) @db.Uuid
+  userId         String             @map("user_id") @db.Uuid
+  photoUrl       String             @map("photo_url")
+  idBackUrl      String?            @map("id_back_url")
+  selfieUrl      String             @map("selfie_url")
+  livenessScore  Decimal?           @map("liveness_score") @db.Decimal(5, 2)
+  faceMatchScore Decimal?           @map("face_match_score") @db.Decimal(5, 2)
+  status         VerificationStatus @default(PENDING)
+  failureReason  String?            @map("failure_reason")
+  reviewedBy     String?            @map("reviewed_by") @db.Uuid
+  reviewedAt     DateTime?          @map("reviewed_at")
+  createdAt      DateTime           @default(now()) @map("created_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@index([userId]) // ADDED: FK index
+  @@index([userId])
+  @@index([status])
   @@map("photo_verifications")
 }
 
@@ -1264,6 +1274,21 @@ model ProfileBoost {
   @@map("profile_boosts")
 }
 
+model BoostPricingTier {
+  id            String    @id @default(uuid()) @db.Uuid
+  tier          BoostTier @unique
+  name          String
+  durationHours Int       @map("duration_hours")
+  price         Int // Amount in VND
+  multiplier    Decimal   @db.Decimal(3, 2)
+  description   String?
+  isActive      Boolean   @default(true) @map("is_active")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  @@map("boost_pricing_tiers")
+}
+
 // ============================================
 // REFERRALS
 // ============================================
@@ -1409,6 +1434,7 @@ enum PaymentRequestType {
   TOPUP
   BOOKING
   BOOST
+  MEMBERSHIP
 }
 
 enum PaymentRequestStatus {
@@ -1433,6 +1459,9 @@ model PaymentRequest {
   // For BOOST type only
   boostId String? @map("boost_id") @db.Uuid
 
+  // For MEMBERSHIP type only
+  membershipId String? @map("membership_id") @db.Uuid
+
   // SePay webhook data (populated on completion)
   sepayId       Int?    @map("sepay_id")
   gateway       String?
@@ -1446,10 +1475,11 @@ model PaymentRequest {
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime  @updatedAt @map("updated_at")
 
-  user       User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  booking    Booking?     @relation(fields: [bookingId], references: [id], onDelete: SetNull)
-  boost      ProfileBoost? @relation(fields: [boostId], references: [id], onDelete: SetNull)
-  webhookLog WebhookLog?  @relation(fields: [webhookLogId], references: [id])
+  user       User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  booking    Booking?         @relation(fields: [bookingId], references: [id], onDelete: SetNull)
+  boost      ProfileBoost?    @relation(fields: [boostId], references: [id], onDelete: SetNull)
+  membership HirerMembership? @relation(fields: [membershipId], references: [id], onDelete: SetNull)
+  webhookLog WebhookLog?      @relation(fields: [webhookLogId], references: [id])
 
   @@index([userId])
   @@index([code])
@@ -1496,4 +1526,59 @@ model IdempotencyKey {
   @@index([userId])
   @@index([expiresAt])
   @@map("idempotency_keys")
+}
+
+// ============================================
+// HIRER VIP MEMBERSHIPS
+// ============================================
+
+enum MembershipTier {
+  SILVER
+  GOLD
+  PLATINUM
+}
+
+enum MembershipStatus {
+  PENDING // Payment pending
+  ACTIVE // Currently active
+  EXPIRED // Past expiry date
+  CANCELLED // Manually cancelled
+}
+
+model MembershipPricingTier {
+  tier                  MembershipTier @id
+  name                  String
+  durationDays          Int            @default(30) @map("duration_days")
+  price                 Int // in VND
+  forYouLimit           Int            @default(1) @map("for_you_limit")
+  maxPendingBookings    Int            @default(3) @map("max_pending_bookings")
+  freeCancellationHours Int            @default(24) @map("free_cancellation_hours")
+  priorityBooking       Boolean        @default(false) @map("priority_booking")
+  nearbySearch          Boolean        @default(false) @map("nearby_search")
+  earlyAccess           Boolean        @default(false) @map("early_access")
+  dedicatedSupport      Boolean        @default(false) @map("dedicated_support")
+  description           String?
+  createdAt             DateTime       @default(now()) @map("created_at")
+  updatedAt             DateTime       @updatedAt @map("updated_at")
+
+  @@map("membership_pricing_tiers")
+}
+
+model HirerMembership {
+  id        String           @id @default(uuid()) @db.Uuid
+  userId    String           @map("user_id") @db.Uuid
+  tier      MembershipTier
+  status    MembershipStatus @default(PENDING)
+  price     Int // Amount paid in VND
+  startedAt DateTime?        @map("started_at")
+  expiresAt DateTime?        @map("expires_at")
+  createdAt DateTime         @default(now()) @map("created_at")
+  updatedAt DateTime         @updatedAt @map("updated_at")
+
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  paymentRequests PaymentRequest[]
+
+  @@index([userId, status])
+  @@index([status, expiresAt])
+  @@map("hirer_memberships")
 }

@@ -17,8 +17,12 @@ import {
   View,
 } from '@/components/ui';
 import { showErrorMessage, showSuccessMessage } from '@/components/ui/utils';
-import { Camera, CheckCircle, IdCard, X } from '@/components/ui/icons';
-import { useSubmitCompanionOnboarding } from '@/lib/hooks';
+import { Camera, CheckCircle, IdCard, User, X } from '@/components/ui/icons';
+import {
+  useSubmitCompanionOnboarding,
+  useSubmitPhotoVerification,
+  useUploadFile,
+} from '@/lib/hooks';
 import { useCompanionOnboarding } from '@/lib/stores';
 
 export default function VerifyIdentity() {
@@ -28,6 +32,7 @@ export default function VerifyIdentity() {
   // Get data from store
   const storedFrontImage = useCompanionOnboarding.use.idFrontImage();
   const storedBackImage = useCompanionOnboarding.use.idBackImage();
+  const storedSelfieImage = useCompanionOnboarding.use.selfieImage();
   const bio = useCompanionOnboarding.use.bio();
   const photoFiles = useCompanionOnboarding.use.photoFiles();
   const province = useCompanionOnboarding.use.province();
@@ -36,19 +41,25 @@ export default function VerifyIdentity() {
   const markStepComplete = useCompanionOnboarding.use.markStepComplete();
   const resetStore = useCompanionOnboarding.use.reset();
 
-  // Submission mutation
+  // Submission mutations
   const submitOnboarding = useSubmitCompanionOnboarding();
+  const uploadFile = useUploadFile();
+  const submitVerification = useSubmitPhotoVerification();
 
   // Local state
   const [frontImage, setFrontImage] = React.useState(storedFrontImage);
   const [backImage, setBackImage] = React.useState(storedBackImage);
+  const [selfieImage, setSelfieImage] = React.useState(storedSelfieImage);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   const handleBack = React.useCallback(() => {
     router.back();
   }, [router]);
 
-  const pickImage = async (useCamera = false): Promise<string | null> => {
+  const pickImage = async (
+    useCamera = false,
+    aspect: [number, number] = [3, 2],
+  ): Promise<string | null> => {
     if (useCamera) {
       const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
 
@@ -64,7 +75,7 @@ export default function VerifyIdentity() {
       const result = await ImagePicker.launchCameraAsync({
         mediaTypes: 'images',
         allowsEditing: true,
-        aspect: [16, 10], // ID card aspect ratio
+        aspect,
         quality: 0.8,
       });
 
@@ -86,7 +97,7 @@ export default function VerifyIdentity() {
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: 'images',
         allowsEditing: true,
-        aspect: [16, 10], // ID card aspect ratio
+        aspect,
         quality: 0.8,
       });
 
@@ -98,7 +109,15 @@ export default function VerifyIdentity() {
   };
 
   const handleSelectImage = React.useCallback(
-    (side: 'front' | 'back') => {
+    (type: 'front' | 'back' | 'selfie') => {
+      const aspect: [number, number] = type === 'selfie' ? [3, 4] : [3, 2];
+      const setImage =
+        type === 'front'
+          ? setFrontImage
+          : type === 'back'
+            ? setBackImage
+            : setSelfieImage;
+
       Alert.alert(
         t('companion.onboard.verify_identity.upload_title'),
         t('companion.onboard.verify_identity.upload_description'),
@@ -106,27 +125,15 @@ export default function VerifyIdentity() {
           {
             text: t('common.camera'),
             onPress: async () => {
-              const uri = await pickImage(true);
-              if (uri) {
-                if (side === 'front') {
-                  setFrontImage(uri);
-                } else {
-                  setBackImage(uri);
-                }
-              }
+              const uri = await pickImage(true, aspect);
+              if (uri) setImage(uri);
             },
           },
           {
             text: t('common.gallery'),
             onPress: async () => {
-              const uri = await pickImage(false);
-              if (uri) {
-                if (side === 'front') {
-                  setFrontImage(uri);
-                } else {
-                  setBackImage(uri);
-                }
-              }
+              const uri = await pickImage(false, aspect);
+              if (uri) setImage(uri);
             },
           },
           { text: t('common.cancel'), style: 'cancel' },
@@ -136,30 +143,41 @@ export default function VerifyIdentity() {
     [t]
   );
 
-  const handleRemoveImage = React.useCallback((side: 'front' | 'back') => {
-    if (side === 'front') {
-      setFrontImage('');
-    } else {
-      setBackImage('');
-    }
+  const handleRemoveImage = React.useCallback((type: 'front' | 'back' | 'selfie') => {
+    if (type === 'front') setFrontImage('');
+    else if (type === 'back') setBackImage('');
+    else setSelfieImage('');
   }, []);
 
   const submitProfile = React.useCallback(async (includeCccd: boolean) => {
-    console.log('submitProfile', includeCccd);
     setIsSubmitting(true);
     try {
-      // Save verification data to store if provided
-      if (includeCccd && frontImage && backImage) {
+      // Upload verification photos to R2 and submit to verification API
+      if (includeCccd && frontImage && backImage && selfieImage) {
         setVerificationData({
           idType: 'cccd',
           idFrontImage: frontImage,
           idBackImage: backImage,
+          selfieImage,
         });
         markStepComplete('verify-identity');
+
+        // Upload all 3 photos to R2 in parallel
+        const [front, back, selfie] = await Promise.all([
+          uploadFile.mutateAsync({ uri: frontImage, category: 'verification_doc' }),
+          uploadFile.mutateAsync({ uri: backImage, category: 'verification_doc' }),
+          uploadFile.mutateAsync({ uri: selfieImage, category: 'verification_doc' }),
+        ]);
+
+        // Submit to verification API with uploaded URLs
+        await submitVerification.mutateAsync({
+          idFrontUrl: front.url,
+          idBackUrl: back.url,
+          selfieUrl: selfie.url,
+        });
       }
 
-      // Submit onboarding
-      console.log('submitOnboarding', 'Submit onboarding');
+      // Submit onboarding (create profile + complete)
       await submitOnboarding.mutateAsync({
         localPhotoUris: photoFiles,
         profile: {
@@ -187,7 +205,7 @@ export default function VerifyIdentity() {
     } finally {
       setIsSubmitting(false);
     }
-  }, [frontImage, backImage, setVerificationData, markStepComplete, submitOnboarding, photoFiles, bio, hourlyRate, province, resetStore, router, t]);
+  }, [frontImage, backImage, selfieImage, setVerificationData, markStepComplete, uploadFile, submitVerification, submitOnboarding, photoFiles, bio, hourlyRate, province, resetStore, router, t]);
 
   const handleContinue = React.useCallback(() => {
     submitProfile(true);
@@ -209,7 +227,7 @@ export default function VerifyIdentity() {
     );
   }, [t, submitProfile]);
 
-  const isValid = frontImage && backImage;
+  const isValid = frontImage && backImage && selfieImage;
 
   return (
     <View className="flex-1 bg-warmwhite">
@@ -217,7 +235,7 @@ export default function VerifyIdentity() {
 
       <CompanionHeader
         title={t('companion.onboard.verify_identity.header')}
-        subtitle={`${t('companion.onboard.step')} 3/3`}
+        subtitle={`${t('companion.onboard.step')} 4/4`}
         onBack={handleBack}
         rightElement={
           <Pressable onPress={handleSkip}>
@@ -355,11 +373,62 @@ export default function VerifyIdentity() {
           </Pressable>
         </MotiView>
 
+        {/* Selfie with CCCD */}
+        <MotiView
+          from={{ opacity: 0, translateY: 20 }}
+          animate={{ opacity: 1, translateY: 0 }}
+          transition={{ type: 'timing', duration: 500, delay: 300 }}
+          className="mb-6"
+        >
+          <Text className="mb-2 text-lg font-semibold text-midnight">
+            {t('companion.onboard.verify_identity.selfie_title')}
+          </Text>
+          <Text className="mb-3 text-sm text-text-secondary">
+            {t('companion.onboard.verify_identity.selfie_description')}
+          </Text>
+
+          <Pressable
+            onPress={() => handleSelectImage('selfie')}
+            className="relative h-56 overflow-hidden rounded-2xl bg-softpink"
+          >
+            {selfieImage ? (
+              <>
+                <Image
+                  source={{ uri: selfieImage }}
+                  className="size-full"
+                  contentFit="cover"
+                />
+                <Pressable
+                  onPress={() => handleRemoveImage('selfie')}
+                  className="absolute right-2 top-2 rounded-full bg-black/50 p-1.5"
+                >
+                  <X color="white" width={16} height={16} />
+                </Pressable>
+                <View className="absolute bottom-2 left-2 flex-row items-center gap-1 rounded-full bg-teal-400/90 px-2 py-1">
+                  <CheckCircle color="white" width={14} height={14} />
+                  <Text className="text-xs font-medium text-white">
+                    {t('companion.onboard.verify_identity.uploaded')}
+                  </Text>
+                </View>
+              </>
+            ) : (
+              <View className="size-full items-center justify-center">
+                <View className="mb-2 rounded-full bg-lavender-900/20 p-3">
+                  <User color={colors.lavender[400]} width={28} height={28} />
+                </View>
+                <Text className="text-sm font-medium text-lavender-900">
+                  {t('companion.onboard.verify_identity.tap_to_upload')}
+                </Text>
+              </View>
+            )}
+          </Pressable>
+        </MotiView>
+
         {/* Tips */}
         <MotiView
           from={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ type: 'timing', duration: 500, delay: 300 }}
+          transition={{ type: 'timing', duration: 500, delay: 400 }}
           className="rounded-xl bg-white p-4"
         >
           <Text className="mb-3 font-semibold text-midnight">
@@ -395,7 +464,11 @@ export default function VerifyIdentity() {
       >
         <View className="px-6 py-4">
           <Button
-            label={t('common.continue')}
+            label={
+              isSubmitting
+                ? t('companion.onboard.verify_identity.uploading_photos')
+                : t('common.continue')
+            }
             onPress={handleContinue}
             disabled={!isValid || isSubmitting}
             loading={isSubmitting}

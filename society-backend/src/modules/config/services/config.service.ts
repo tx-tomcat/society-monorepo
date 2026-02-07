@@ -1,5 +1,5 @@
-import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
+import { Injectable, Logger } from '@nestjs/common';
 import { PlatformConfigDto } from '../dto/platform-config.dto';
 
 // Default values (used when database config doesn't exist)
@@ -11,7 +11,7 @@ const DEFAULT_CONFIG: PlatformConfigDto = {
   minAdvanceBookingHours: 2,
   maxAdvanceBookingDays: 30,
   freeCancellationHours: 24,
-  supportEmail: 'support@luxe.vn',
+  supportEmail: 'support@hireme.vn',
   supportPhone: '+84 28 1234 5678',
   minAppVersion: '1.0.0',
   currentAppVersion: '1.0.0',
@@ -25,7 +25,7 @@ const DEFAULT_CONFIG: PlatformConfigDto = {
 export class PlatformConfigService {
   private readonly logger = new Logger(PlatformConfigService.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   /**
    * Get platform configuration from database

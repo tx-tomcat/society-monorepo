@@ -19,6 +19,7 @@ import {
   Bell,
   Calendar,
   Clock,
+  Crown,
   Heart,
   HiremeLogo,
   MapPin,
@@ -31,6 +32,7 @@ import { bookingsService } from '@/lib/api/services/bookings.service';
 import { getPrimaryPhotoUrl } from '@/lib/api/services/companions.service';
 import { favoritesService } from '@/lib/api/services/favorites.service';
 import { useCurrentUser } from '@/lib/hooks';
+import { useActiveMembership } from '@/lib/hooks/use-membership';
 
 type UpcomingBooking = Booking & {
   displayStatus: 'upcoming' | 'active' | 'pending';
@@ -149,8 +151,14 @@ export default function HirerDashboard() {
 
   // Get current user for greeting
   const { data: currentUser } = useCurrentUser();
+  const { data: membershipData } = useActiveMembership();
+  const activeMembership = membershipData?.active;
 
   const userName = currentUser?.user?.fullName?.split(' ')[0] || 'there';
+
+  const handleMembershipPress = React.useCallback(() => {
+    router.push('/hirer/membership' as Href);
+  }, [router]);
 
   // Track last fetch time to prevent over-fetching
   const lastFetchRef = React.useRef<number>(0);
@@ -390,6 +398,59 @@ export default function HirerDashboard() {
             <View className="rounded-full bg-white/20 px-3 py-1">
               <Text className="text-sm font-semibold text-white">
                 {t('hirer.dashboard.explore')}
+              </Text>
+            </View>
+          </Pressable>
+        </MotiView>
+
+        {/* VIP Membership Banner */}
+        <MotiView
+          from={{ opacity: 0, translateY: 20 }}
+          animate={{ opacity: 1, translateY: 0 }}
+          transition={{ type: 'timing', duration: 500, delay: 150 }}
+          className="mx-4 mb-4"
+        >
+          <Pressable
+            onPress={handleMembershipPress}
+            testID="membership-banner"
+            className={`flex-row items-center justify-between rounded-2xl p-4 ${
+              activeMembership?.status === 'ACTIVE'
+                ? 'bg-amber-500'
+                : 'bg-gradient-to-r from-amber-400 to-yellow-500'
+            }`}
+            style={{ backgroundColor: activeMembership?.status === 'ACTIVE' ? colors.yellow[500] : '#F59E0B' }}
+          >
+            <View className="flex-row items-center gap-3">
+              <View className="size-12 items-center justify-center rounded-full bg-white/20">
+                <Crown color="#FFFFFF" width={24} height={24} />
+              </View>
+              <View>
+                {activeMembership?.status === 'ACTIVE' ? (
+                  <>
+                    <Text className="text-sm text-white/80">
+                      {activeMembership.tier} {t('hirer.dashboard.member')}
+                    </Text>
+                    <Text className="font-urbanist-bold text-lg text-white">
+                      {t('hirer.dashboard.manage_membership')}
+                    </Text>
+                  </>
+                ) : (
+                  <>
+                    <Text className="text-sm text-white/80">
+                      {t('hirer.dashboard.unlock_features')}
+                    </Text>
+                    <Text className="font-urbanist-bold text-lg text-white">
+                      {t('hirer.dashboard.upgrade_vip')}
+                    </Text>
+                  </>
+                )}
+              </View>
+            </View>
+            <View className="rounded-full bg-white/20 px-3 py-1">
+              <Text className="text-sm font-semibold text-white">
+                {activeMembership?.status === 'ACTIVE'
+                  ? t('hirer.dashboard.view')
+                  : t('hirer.dashboard.explore')}
               </Text>
             </View>
           </Pressable>

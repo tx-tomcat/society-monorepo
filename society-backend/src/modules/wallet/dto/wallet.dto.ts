@@ -98,6 +98,36 @@ export interface TransactionsResponse {
   };
 }
 
+export interface BoostPaymentResponse {
+  id: string;
+  boostId: string;
+  code: string;
+  amount: number;
+  qrUrl: string;
+  deeplinks: BankDeeplinkInfo[];
+  accountInfo: {
+    bankCode: string;
+    accountNumber: string;
+    accountName: string;
+  };
+  expiresAt: string;
+}
+
+export interface MembershipPaymentResponse {
+  id: string;
+  membershipId: string;
+  code: string;
+  amount: number;
+  qrUrl: string;
+  deeplinks: BankDeeplinkInfo[];
+  accountInfo: {
+    bankCode: string;
+    accountNumber: string;
+    accountName: string;
+  };
+  expiresAt: string;
+}
+
 export interface PaymentRequestStatusResponse {
   id: string;
   code: string;

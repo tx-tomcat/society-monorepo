@@ -27,7 +27,7 @@ import {
     Clock,
     MapPin,
 } from '@/components/ui/icons';
-import { BookingStatus } from '@/lib/api/enums';
+import { BookingStatus, PaymentStatus } from '@/lib/api/enums';
 import type { Booking } from '@/lib/api/services/bookings.service';
 import { useCompanionSchedule } from '@/lib/hooks';
 
@@ -69,6 +69,7 @@ export default function CompanionSchedule() {
     const {
         data: schedule = [],
         isLoading,
+        isFetching,
         refetch,
         isRefetching,
     } = useCompanionSchedule(weekStart.toISOString(), weekEnd.toISOString());
@@ -87,9 +88,14 @@ export default function CompanionSchedule() {
         return dates;
     }, [selectedDate]);
 
-    // Get all bookings as a flat array for easier lookup
+    // Get all bookings as a flat array, only show CONFIRMED bookings when paid
     const allBookings = React.useMemo(() => {
-        return schedule.flatMap((item) => item.bookings);
+        return schedule.flatMap((item) => item.bookings).filter((b) => {
+            if (b.status === BookingStatus.CONFIRMED) {
+                return b.paymentStatus === PaymentStatus.PAID;
+            }
+            return true;
+        });
     }, [schedule]);
 
     // Filter bookings for selected date
@@ -139,13 +145,16 @@ export default function CompanionSchedule() {
         [allBookings]
     );
 
-    if (isLoading) {
-        return (
-            <View className="flex-1 items-center justify-center bg-warmwhite">
-                <ActivityIndicator size="large" color={colors.lavender[400]} />
-            </View>
-        );
-    }
+    // Show full-screen loader only on very first load (no cached data yet)
+    // if (isLoading && schedule.length === 0) {
+    //     return (
+    //         <View className="flex-1 items-center justify-center bg-warmwhite">
+    //             <ActivityIndicator size="large" color={colors.lavender[400]} />
+    //         </View>
+    //     );
+    // }
+
+    const isLoadingWeek = isFetching && !isRefetching;
 
     return (
         <View className="flex-1 bg-warmwhite">
@@ -153,12 +162,11 @@ export default function CompanionSchedule() {
 
             <CompanionHeader
                 title={t('companion.schedule.header')}
-                onBack={handleBack}
-                rightElement={
-                    <Pressable>
-                        <Calendar color={colors.lavender[400]} width={24} height={24} />
-                    </Pressable>
-                }
+            // rightElement={
+            //     <Pressable>
+            //         <Calendar color={colors.lavender[400]} width={24} height={24} />
+            //     </Pressable>
+            // }
             />
 
             {/* Calendar Week View */}
@@ -166,14 +174,14 @@ export default function CompanionSchedule() {
                 from={{ opacity: 0, translateY: -20 }}
                 animate={{ opacity: 1, translateY: 0 }}
                 transition={{ type: 'timing', duration: 500 }}
-                className="bg-white p-4"
+                className="bg-white px-4 py-5"
             >
                 {/* Month Header */}
-                <View className="mb-4 flex-row items-center justify-between">
+                <View className="mb-5 flex-row items-center justify-between">
                     <Pressable onPress={handlePrevWeek} className="p-2">
                         <ArrowLeft color={colors.midnight.DEFAULT} width={20} height={20} />
                     </Pressable>
-                    <Text className="font-urbanist-bold text-lg text-midnight">
+                    <Text className="font-urbanist-bold text-xl text-midnight">
                         {selectedDate.toLocaleDateString('en-US', {
                             month: 'long',
                             year: 'numeric',
@@ -189,7 +197,7 @@ export default function CompanionSchedule() {
                 </View>
 
                 {/* Week Days */}
-                <View className="flex-row">
+                <View className="flex-row gap-1">
                     {weekDates.map((date, index) => {
                         const isSelected =
                             date.toDateString() === selectedDate.toDateString();
@@ -200,17 +208,17 @@ export default function CompanionSchedule() {
                             <Pressable
                                 key={index}
                                 onPress={() => setSelectedDate(date)}
-                                className={`flex-1 items-center rounded-xl py-3 ${isSelected ? 'bg-lavender-900' : ''
+                                className={`flex-1 items-center rounded-xl py-3 ${isSelected ? 'bg-lavender-900' : isToday ? 'border border-lavender-900' : ''
                                     }`}
                             >
                                 <Text
-                                    className={`text-xs ${isSelected ? 'text-white' : 'text-text-tertiary'
+                                    className={`text-xs font-medium ${isSelected ? 'text-white' : 'text-text-tertiary'
                                         }`}
                                 >
                                     {t(DAYS_OF_WEEK_KEYS[date.getDay()])}
                                 </Text>
                                 <Text
-                                    className={`mt-1 text-lg font-semibold ${isSelected
+                                    className={`mt-1 text-lg font-urbanist-bold ${isSelected
                                         ? 'text-white'
                                         : isToday
                                             ? 'text-lavender-900'
@@ -244,7 +252,7 @@ export default function CompanionSchedule() {
                 }
             >
                 {/* Selected Date Header */}
-                <Text className="mb-4 text-sm font-medium text-text-tertiary">
+                <Text className="mb-4 font-urbanist-bold text-lg text-midnight">
                     {selectedDate.toLocaleDateString('en-US', {
                         weekday: 'long',
                         month: 'long',
@@ -253,7 +261,11 @@ export default function CompanionSchedule() {
                 </Text>
 
                 {/* Bookings */}
-                {dayBookings.length > 0 ? (
+                {isLoadingWeek ? (
+                    <View className="items-center py-16">
+                        <ActivityIndicator size="large" color={colors.lavender[400]} />
+                    </View>
+                ) : dayBookings.length > 0 ? (
                     <View className="gap-3">
                         {dayBookings.map((booking, index) => {
                             const startTime = new Date(booking.startDatetime);
@@ -295,11 +307,11 @@ export default function CompanionSchedule() {
                                         className="flex-row gap-4 rounded-2xl bg-white p-4"
                                     >
                                         {/* Time Indicator */}
-                                        <View className="items-center">
+                                        <View className="items-center justify-center ">
                                             <Text className="text-sm font-semibold text-lavender-900">
                                                 {startTimeStr}
                                             </Text>
-                                            <View className="my-2 h-12 w-0.5 bg-lavender-900/30" />
+                                            <View className="h-16 w-0.5 bg-lavender-900/30" />
                                             <Text className="text-xs text-text-tertiary">
                                                 {endTimeStr}
                                             </Text>

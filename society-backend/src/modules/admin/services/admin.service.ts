@@ -7,7 +7,7 @@ import {
 import { PrismaService } from '../../../prisma/prisma.service';
 import { CacheService } from '../../cache/cache.service';
 import { NotificationsService } from '../../notifications/services/notifications.service';
-import { UserRole, UserStatus, BookingStatus, WithdrawalStatus, Prisma } from '@generated/client';
+import { UserRole, UserStatus, BookingStatus, WithdrawalStatus, VerificationStatus, Prisma } from '@generated/client';
 import {
   UserSearchDto,
   UpdateUserRoleDto,
@@ -418,6 +418,116 @@ export class AdminService {
       adminId,
       dto.approved ? 'APPROVE_VERIFICATION' : 'REJECT_VERIFICATION',
       'verification',
+      verificationId,
+      { userId: verification.userId, reason: dto.rejectionReason },
+    );
+
+    return { success: true };
+  }
+
+  // ============================================
+  // Photo Verification Review
+  // ============================================
+
+  async getPendingPhotoVerifications() {
+    const verifications = await this.prisma.photoVerification.findMany({
+      where: { status: VerificationStatus.PENDING },
+      include: {
+        user: {
+          include: {
+            companionProfile: true,
+          },
+        },
+      },
+      orderBy: { createdAt: 'asc' },
+    });
+
+    return verifications.map((v) => ({
+      id: v.id,
+      userId: v.userId,
+      userName: v.user.fullName || v.user.email,
+      idFrontUrl: v.photoUrl,
+      idBackUrl: v.idBackUrl,
+      selfieUrl: v.selfieUrl,
+      companionDisplayName: v.user.companionProfile?.displayName ?? null,
+      createdAt: v.createdAt,
+    }));
+  }
+
+  async reviewPhotoVerification(
+    adminId: string,
+    verificationId: string,
+    dto: VerificationApprovalDto,
+  ) {
+    const verification = await this.prisma.photoVerification.findUnique({
+      where: { id: verificationId },
+    });
+
+    if (!verification) {
+      throw new NotFoundException('Photo verification not found');
+    }
+
+    if (verification.status !== VerificationStatus.PENDING) {
+      throw new BadRequestException('This verification has already been reviewed');
+    }
+
+    const newStatus = dto.approved
+      ? VerificationStatus.VERIFIED
+      : VerificationStatus.FAILED;
+
+    // Update PhotoVerification record
+    await this.prisma.photoVerification.update({
+      where: { id: verificationId },
+      data: {
+        status: newStatus,
+        failureReason: dto.approved ? null : (dto.rejectionReason ?? null),
+        reviewedBy: adminId,
+        reviewedAt: new Date(),
+      },
+    });
+
+    // Update CompanionProfile verificationStatus
+    const companionProfile = await this.prisma.companionProfile.findFirst({
+      where: { userId: verification.userId },
+    });
+
+    if (companionProfile) {
+      await this.prisma.companionProfile.update({
+        where: { id: companionProfile.id },
+        data: { verificationStatus: newStatus },
+      });
+    }
+
+    // If approved, mark user as verified
+    if (dto.approved) {
+      await this.prisma.user.update({
+        where: { id: verification.userId },
+        data: { isVerified: true },
+      });
+
+      // Send notification
+      await this.notificationsService.send({
+        userId: verification.userId,
+        type: 'SYSTEM',
+        title: 'Identity Verified',
+        body: 'Your identity has been verified. You now have a verified badge on your profile!',
+      });
+    } else {
+      // Send rejection notification
+      await this.notificationsService.send({
+        userId: verification.userId,
+        type: 'SYSTEM',
+        title: 'Verification Not Approved',
+        body: dto.rejectionReason
+          ? `Your verification was not approved: ${dto.rejectionReason}`
+          : 'Your verification was not approved. Please resubmit with clearer photos.',
+      });
+    }
+
+    await this.createAuditLog(
+      adminId,
+      dto.approved ? 'APPROVE_PHOTO_VERIFICATION' : 'REJECT_PHOTO_VERIFICATION',
+      'photo_verification',
       verificationId,
       { userId: verification.userId, reason: dto.rejectionReason },
     );

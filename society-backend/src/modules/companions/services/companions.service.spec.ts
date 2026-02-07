@@ -1,8 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { CompanionsService } from './companions.service';
 import { PrismaService } from '@/prisma/prisma.service';
 import { CachePatternsService } from '@/modules/cache/cache-patterns.service';
+import { WalletService } from '@/modules/wallet/wallet.service';
 import { BoostTierEnum } from '../dto/companion.dto';
 
 describe('CompanionsService', () => {
@@ -13,6 +15,28 @@ describe('CompanionsService', () => {
     getOrFetch: jest.fn().mockImplementation((_key, _ttl, fetcher) => fetcher()),
     invalidate: jest.fn().mockResolvedValue(undefined),
     invalidatePattern: jest.fn().mockResolvedValue(undefined),
+  };
+
+  const mockConfigService = {
+    get: jest.fn().mockImplementation((key: string, defaultValue?: string) => {
+      if (key === 'R2_PUBLIC_URL') return 'https://static.hireme.vn';
+      return defaultValue;
+    }),
+  };
+
+  const mockWalletService = {
+    canPayFromWallet: jest.fn().mockResolvedValue(true),
+    deductFromWallet: jest.fn().mockResolvedValue(undefined),
+    createBoostPaymentRequest: jest.fn().mockResolvedValue({
+      id: 'payment-request-123',
+      boostId: 'boost-123',
+      code: 'HM123456',
+      amount: 100000,
+      qrUrl: 'https://qr.sepay.vn/img?acc=test&bank=test',
+      deeplinks: [],
+      accountInfo: { bankCode: 'MB', accountNumber: '123456', accountName: 'Test' },
+      expiresAt: new Date(Date.now() + 30 * 60 * 1000).toISOString(),
+    }),
   };
 
   const mockPrismaService = {
@@ -59,6 +83,13 @@ describe('CompanionsService', () => {
       update: jest.fn(),
       updateMany: jest.fn(),
     },
+    boostPricingTier: {
+      findMany: jest.fn(),
+      findFirst: jest.fn(),
+    },
+    invalidateCache: jest.fn().mockResolvedValue(undefined),
+    invalidateExactQuery: jest.fn().mockResolvedValue(undefined),
+    invalidateModelCache: jest.fn().mockResolvedValue(undefined),
   };
 
   beforeEach(async () => {
@@ -72,6 +103,14 @@ describe('CompanionsService', () => {
         {
           provide: CachePatternsService,
           useValue: mockCachePatternsService,
+        },
+        {
+          provide: WalletService,
+          useValue: mockWalletService,
+        },
+        {
+          provide: ConfigService,
+          useValue: mockConfigService,
         },
       ],
     }).compile();
@@ -116,8 +155,8 @@ describe('CompanionsService', () => {
             gender: 'FEMALE',
             isVerified: true,
           },
-          photos: [{ id: 'photo-1', url: 'photo1.jpg', position: 0 }],
-          services: [{ serviceType: 'FAMILY_INTRODUCTION', isEnabled: true }],
+          photos: [{ id: 'photo-1', url: 'photo1.jpg', position: 0, isPrimary: true }],
+          services: [{ serviceType: 'FAMILY_INTRODUCTION', isEnabled: true, occasionId: 'occ-1', occasion: { id: 'occ-1', code: 'FAMILY_INTRODUCTION', nameEn: 'Family Introduction', emoji: '👨‍👩‍👧' } }],
         },
       ];
 
@@ -246,6 +285,7 @@ describe('CompanionsService', () => {
       const mockCompanion = {
         id: 'comp-1',
         userId: 'user-1',
+        displayName: 'Test Companion',
         bio: 'A friendly companion',
         heightCm: 165,
         languages: ['vi', 'en'],
@@ -271,8 +311,8 @@ describe('CompanionsService', () => {
           isVerified: true,
           createdAt: new Date(),
         },
-        photos: [{ id: 'photo-1', url: 'photo1.jpg', position: 0 }],
-        services: [{ serviceType: 'FAMILY_INTRODUCTION', description: null, priceAdjustment: 0 }],
+        photos: [{ id: 'photo-1', url: 'photo1.jpg', position: 0, isPrimary: true }],
+        services: [{ serviceType: 'FAMILY_INTRODUCTION', description: null, priceAdjustment: 0, isEnabled: true, occasionId: 'occ-1', occasion: { id: 'occ-1', code: 'FAMILY_INTRODUCTION', nameEn: 'Family Introduction', emoji: '👨‍👩‍👧' } }],
         availability: [],
       };
 
@@ -365,7 +405,7 @@ describe('CompanionsService', () => {
 
       expect(result.reviews).toHaveLength(1);
       expect(result.averageRating).toBe(4.5);
-      expect(result.reviews[0].reviewer.name).toBe('John Doe');
+      expect(result.reviews[0].reviewer.fullName).toBe('J****e');
     });
 
     it('should throw NotFoundException when companion not found', async () => {
@@ -466,8 +506,16 @@ describe('CompanionsService', () => {
   // ============================================
 
   describe('getBoostPricing', () => {
-    it('should return all boost pricing tiers', () => {
-      const pricing = service.getBoostPricing();
+    const mockPricingTiers = [
+      { id: 'pt-1', tier: 'STANDARD', name: 'Standard Boost', durationHours: 24, price: 99000, multiplier: 1.5, description: 'Appear higher in search results for 24 hours', isActive: true },
+      { id: 'pt-2', tier: 'PREMIUM', name: 'Premium Boost', durationHours: 48, price: 179000, multiplier: 2.0, description: 'Double your visibility for 48 hours', isActive: true },
+      { id: 'pt-3', tier: 'SUPER', name: 'Super Boost', durationHours: 72, price: 249000, multiplier: 3.0, description: 'Maximum visibility for 72 hours - appear at the top', isActive: true },
+    ];
+
+    it('should return all boost pricing tiers', async () => {
+      mockPrismaService.boostPricingTier.findMany.mockResolvedValue(mockPricingTiers);
+
+      const pricing = await service.getBoostPricing();
 
       expect(pricing).toHaveLength(3);
       expect(pricing.find(p => p.tier === 'STANDARD')).toBeDefined();
@@ -475,8 +523,10 @@ describe('CompanionsService', () => {
       expect(pricing.find(p => p.tier === 'SUPER')).toBeDefined();
     });
 
-    it('should have correct pricing structure', () => {
-      const pricing = service.getBoostPricing();
+    it('should have correct pricing structure', async () => {
+      mockPrismaService.boostPricingTier.findMany.mockResolvedValue(mockPricingTiers);
+
+      const pricing = await service.getBoostPricing();
 
       for (const tier of pricing) {
         expect(tier).toHaveProperty('tier');
@@ -575,19 +625,26 @@ describe('CompanionsService', () => {
   });
 
   describe('purchaseBoost', () => {
-    it('should create pending boost for valid tier', async () => {
+    const mockStandardPricing = {
+      id: 'pt-1', tier: 'STANDARD', name: 'Standard Boost',
+      durationHours: 24, price: 99000, multiplier: 1.5,
+      description: 'Appear higher in search results for 24 hours', isActive: true,
+    };
+
+    it('should create boost for valid tier', async () => {
       const mockProfile = { id: 'comp-1', userId: 'user-1' };
       const mockBoost = {
         id: 'boost-1',
         companionId: 'comp-1',
         tier: 'STANDARD',
-        status: 'PENDING',
+        status: 'ACTIVE',
         multiplier: 1.5,
         price: 99000,
       };
 
       mockPrismaService.companionProfile.findUnique.mockResolvedValue(mockProfile);
-      mockPrismaService.profileBoost.findFirst.mockResolvedValue(null); // No active or pending boost
+      mockPrismaService.profileBoost.findFirst.mockResolvedValue(null); // No active boost
+      mockPrismaService.boostPricingTier.findFirst.mockResolvedValue(mockStandardPricing);
       mockPrismaService.profileBoost.create.mockResolvedValue(mockBoost);
 
       const result = await service.purchaseBoost('user-1', { tier: BoostTierEnum.STANDARD });
@@ -595,15 +652,6 @@ describe('CompanionsService', () => {
       expect(result.boostId).toBe('boost-1');
       expect(result.tier).toBe('STANDARD');
       expect(result.price).toBe(99000);
-      expect(mockPrismaService.profileBoost.create).toHaveBeenCalledWith(
-        expect.objectContaining({
-          data: expect.objectContaining({
-            status: 'PENDING',
-            multiplier: 1.5,
-            price: 99000,
-          }),
-        }),
-      );
     });
 
     it('should throw BadRequestException when active boost exists', async () => {
@@ -622,19 +670,12 @@ describe('CompanionsService', () => {
       ).rejects.toThrow(BadRequestException);
     });
 
-    it('should throw BadRequestException when pending boost exists', async () => {
+    it('should throw BadRequestException when pricing tier not found', async () => {
       const mockProfile = { id: 'comp-1', userId: 'user-1' };
 
       mockPrismaService.companionProfile.findUnique.mockResolvedValue(mockProfile);
-      // First call returns null (no active boost)
-      // Second call returns pending boost
-      mockPrismaService.profileBoost.findFirst
-        .mockResolvedValueOnce(null)
-        .mockResolvedValueOnce({
-          id: 'pending-boost',
-          status: 'PENDING',
-          createdAt: new Date(),
-        });
+      mockPrismaService.profileBoost.findFirst.mockResolvedValue(null);
+      mockPrismaService.boostPricingTier.findFirst.mockResolvedValue(null);
 
       await expect(
         service.purchaseBoost('user-1', { tier: BoostTierEnum.STANDARD }),
@@ -651,6 +692,12 @@ describe('CompanionsService', () => {
   });
 
   describe('activateBoost', () => {
+    const mockPremiumPricing = {
+      id: 'pt-2', tier: 'PREMIUM', name: 'Premium Boost',
+      durationHours: 48, price: 179000, multiplier: 2.0,
+      description: 'Double your visibility for 48 hours', isActive: true,
+    };
+
     it('should activate pending boost', async () => {
       const mockBoost = {
         id: 'boost-1',
@@ -659,18 +706,14 @@ describe('CompanionsService', () => {
       };
 
       mockPrismaService.profileBoost.findUnique.mockResolvedValue(mockBoost);
-      mockPrismaService.profileBoost.update.mockResolvedValue({
-        ...mockBoost,
-        status: 'ACTIVE',
-        startedAt: expect.any(Date),
-        expiresAt: expect.any(Date),
-      });
+      mockPrismaService.boostPricingTier.findFirst.mockResolvedValue(mockPremiumPricing);
+      mockPrismaService.profileBoost.updateMany.mockResolvedValue({ count: 1 });
 
       await service.activateBoost('boost-1');
 
-      expect(mockPrismaService.profileBoost.update).toHaveBeenCalledWith(
+      expect(mockPrismaService.profileBoost.updateMany).toHaveBeenCalledWith(
         expect.objectContaining({
-          where: { id: 'boost-1' },
+          where: { id: 'boost-1', status: 'PENDING' },
           data: expect.objectContaining({
             status: 'ACTIVE',
           }),
@@ -689,7 +732,7 @@ describe('CompanionsService', () => {
 
       await service.activateBoost('boost-1');
 
-      expect(mockPrismaService.profileBoost.update).not.toHaveBeenCalled();
+      expect(mockPrismaService.profileBoost.updateMany).not.toHaveBeenCalled();
     });
 
     it('should handle non-existent boost gracefully', async () => {
@@ -697,7 +740,7 @@ describe('CompanionsService', () => {
 
       await service.activateBoost('non-existent');
 
-      expect(mockPrismaService.profileBoost.update).not.toHaveBeenCalled();
+      expect(mockPrismaService.profileBoost.updateMany).not.toHaveBeenCalled();
     });
   });
 

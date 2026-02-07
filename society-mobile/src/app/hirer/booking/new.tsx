@@ -123,7 +123,7 @@ export default function BookingFormScreen() {
       reviewCount: c.reviewCount ?? 0,
       hourlyRate: c.hourlyRate || 0,
       location: c.languages?.join(', ') || '',
-      isVerified: c.isVerified ?? c.verificationStatus === 'verified',
+      isVerified: c.isVerified ?? c.verificationStatus === 'VERIFIED',
     };
   }, [companionData]);
 

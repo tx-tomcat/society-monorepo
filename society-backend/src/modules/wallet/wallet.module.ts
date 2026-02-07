@@ -1,12 +1,12 @@
+import { IdempotencyService } from '@/common/services/idempotency.service';
+import { SepayService } from '@/modules/payments/services/sepay.service';
+import { PrismaModule } from '@/prisma/prisma.module';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
-import { PrismaModule } from '@/prisma/prisma.module';
-import { SepayService } from '@/modules/payments/services/sepay.service';
-import { IdempotencyService } from '@/common/services/idempotency.service';
-import { WalletService } from './wallet.service';
-import { WalletController, SepayWebhookController } from './wallet.controller';
+import { SepayWebhookController, WalletController } from './wallet.controller';
 import { WalletScheduler } from './wallet.scheduler';
+import { WalletService } from './wallet.service';
 
 @Module({
   imports: [ConfigModule, PrismaModule, ScheduleModule.forRoot()],
@@ -14,4 +14,4 @@ import { WalletScheduler } from './wallet.scheduler';
   providers: [WalletService, SepayService, WalletScheduler, IdempotencyService],
   exports: [WalletService, SepayService],
 })
-export class WalletModule {}
+export class WalletModule { }

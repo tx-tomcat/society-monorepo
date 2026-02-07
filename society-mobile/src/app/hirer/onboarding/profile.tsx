@@ -141,7 +141,7 @@ export default function HirerOnboardingProfile() {
 
       console.log('Profile updated successfully');
       // Navigate to main hirer app after profile completion
-      router.replace('/(app)' as Href);
+      router.push('/hirer/onboarding/phone' as Href);
     } catch (error) {
       console.error('Profile creation error:', error);
       Alert.alert(

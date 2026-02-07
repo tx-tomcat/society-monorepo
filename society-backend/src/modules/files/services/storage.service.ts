@@ -11,6 +11,15 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { SignedUrlOptions } from '../interfaces/file.interface';
 
+/**
+ * Rewrite legacy R2 dev URLs to the custom domain.
+ * e.g. https://pub-xxx.r2.dev/path → https://static.hireme.vn/path
+ */
+export function normalizeFileUrl(url: string, publicUrl: string): string {
+  if (!url || !publicUrl) return url;
+  return url.replace(/^https:\/\/pub-[a-z0-9]+\.r2\.dev\//, `${publicUrl}/`);
+}
+
 @Injectable()
 export class StorageService {
   private readonly logger = new Logger(StorageService.name);
@@ -157,6 +166,10 @@ export class StorageService {
 
   getPublicUrl(key: string): string {
     return `${this.publicUrl}/${key}`;
+  }
+
+  normalizeUrl(url: string): string {
+    return normalizeFileUrl(url, this.publicUrl);
   }
 
   generateKey(userId: string, category: string, filename: string): string {

@@ -101,6 +101,11 @@ const CACHED_MODELS = [
   "webhookLog",
   // Platform Config
   "platformConfig",
+  // Boost Pricing
+  "boostPricingTier",
+  // Membership
+  "membershipPricingTier",
+  "hirerMembership",
 ] as const;
 
 type CachedModelName = (typeof CACHED_MODELS)[number];
@@ -250,6 +255,20 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
   ): Promise<void> {
     if (this.cacheProxy) {
       await this.cacheProxy.invalidateCache(model, args);
+    }
+  }
+
+  /**
+   * Invalidate a specific cached query by exact model, method, and args.
+   * Use when you know the exact query shape to invalidate.
+   */
+  async invalidateExactQuery(
+    model: string,
+    method: string,
+    args: Record<string, unknown>,
+  ): Promise<void> {
+    if (this.cacheProxy) {
+      await this.cacheProxy.invalidateExactQuery(model, method, args);
     }
   }
 
@@ -545,4 +564,9 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
   declare webhookLog: PrismaClient["webhookLog"];
   // Platform Config
   declare platformConfig: PrismaClient["platformConfig"];
+  // Boost Pricing
+  declare boostPricingTier: PrismaClient["boostPricingTier"];
+  // Membership
+  declare membershipPricingTier: PrismaClient["membershipPricingTier"];
+  declare hirerMembership: PrismaClient["hirerMembership"];
 }

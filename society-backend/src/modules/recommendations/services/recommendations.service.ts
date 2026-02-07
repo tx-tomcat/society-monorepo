@@ -1,6 +1,6 @@
 import { CacheService } from '@/modules/cache/cache.service';
 import { PrismaService } from '@/prisma/prisma.service';
-import { InteractionEventType } from '@generated/client';
+import { BoostStatus, InteractionEventType } from '@generated/client';
 import { Injectable, Logger } from '@nestjs/common';
 import { TrackInteractionDto } from '../dto/track-interaction.dto';
 import { ScoredCompanion, ScoringService } from './scoring.service';
@@ -66,19 +66,23 @@ export class RecommendationsService {
     const strategy: 'cold_start' | 'hybrid' =
       interactionCount < COLD_START_THRESHOLD ? 'cold_start' : 'hybrid';
 
-    // Get candidate companions (exclude blocked, self, already booked today)
-    const candidates = await this.getCandidateCompanions(userId);
+    // Get candidate companions and active boosts in parallel
+    const [candidates, boostMultipliers] = await Promise.all([
+      this.getCandidateCompanions(userId),
+      this.getActiveBoostMultipliers(),
+    ]);
 
     let scoredCompanions: ScoredCompanion[];
 
     if (strategy === 'cold_start') {
-      // Cold start: Use popularity + profile quality
-      scoredCompanions = await this.getColdStartRecommendations(candidates);
+      // Cold start: Use popularity + profile quality + boost priority
+      scoredCompanions = await this.getColdStartRecommendations(candidates, boostMultipliers);
     } else {
-      // Hybrid: Use full scoring
+      // Hybrid: Use full scoring with boost multipliers
       scoredCompanions = await this.scoringService.calculateScores(
         userId,
         candidates,
+        boostMultipliers,
       );
     }
 
@@ -229,11 +233,39 @@ export class RecommendationsService {
   }
 
   /**
+   * Get active boost multipliers for all currently boosted companions
+   * Returns a map of CompanionProfile.id → multiplier
+   */
+  private async getActiveBoostMultipliers(): Promise<Map<string, number>> {
+    const activeBoosts = await this.prisma.profileBoost.findMany({
+      where: {
+        status: BoostStatus.ACTIVE,
+        expiresAt: { gt: new Date() },
+      },
+      select: {
+        companionId: true,
+        multiplier: true,
+      },
+      orderBy: { multiplier: 'desc' },
+    });
+
+    const boostMap = new Map<string, number>();
+    for (const boost of activeBoosts) {
+      // Keep the highest multiplier if a companion has multiple boosts
+      if (!boostMap.has(boost.companionId)) {
+        boostMap.set(boost.companionId, Number(boost.multiplier));
+      }
+    }
+    return boostMap;
+  }
+
+  /**
    * Cold start recommendations (new users)
    * candidateIds are CompanionProfile IDs
    */
   private async getColdStartRecommendations(
     candidateIds: string[],
+    boostMultipliers: Map<string, number> = new Map(),
   ): Promise<ScoredCompanion[]> {
     if (candidateIds.length === 0) return [];
 
@@ -266,12 +298,16 @@ export class RecommendationsService {
       orderBy: [{ ratingAvg: 'desc' }, { completedBookings: 'desc' }],
     });
 
-    return companions.map((c) => {
+    const scored = companions.map((c) => {
       const quality =
         (c.photos.length >= 3 ? 0.3 : 0) +
         (c.user.isVerified ? 0.3 : 0) +
         (c.bio && c.bio.length > 50 ? 0.2 : 0) +
         (Number(c.ratingAvg) / 5) * 0.2;
+
+      // Apply boost multiplier
+      const boostMultiplier = boostMultipliers.get(c.id) ?? 0;
+      const score = boostMultiplier > 0 ? quality * boostMultiplier : quality;
 
       // Calculate age from dateOfBirth
       const age = c.user.dateOfBirth
@@ -283,8 +319,8 @@ export class RecommendationsService {
 
       return {
         companionId: c.id, // Use CompanionProfile.id, not userId
-        score: quality,
-        reason: 'Popular in your area',
+        score,
+        reason: boostMultiplier > 0 ? 'Featured profile' : 'Popular in your area',
         breakdown: {
           preferenceMatch: 0.5,
           profileQuality: quality,
@@ -312,5 +348,8 @@ export class RecommendationsService {
         },
       };
     });
+
+    // Sort by score descending so boosted profiles appear first
+    return scored.sort((a, b) => b.score - a.score);
   }
 }

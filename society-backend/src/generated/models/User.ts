@@ -371,6 +371,7 @@ export type UserWhereInput = {
   emergencyContacts?: Prisma.EmergencyContactListRelationFilter
   emergencyEvents?: Prisma.EmergencyEventListRelationFilter
   resolvedEmergencies?: Prisma.EmergencyEventListRelationFilter
+  memberships?: Prisma.HirerMembershipListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -436,6 +437,7 @@ export type UserOrderByWithRelationInput = {
   emergencyContacts?: Prisma.EmergencyContactOrderByRelationAggregateInput
   emergencyEvents?: Prisma.EmergencyEventOrderByRelationAggregateInput
   resolvedEmergencies?: Prisma.EmergencyEventOrderByRelationAggregateInput
+  memberships?: Prisma.HirerMembershipOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -504,6 +506,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   emergencyContacts?: Prisma.EmergencyContactListRelationFilter
   emergencyEvents?: Prisma.EmergencyEventListRelationFilter
   resolvedEmergencies?: Prisma.EmergencyEventListRelationFilter
+  memberships?: Prisma.HirerMembershipListRelationFilter
 }, "id" | "zaloId" | "phoneHash">
 
 export type UserOrderByWithAggregationInput = {
@@ -620,6 +623,7 @@ export type UserCreateInput = {
   emergencyContacts?: Prisma.EmergencyContactCreateNestedManyWithoutUserInput
   emergencyEvents?: Prisma.EmergencyEventCreateNestedManyWithoutUserInput
   resolvedEmergencies?: Prisma.EmergencyEventCreateNestedManyWithoutResolvedByInput
+  memberships?: Prisma.HirerMembershipCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -684,6 +688,7 @@ export type UserUncheckedCreateInput = {
   emergencyContacts?: Prisma.EmergencyContactUncheckedCreateNestedManyWithoutUserInput
   emergencyEvents?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutUserInput
   resolvedEmergencies?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutResolvedByInput
+  memberships?: Prisma.HirerMembershipUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserUpdateInput = {
@@ -748,6 +753,7 @@ export type UserUpdateInput = {
   emergencyContacts?: Prisma.EmergencyContactUpdateManyWithoutUserNestedInput
   emergencyEvents?: Prisma.EmergencyEventUpdateManyWithoutUserNestedInput
   resolvedEmergencies?: Prisma.EmergencyEventUpdateManyWithoutResolvedByNestedInput
+  memberships?: Prisma.HirerMembershipUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -812,6 +818,7 @@ export type UserUncheckedUpdateInput = {
   emergencyContacts?: Prisma.EmergencyContactUncheckedUpdateManyWithoutUserNestedInput
   emergencyEvents?: Prisma.EmergencyEventUncheckedUpdateManyWithoutUserNestedInput
   resolvedEmergencies?: Prisma.EmergencyEventUncheckedUpdateManyWithoutResolvedByNestedInput
+  memberships?: Prisma.HirerMembershipUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -1653,6 +1660,20 @@ export type UserUpdateOneRequiredWithoutPaymentRequestsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutPaymentRequestsInput, Prisma.UserUpdateWithoutPaymentRequestsInput>, Prisma.UserUncheckedUpdateWithoutPaymentRequestsInput>
 }
 
+export type UserCreateNestedOneWithoutMembershipsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutMembershipsInput, Prisma.UserUncheckedCreateWithoutMembershipsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutMembershipsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutMembershipsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutMembershipsInput, Prisma.UserUncheckedCreateWithoutMembershipsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutMembershipsInput
+  upsert?: Prisma.UserUpsertWithoutMembershipsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutMembershipsInput, Prisma.UserUpdateWithoutMembershipsInput>, Prisma.UserUncheckedUpdateWithoutMembershipsInput>
+}
+
 export type UserCreateWithoutSettingsInput = {
   id?: string
   zaloId: string
@@ -1714,6 +1735,7 @@ export type UserCreateWithoutSettingsInput = {
   emergencyContacts?: Prisma.EmergencyContactCreateNestedManyWithoutUserInput
   emergencyEvents?: Prisma.EmergencyEventCreateNestedManyWithoutUserInput
   resolvedEmergencies?: Prisma.EmergencyEventCreateNestedManyWithoutResolvedByInput
+  memberships?: Prisma.HirerMembershipCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutSettingsInput = {
@@ -1777,6 +1799,7 @@ export type UserUncheckedCreateWithoutSettingsInput = {
   emergencyContacts?: Prisma.EmergencyContactUncheckedCreateNestedManyWithoutUserInput
   emergencyEvents?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutUserInput
   resolvedEmergencies?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutResolvedByInput
+  memberships?: Prisma.HirerMembershipUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutSettingsInput = {
@@ -1856,6 +1879,7 @@ export type UserUpdateWithoutSettingsInput = {
   emergencyContacts?: Prisma.EmergencyContactUpdateManyWithoutUserNestedInput
   emergencyEvents?: Prisma.EmergencyEventUpdateManyWithoutUserNestedInput
   resolvedEmergencies?: Prisma.EmergencyEventUpdateManyWithoutResolvedByNestedInput
+  memberships?: Prisma.HirerMembershipUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSettingsInput = {
@@ -1919,6 +1943,7 @@ export type UserUncheckedUpdateWithoutSettingsInput = {
   emergencyContacts?: Prisma.EmergencyContactUncheckedUpdateManyWithoutUserNestedInput
   emergencyEvents?: Prisma.EmergencyEventUncheckedUpdateManyWithoutUserNestedInput
   resolvedEmergencies?: Prisma.EmergencyEventUncheckedUpdateManyWithoutResolvedByNestedInput
+  memberships?: Prisma.HirerMembershipUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutDevicesInput = {
@@ -1982,6 +2007,7 @@ export type UserCreateWithoutDevicesInput = {
   emergencyContacts?: Prisma.EmergencyContactCreateNestedManyWithoutUserInput
   emergencyEvents?: Prisma.EmergencyEventCreateNestedManyWithoutUserInput
   resolvedEmergencies?: Prisma.EmergencyEventCreateNestedManyWithoutResolvedByInput
+  memberships?: Prisma.HirerMembershipCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutDevicesInput = {
@@ -2045,6 +2071,7 @@ export type UserUncheckedCreateWithoutDevicesInput = {
   emergencyContacts?: Prisma.EmergencyContactUncheckedCreateNestedManyWithoutUserInput
   emergencyEvents?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutUserInput
   resolvedEmergencies?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutResolvedByInput
+  memberships?: Prisma.HirerMembershipUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutDevicesInput = {
@@ -2124,6 +2151,7 @@ export type UserUpdateWithoutDevicesInput = {
   emergencyContacts?: Prisma.EmergencyContactUpdateManyWithoutUserNestedInput
   emergencyEvents?: Prisma.EmergencyEventUpdateManyWithoutUserNestedInput
   resolvedEmergencies?: Prisma.EmergencyEventUpdateManyWithoutResolvedByNestedInput
+  memberships?: Prisma.HirerMembershipUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutDevicesInput = {
@@ -2187,6 +2215,7 @@ export type UserUncheckedUpdateWithoutDevicesInput = {
   emergencyContacts?: Prisma.EmergencyContactUncheckedUpdateManyWithoutUserNestedInput
   emergencyEvents?: Prisma.EmergencyEventUncheckedUpdateManyWithoutUserNestedInput
   resolvedEmergencies?: Prisma.EmergencyEventUncheckedUpdateManyWithoutResolvedByNestedInput
+  memberships?: Prisma.HirerMembershipUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutSessionsInput = {
@@ -2250,6 +2279,7 @@ export type UserCreateWithoutSessionsInput = {
   emergencyContacts?: Prisma.EmergencyContactCreateNestedManyWithoutUserInput
   emergencyEvents?: Prisma.EmergencyEventCreateNestedManyWithoutUserInput
   resolvedEmergencies?: Prisma.EmergencyEventCreateNestedManyWithoutResolvedByInput
+  memberships?: Prisma.HirerMembershipCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutSessionsInput = {
@@ -2313,6 +2343,7 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   emergencyContacts?: Prisma.EmergencyContactUncheckedCreateNestedManyWithoutUserInput
   emergencyEvents?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutUserInput
   resolvedEmergencies?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutResolvedByInput
+  memberships?: Prisma.HirerMembershipUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutSessionsInput = {
@@ -2392,6 +2423,7 @@ export type UserUpdateWithoutSessionsInput = {
   emergencyContacts?: Prisma.EmergencyContactUpdateManyWithoutUserNestedInput
   emergencyEvents?: Prisma.EmergencyEventUpdateManyWithoutUserNestedInput
   resolvedEmergencies?: Prisma.EmergencyEventUpdateManyWithoutResolvedByNestedInput
+  memberships?: Prisma.HirerMembershipUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSessionsInput = {
@@ -2455,6 +2487,7 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   emergencyContacts?: Prisma.EmergencyContactUncheckedUpdateManyWithoutUserNestedInput
   emergencyEvents?: Prisma.EmergencyEventUncheckedUpdateManyWithoutUserNestedInput
   resolvedEmergencies?: Prisma.EmergencyEventUncheckedUpdateManyWithoutResolvedByNestedInput
+  memberships?: Prisma.HirerMembershipUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutCompanionProfileInput = {
@@ -2518,6 +2551,7 @@ export type UserCreateWithoutCompanionProfileInput = {
   emergencyContacts?: Prisma.EmergencyContactCreateNestedManyWithoutUserInput
   emergencyEvents?: Prisma.EmergencyEventCreateNestedManyWithoutUserInput
   resolvedEmergencies?: Prisma.EmergencyEventCreateNestedManyWithoutResolvedByInput
+  memberships?: Prisma.HirerMembershipCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutCompanionProfileInput = {
@@ -2581,6 +2615,7 @@ export type UserUncheckedCreateWithoutCompanionProfileInput = {
   emergencyContacts?: Prisma.EmergencyContactUncheckedCreateNestedManyWithoutUserInput
   emergencyEvents?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutUserInput
   resolvedEmergencies?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutResolvedByInput
+  memberships?: Prisma.HirerMembershipUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutCompanionProfileInput = {
@@ -2660,6 +2695,7 @@ export type UserUpdateWithoutCompanionProfileInput = {
   emergencyContacts?: Prisma.EmergencyContactUpdateManyWithoutUserNestedInput
   emergencyEvents?: Prisma.EmergencyEventUpdateManyWithoutUserNestedInput
   resolvedEmergencies?: Prisma.EmergencyEventUpdateManyWithoutResolvedByNestedInput
+  memberships?: Prisma.HirerMembershipUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCompanionProfileInput = {
@@ -2723,6 +2759,7 @@ export type UserUncheckedUpdateWithoutCompanionProfileInput = {
   emergencyContacts?: Prisma.EmergencyContactUncheckedUpdateManyWithoutUserNestedInput
   emergencyEvents?: Prisma.EmergencyEventUncheckedUpdateManyWithoutUserNestedInput
   resolvedEmergencies?: Prisma.EmergencyEventUncheckedUpdateManyWithoutResolvedByNestedInput
+  memberships?: Prisma.HirerMembershipUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutHirerProfileInput = {
@@ -2786,6 +2823,7 @@ export type UserCreateWithoutHirerProfileInput = {
   emergencyContacts?: Prisma.EmergencyContactCreateNestedManyWithoutUserInput
   emergencyEvents?: Prisma.EmergencyEventCreateNestedManyWithoutUserInput
   resolvedEmergencies?: Prisma.EmergencyEventCreateNestedManyWithoutResolvedByInput
+  memberships?: Prisma.HirerMembershipCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutHirerProfileInput = {
@@ -2849,6 +2887,7 @@ export type UserUncheckedCreateWithoutHirerProfileInput = {
   emergencyContacts?: Prisma.EmergencyContactUncheckedCreateNestedManyWithoutUserInput
   emergencyEvents?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutUserInput
   resolvedEmergencies?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutResolvedByInput
+  memberships?: Prisma.HirerMembershipUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutHirerProfileInput = {
@@ -2928,6 +2967,7 @@ export type UserUpdateWithoutHirerProfileInput = {
   emergencyContacts?: Prisma.EmergencyContactUpdateManyWithoutUserNestedInput
   emergencyEvents?: Prisma.EmergencyEventUpdateManyWithoutUserNestedInput
   resolvedEmergencies?: Prisma.EmergencyEventUpdateManyWithoutResolvedByNestedInput
+  memberships?: Prisma.HirerMembershipUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutHirerProfileInput = {
@@ -2991,6 +3031,7 @@ export type UserUncheckedUpdateWithoutHirerProfileInput = {
   emergencyContacts?: Prisma.EmergencyContactUncheckedUpdateManyWithoutUserNestedInput
   emergencyEvents?: Prisma.EmergencyEventUncheckedUpdateManyWithoutUserNestedInput
   resolvedEmergencies?: Prisma.EmergencyEventUncheckedUpdateManyWithoutResolvedByNestedInput
+  memberships?: Prisma.HirerMembershipUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutVerificationsInput = {
@@ -3054,6 +3095,7 @@ export type UserCreateWithoutVerificationsInput = {
   emergencyContacts?: Prisma.EmergencyContactCreateNestedManyWithoutUserInput
   emergencyEvents?: Prisma.EmergencyEventCreateNestedManyWithoutUserInput
   resolvedEmergencies?: Prisma.EmergencyEventCreateNestedManyWithoutResolvedByInput
+  memberships?: Prisma.HirerMembershipCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutVerificationsInput = {
@@ -3117,6 +3159,7 @@ export type UserUncheckedCreateWithoutVerificationsInput = {
   emergencyContacts?: Prisma.EmergencyContactUncheckedCreateNestedManyWithoutUserInput
   emergencyEvents?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutUserInput
   resolvedEmergencies?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutResolvedByInput
+  memberships?: Prisma.HirerMembershipUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutVerificationsInput = {
@@ -3196,6 +3239,7 @@ export type UserUpdateWithoutVerificationsInput = {
   emergencyContacts?: Prisma.EmergencyContactUpdateManyWithoutUserNestedInput
   emergencyEvents?: Prisma.EmergencyEventUpdateManyWithoutUserNestedInput
   resolvedEmergencies?: Prisma.EmergencyEventUpdateManyWithoutResolvedByNestedInput
+  memberships?: Prisma.HirerMembershipUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutVerificationsInput = {
@@ -3259,6 +3303,7 @@ export type UserUncheckedUpdateWithoutVerificationsInput = {
   emergencyContacts?: Prisma.EmergencyContactUncheckedUpdateManyWithoutUserNestedInput
   emergencyEvents?: Prisma.EmergencyEventUncheckedUpdateManyWithoutUserNestedInput
   resolvedEmergencies?: Prisma.EmergencyEventUncheckedUpdateManyWithoutResolvedByNestedInput
+  memberships?: Prisma.HirerMembershipUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutPhotoVerificationsInput = {
@@ -3322,6 +3367,7 @@ export type UserCreateWithoutPhotoVerificationsInput = {
   emergencyContacts?: Prisma.EmergencyContactCreateNestedManyWithoutUserInput
   emergencyEvents?: Prisma.EmergencyEventCreateNestedManyWithoutUserInput
   resolvedEmergencies?: Prisma.EmergencyEventCreateNestedManyWithoutResolvedByInput
+  memberships?: Prisma.HirerMembershipCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutPhotoVerificationsInput = {
@@ -3385,6 +3431,7 @@ export type UserUncheckedCreateWithoutPhotoVerificationsInput = {
   emergencyContacts?: Prisma.EmergencyContactUncheckedCreateNestedManyWithoutUserInput
   emergencyEvents?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutUserInput
   resolvedEmergencies?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutResolvedByInput
+  memberships?: Prisma.HirerMembershipUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutPhotoVerificationsInput = {
@@ -3464,6 +3511,7 @@ export type UserUpdateWithoutPhotoVerificationsInput = {
   emergencyContacts?: Prisma.EmergencyContactUpdateManyWithoutUserNestedInput
   emergencyEvents?: Prisma.EmergencyEventUpdateManyWithoutUserNestedInput
   resolvedEmergencies?: Prisma.EmergencyEventUpdateManyWithoutResolvedByNestedInput
+  memberships?: Prisma.HirerMembershipUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutPhotoVerificationsInput = {
@@ -3527,6 +3575,7 @@ export type UserUncheckedUpdateWithoutPhotoVerificationsInput = {
   emergencyContacts?: Prisma.EmergencyContactUncheckedUpdateManyWithoutUserNestedInput
   emergencyEvents?: Prisma.EmergencyEventUncheckedUpdateManyWithoutUserNestedInput
   resolvedEmergencies?: Prisma.EmergencyEventUncheckedUpdateManyWithoutResolvedByNestedInput
+  memberships?: Prisma.HirerMembershipUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutHirerBookingsInput = {
@@ -3590,6 +3639,7 @@ export type UserCreateWithoutHirerBookingsInput = {
   emergencyContacts?: Prisma.EmergencyContactCreateNestedManyWithoutUserInput
   emergencyEvents?: Prisma.EmergencyEventCreateNestedManyWithoutUserInput
   resolvedEmergencies?: Prisma.EmergencyEventCreateNestedManyWithoutResolvedByInput
+  memberships?: Prisma.HirerMembershipCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutHirerBookingsInput = {
@@ -3653,6 +3703,7 @@ export type UserUncheckedCreateWithoutHirerBookingsInput = {
   emergencyContacts?: Prisma.EmergencyContactUncheckedCreateNestedManyWithoutUserInput
   emergencyEvents?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutUserInput
   resolvedEmergencies?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutResolvedByInput
+  memberships?: Prisma.HirerMembershipUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutHirerBookingsInput = {
@@ -3721,6 +3772,7 @@ export type UserCreateWithoutCompanionBookingsInput = {
   emergencyContacts?: Prisma.EmergencyContactCreateNestedManyWithoutUserInput
   emergencyEvents?: Prisma.EmergencyEventCreateNestedManyWithoutUserInput
   resolvedEmergencies?: Prisma.EmergencyEventCreateNestedManyWithoutResolvedByInput
+  memberships?: Prisma.HirerMembershipCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutCompanionBookingsInput = {
@@ -3784,6 +3836,7 @@ export type UserUncheckedCreateWithoutCompanionBookingsInput = {
   emergencyContacts?: Prisma.EmergencyContactUncheckedCreateNestedManyWithoutUserInput
   emergencyEvents?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutUserInput
   resolvedEmergencies?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutResolvedByInput
+  memberships?: Prisma.HirerMembershipUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutCompanionBookingsInput = {
@@ -3863,6 +3916,7 @@ export type UserUpdateWithoutHirerBookingsInput = {
   emergencyContacts?: Prisma.EmergencyContactUpdateManyWithoutUserNestedInput
   emergencyEvents?: Prisma.EmergencyEventUpdateManyWithoutUserNestedInput
   resolvedEmergencies?: Prisma.EmergencyEventUpdateManyWithoutResolvedByNestedInput
+  memberships?: Prisma.HirerMembershipUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutHirerBookingsInput = {
@@ -3926,6 +3980,7 @@ export type UserUncheckedUpdateWithoutHirerBookingsInput = {
   emergencyContacts?: Prisma.EmergencyContactUncheckedUpdateManyWithoutUserNestedInput
   emergencyEvents?: Prisma.EmergencyEventUncheckedUpdateManyWithoutUserNestedInput
   resolvedEmergencies?: Prisma.EmergencyEventUncheckedUpdateManyWithoutResolvedByNestedInput
+  memberships?: Prisma.HirerMembershipUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserUpsertWithoutCompanionBookingsInput = {
@@ -4000,6 +4055,7 @@ export type UserUpdateWithoutCompanionBookingsInput = {
   emergencyContacts?: Prisma.EmergencyContactUpdateManyWithoutUserNestedInput
   emergencyEvents?: Prisma.EmergencyEventUpdateManyWithoutUserNestedInput
   resolvedEmergencies?: Prisma.EmergencyEventUpdateManyWithoutResolvedByNestedInput
+  memberships?: Prisma.HirerMembershipUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCompanionBookingsInput = {
@@ -4063,6 +4119,7 @@ export type UserUncheckedUpdateWithoutCompanionBookingsInput = {
   emergencyContacts?: Prisma.EmergencyContactUncheckedUpdateManyWithoutUserNestedInput
   emergencyEvents?: Prisma.EmergencyEventUncheckedUpdateManyWithoutUserNestedInput
   resolvedEmergencies?: Prisma.EmergencyEventUncheckedUpdateManyWithoutResolvedByNestedInput
+  memberships?: Prisma.HirerMembershipUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutPaymentsInput = {
@@ -4126,6 +4183,7 @@ export type UserCreateWithoutPaymentsInput = {
   emergencyContacts?: Prisma.EmergencyContactCreateNestedManyWithoutUserInput
   emergencyEvents?: Prisma.EmergencyEventCreateNestedManyWithoutUserInput
   resolvedEmergencies?: Prisma.EmergencyEventCreateNestedManyWithoutResolvedByInput
+  memberships?: Prisma.HirerMembershipCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutPaymentsInput = {
@@ -4189,6 +4247,7 @@ export type UserUncheckedCreateWithoutPaymentsInput = {
   emergencyContacts?: Prisma.EmergencyContactUncheckedCreateNestedManyWithoutUserInput
   emergencyEvents?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutUserInput
   resolvedEmergencies?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutResolvedByInput
+  memberships?: Prisma.HirerMembershipUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutPaymentsInput = {
@@ -4268,6 +4327,7 @@ export type UserUpdateWithoutPaymentsInput = {
   emergencyContacts?: Prisma.EmergencyContactUpdateManyWithoutUserNestedInput
   emergencyEvents?: Prisma.EmergencyEventUpdateManyWithoutUserNestedInput
   resolvedEmergencies?: Prisma.EmergencyEventUpdateManyWithoutResolvedByNestedInput
+  memberships?: Prisma.HirerMembershipUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutPaymentsInput = {
@@ -4331,6 +4391,7 @@ export type UserUncheckedUpdateWithoutPaymentsInput = {
   emergencyContacts?: Prisma.EmergencyContactUncheckedUpdateManyWithoutUserNestedInput
   emergencyEvents?: Prisma.EmergencyEventUncheckedUpdateManyWithoutUserNestedInput
   resolvedEmergencies?: Prisma.EmergencyEventUncheckedUpdateManyWithoutResolvedByNestedInput
+  memberships?: Prisma.HirerMembershipUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutReviewsGivenInput = {
@@ -4394,6 +4455,7 @@ export type UserCreateWithoutReviewsGivenInput = {
   emergencyContacts?: Prisma.EmergencyContactCreateNestedManyWithoutUserInput
   emergencyEvents?: Prisma.EmergencyEventCreateNestedManyWithoutUserInput
   resolvedEmergencies?: Prisma.EmergencyEventCreateNestedManyWithoutResolvedByInput
+  memberships?: Prisma.HirerMembershipCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutReviewsGivenInput = {
@@ -4457,6 +4519,7 @@ export type UserUncheckedCreateWithoutReviewsGivenInput = {
   emergencyContacts?: Prisma.EmergencyContactUncheckedCreateNestedManyWithoutUserInput
   emergencyEvents?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutUserInput
   resolvedEmergencies?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutResolvedByInput
+  memberships?: Prisma.HirerMembershipUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutReviewsGivenInput = {
@@ -4525,6 +4588,7 @@ export type UserCreateWithoutReviewsReceivedInput = {
   emergencyContacts?: Prisma.EmergencyContactCreateNestedManyWithoutUserInput
   emergencyEvents?: Prisma.EmergencyEventCreateNestedManyWithoutUserInput
   resolvedEmergencies?: Prisma.EmergencyEventCreateNestedManyWithoutResolvedByInput
+  memberships?: Prisma.HirerMembershipCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutReviewsReceivedInput = {
@@ -4588,6 +4652,7 @@ export type UserUncheckedCreateWithoutReviewsReceivedInput = {
   emergencyContacts?: Prisma.EmergencyContactUncheckedCreateNestedManyWithoutUserInput
   emergencyEvents?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutUserInput
   resolvedEmergencies?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutResolvedByInput
+  memberships?: Prisma.HirerMembershipUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutReviewsReceivedInput = {
@@ -4667,6 +4732,7 @@ export type UserUpdateWithoutReviewsGivenInput = {
   emergencyContacts?: Prisma.EmergencyContactUpdateManyWithoutUserNestedInput
   emergencyEvents?: Prisma.EmergencyEventUpdateManyWithoutUserNestedInput
   resolvedEmergencies?: Prisma.EmergencyEventUpdateManyWithoutResolvedByNestedInput
+  memberships?: Prisma.HirerMembershipUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutReviewsGivenInput = {
@@ -4730,6 +4796,7 @@ export type UserUncheckedUpdateWithoutReviewsGivenInput = {
   emergencyContacts?: Prisma.EmergencyContactUncheckedUpdateManyWithoutUserNestedInput
   emergencyEvents?: Prisma.EmergencyEventUncheckedUpdateManyWithoutUserNestedInput
   resolvedEmergencies?: Prisma.EmergencyEventUncheckedUpdateManyWithoutResolvedByNestedInput
+  memberships?: Prisma.HirerMembershipUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserUpsertWithoutReviewsReceivedInput = {
@@ -4804,6 +4871,7 @@ export type UserUpdateWithoutReviewsReceivedInput = {
   emergencyContacts?: Prisma.EmergencyContactUpdateManyWithoutUserNestedInput
   emergencyEvents?: Prisma.EmergencyEventUpdateManyWithoutUserNestedInput
   resolvedEmergencies?: Prisma.EmergencyEventUpdateManyWithoutResolvedByNestedInput
+  memberships?: Prisma.HirerMembershipUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutReviewsReceivedInput = {
@@ -4867,6 +4935,7 @@ export type UserUncheckedUpdateWithoutReviewsReceivedInput = {
   emergencyContacts?: Prisma.EmergencyContactUncheckedUpdateManyWithoutUserNestedInput
   emergencyEvents?: Prisma.EmergencyEventUncheckedUpdateManyWithoutUserNestedInput
   resolvedEmergencies?: Prisma.EmergencyEventUncheckedUpdateManyWithoutResolvedByNestedInput
+  memberships?: Prisma.HirerMembershipUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutConversationsAsHirerInput = {
@@ -4930,6 +4999,7 @@ export type UserCreateWithoutConversationsAsHirerInput = {
   emergencyContacts?: Prisma.EmergencyContactCreateNestedManyWithoutUserInput
   emergencyEvents?: Prisma.EmergencyEventCreateNestedManyWithoutUserInput
   resolvedEmergencies?: Prisma.EmergencyEventCreateNestedManyWithoutResolvedByInput
+  memberships?: Prisma.HirerMembershipCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutConversationsAsHirerInput = {
@@ -4993,6 +5063,7 @@ export type UserUncheckedCreateWithoutConversationsAsHirerInput = {
   emergencyContacts?: Prisma.EmergencyContactUncheckedCreateNestedManyWithoutUserInput
   emergencyEvents?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutUserInput
   resolvedEmergencies?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutResolvedByInput
+  memberships?: Prisma.HirerMembershipUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutConversationsAsHirerInput = {
@@ -5061,6 +5132,7 @@ export type UserCreateWithoutConversationsAsCompanionInput = {
   emergencyContacts?: Prisma.EmergencyContactCreateNestedManyWithoutUserInput
   emergencyEvents?: Prisma.EmergencyEventCreateNestedManyWithoutUserInput
   resolvedEmergencies?: Prisma.EmergencyEventCreateNestedManyWithoutResolvedByInput
+  memberships?: Prisma.HirerMembershipCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutConversationsAsCompanionInput = {
@@ -5124,6 +5196,7 @@ export type UserUncheckedCreateWithoutConversationsAsCompanionInput = {
   emergencyContacts?: Prisma.EmergencyContactUncheckedCreateNestedManyWithoutUserInput
   emergencyEvents?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutUserInput
   resolvedEmergencies?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutResolvedByInput
+  memberships?: Prisma.HirerMembershipUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutConversationsAsCompanionInput = {
@@ -5203,6 +5276,7 @@ export type UserUpdateWithoutConversationsAsHirerInput = {
   emergencyContacts?: Prisma.EmergencyContactUpdateManyWithoutUserNestedInput
   emergencyEvents?: Prisma.EmergencyEventUpdateManyWithoutUserNestedInput
   resolvedEmergencies?: Prisma.EmergencyEventUpdateManyWithoutResolvedByNestedInput
+  memberships?: Prisma.HirerMembershipUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutConversationsAsHirerInput = {
@@ -5266,6 +5340,7 @@ export type UserUncheckedUpdateWithoutConversationsAsHirerInput = {
   emergencyContacts?: Prisma.EmergencyContactUncheckedUpdateManyWithoutUserNestedInput
   emergencyEvents?: Prisma.EmergencyEventUncheckedUpdateManyWithoutUserNestedInput
   resolvedEmergencies?: Prisma.EmergencyEventUncheckedUpdateManyWithoutResolvedByNestedInput
+  memberships?: Prisma.HirerMembershipUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserUpsertWithoutConversationsAsCompanionInput = {
@@ -5340,6 +5415,7 @@ export type UserUpdateWithoutConversationsAsCompanionInput = {
   emergencyContacts?: Prisma.EmergencyContactUpdateManyWithoutUserNestedInput
   emergencyEvents?: Prisma.EmergencyEventUpdateManyWithoutUserNestedInput
   resolvedEmergencies?: Prisma.EmergencyEventUpdateManyWithoutResolvedByNestedInput
+  memberships?: Prisma.HirerMembershipUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutConversationsAsCompanionInput = {
@@ -5403,6 +5479,7 @@ export type UserUncheckedUpdateWithoutConversationsAsCompanionInput = {
   emergencyContacts?: Prisma.EmergencyContactUncheckedUpdateManyWithoutUserNestedInput
   emergencyEvents?: Prisma.EmergencyEventUncheckedUpdateManyWithoutUserNestedInput
   resolvedEmergencies?: Prisma.EmergencyEventUncheckedUpdateManyWithoutResolvedByNestedInput
+  memberships?: Prisma.HirerMembershipUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutMessagesSentInput = {
@@ -5466,6 +5543,7 @@ export type UserCreateWithoutMessagesSentInput = {
   emergencyContacts?: Prisma.EmergencyContactCreateNestedManyWithoutUserInput
   emergencyEvents?: Prisma.EmergencyEventCreateNestedManyWithoutUserInput
   resolvedEmergencies?: Prisma.EmergencyEventCreateNestedManyWithoutResolvedByInput
+  memberships?: Prisma.HirerMembershipCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutMessagesSentInput = {
@@ -5529,6 +5607,7 @@ export type UserUncheckedCreateWithoutMessagesSentInput = {
   emergencyContacts?: Prisma.EmergencyContactUncheckedCreateNestedManyWithoutUserInput
   emergencyEvents?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutUserInput
   resolvedEmergencies?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutResolvedByInput
+  memberships?: Prisma.HirerMembershipUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutMessagesSentInput = {
@@ -5608,6 +5687,7 @@ export type UserUpdateWithoutMessagesSentInput = {
   emergencyContacts?: Prisma.EmergencyContactUpdateManyWithoutUserNestedInput
   emergencyEvents?: Prisma.EmergencyEventUpdateManyWithoutUserNestedInput
   resolvedEmergencies?: Prisma.EmergencyEventUpdateManyWithoutResolvedByNestedInput
+  memberships?: Prisma.HirerMembershipUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutMessagesSentInput = {
@@ -5671,6 +5751,7 @@ export type UserUncheckedUpdateWithoutMessagesSentInput = {
   emergencyContacts?: Prisma.EmergencyContactUncheckedUpdateManyWithoutUserNestedInput
   emergencyEvents?: Prisma.EmergencyEventUncheckedUpdateManyWithoutUserNestedInput
   resolvedEmergencies?: Prisma.EmergencyEventUncheckedUpdateManyWithoutResolvedByNestedInput
+  memberships?: Prisma.HirerMembershipUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutBlockedUsersInput = {
@@ -5734,6 +5815,7 @@ export type UserCreateWithoutBlockedUsersInput = {
   emergencyContacts?: Prisma.EmergencyContactCreateNestedManyWithoutUserInput
   emergencyEvents?: Prisma.EmergencyEventCreateNestedManyWithoutUserInput
   resolvedEmergencies?: Prisma.EmergencyEventCreateNestedManyWithoutResolvedByInput
+  memberships?: Prisma.HirerMembershipCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutBlockedUsersInput = {
@@ -5797,6 +5879,7 @@ export type UserUncheckedCreateWithoutBlockedUsersInput = {
   emergencyContacts?: Prisma.EmergencyContactUncheckedCreateNestedManyWithoutUserInput
   emergencyEvents?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutUserInput
   resolvedEmergencies?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutResolvedByInput
+  memberships?: Prisma.HirerMembershipUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutBlockedUsersInput = {
@@ -5865,6 +5948,7 @@ export type UserCreateWithoutBlockedByUsersInput = {
   emergencyContacts?: Prisma.EmergencyContactCreateNestedManyWithoutUserInput
   emergencyEvents?: Prisma.EmergencyEventCreateNestedManyWithoutUserInput
   resolvedEmergencies?: Prisma.EmergencyEventCreateNestedManyWithoutResolvedByInput
+  memberships?: Prisma.HirerMembershipCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutBlockedByUsersInput = {
@@ -5928,6 +6012,7 @@ export type UserUncheckedCreateWithoutBlockedByUsersInput = {
   emergencyContacts?: Prisma.EmergencyContactUncheckedCreateNestedManyWithoutUserInput
   emergencyEvents?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutUserInput
   resolvedEmergencies?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutResolvedByInput
+  memberships?: Prisma.HirerMembershipUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutBlockedByUsersInput = {
@@ -6007,6 +6092,7 @@ export type UserUpdateWithoutBlockedUsersInput = {
   emergencyContacts?: Prisma.EmergencyContactUpdateManyWithoutUserNestedInput
   emergencyEvents?: Prisma.EmergencyEventUpdateManyWithoutUserNestedInput
   resolvedEmergencies?: Prisma.EmergencyEventUpdateManyWithoutResolvedByNestedInput
+  memberships?: Prisma.HirerMembershipUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutBlockedUsersInput = {
@@ -6070,6 +6156,7 @@ export type UserUncheckedUpdateWithoutBlockedUsersInput = {
   emergencyContacts?: Prisma.EmergencyContactUncheckedUpdateManyWithoutUserNestedInput
   emergencyEvents?: Prisma.EmergencyEventUncheckedUpdateManyWithoutUserNestedInput
   resolvedEmergencies?: Prisma.EmergencyEventUncheckedUpdateManyWithoutResolvedByNestedInput
+  memberships?: Prisma.HirerMembershipUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserUpsertWithoutBlockedByUsersInput = {
@@ -6144,6 +6231,7 @@ export type UserUpdateWithoutBlockedByUsersInput = {
   emergencyContacts?: Prisma.EmergencyContactUpdateManyWithoutUserNestedInput
   emergencyEvents?: Prisma.EmergencyEventUpdateManyWithoutUserNestedInput
   resolvedEmergencies?: Prisma.EmergencyEventUpdateManyWithoutResolvedByNestedInput
+  memberships?: Prisma.HirerMembershipUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutBlockedByUsersInput = {
@@ -6207,6 +6295,7 @@ export type UserUncheckedUpdateWithoutBlockedByUsersInput = {
   emergencyContacts?: Prisma.EmergencyContactUncheckedUpdateManyWithoutUserNestedInput
   emergencyEvents?: Prisma.EmergencyEventUncheckedUpdateManyWithoutUserNestedInput
   resolvedEmergencies?: Prisma.EmergencyEventUncheckedUpdateManyWithoutResolvedByNestedInput
+  memberships?: Prisma.HirerMembershipUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutReportsMadeInput = {
@@ -6270,6 +6359,7 @@ export type UserCreateWithoutReportsMadeInput = {
   emergencyContacts?: Prisma.EmergencyContactCreateNestedManyWithoutUserInput
   emergencyEvents?: Prisma.EmergencyEventCreateNestedManyWithoutUserInput
   resolvedEmergencies?: Prisma.EmergencyEventCreateNestedManyWithoutResolvedByInput
+  memberships?: Prisma.HirerMembershipCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutReportsMadeInput = {
@@ -6333,6 +6423,7 @@ export type UserUncheckedCreateWithoutReportsMadeInput = {
   emergencyContacts?: Prisma.EmergencyContactUncheckedCreateNestedManyWithoutUserInput
   emergencyEvents?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutUserInput
   resolvedEmergencies?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutResolvedByInput
+  memberships?: Prisma.HirerMembershipUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutReportsMadeInput = {
@@ -6401,6 +6492,7 @@ export type UserCreateWithoutReportsReceivedInput = {
   emergencyContacts?: Prisma.EmergencyContactCreateNestedManyWithoutUserInput
   emergencyEvents?: Prisma.EmergencyEventCreateNestedManyWithoutUserInput
   resolvedEmergencies?: Prisma.EmergencyEventCreateNestedManyWithoutResolvedByInput
+  memberships?: Prisma.HirerMembershipCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutReportsReceivedInput = {
@@ -6464,6 +6556,7 @@ export type UserUncheckedCreateWithoutReportsReceivedInput = {
   emergencyContacts?: Prisma.EmergencyContactUncheckedCreateNestedManyWithoutUserInput
   emergencyEvents?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutUserInput
   resolvedEmergencies?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutResolvedByInput
+  memberships?: Prisma.HirerMembershipUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutReportsReceivedInput = {
@@ -6543,6 +6636,7 @@ export type UserUpdateWithoutReportsMadeInput = {
   emergencyContacts?: Prisma.EmergencyContactUpdateManyWithoutUserNestedInput
   emergencyEvents?: Prisma.EmergencyEventUpdateManyWithoutUserNestedInput
   resolvedEmergencies?: Prisma.EmergencyEventUpdateManyWithoutResolvedByNestedInput
+  memberships?: Prisma.HirerMembershipUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutReportsMadeInput = {
@@ -6606,6 +6700,7 @@ export type UserUncheckedUpdateWithoutReportsMadeInput = {
   emergencyContacts?: Prisma.EmergencyContactUncheckedUpdateManyWithoutUserNestedInput
   emergencyEvents?: Prisma.EmergencyEventUncheckedUpdateManyWithoutUserNestedInput
   resolvedEmergencies?: Prisma.EmergencyEventUncheckedUpdateManyWithoutResolvedByNestedInput
+  memberships?: Prisma.HirerMembershipUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserUpsertWithoutReportsReceivedInput = {
@@ -6680,6 +6775,7 @@ export type UserUpdateWithoutReportsReceivedInput = {
   emergencyContacts?: Prisma.EmergencyContactUpdateManyWithoutUserNestedInput
   emergencyEvents?: Prisma.EmergencyEventUpdateManyWithoutUserNestedInput
   resolvedEmergencies?: Prisma.EmergencyEventUpdateManyWithoutResolvedByNestedInput
+  memberships?: Prisma.HirerMembershipUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutReportsReceivedInput = {
@@ -6743,6 +6839,7 @@ export type UserUncheckedUpdateWithoutReportsReceivedInput = {
   emergencyContacts?: Prisma.EmergencyContactUncheckedUpdateManyWithoutUserNestedInput
   emergencyEvents?: Prisma.EmergencyEventUncheckedUpdateManyWithoutUserNestedInput
   resolvedEmergencies?: Prisma.EmergencyEventUncheckedUpdateManyWithoutResolvedByNestedInput
+  memberships?: Prisma.HirerMembershipUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutStrikesInput = {
@@ -6806,6 +6903,7 @@ export type UserCreateWithoutStrikesInput = {
   emergencyContacts?: Prisma.EmergencyContactCreateNestedManyWithoutUserInput
   emergencyEvents?: Prisma.EmergencyEventCreateNestedManyWithoutUserInput
   resolvedEmergencies?: Prisma.EmergencyEventCreateNestedManyWithoutResolvedByInput
+  memberships?: Prisma.HirerMembershipCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutStrikesInput = {
@@ -6869,6 +6967,7 @@ export type UserUncheckedCreateWithoutStrikesInput = {
   emergencyContacts?: Prisma.EmergencyContactUncheckedCreateNestedManyWithoutUserInput
   emergencyEvents?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutUserInput
   resolvedEmergencies?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutResolvedByInput
+  memberships?: Prisma.HirerMembershipUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutStrikesInput = {
@@ -6948,6 +7047,7 @@ export type UserUpdateWithoutStrikesInput = {
   emergencyContacts?: Prisma.EmergencyContactUpdateManyWithoutUserNestedInput
   emergencyEvents?: Prisma.EmergencyEventUpdateManyWithoutUserNestedInput
   resolvedEmergencies?: Prisma.EmergencyEventUpdateManyWithoutResolvedByNestedInput
+  memberships?: Prisma.HirerMembershipUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutStrikesInput = {
@@ -7011,6 +7111,7 @@ export type UserUncheckedUpdateWithoutStrikesInput = {
   emergencyContacts?: Prisma.EmergencyContactUncheckedUpdateManyWithoutUserNestedInput
   emergencyEvents?: Prisma.EmergencyEventUncheckedUpdateManyWithoutUserNestedInput
   resolvedEmergencies?: Prisma.EmergencyEventUncheckedUpdateManyWithoutResolvedByNestedInput
+  memberships?: Prisma.HirerMembershipUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutNotificationsInput = {
@@ -7074,6 +7175,7 @@ export type UserCreateWithoutNotificationsInput = {
   emergencyContacts?: Prisma.EmergencyContactCreateNestedManyWithoutUserInput
   emergencyEvents?: Prisma.EmergencyEventCreateNestedManyWithoutUserInput
   resolvedEmergencies?: Prisma.EmergencyEventCreateNestedManyWithoutResolvedByInput
+  memberships?: Prisma.HirerMembershipCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutNotificationsInput = {
@@ -7137,6 +7239,7 @@ export type UserUncheckedCreateWithoutNotificationsInput = {
   emergencyContacts?: Prisma.EmergencyContactUncheckedCreateNestedManyWithoutUserInput
   emergencyEvents?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutUserInput
   resolvedEmergencies?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutResolvedByInput
+  memberships?: Prisma.HirerMembershipUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutNotificationsInput = {
@@ -7216,6 +7319,7 @@ export type UserUpdateWithoutNotificationsInput = {
   emergencyContacts?: Prisma.EmergencyContactUpdateManyWithoutUserNestedInput
   emergencyEvents?: Prisma.EmergencyEventUpdateManyWithoutUserNestedInput
   resolvedEmergencies?: Prisma.EmergencyEventUpdateManyWithoutResolvedByNestedInput
+  memberships?: Prisma.HirerMembershipUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutNotificationsInput = {
@@ -7279,6 +7383,7 @@ export type UserUncheckedUpdateWithoutNotificationsInput = {
   emergencyContacts?: Prisma.EmergencyContactUncheckedUpdateManyWithoutUserNestedInput
   emergencyEvents?: Prisma.EmergencyEventUncheckedUpdateManyWithoutUserNestedInput
   resolvedEmergencies?: Prisma.EmergencyEventUncheckedUpdateManyWithoutResolvedByNestedInput
+  memberships?: Prisma.HirerMembershipUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutPushTokensInput = {
@@ -7342,6 +7447,7 @@ export type UserCreateWithoutPushTokensInput = {
   emergencyContacts?: Prisma.EmergencyContactCreateNestedManyWithoutUserInput
   emergencyEvents?: Prisma.EmergencyEventCreateNestedManyWithoutUserInput
   resolvedEmergencies?: Prisma.EmergencyEventCreateNestedManyWithoutResolvedByInput
+  memberships?: Prisma.HirerMembershipCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutPushTokensInput = {
@@ -7405,6 +7511,7 @@ export type UserUncheckedCreateWithoutPushTokensInput = {
   emergencyContacts?: Prisma.EmergencyContactUncheckedCreateNestedManyWithoutUserInput
   emergencyEvents?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutUserInput
   resolvedEmergencies?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutResolvedByInput
+  memberships?: Prisma.HirerMembershipUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutPushTokensInput = {
@@ -7484,6 +7591,7 @@ export type UserUpdateWithoutPushTokensInput = {
   emergencyContacts?: Prisma.EmergencyContactUpdateManyWithoutUserNestedInput
   emergencyEvents?: Prisma.EmergencyEventUpdateManyWithoutUserNestedInput
   resolvedEmergencies?: Prisma.EmergencyEventUpdateManyWithoutResolvedByNestedInput
+  memberships?: Prisma.HirerMembershipUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutPushTokensInput = {
@@ -7547,6 +7655,7 @@ export type UserUncheckedUpdateWithoutPushTokensInput = {
   emergencyContacts?: Prisma.EmergencyContactUncheckedUpdateManyWithoutUserNestedInput
   emergencyEvents?: Prisma.EmergencyEventUncheckedUpdateManyWithoutUserNestedInput
   resolvedEmergencies?: Prisma.EmergencyEventUncheckedUpdateManyWithoutResolvedByNestedInput
+  memberships?: Prisma.HirerMembershipUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutModerationQueueInput = {
@@ -7610,6 +7719,7 @@ export type UserCreateWithoutModerationQueueInput = {
   emergencyContacts?: Prisma.EmergencyContactCreateNestedManyWithoutUserInput
   emergencyEvents?: Prisma.EmergencyEventCreateNestedManyWithoutUserInput
   resolvedEmergencies?: Prisma.EmergencyEventCreateNestedManyWithoutResolvedByInput
+  memberships?: Prisma.HirerMembershipCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutModerationQueueInput = {
@@ -7673,6 +7783,7 @@ export type UserUncheckedCreateWithoutModerationQueueInput = {
   emergencyContacts?: Prisma.EmergencyContactUncheckedCreateNestedManyWithoutUserInput
   emergencyEvents?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutUserInput
   resolvedEmergencies?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutResolvedByInput
+  memberships?: Prisma.HirerMembershipUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutModerationQueueInput = {
@@ -7752,6 +7863,7 @@ export type UserUpdateWithoutModerationQueueInput = {
   emergencyContacts?: Prisma.EmergencyContactUpdateManyWithoutUserNestedInput
   emergencyEvents?: Prisma.EmergencyEventUpdateManyWithoutUserNestedInput
   resolvedEmergencies?: Prisma.EmergencyEventUpdateManyWithoutResolvedByNestedInput
+  memberships?: Prisma.HirerMembershipUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutModerationQueueInput = {
@@ -7815,6 +7927,7 @@ export type UserUncheckedUpdateWithoutModerationQueueInput = {
   emergencyContacts?: Prisma.EmergencyContactUncheckedUpdateManyWithoutUserNestedInput
   emergencyEvents?: Prisma.EmergencyEventUncheckedUpdateManyWithoutUserNestedInput
   resolvedEmergencies?: Prisma.EmergencyEventUncheckedUpdateManyWithoutResolvedByNestedInput
+  memberships?: Prisma.HirerMembershipUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutModerationActionsInput = {
@@ -7878,6 +7991,7 @@ export type UserCreateWithoutModerationActionsInput = {
   emergencyContacts?: Prisma.EmergencyContactCreateNestedManyWithoutUserInput
   emergencyEvents?: Prisma.EmergencyEventCreateNestedManyWithoutUserInput
   resolvedEmergencies?: Prisma.EmergencyEventCreateNestedManyWithoutResolvedByInput
+  memberships?: Prisma.HirerMembershipCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutModerationActionsInput = {
@@ -7941,6 +8055,7 @@ export type UserUncheckedCreateWithoutModerationActionsInput = {
   emergencyContacts?: Prisma.EmergencyContactUncheckedCreateNestedManyWithoutUserInput
   emergencyEvents?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutUserInput
   resolvedEmergencies?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutResolvedByInput
+  memberships?: Prisma.HirerMembershipUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutModerationActionsInput = {
@@ -8020,6 +8135,7 @@ export type UserUpdateWithoutModerationActionsInput = {
   emergencyContacts?: Prisma.EmergencyContactUpdateManyWithoutUserNestedInput
   emergencyEvents?: Prisma.EmergencyEventUpdateManyWithoutUserNestedInput
   resolvedEmergencies?: Prisma.EmergencyEventUpdateManyWithoutResolvedByNestedInput
+  memberships?: Prisma.HirerMembershipUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutModerationActionsInput = {
@@ -8083,6 +8199,7 @@ export type UserUncheckedUpdateWithoutModerationActionsInput = {
   emergencyContacts?: Prisma.EmergencyContactUncheckedUpdateManyWithoutUserNestedInput
   emergencyEvents?: Prisma.EmergencyEventUncheckedUpdateManyWithoutUserNestedInput
   resolvedEmergencies?: Prisma.EmergencyEventUncheckedUpdateManyWithoutResolvedByNestedInput
+  memberships?: Prisma.HirerMembershipUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutSuspensionsInput = {
@@ -8146,6 +8263,7 @@ export type UserCreateWithoutSuspensionsInput = {
   emergencyContacts?: Prisma.EmergencyContactCreateNestedManyWithoutUserInput
   emergencyEvents?: Prisma.EmergencyEventCreateNestedManyWithoutUserInput
   resolvedEmergencies?: Prisma.EmergencyEventCreateNestedManyWithoutResolvedByInput
+  memberships?: Prisma.HirerMembershipCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutSuspensionsInput = {
@@ -8209,6 +8327,7 @@ export type UserUncheckedCreateWithoutSuspensionsInput = {
   emergencyContacts?: Prisma.EmergencyContactUncheckedCreateNestedManyWithoutUserInput
   emergencyEvents?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutUserInput
   resolvedEmergencies?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutResolvedByInput
+  memberships?: Prisma.HirerMembershipUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutSuspensionsInput = {
@@ -8277,6 +8396,7 @@ export type UserCreateWithoutSuspendedByInput = {
   emergencyContacts?: Prisma.EmergencyContactCreateNestedManyWithoutUserInput
   emergencyEvents?: Prisma.EmergencyEventCreateNestedManyWithoutUserInput
   resolvedEmergencies?: Prisma.EmergencyEventCreateNestedManyWithoutResolvedByInput
+  memberships?: Prisma.HirerMembershipCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutSuspendedByInput = {
@@ -8340,6 +8460,7 @@ export type UserUncheckedCreateWithoutSuspendedByInput = {
   emergencyContacts?: Prisma.EmergencyContactUncheckedCreateNestedManyWithoutUserInput
   emergencyEvents?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutUserInput
   resolvedEmergencies?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutResolvedByInput
+  memberships?: Prisma.HirerMembershipUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutSuspendedByInput = {
@@ -8408,6 +8529,7 @@ export type UserCreateWithoutLiftedSuspensionsInput = {
   emergencyContacts?: Prisma.EmergencyContactCreateNestedManyWithoutUserInput
   emergencyEvents?: Prisma.EmergencyEventCreateNestedManyWithoutUserInput
   resolvedEmergencies?: Prisma.EmergencyEventCreateNestedManyWithoutResolvedByInput
+  memberships?: Prisma.HirerMembershipCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutLiftedSuspensionsInput = {
@@ -8471,6 +8593,7 @@ export type UserUncheckedCreateWithoutLiftedSuspensionsInput = {
   emergencyContacts?: Prisma.EmergencyContactUncheckedCreateNestedManyWithoutUserInput
   emergencyEvents?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutUserInput
   resolvedEmergencies?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutResolvedByInput
+  memberships?: Prisma.HirerMembershipUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutLiftedSuspensionsInput = {
@@ -8550,6 +8673,7 @@ export type UserUpdateWithoutSuspensionsInput = {
   emergencyContacts?: Prisma.EmergencyContactUpdateManyWithoutUserNestedInput
   emergencyEvents?: Prisma.EmergencyEventUpdateManyWithoutUserNestedInput
   resolvedEmergencies?: Prisma.EmergencyEventUpdateManyWithoutResolvedByNestedInput
+  memberships?: Prisma.HirerMembershipUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSuspensionsInput = {
@@ -8613,6 +8737,7 @@ export type UserUncheckedUpdateWithoutSuspensionsInput = {
   emergencyContacts?: Prisma.EmergencyContactUncheckedUpdateManyWithoutUserNestedInput
   emergencyEvents?: Prisma.EmergencyEventUncheckedUpdateManyWithoutUserNestedInput
   resolvedEmergencies?: Prisma.EmergencyEventUncheckedUpdateManyWithoutResolvedByNestedInput
+  memberships?: Prisma.HirerMembershipUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserUpsertWithoutSuspendedByInput = {
@@ -8687,6 +8812,7 @@ export type UserUpdateWithoutSuspendedByInput = {
   emergencyContacts?: Prisma.EmergencyContactUpdateManyWithoutUserNestedInput
   emergencyEvents?: Prisma.EmergencyEventUpdateManyWithoutUserNestedInput
   resolvedEmergencies?: Prisma.EmergencyEventUpdateManyWithoutResolvedByNestedInput
+  memberships?: Prisma.HirerMembershipUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSuspendedByInput = {
@@ -8750,6 +8876,7 @@ export type UserUncheckedUpdateWithoutSuspendedByInput = {
   emergencyContacts?: Prisma.EmergencyContactUncheckedUpdateManyWithoutUserNestedInput
   emergencyEvents?: Prisma.EmergencyEventUncheckedUpdateManyWithoutUserNestedInput
   resolvedEmergencies?: Prisma.EmergencyEventUncheckedUpdateManyWithoutResolvedByNestedInput
+  memberships?: Prisma.HirerMembershipUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserUpsertWithoutLiftedSuspensionsInput = {
@@ -8824,6 +8951,7 @@ export type UserUpdateWithoutLiftedSuspensionsInput = {
   emergencyContacts?: Prisma.EmergencyContactUpdateManyWithoutUserNestedInput
   emergencyEvents?: Prisma.EmergencyEventUpdateManyWithoutUserNestedInput
   resolvedEmergencies?: Prisma.EmergencyEventUpdateManyWithoutResolvedByNestedInput
+  memberships?: Prisma.HirerMembershipUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutLiftedSuspensionsInput = {
@@ -8887,6 +9015,7 @@ export type UserUncheckedUpdateWithoutLiftedSuspensionsInput = {
   emergencyContacts?: Prisma.EmergencyContactUncheckedUpdateManyWithoutUserNestedInput
   emergencyEvents?: Prisma.EmergencyEventUncheckedUpdateManyWithoutUserNestedInput
   resolvedEmergencies?: Prisma.EmergencyEventUncheckedUpdateManyWithoutResolvedByNestedInput
+  memberships?: Prisma.HirerMembershipUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutAppealsInput = {
@@ -8950,6 +9079,7 @@ export type UserCreateWithoutAppealsInput = {
   emergencyContacts?: Prisma.EmergencyContactCreateNestedManyWithoutUserInput
   emergencyEvents?: Prisma.EmergencyEventCreateNestedManyWithoutUserInput
   resolvedEmergencies?: Prisma.EmergencyEventCreateNestedManyWithoutResolvedByInput
+  memberships?: Prisma.HirerMembershipCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutAppealsInput = {
@@ -9013,6 +9143,7 @@ export type UserUncheckedCreateWithoutAppealsInput = {
   emergencyContacts?: Prisma.EmergencyContactUncheckedCreateNestedManyWithoutUserInput
   emergencyEvents?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutUserInput
   resolvedEmergencies?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutResolvedByInput
+  memberships?: Prisma.HirerMembershipUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutAppealsInput = {
@@ -9081,6 +9212,7 @@ export type UserCreateWithoutAppealReviewsInput = {
   emergencyContacts?: Prisma.EmergencyContactCreateNestedManyWithoutUserInput
   emergencyEvents?: Prisma.EmergencyEventCreateNestedManyWithoutUserInput
   resolvedEmergencies?: Prisma.EmergencyEventCreateNestedManyWithoutResolvedByInput
+  memberships?: Prisma.HirerMembershipCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutAppealReviewsInput = {
@@ -9144,6 +9276,7 @@ export type UserUncheckedCreateWithoutAppealReviewsInput = {
   emergencyContacts?: Prisma.EmergencyContactUncheckedCreateNestedManyWithoutUserInput
   emergencyEvents?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutUserInput
   resolvedEmergencies?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutResolvedByInput
+  memberships?: Prisma.HirerMembershipUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutAppealReviewsInput = {
@@ -9223,6 +9356,7 @@ export type UserUpdateWithoutAppealsInput = {
   emergencyContacts?: Prisma.EmergencyContactUpdateManyWithoutUserNestedInput
   emergencyEvents?: Prisma.EmergencyEventUpdateManyWithoutUserNestedInput
   resolvedEmergencies?: Prisma.EmergencyEventUpdateManyWithoutResolvedByNestedInput
+  memberships?: Prisma.HirerMembershipUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAppealsInput = {
@@ -9286,6 +9420,7 @@ export type UserUncheckedUpdateWithoutAppealsInput = {
   emergencyContacts?: Prisma.EmergencyContactUncheckedUpdateManyWithoutUserNestedInput
   emergencyEvents?: Prisma.EmergencyEventUncheckedUpdateManyWithoutUserNestedInput
   resolvedEmergencies?: Prisma.EmergencyEventUncheckedUpdateManyWithoutResolvedByNestedInput
+  memberships?: Prisma.HirerMembershipUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserUpsertWithoutAppealReviewsInput = {
@@ -9360,6 +9495,7 @@ export type UserUpdateWithoutAppealReviewsInput = {
   emergencyContacts?: Prisma.EmergencyContactUpdateManyWithoutUserNestedInput
   emergencyEvents?: Prisma.EmergencyEventUpdateManyWithoutUserNestedInput
   resolvedEmergencies?: Prisma.EmergencyEventUpdateManyWithoutResolvedByNestedInput
+  memberships?: Prisma.HirerMembershipUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAppealReviewsInput = {
@@ -9423,6 +9559,7 @@ export type UserUncheckedUpdateWithoutAppealReviewsInput = {
   emergencyContacts?: Prisma.EmergencyContactUncheckedUpdateManyWithoutUserNestedInput
   emergencyEvents?: Prisma.EmergencyEventUncheckedUpdateManyWithoutUserNestedInput
   resolvedEmergencies?: Prisma.EmergencyEventUncheckedUpdateManyWithoutResolvedByNestedInput
+  memberships?: Prisma.HirerMembershipUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutFilesInput = {
@@ -9486,6 +9623,7 @@ export type UserCreateWithoutFilesInput = {
   emergencyContacts?: Prisma.EmergencyContactCreateNestedManyWithoutUserInput
   emergencyEvents?: Prisma.EmergencyEventCreateNestedManyWithoutUserInput
   resolvedEmergencies?: Prisma.EmergencyEventCreateNestedManyWithoutResolvedByInput
+  memberships?: Prisma.HirerMembershipCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutFilesInput = {
@@ -9549,6 +9687,7 @@ export type UserUncheckedCreateWithoutFilesInput = {
   emergencyContacts?: Prisma.EmergencyContactUncheckedCreateNestedManyWithoutUserInput
   emergencyEvents?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutUserInput
   resolvedEmergencies?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutResolvedByInput
+  memberships?: Prisma.HirerMembershipUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutFilesInput = {
@@ -9628,6 +9767,7 @@ export type UserUpdateWithoutFilesInput = {
   emergencyContacts?: Prisma.EmergencyContactUpdateManyWithoutUserNestedInput
   emergencyEvents?: Prisma.EmergencyEventUpdateManyWithoutUserNestedInput
   resolvedEmergencies?: Prisma.EmergencyEventUpdateManyWithoutResolvedByNestedInput
+  memberships?: Prisma.HirerMembershipUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutFilesInput = {
@@ -9691,6 +9831,7 @@ export type UserUncheckedUpdateWithoutFilesInput = {
   emergencyContacts?: Prisma.EmergencyContactUncheckedUpdateManyWithoutUserNestedInput
   emergencyEvents?: Prisma.EmergencyEventUncheckedUpdateManyWithoutUserNestedInput
   resolvedEmergencies?: Prisma.EmergencyEventUncheckedUpdateManyWithoutResolvedByNestedInput
+  memberships?: Prisma.HirerMembershipUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutSecurityEventsInput = {
@@ -9754,6 +9895,7 @@ export type UserCreateWithoutSecurityEventsInput = {
   emergencyContacts?: Prisma.EmergencyContactCreateNestedManyWithoutUserInput
   emergencyEvents?: Prisma.EmergencyEventCreateNestedManyWithoutUserInput
   resolvedEmergencies?: Prisma.EmergencyEventCreateNestedManyWithoutResolvedByInput
+  memberships?: Prisma.HirerMembershipCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutSecurityEventsInput = {
@@ -9817,6 +9959,7 @@ export type UserUncheckedCreateWithoutSecurityEventsInput = {
   emergencyContacts?: Prisma.EmergencyContactUncheckedCreateNestedManyWithoutUserInput
   emergencyEvents?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutUserInput
   resolvedEmergencies?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutResolvedByInput
+  memberships?: Prisma.HirerMembershipUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutSecurityEventsInput = {
@@ -9896,6 +10039,7 @@ export type UserUpdateWithoutSecurityEventsInput = {
   emergencyContacts?: Prisma.EmergencyContactUpdateManyWithoutUserNestedInput
   emergencyEvents?: Prisma.EmergencyEventUpdateManyWithoutUserNestedInput
   resolvedEmergencies?: Prisma.EmergencyEventUpdateManyWithoutResolvedByNestedInput
+  memberships?: Prisma.HirerMembershipUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSecurityEventsInput = {
@@ -9959,6 +10103,7 @@ export type UserUncheckedUpdateWithoutSecurityEventsInput = {
   emergencyContacts?: Prisma.EmergencyContactUncheckedUpdateManyWithoutUserNestedInput
   emergencyEvents?: Prisma.EmergencyEventUncheckedUpdateManyWithoutUserNestedInput
   resolvedEmergencies?: Prisma.EmergencyEventUncheckedUpdateManyWithoutResolvedByNestedInput
+  memberships?: Prisma.HirerMembershipUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutAdminAuditLogsInput = {
@@ -10022,6 +10167,7 @@ export type UserCreateWithoutAdminAuditLogsInput = {
   emergencyContacts?: Prisma.EmergencyContactCreateNestedManyWithoutUserInput
   emergencyEvents?: Prisma.EmergencyEventCreateNestedManyWithoutUserInput
   resolvedEmergencies?: Prisma.EmergencyEventCreateNestedManyWithoutResolvedByInput
+  memberships?: Prisma.HirerMembershipCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutAdminAuditLogsInput = {
@@ -10085,6 +10231,7 @@ export type UserUncheckedCreateWithoutAdminAuditLogsInput = {
   emergencyContacts?: Prisma.EmergencyContactUncheckedCreateNestedManyWithoutUserInput
   emergencyEvents?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutUserInput
   resolvedEmergencies?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutResolvedByInput
+  memberships?: Prisma.HirerMembershipUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutAdminAuditLogsInput = {
@@ -10164,6 +10311,7 @@ export type UserUpdateWithoutAdminAuditLogsInput = {
   emergencyContacts?: Prisma.EmergencyContactUpdateManyWithoutUserNestedInput
   emergencyEvents?: Prisma.EmergencyEventUpdateManyWithoutUserNestedInput
   resolvedEmergencies?: Prisma.EmergencyEventUpdateManyWithoutResolvedByNestedInput
+  memberships?: Prisma.HirerMembershipUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAdminAuditLogsInput = {
@@ -10227,6 +10375,7 @@ export type UserUncheckedUpdateWithoutAdminAuditLogsInput = {
   emergencyContacts?: Prisma.EmergencyContactUncheckedUpdateManyWithoutUserNestedInput
   emergencyEvents?: Prisma.EmergencyEventUncheckedUpdateManyWithoutUserNestedInput
   resolvedEmergencies?: Prisma.EmergencyEventUncheckedUpdateManyWithoutResolvedByNestedInput
+  memberships?: Prisma.HirerMembershipUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutSupportTicketsInput = {
@@ -10290,6 +10439,7 @@ export type UserCreateWithoutSupportTicketsInput = {
   emergencyContacts?: Prisma.EmergencyContactCreateNestedManyWithoutUserInput
   emergencyEvents?: Prisma.EmergencyEventCreateNestedManyWithoutUserInput
   resolvedEmergencies?: Prisma.EmergencyEventCreateNestedManyWithoutResolvedByInput
+  memberships?: Prisma.HirerMembershipCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutSupportTicketsInput = {
@@ -10353,6 +10503,7 @@ export type UserUncheckedCreateWithoutSupportTicketsInput = {
   emergencyContacts?: Prisma.EmergencyContactUncheckedCreateNestedManyWithoutUserInput
   emergencyEvents?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutUserInput
   resolvedEmergencies?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutResolvedByInput
+  memberships?: Prisma.HirerMembershipUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutSupportTicketsInput = {
@@ -10421,6 +10572,7 @@ export type UserCreateWithoutAssignedTicketsInput = {
   emergencyContacts?: Prisma.EmergencyContactCreateNestedManyWithoutUserInput
   emergencyEvents?: Prisma.EmergencyEventCreateNestedManyWithoutUserInput
   resolvedEmergencies?: Prisma.EmergencyEventCreateNestedManyWithoutResolvedByInput
+  memberships?: Prisma.HirerMembershipCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutAssignedTicketsInput = {
@@ -10484,6 +10636,7 @@ export type UserUncheckedCreateWithoutAssignedTicketsInput = {
   emergencyContacts?: Prisma.EmergencyContactUncheckedCreateNestedManyWithoutUserInput
   emergencyEvents?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutUserInput
   resolvedEmergencies?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutResolvedByInput
+  memberships?: Prisma.HirerMembershipUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutAssignedTicketsInput = {
@@ -10563,6 +10716,7 @@ export type UserUpdateWithoutSupportTicketsInput = {
   emergencyContacts?: Prisma.EmergencyContactUpdateManyWithoutUserNestedInput
   emergencyEvents?: Prisma.EmergencyEventUpdateManyWithoutUserNestedInput
   resolvedEmergencies?: Prisma.EmergencyEventUpdateManyWithoutResolvedByNestedInput
+  memberships?: Prisma.HirerMembershipUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSupportTicketsInput = {
@@ -10626,6 +10780,7 @@ export type UserUncheckedUpdateWithoutSupportTicketsInput = {
   emergencyContacts?: Prisma.EmergencyContactUncheckedUpdateManyWithoutUserNestedInput
   emergencyEvents?: Prisma.EmergencyEventUncheckedUpdateManyWithoutUserNestedInput
   resolvedEmergencies?: Prisma.EmergencyEventUncheckedUpdateManyWithoutResolvedByNestedInput
+  memberships?: Prisma.HirerMembershipUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserUpsertWithoutAssignedTicketsInput = {
@@ -10700,6 +10855,7 @@ export type UserUpdateWithoutAssignedTicketsInput = {
   emergencyContacts?: Prisma.EmergencyContactUpdateManyWithoutUserNestedInput
   emergencyEvents?: Prisma.EmergencyEventUpdateManyWithoutUserNestedInput
   resolvedEmergencies?: Prisma.EmergencyEventUpdateManyWithoutResolvedByNestedInput
+  memberships?: Prisma.HirerMembershipUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAssignedTicketsInput = {
@@ -10763,6 +10919,7 @@ export type UserUncheckedUpdateWithoutAssignedTicketsInput = {
   emergencyContacts?: Prisma.EmergencyContactUncheckedUpdateManyWithoutUserNestedInput
   emergencyEvents?: Prisma.EmergencyEventUncheckedUpdateManyWithoutUserNestedInput
   resolvedEmergencies?: Prisma.EmergencyEventUncheckedUpdateManyWithoutResolvedByNestedInput
+  memberships?: Prisma.HirerMembershipUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutTicketMessagesInput = {
@@ -10826,6 +10983,7 @@ export type UserCreateWithoutTicketMessagesInput = {
   emergencyContacts?: Prisma.EmergencyContactCreateNestedManyWithoutUserInput
   emergencyEvents?: Prisma.EmergencyEventCreateNestedManyWithoutUserInput
   resolvedEmergencies?: Prisma.EmergencyEventCreateNestedManyWithoutResolvedByInput
+  memberships?: Prisma.HirerMembershipCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutTicketMessagesInput = {
@@ -10889,6 +11047,7 @@ export type UserUncheckedCreateWithoutTicketMessagesInput = {
   emergencyContacts?: Prisma.EmergencyContactUncheckedCreateNestedManyWithoutUserInput
   emergencyEvents?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutUserInput
   resolvedEmergencies?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutResolvedByInput
+  memberships?: Prisma.HirerMembershipUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutTicketMessagesInput = {
@@ -10968,6 +11127,7 @@ export type UserUpdateWithoutTicketMessagesInput = {
   emergencyContacts?: Prisma.EmergencyContactUpdateManyWithoutUserNestedInput
   emergencyEvents?: Prisma.EmergencyEventUpdateManyWithoutUserNestedInput
   resolvedEmergencies?: Prisma.EmergencyEventUpdateManyWithoutResolvedByNestedInput
+  memberships?: Prisma.HirerMembershipUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutTicketMessagesInput = {
@@ -11031,6 +11191,7 @@ export type UserUncheckedUpdateWithoutTicketMessagesInput = {
   emergencyContacts?: Prisma.EmergencyContactUncheckedUpdateManyWithoutUserNestedInput
   emergencyEvents?: Prisma.EmergencyEventUncheckedUpdateManyWithoutUserNestedInput
   resolvedEmergencies?: Prisma.EmergencyEventUncheckedUpdateManyWithoutResolvedByNestedInput
+  memberships?: Prisma.HirerMembershipUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutEmergencyContactsInput = {
@@ -11094,6 +11255,7 @@ export type UserCreateWithoutEmergencyContactsInput = {
   favoritedBy?: Prisma.FavoriteCompanionCreateNestedManyWithoutCompanionInput
   emergencyEvents?: Prisma.EmergencyEventCreateNestedManyWithoutUserInput
   resolvedEmergencies?: Prisma.EmergencyEventCreateNestedManyWithoutResolvedByInput
+  memberships?: Prisma.HirerMembershipCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutEmergencyContactsInput = {
@@ -11157,6 +11319,7 @@ export type UserUncheckedCreateWithoutEmergencyContactsInput = {
   favoritedBy?: Prisma.FavoriteCompanionUncheckedCreateNestedManyWithoutCompanionInput
   emergencyEvents?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutUserInput
   resolvedEmergencies?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutResolvedByInput
+  memberships?: Prisma.HirerMembershipUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutEmergencyContactsInput = {
@@ -11236,6 +11399,7 @@ export type UserUpdateWithoutEmergencyContactsInput = {
   favoritedBy?: Prisma.FavoriteCompanionUpdateManyWithoutCompanionNestedInput
   emergencyEvents?: Prisma.EmergencyEventUpdateManyWithoutUserNestedInput
   resolvedEmergencies?: Prisma.EmergencyEventUpdateManyWithoutResolvedByNestedInput
+  memberships?: Prisma.HirerMembershipUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutEmergencyContactsInput = {
@@ -11299,6 +11463,7 @@ export type UserUncheckedUpdateWithoutEmergencyContactsInput = {
   favoritedBy?: Prisma.FavoriteCompanionUncheckedUpdateManyWithoutCompanionNestedInput
   emergencyEvents?: Prisma.EmergencyEventUncheckedUpdateManyWithoutUserNestedInput
   resolvedEmergencies?: Prisma.EmergencyEventUncheckedUpdateManyWithoutResolvedByNestedInput
+  memberships?: Prisma.HirerMembershipUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutEmergencyEventsInput = {
@@ -11362,6 +11527,7 @@ export type UserCreateWithoutEmergencyEventsInput = {
   favoritedBy?: Prisma.FavoriteCompanionCreateNestedManyWithoutCompanionInput
   emergencyContacts?: Prisma.EmergencyContactCreateNestedManyWithoutUserInput
   resolvedEmergencies?: Prisma.EmergencyEventCreateNestedManyWithoutResolvedByInput
+  memberships?: Prisma.HirerMembershipCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutEmergencyEventsInput = {
@@ -11425,6 +11591,7 @@ export type UserUncheckedCreateWithoutEmergencyEventsInput = {
   favoritedBy?: Prisma.FavoriteCompanionUncheckedCreateNestedManyWithoutCompanionInput
   emergencyContacts?: Prisma.EmergencyContactUncheckedCreateNestedManyWithoutUserInput
   resolvedEmergencies?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutResolvedByInput
+  memberships?: Prisma.HirerMembershipUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutEmergencyEventsInput = {
@@ -11493,6 +11660,7 @@ export type UserCreateWithoutResolvedEmergenciesInput = {
   favoritedBy?: Prisma.FavoriteCompanionCreateNestedManyWithoutCompanionInput
   emergencyContacts?: Prisma.EmergencyContactCreateNestedManyWithoutUserInput
   emergencyEvents?: Prisma.EmergencyEventCreateNestedManyWithoutUserInput
+  memberships?: Prisma.HirerMembershipCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutResolvedEmergenciesInput = {
@@ -11556,6 +11724,7 @@ export type UserUncheckedCreateWithoutResolvedEmergenciesInput = {
   favoritedBy?: Prisma.FavoriteCompanionUncheckedCreateNestedManyWithoutCompanionInput
   emergencyContacts?: Prisma.EmergencyContactUncheckedCreateNestedManyWithoutUserInput
   emergencyEvents?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutUserInput
+  memberships?: Prisma.HirerMembershipUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutResolvedEmergenciesInput = {
@@ -11635,6 +11804,7 @@ export type UserUpdateWithoutEmergencyEventsInput = {
   favoritedBy?: Prisma.FavoriteCompanionUpdateManyWithoutCompanionNestedInput
   emergencyContacts?: Prisma.EmergencyContactUpdateManyWithoutUserNestedInput
   resolvedEmergencies?: Prisma.EmergencyEventUpdateManyWithoutResolvedByNestedInput
+  memberships?: Prisma.HirerMembershipUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutEmergencyEventsInput = {
@@ -11698,6 +11868,7 @@ export type UserUncheckedUpdateWithoutEmergencyEventsInput = {
   favoritedBy?: Prisma.FavoriteCompanionUncheckedUpdateManyWithoutCompanionNestedInput
   emergencyContacts?: Prisma.EmergencyContactUncheckedUpdateManyWithoutUserNestedInput
   resolvedEmergencies?: Prisma.EmergencyEventUncheckedUpdateManyWithoutResolvedByNestedInput
+  memberships?: Prisma.HirerMembershipUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserUpsertWithoutResolvedEmergenciesInput = {
@@ -11772,6 +11943,7 @@ export type UserUpdateWithoutResolvedEmergenciesInput = {
   favoritedBy?: Prisma.FavoriteCompanionUpdateManyWithoutCompanionNestedInput
   emergencyContacts?: Prisma.EmergencyContactUpdateManyWithoutUserNestedInput
   emergencyEvents?: Prisma.EmergencyEventUpdateManyWithoutUserNestedInput
+  memberships?: Prisma.HirerMembershipUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutResolvedEmergenciesInput = {
@@ -11835,6 +12007,7 @@ export type UserUncheckedUpdateWithoutResolvedEmergenciesInput = {
   favoritedBy?: Prisma.FavoriteCompanionUncheckedUpdateManyWithoutCompanionNestedInput
   emergencyContacts?: Prisma.EmergencyContactUncheckedUpdateManyWithoutUserNestedInput
   emergencyEvents?: Prisma.EmergencyEventUncheckedUpdateManyWithoutUserNestedInput
+  memberships?: Prisma.HirerMembershipUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutFavoriteCompanionsInput = {
@@ -11898,6 +12071,7 @@ export type UserCreateWithoutFavoriteCompanionsInput = {
   emergencyContacts?: Prisma.EmergencyContactCreateNestedManyWithoutUserInput
   emergencyEvents?: Prisma.EmergencyEventCreateNestedManyWithoutUserInput
   resolvedEmergencies?: Prisma.EmergencyEventCreateNestedManyWithoutResolvedByInput
+  memberships?: Prisma.HirerMembershipCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutFavoriteCompanionsInput = {
@@ -11961,6 +12135,7 @@ export type UserUncheckedCreateWithoutFavoriteCompanionsInput = {
   emergencyContacts?: Prisma.EmergencyContactUncheckedCreateNestedManyWithoutUserInput
   emergencyEvents?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutUserInput
   resolvedEmergencies?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutResolvedByInput
+  memberships?: Prisma.HirerMembershipUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutFavoriteCompanionsInput = {
@@ -12029,6 +12204,7 @@ export type UserCreateWithoutFavoritedByInput = {
   emergencyContacts?: Prisma.EmergencyContactCreateNestedManyWithoutUserInput
   emergencyEvents?: Prisma.EmergencyEventCreateNestedManyWithoutUserInput
   resolvedEmergencies?: Prisma.EmergencyEventCreateNestedManyWithoutResolvedByInput
+  memberships?: Prisma.HirerMembershipCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutFavoritedByInput = {
@@ -12092,6 +12268,7 @@ export type UserUncheckedCreateWithoutFavoritedByInput = {
   emergencyContacts?: Prisma.EmergencyContactUncheckedCreateNestedManyWithoutUserInput
   emergencyEvents?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutUserInput
   resolvedEmergencies?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutResolvedByInput
+  memberships?: Prisma.HirerMembershipUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutFavoritedByInput = {
@@ -12171,6 +12348,7 @@ export type UserUpdateWithoutFavoriteCompanionsInput = {
   emergencyContacts?: Prisma.EmergencyContactUpdateManyWithoutUserNestedInput
   emergencyEvents?: Prisma.EmergencyEventUpdateManyWithoutUserNestedInput
   resolvedEmergencies?: Prisma.EmergencyEventUpdateManyWithoutResolvedByNestedInput
+  memberships?: Prisma.HirerMembershipUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutFavoriteCompanionsInput = {
@@ -12234,6 +12412,7 @@ export type UserUncheckedUpdateWithoutFavoriteCompanionsInput = {
   emergencyContacts?: Prisma.EmergencyContactUncheckedUpdateManyWithoutUserNestedInput
   emergencyEvents?: Prisma.EmergencyEventUncheckedUpdateManyWithoutUserNestedInput
   resolvedEmergencies?: Prisma.EmergencyEventUncheckedUpdateManyWithoutResolvedByNestedInput
+  memberships?: Prisma.HirerMembershipUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserUpsertWithoutFavoritedByInput = {
@@ -12308,6 +12487,7 @@ export type UserUpdateWithoutFavoritedByInput = {
   emergencyContacts?: Prisma.EmergencyContactUpdateManyWithoutUserNestedInput
   emergencyEvents?: Prisma.EmergencyEventUpdateManyWithoutUserNestedInput
   resolvedEmergencies?: Prisma.EmergencyEventUpdateManyWithoutResolvedByNestedInput
+  memberships?: Prisma.HirerMembershipUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutFavoritedByInput = {
@@ -12371,6 +12551,7 @@ export type UserUncheckedUpdateWithoutFavoritedByInput = {
   emergencyContacts?: Prisma.EmergencyContactUncheckedUpdateManyWithoutUserNestedInput
   emergencyEvents?: Prisma.EmergencyEventUncheckedUpdateManyWithoutUserNestedInput
   resolvedEmergencies?: Prisma.EmergencyEventUncheckedUpdateManyWithoutResolvedByNestedInput
+  memberships?: Prisma.HirerMembershipUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutReferralInput = {
@@ -12434,6 +12615,7 @@ export type UserCreateWithoutReferralInput = {
   emergencyContacts?: Prisma.EmergencyContactCreateNestedManyWithoutUserInput
   emergencyEvents?: Prisma.EmergencyEventCreateNestedManyWithoutUserInput
   resolvedEmergencies?: Prisma.EmergencyEventCreateNestedManyWithoutResolvedByInput
+  memberships?: Prisma.HirerMembershipCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutReferralInput = {
@@ -12497,6 +12679,7 @@ export type UserUncheckedCreateWithoutReferralInput = {
   emergencyContacts?: Prisma.EmergencyContactUncheckedCreateNestedManyWithoutUserInput
   emergencyEvents?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutUserInput
   resolvedEmergencies?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutResolvedByInput
+  memberships?: Prisma.HirerMembershipUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutReferralInput = {
@@ -12565,6 +12748,7 @@ export type UserCreateWithoutReferredByInput = {
   emergencyContacts?: Prisma.EmergencyContactCreateNestedManyWithoutUserInput
   emergencyEvents?: Prisma.EmergencyEventCreateNestedManyWithoutUserInput
   resolvedEmergencies?: Prisma.EmergencyEventCreateNestedManyWithoutResolvedByInput
+  memberships?: Prisma.HirerMembershipCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutReferredByInput = {
@@ -12628,6 +12812,7 @@ export type UserUncheckedCreateWithoutReferredByInput = {
   emergencyContacts?: Prisma.EmergencyContactUncheckedCreateNestedManyWithoutUserInput
   emergencyEvents?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutUserInput
   resolvedEmergencies?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutResolvedByInput
+  memberships?: Prisma.HirerMembershipUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutReferredByInput = {
@@ -12712,6 +12897,7 @@ export type UserUpdateWithoutReferralInput = {
   emergencyContacts?: Prisma.EmergencyContactUpdateManyWithoutUserNestedInput
   emergencyEvents?: Prisma.EmergencyEventUpdateManyWithoutUserNestedInput
   resolvedEmergencies?: Prisma.EmergencyEventUpdateManyWithoutResolvedByNestedInput
+  memberships?: Prisma.HirerMembershipUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutReferralInput = {
@@ -12775,6 +12961,7 @@ export type UserUncheckedUpdateWithoutReferralInput = {
   emergencyContacts?: Prisma.EmergencyContactUncheckedUpdateManyWithoutUserNestedInput
   emergencyEvents?: Prisma.EmergencyEventUncheckedUpdateManyWithoutUserNestedInput
   resolvedEmergencies?: Prisma.EmergencyEventUncheckedUpdateManyWithoutResolvedByNestedInput
+  memberships?: Prisma.HirerMembershipUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserUpsertWithWhereUniqueWithoutReferredByInput = {
@@ -12879,6 +13066,7 @@ export type UserCreateWithoutPaymentRequestsInput = {
   emergencyContacts?: Prisma.EmergencyContactCreateNestedManyWithoutUserInput
   emergencyEvents?: Prisma.EmergencyEventCreateNestedManyWithoutUserInput
   resolvedEmergencies?: Prisma.EmergencyEventCreateNestedManyWithoutResolvedByInput
+  memberships?: Prisma.HirerMembershipCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutPaymentRequestsInput = {
@@ -12942,6 +13130,7 @@ export type UserUncheckedCreateWithoutPaymentRequestsInput = {
   emergencyContacts?: Prisma.EmergencyContactUncheckedCreateNestedManyWithoutUserInput
   emergencyEvents?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutUserInput
   resolvedEmergencies?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutResolvedByInput
+  memberships?: Prisma.HirerMembershipUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutPaymentRequestsInput = {
@@ -13021,6 +13210,7 @@ export type UserUpdateWithoutPaymentRequestsInput = {
   emergencyContacts?: Prisma.EmergencyContactUpdateManyWithoutUserNestedInput
   emergencyEvents?: Prisma.EmergencyEventUpdateManyWithoutUserNestedInput
   resolvedEmergencies?: Prisma.EmergencyEventUpdateManyWithoutResolvedByNestedInput
+  memberships?: Prisma.HirerMembershipUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutPaymentRequestsInput = {
@@ -13065,6 +13255,279 @@ export type UserUncheckedUpdateWithoutPaymentRequestsInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   pushTokens?: Prisma.PushTokenUncheckedUpdateManyWithoutUserNestedInput
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutUserNestedInput
+  moderationQueue?: Prisma.ModerationQueueUncheckedUpdateManyWithoutUserNestedInput
+  moderationActions?: Prisma.ModerationActionUncheckedUpdateManyWithoutModeratorNestedInput
+  suspensions?: Prisma.UserSuspensionUncheckedUpdateManyWithoutUserNestedInput
+  suspendedBy?: Prisma.UserSuspensionUncheckedUpdateManyWithoutSuspendedByNestedInput
+  liftedSuspensions?: Prisma.UserSuspensionUncheckedUpdateManyWithoutLiftedByNestedInput
+  appeals?: Prisma.AppealUncheckedUpdateManyWithoutUserNestedInput
+  appealReviews?: Prisma.AppealUncheckedUpdateManyWithoutReviewedByNestedInput
+  files?: Prisma.FileUncheckedUpdateManyWithoutUserNestedInput
+  securityEvents?: Prisma.SecurityEventUncheckedUpdateManyWithoutUserNestedInput
+  adminAuditLogs?: Prisma.AdminAuditLogUncheckedUpdateManyWithoutAdminNestedInput
+  supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutUserNestedInput
+  assignedTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutAssigneeNestedInput
+  ticketMessages?: Prisma.SupportTicketMessageUncheckedUpdateManyWithoutSenderNestedInput
+  referral?: Prisma.ReferralUncheckedUpdateOneWithoutUserNestedInput
+  favoriteCompanions?: Prisma.FavoriteCompanionUncheckedUpdateManyWithoutHirerNestedInput
+  favoritedBy?: Prisma.FavoriteCompanionUncheckedUpdateManyWithoutCompanionNestedInput
+  emergencyContacts?: Prisma.EmergencyContactUncheckedUpdateManyWithoutUserNestedInput
+  emergencyEvents?: Prisma.EmergencyEventUncheckedUpdateManyWithoutUserNestedInput
+  resolvedEmergencies?: Prisma.EmergencyEventUncheckedUpdateManyWithoutResolvedByNestedInput
+  memberships?: Prisma.HirerMembershipUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutMembershipsInput = {
+  id?: string
+  zaloId: string
+  phone?: string | null
+  phoneHash?: string | null
+  isPhoneVerified?: boolean
+  phoneVerifiedAt?: Date | string | null
+  email?: string | null
+  fullName?: string | null
+  avatarUrl?: string | null
+  gender?: $Enums.Gender | null
+  dateOfBirth?: Date | string | null
+  role?: $Enums.UserRole | null
+  status?: $Enums.UserStatus
+  isVerified?: boolean
+  trustScore?: number
+  deletedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  settings?: Prisma.UserSettingsCreateNestedOneWithoutUserInput
+  devices?: Prisma.UserDeviceCreateNestedManyWithoutUserInput
+  sessions?: Prisma.UserSessionCreateNestedManyWithoutUserInput
+  companionProfile?: Prisma.CompanionProfileCreateNestedOneWithoutUserInput
+  hirerProfile?: Prisma.HirerProfileCreateNestedOneWithoutUserInput
+  hirerBookings?: Prisma.BookingCreateNestedManyWithoutHirerInput
+  companionBookings?: Prisma.BookingCreateNestedManyWithoutCompanionInput
+  conversationsAsHirer?: Prisma.ConversationCreateNestedManyWithoutHirerInput
+  conversationsAsCompanion?: Prisma.ConversationCreateNestedManyWithoutCompanionInput
+  messagesSent?: Prisma.MessageCreateNestedManyWithoutSenderInput
+  reviewsGiven?: Prisma.ReviewCreateNestedManyWithoutReviewerInput
+  reviewsReceived?: Prisma.ReviewCreateNestedManyWithoutRevieweeInput
+  blockedUsers?: Prisma.UserBlockCreateNestedManyWithoutBlockerInput
+  blockedByUsers?: Prisma.UserBlockCreateNestedManyWithoutBlockedInput
+  reportsMade?: Prisma.ReportCreateNestedManyWithoutReporterInput
+  reportsReceived?: Prisma.ReportCreateNestedManyWithoutReportedInput
+  strikes?: Prisma.UserStrikeCreateNestedManyWithoutUserInput
+  verifications?: Prisma.VerificationCreateNestedManyWithoutUserInput
+  photoVerifications?: Prisma.PhotoVerificationCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  pushTokens?: Prisma.PushTokenCreateNestedManyWithoutUserInput
+  payments?: Prisma.PaymentCreateNestedManyWithoutUserInput
+  paymentRequests?: Prisma.PaymentRequestCreateNestedManyWithoutUserInput
+  moderationQueue?: Prisma.ModerationQueueCreateNestedManyWithoutUserInput
+  moderationActions?: Prisma.ModerationActionCreateNestedManyWithoutModeratorInput
+  suspensions?: Prisma.UserSuspensionCreateNestedManyWithoutUserInput
+  suspendedBy?: Prisma.UserSuspensionCreateNestedManyWithoutSuspendedByInput
+  liftedSuspensions?: Prisma.UserSuspensionCreateNestedManyWithoutLiftedByInput
+  appeals?: Prisma.AppealCreateNestedManyWithoutUserInput
+  appealReviews?: Prisma.AppealCreateNestedManyWithoutReviewedByInput
+  files?: Prisma.FileCreateNestedManyWithoutUserInput
+  securityEvents?: Prisma.SecurityEventCreateNestedManyWithoutUserInput
+  adminAuditLogs?: Prisma.AdminAuditLogCreateNestedManyWithoutAdminInput
+  supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutUserInput
+  assignedTickets?: Prisma.SupportTicketCreateNestedManyWithoutAssigneeInput
+  ticketMessages?: Prisma.SupportTicketMessageCreateNestedManyWithoutSenderInput
+  referral?: Prisma.ReferralCreateNestedOneWithoutUserInput
+  referredBy?: Prisma.ReferralCreateNestedOneWithoutReferredUsersInput
+  favoriteCompanions?: Prisma.FavoriteCompanionCreateNestedManyWithoutHirerInput
+  favoritedBy?: Prisma.FavoriteCompanionCreateNestedManyWithoutCompanionInput
+  emergencyContacts?: Prisma.EmergencyContactCreateNestedManyWithoutUserInput
+  emergencyEvents?: Prisma.EmergencyEventCreateNestedManyWithoutUserInput
+  resolvedEmergencies?: Prisma.EmergencyEventCreateNestedManyWithoutResolvedByInput
+}
+
+export type UserUncheckedCreateWithoutMembershipsInput = {
+  id?: string
+  zaloId: string
+  phone?: string | null
+  phoneHash?: string | null
+  isPhoneVerified?: boolean
+  phoneVerifiedAt?: Date | string | null
+  email?: string | null
+  fullName?: string | null
+  avatarUrl?: string | null
+  gender?: $Enums.Gender | null
+  dateOfBirth?: Date | string | null
+  role?: $Enums.UserRole | null
+  status?: $Enums.UserStatus
+  isVerified?: boolean
+  trustScore?: number
+  deletedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  referredById?: string | null
+  settings?: Prisma.UserSettingsUncheckedCreateNestedOneWithoutUserInput
+  devices?: Prisma.UserDeviceUncheckedCreateNestedManyWithoutUserInput
+  sessions?: Prisma.UserSessionUncheckedCreateNestedManyWithoutUserInput
+  companionProfile?: Prisma.CompanionProfileUncheckedCreateNestedOneWithoutUserInput
+  hirerProfile?: Prisma.HirerProfileUncheckedCreateNestedOneWithoutUserInput
+  hirerBookings?: Prisma.BookingUncheckedCreateNestedManyWithoutHirerInput
+  companionBookings?: Prisma.BookingUncheckedCreateNestedManyWithoutCompanionInput
+  conversationsAsHirer?: Prisma.ConversationUncheckedCreateNestedManyWithoutHirerInput
+  conversationsAsCompanion?: Prisma.ConversationUncheckedCreateNestedManyWithoutCompanionInput
+  messagesSent?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
+  reviewsGiven?: Prisma.ReviewUncheckedCreateNestedManyWithoutReviewerInput
+  reviewsReceived?: Prisma.ReviewUncheckedCreateNestedManyWithoutRevieweeInput
+  blockedUsers?: Prisma.UserBlockUncheckedCreateNestedManyWithoutBlockerInput
+  blockedByUsers?: Prisma.UserBlockUncheckedCreateNestedManyWithoutBlockedInput
+  reportsMade?: Prisma.ReportUncheckedCreateNestedManyWithoutReporterInput
+  reportsReceived?: Prisma.ReportUncheckedCreateNestedManyWithoutReportedInput
+  strikes?: Prisma.UserStrikeUncheckedCreateNestedManyWithoutUserInput
+  verifications?: Prisma.VerificationUncheckedCreateNestedManyWithoutUserInput
+  photoVerifications?: Prisma.PhotoVerificationUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  pushTokens?: Prisma.PushTokenUncheckedCreateNestedManyWithoutUserInput
+  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutUserInput
+  paymentRequests?: Prisma.PaymentRequestUncheckedCreateNestedManyWithoutUserInput
+  moderationQueue?: Prisma.ModerationQueueUncheckedCreateNestedManyWithoutUserInput
+  moderationActions?: Prisma.ModerationActionUncheckedCreateNestedManyWithoutModeratorInput
+  suspensions?: Prisma.UserSuspensionUncheckedCreateNestedManyWithoutUserInput
+  suspendedBy?: Prisma.UserSuspensionUncheckedCreateNestedManyWithoutSuspendedByInput
+  liftedSuspensions?: Prisma.UserSuspensionUncheckedCreateNestedManyWithoutLiftedByInput
+  appeals?: Prisma.AppealUncheckedCreateNestedManyWithoutUserInput
+  appealReviews?: Prisma.AppealUncheckedCreateNestedManyWithoutReviewedByInput
+  files?: Prisma.FileUncheckedCreateNestedManyWithoutUserInput
+  securityEvents?: Prisma.SecurityEventUncheckedCreateNestedManyWithoutUserInput
+  adminAuditLogs?: Prisma.AdminAuditLogUncheckedCreateNestedManyWithoutAdminInput
+  supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutUserInput
+  assignedTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutAssigneeInput
+  ticketMessages?: Prisma.SupportTicketMessageUncheckedCreateNestedManyWithoutSenderInput
+  referral?: Prisma.ReferralUncheckedCreateNestedOneWithoutUserInput
+  favoriteCompanions?: Prisma.FavoriteCompanionUncheckedCreateNestedManyWithoutHirerInput
+  favoritedBy?: Prisma.FavoriteCompanionUncheckedCreateNestedManyWithoutCompanionInput
+  emergencyContacts?: Prisma.EmergencyContactUncheckedCreateNestedManyWithoutUserInput
+  emergencyEvents?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutUserInput
+  resolvedEmergencies?: Prisma.EmergencyEventUncheckedCreateNestedManyWithoutResolvedByInput
+}
+
+export type UserCreateOrConnectWithoutMembershipsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutMembershipsInput, Prisma.UserUncheckedCreateWithoutMembershipsInput>
+}
+
+export type UserUpsertWithoutMembershipsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutMembershipsInput, Prisma.UserUncheckedUpdateWithoutMembershipsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutMembershipsInput, Prisma.UserUncheckedCreateWithoutMembershipsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutMembershipsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutMembershipsInput, Prisma.UserUncheckedUpdateWithoutMembershipsInput>
+}
+
+export type UserUpdateWithoutMembershipsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  zaloId?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phoneHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isPhoneVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  phoneVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fullName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gender?: Prisma.NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
+  dateOfBirth?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  role?: Prisma.NullableEnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole | null
+  status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
+  isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  trustScore?: Prisma.IntFieldUpdateOperationsInput | number
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  settings?: Prisma.UserSettingsUpdateOneWithoutUserNestedInput
+  devices?: Prisma.UserDeviceUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.UserSessionUpdateManyWithoutUserNestedInput
+  companionProfile?: Prisma.CompanionProfileUpdateOneWithoutUserNestedInput
+  hirerProfile?: Prisma.HirerProfileUpdateOneWithoutUserNestedInput
+  hirerBookings?: Prisma.BookingUpdateManyWithoutHirerNestedInput
+  companionBookings?: Prisma.BookingUpdateManyWithoutCompanionNestedInput
+  conversationsAsHirer?: Prisma.ConversationUpdateManyWithoutHirerNestedInput
+  conversationsAsCompanion?: Prisma.ConversationUpdateManyWithoutCompanionNestedInput
+  messagesSent?: Prisma.MessageUpdateManyWithoutSenderNestedInput
+  reviewsGiven?: Prisma.ReviewUpdateManyWithoutReviewerNestedInput
+  reviewsReceived?: Prisma.ReviewUpdateManyWithoutRevieweeNestedInput
+  blockedUsers?: Prisma.UserBlockUpdateManyWithoutBlockerNestedInput
+  blockedByUsers?: Prisma.UserBlockUpdateManyWithoutBlockedNestedInput
+  reportsMade?: Prisma.ReportUpdateManyWithoutReporterNestedInput
+  reportsReceived?: Prisma.ReportUpdateManyWithoutReportedNestedInput
+  strikes?: Prisma.UserStrikeUpdateManyWithoutUserNestedInput
+  verifications?: Prisma.VerificationUpdateManyWithoutUserNestedInput
+  photoVerifications?: Prisma.PhotoVerificationUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  pushTokens?: Prisma.PushTokenUpdateManyWithoutUserNestedInput
+  payments?: Prisma.PaymentUpdateManyWithoutUserNestedInput
+  paymentRequests?: Prisma.PaymentRequestUpdateManyWithoutUserNestedInput
+  moderationQueue?: Prisma.ModerationQueueUpdateManyWithoutUserNestedInput
+  moderationActions?: Prisma.ModerationActionUpdateManyWithoutModeratorNestedInput
+  suspensions?: Prisma.UserSuspensionUpdateManyWithoutUserNestedInput
+  suspendedBy?: Prisma.UserSuspensionUpdateManyWithoutSuspendedByNestedInput
+  liftedSuspensions?: Prisma.UserSuspensionUpdateManyWithoutLiftedByNestedInput
+  appeals?: Prisma.AppealUpdateManyWithoutUserNestedInput
+  appealReviews?: Prisma.AppealUpdateManyWithoutReviewedByNestedInput
+  files?: Prisma.FileUpdateManyWithoutUserNestedInput
+  securityEvents?: Prisma.SecurityEventUpdateManyWithoutUserNestedInput
+  adminAuditLogs?: Prisma.AdminAuditLogUpdateManyWithoutAdminNestedInput
+  supportTickets?: Prisma.SupportTicketUpdateManyWithoutUserNestedInput
+  assignedTickets?: Prisma.SupportTicketUpdateManyWithoutAssigneeNestedInput
+  ticketMessages?: Prisma.SupportTicketMessageUpdateManyWithoutSenderNestedInput
+  referral?: Prisma.ReferralUpdateOneWithoutUserNestedInput
+  referredBy?: Prisma.ReferralUpdateOneWithoutReferredUsersNestedInput
+  favoriteCompanions?: Prisma.FavoriteCompanionUpdateManyWithoutHirerNestedInput
+  favoritedBy?: Prisma.FavoriteCompanionUpdateManyWithoutCompanionNestedInput
+  emergencyContacts?: Prisma.EmergencyContactUpdateManyWithoutUserNestedInput
+  emergencyEvents?: Prisma.EmergencyEventUpdateManyWithoutUserNestedInput
+  resolvedEmergencies?: Prisma.EmergencyEventUpdateManyWithoutResolvedByNestedInput
+}
+
+export type UserUncheckedUpdateWithoutMembershipsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  zaloId?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phoneHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isPhoneVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  phoneVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fullName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gender?: Prisma.NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
+  dateOfBirth?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  role?: Prisma.NullableEnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole | null
+  status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
+  isVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  trustScore?: Prisma.IntFieldUpdateOperationsInput | number
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  referredById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  settings?: Prisma.UserSettingsUncheckedUpdateOneWithoutUserNestedInput
+  devices?: Prisma.UserDeviceUncheckedUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.UserSessionUncheckedUpdateManyWithoutUserNestedInput
+  companionProfile?: Prisma.CompanionProfileUncheckedUpdateOneWithoutUserNestedInput
+  hirerProfile?: Prisma.HirerProfileUncheckedUpdateOneWithoutUserNestedInput
+  hirerBookings?: Prisma.BookingUncheckedUpdateManyWithoutHirerNestedInput
+  companionBookings?: Prisma.BookingUncheckedUpdateManyWithoutCompanionNestedInput
+  conversationsAsHirer?: Prisma.ConversationUncheckedUpdateManyWithoutHirerNestedInput
+  conversationsAsCompanion?: Prisma.ConversationUncheckedUpdateManyWithoutCompanionNestedInput
+  messagesSent?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
+  reviewsGiven?: Prisma.ReviewUncheckedUpdateManyWithoutReviewerNestedInput
+  reviewsReceived?: Prisma.ReviewUncheckedUpdateManyWithoutRevieweeNestedInput
+  blockedUsers?: Prisma.UserBlockUncheckedUpdateManyWithoutBlockerNestedInput
+  blockedByUsers?: Prisma.UserBlockUncheckedUpdateManyWithoutBlockedNestedInput
+  reportsMade?: Prisma.ReportUncheckedUpdateManyWithoutReporterNestedInput
+  reportsReceived?: Prisma.ReportUncheckedUpdateManyWithoutReportedNestedInput
+  strikes?: Prisma.UserStrikeUncheckedUpdateManyWithoutUserNestedInput
+  verifications?: Prisma.VerificationUncheckedUpdateManyWithoutUserNestedInput
+  photoVerifications?: Prisma.PhotoVerificationUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  pushTokens?: Prisma.PushTokenUncheckedUpdateManyWithoutUserNestedInput
+  payments?: Prisma.PaymentUncheckedUpdateManyWithoutUserNestedInput
+  paymentRequests?: Prisma.PaymentRequestUncheckedUpdateManyWithoutUserNestedInput
   moderationQueue?: Prisma.ModerationQueueUncheckedUpdateManyWithoutUserNestedInput
   moderationActions?: Prisma.ModerationActionUncheckedUpdateManyWithoutModeratorNestedInput
   suspensions?: Prisma.UserSuspensionUncheckedUpdateManyWithoutUserNestedInput
@@ -13168,6 +13631,7 @@ export type UserUpdateWithoutReferredByInput = {
   emergencyContacts?: Prisma.EmergencyContactUpdateManyWithoutUserNestedInput
   emergencyEvents?: Prisma.EmergencyEventUpdateManyWithoutUserNestedInput
   resolvedEmergencies?: Prisma.EmergencyEventUpdateManyWithoutResolvedByNestedInput
+  memberships?: Prisma.HirerMembershipUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutReferredByInput = {
@@ -13231,6 +13695,7 @@ export type UserUncheckedUpdateWithoutReferredByInput = {
   emergencyContacts?: Prisma.EmergencyContactUncheckedUpdateManyWithoutUserNestedInput
   emergencyEvents?: Prisma.EmergencyEventUncheckedUpdateManyWithoutUserNestedInput
   resolvedEmergencies?: Prisma.EmergencyEventUncheckedUpdateManyWithoutResolvedByNestedInput
+  memberships?: Prisma.HirerMembershipUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateManyWithoutReferredByInput = {
@@ -13298,6 +13763,7 @@ export type UserCountOutputType = {
   emergencyContacts: number
   emergencyEvents: number
   resolvedEmergencies: number
+  memberships: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -13339,6 +13805,7 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   emergencyContacts?: boolean | UserCountOutputTypeCountEmergencyContactsArgs
   emergencyEvents?: boolean | UserCountOutputTypeCountEmergencyEventsArgs
   resolvedEmergencies?: boolean | UserCountOutputTypeCountResolvedEmergenciesArgs
+  memberships?: boolean | UserCountOutputTypeCountMembershipsArgs
 }
 
 /**
@@ -13617,6 +14084,13 @@ export type UserCountOutputTypeCountResolvedEmergenciesArgs<ExtArgs extends runt
   where?: Prisma.EmergencyEventWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountMembershipsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.HirerMembershipWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -13681,6 +14155,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   emergencyContacts?: boolean | Prisma.User$emergencyContactsArgs<ExtArgs>
   emergencyEvents?: boolean | Prisma.User$emergencyEventsArgs<ExtArgs>
   resolvedEmergencies?: boolean | Prisma.User$resolvedEmergenciesArgs<ExtArgs>
+  memberships?: boolean | Prisma.User$membershipsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -13797,6 +14272,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   emergencyContacts?: boolean | Prisma.User$emergencyContactsArgs<ExtArgs>
   emergencyEvents?: boolean | Prisma.User$emergencyEventsArgs<ExtArgs>
   resolvedEmergencies?: boolean | Prisma.User$resolvedEmergenciesArgs<ExtArgs>
+  memberships?: boolean | Prisma.User$membershipsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -13852,6 +14328,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     emergencyContacts: Prisma.$EmergencyContactPayload<ExtArgs>[]
     emergencyEvents: Prisma.$EmergencyEventPayload<ExtArgs>[]
     resolvedEmergencies: Prisma.$EmergencyEventPayload<ExtArgs>[]
+    memberships: Prisma.$HirerMembershipPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -14310,6 +14787,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   emergencyContacts<T extends Prisma.User$emergencyContactsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$emergencyContactsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EmergencyContactPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   emergencyEvents<T extends Prisma.User$emergencyEventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$emergencyEventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EmergencyEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   resolvedEmergencies<T extends Prisma.User$resolvedEmergenciesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$resolvedEmergenciesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EmergencyEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  memberships<T extends Prisma.User$membershipsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$membershipsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$HirerMembershipPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -15758,6 +16236,30 @@ export type User$resolvedEmergenciesArgs<ExtArgs extends runtime.Types.Extension
   take?: number
   skip?: number
   distinct?: Prisma.EmergencyEventScalarFieldEnum | Prisma.EmergencyEventScalarFieldEnum[]
+}
+
+/**
+ * User.memberships
+ */
+export type User$membershipsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the HirerMembership
+   */
+  select?: Prisma.HirerMembershipSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the HirerMembership
+   */
+  omit?: Prisma.HirerMembershipOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.HirerMembershipInclude<ExtArgs> | null
+  where?: Prisma.HirerMembershipWhereInput
+  orderBy?: Prisma.HirerMembershipOrderByWithRelationInput | Prisma.HirerMembershipOrderByWithRelationInput[]
+  cursor?: Prisma.HirerMembershipWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.HirerMembershipScalarFieldEnum | Prisma.HirerMembershipScalarFieldEnum[]
 }
 
 /**

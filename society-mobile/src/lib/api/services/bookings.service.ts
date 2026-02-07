@@ -47,6 +47,7 @@ export interface Booking {
     displayName: string;
     avatar?: string | null;
     rating: number;
+    membershipTier?: string | null;
   };
 }
 

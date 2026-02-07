@@ -72,6 +72,14 @@ export class EarningsController {
   }
 
   /**
+   * Get withdrawal history
+   */
+  @Get('withdrawals')
+  async getWithdrawalHistory(@CurrentUser('id') userId: string) {
+    return this.earningsService.getWithdrawalHistory(userId);
+  }
+
+  /**
    * Withdraw funds
    */
   @Post('withdraw')

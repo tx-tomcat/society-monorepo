@@ -1,4 +1,5 @@
 /* eslint-disable max-lines-per-function */
+import type { Href } from 'expo-router';
 import { useRouter } from 'expo-router';
 import { MotiView } from 'moti';
 import React from 'react';
@@ -27,7 +28,7 @@ import {
   Info,
   Wallet,
 } from '@/components/ui/icons';
-import { showErrorMessage, showSuccessMessage } from '@/components/ui/utils';
+import { showSuccessMessage } from '@/components/ui/utils';
 import {
   useBankAccounts,
   useEarningsOverview,
@@ -109,11 +110,13 @@ export default function WithdrawFunds() {
                     t('companion.withdraw.success'),
                     t('companion.withdraw.success_description')
                   );
-                  router.back();
+                  setTimeout(() => {
+                    router.replace('/companion/earnings/withdrawals' as Href);
+                  }, 1500);
                 },
                 onError: (error) => {
-                  console.error('Withdrawal request failed:', error);
-                  showErrorMessage(t('companion.withdraw.request_failed'));
+                  // console.error('Withdrawal request failed:', error);
+                  // showErrorMessage(t('companion.withdraw.request_failed'));
                 },
               }
             );

@@ -17,6 +17,7 @@ import {
 import {
     ArrowRight,
     Bell,
+    Crown,
     Edit,
     Heart,
     Help,
@@ -60,6 +61,14 @@ const SETTINGS_SECTIONS: { titleKey: string; items: SettingsItem[] }[] = [
                 iconBg: 'bg-rose-400/10',
                 iconColor: colors.rose[400],
                 route: '/hirer/favorites',
+            },
+            {
+                id: 'membership',
+                labelKey: 'hirer.settings.vip_membership',
+                icon: Crown,
+                iconBg: 'bg-yellow-400/10',
+                iconColor: colors.yellow[400],
+                route: '/hirer/membership',
             },
         ],
     },

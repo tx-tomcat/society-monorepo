@@ -21,6 +21,9 @@ import {
   Logger,
   NotFoundException,
 } from "@nestjs/common";
+import { ConfigService } from '@nestjs/config';
+import { OnEvent } from '@nestjs/event-emitter';
+import { BoostPaymentCompletedEvent, WALLET_EVENTS } from '@/modules/wallet/events/wallet.events';
 import {
   ActiveBoostInfo,
   BoostHistoryItem,
@@ -31,54 +34,40 @@ import {
   CompanionListItem,
   CompanionProfileResponse,
   DayAvailabilityDetail,
+  PhotoVerificationResponse,
   PurchaseBoostDto,
+  SubmitPhotoVerificationDto,
   UpdateAvailabilityDto,
   UpdateCompanionProfileDto,
 } from "../dto/companion.dto";
-
-// Boost pricing configuration (in VND)
-const BOOST_PRICING: Record<
-  BoostTierEnum,
-  {
-    durationHours: number;
-    price: number;
-    multiplier: number;
-    name: string;
-    description: string;
-  }
-> = {
-  [BoostTierEnum.STANDARD]: {
-    name: "Standard Boost",
-    durationHours: 24,
-    price: 99_000, // ~$4 USD
-    multiplier: 1.5,
-    description: "Appear higher in search results for 24 hours",
-  },
-  [BoostTierEnum.PREMIUM]: {
-    name: "Premium Boost",
-    durationHours: 48,
-    price: 179_000, // ~$7 USD
-    multiplier: 2.0,
-    description: "Double your visibility for 48 hours",
-  },
-  [BoostTierEnum.SUPER]: {
-    name: "Super Boost",
-    durationHours: 72,
-    price: 249_000, // ~$10 USD
-    multiplier: 3.0,
-    description: "Maximum visibility for 72 hours - appear at the top",
-  },
-};
 
 @Injectable()
 export class CompanionsService {
   private readonly logger = new Logger(CompanionsService.name);
 
+  private readonly r2DevUrlRe = /^https:\/\/pub-[a-z0-9]+\.r2\.dev\//;
+  private readonly r2PublicUrl: string;
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly cachePatterns: CachePatternsService,
     private readonly walletService: WalletService,
-  ) {}
+    private readonly configService: ConfigService,
+  ) {
+    const publicUrl = this.configService.get<string>('R2_PUBLIC_URL', '');
+    this.r2PublicUrl = publicUrl.endsWith('/') ? publicUrl : `${publicUrl}/`;
+  }
+
+  /** Rewrite legacy R2 dev URLs to the custom domain */
+  private normalizeUrl(url: string | null | undefined): string | null {
+    if (!url || !this.r2PublicUrl) return url ?? null;
+    return url.replace(this.r2DevUrlRe, this.r2PublicUrl);
+  }
+
+  @OnEvent(WALLET_EVENTS.BOOST_PAYMENT_COMPLETED)
+  async handleBoostPaymentCompleted(event: BoostPaymentCompletedEvent): Promise<void> {
+    await this.activateBoost(event.boostId);
+  }
 
   /**
    * Browse companions with filters
@@ -243,8 +232,9 @@ export class CompanionsService {
       age: c.user.dateOfBirth
         ? DateUtils.calculateAge(c.user.dateOfBirth as Date)
         : null,
-      avatar:
+      avatar: this.normalizeUrl(
         c.user.avatarUrl || (c.photos.length > 0 ? c.photos[0].url : null),
+      ),
       gender: c.user.gender,
       hourlyRate: c.hourlyRate,
       halfDayRate: c.halfDayRate,
@@ -261,7 +251,7 @@ export class CompanionsService {
         name: s.occasion.nameEn, // TODO: Use language from request
         emoji: s.occasion.emoji,
       })),
-      photos: c.photos.map((p) => p.url),
+      photos: c.photos.map((p) => this.normalizeUrl(p.url)!),
       isAvailable: c.isActive && !c.isHidden,
       distanceKm: null, // Location data not yet available in schema
     }));
@@ -380,8 +370,8 @@ export class CompanionsService {
         ? DateUtils.calculateAge(companion.user.dateOfBirth)
         : null,
       bio: companion.bio,
-      avatar: companion.photos[0]?.url || companion.user.avatarUrl,
-      photos: companion.photos.map((p) => p.url),
+      avatar: this.normalizeUrl(companion.photos[0]?.url || companion.user.avatarUrl),
+      photos: companion.photos.map((p) => this.normalizeUrl(p.url)!),
       gender: companion.user.gender,
       heightCm: companion.heightCm,
       languages: companion.languages,
@@ -413,16 +403,16 @@ export class CompanionsService {
         comment: r.comment,
         occasion: r.booking.occasion
           ? {
-              id: r.booking.occasion.id,
-              code: r.booking.occasion.code,
-              name: r.booking.occasion.nameEn,
-              emoji: r.booking.occasion.emoji,
-            }
+            id: r.booking.occasion.id,
+            code: r.booking.occasion.code,
+            name: r.booking.occasion.nameEn,
+            emoji: r.booking.occasion.emoji,
+          }
           : null,
         date: this.formatDateToString(r.createdAt),
         reviewer: {
           name: r.reviewer.fullName || "Anonymous",
-          avatar: r.reviewer.avatarUrl,
+          avatar: this.normalizeUrl(r.reviewer.avatarUrl),
         },
       })),
       availability: {
@@ -559,8 +549,8 @@ export class CompanionsService {
       },
     });
 
-    // Invalidate user cache since getMyCompanionProfile queries user with companionProfile include
-    await this.prisma.invalidateCache('user', { where: { id: userId } });
+    // Invalidate the exact cached query for getMyCompanionProfile
+    await this.prisma.invalidateExactQuery('user', 'findUnique', this.myProfileQueryArgs(userId));
 
     return updated;
   }
@@ -568,14 +558,18 @@ export class CompanionsService {
   /**
    * Get own companion profile (authenticated)
    */
-  async getMyCompanionProfile(userId: string) {
-    const user = await this.prisma.user.findUnique({
+  /**
+   * Build the query args for getMyCompanionProfile.
+   * Shared between the query and cache invalidation to ensure key match.
+   */
+  private myProfileQueryArgs(userId: string) {
+    return {
       where: { id: userId },
       include: {
         companionProfile: {
           include: {
             photos: {
-              orderBy: { position: "asc" },
+              orderBy: { position: "asc" as const },
             },
             services: {
               include: {
@@ -587,7 +581,11 @@ export class CompanionsService {
           },
         },
       },
-    });
+    };
+  }
+
+  async getMyCompanionProfile(userId: string) {
+    const user = await this.prisma.user.findUnique(this.myProfileQueryArgs(userId));
 
     if (!user) {
       throw new NotFoundException("User not found");
@@ -611,7 +609,7 @@ export class CompanionsService {
       fullDayRate: profile.fullDayRate,
       photos: profile.photos.map((p) => ({
         id: p.id,
-        url: p.url,
+        url: this.normalizeUrl(p.url)!,
         position: p.position,
         isVerified: p.isVerified,
         isPrimary: p.isPrimary,
@@ -790,8 +788,8 @@ export class CompanionsService {
       }
     }
 
-    // Invalidate cache for companion profile (which includes availability)
-    await this.prisma.invalidateCache('companionProfile', { where: { userId } });
+    // Invalidate the exact cached query for getMyCompanionProfile
+    await this.prisma.invalidateExactQuery('user', 'findUnique', this.myProfileQueryArgs(userId));
     await this.prisma.invalidateModelCache('companionAvailability');
 
     return { success: true, message: "Availability updated" };
@@ -886,7 +884,7 @@ export class CompanionsService {
           reviewer: {
             id: r.reviewerId,
             fullName: maskName(r.reviewer.fullName),
-            avatarUrl: r.reviewer.avatarUrl,
+            avatarUrl: this.normalizeUrl(r.reviewer.avatarUrl),
           },
         };
       }),
@@ -902,6 +900,8 @@ export class CompanionsService {
   /**
    * Add a photo to companion profile
    */
+  private readonly MAX_PHOTOS = 6;
+
   async addPhoto(userId: string, photoUrl: string, isPrimary: boolean = false) {
     const profile = await this.prisma.companionProfile.findUnique({
       where: { userId },
@@ -910,6 +910,10 @@ export class CompanionsService {
 
     if (!profile) {
       throw new NotFoundException("Companion profile not found");
+    }
+
+    if (profile.photos.length >= this.MAX_PHOTOS) {
+      throw new BadRequestException(`Maximum ${this.MAX_PHOTOS} photos allowed`);
     }
 
     const nextPosition = profile.photos.length;
@@ -930,6 +934,9 @@ export class CompanionsService {
         isPrimary: isPrimary || nextPosition === 0,
       },
     });
+
+    // Invalidate the exact cached query for getMyCompanionProfile
+    await this.prisma.invalidateExactQuery('user', 'findUnique', this.myProfileQueryArgs(userId));
 
     return photo;
   }
@@ -957,6 +964,46 @@ export class CompanionsService {
     await this.prisma.companionPhoto.delete({
       where: { id: photoId },
     });
+
+    // Invalidate the exact cached query for getMyCompanionProfile
+    await this.prisma.invalidateExactQuery('user', 'findUnique', this.myProfileQueryArgs(userId));
+
+    return { success: true };
+  }
+
+  /**
+   * Set a photo as the primary profile photo
+   */
+  async setPrimaryPhoto(userId: string, photoId: string) {
+    const profile = await this.prisma.companionProfile.findUnique({
+      where: { userId },
+    });
+
+    if (!profile) {
+      throw new NotFoundException("Companion profile not found");
+    }
+
+    const photo = await this.prisma.companionPhoto.findUnique({
+      where: { id: photoId },
+    });
+
+    if (!photo || photo.companionId !== profile.id) {
+      throw new NotFoundException("Photo not found");
+    }
+
+    // Unset current primary, then set the new one
+    await this.prisma.companionPhoto.updateMany({
+      where: { companionId: profile.id, isPrimary: true },
+      data: { isPrimary: false },
+    });
+
+    await this.prisma.companionPhoto.update({
+      where: { id: photoId },
+      data: { isPrimary: true },
+    });
+
+    // Invalidate the exact cached query for getMyCompanionProfile
+    await this.prisma.invalidateExactQuery('user', 'findUnique', this.myProfileQueryArgs(userId));
 
     return { success: true };
   }
@@ -1004,6 +1051,9 @@ export class CompanionsService {
         },
       });
     }
+
+    // Invalidate the exact cached query for getMyCompanionProfile
+    await this.prisma.invalidateExactQuery('user', 'findUnique', this.myProfileQueryArgs(userId));
 
     // Return updated services with occasion data
     const updatedServices = await this.prisma.companionService.findMany({
@@ -1056,17 +1106,31 @@ export class CompanionsService {
   // ============================================
 
   /**
-   * Get boost pricing options
+   * Get boost pricing options from database
    */
-  getBoostPricing(): BoostPricing[] {
-    return Object.entries(BOOST_PRICING).map(([tier, config]) => ({
-      tier: tier as BoostTierEnum,
-      name: config.name,
-      durationHours: config.durationHours,
-      price: config.price,
-      multiplier: config.multiplier,
-      description: config.description,
+  async getBoostPricing(): Promise<BoostPricing[]> {
+    const tiers = await this.prisma.boostPricingTier.findMany({
+      where: { isActive: true },
+      orderBy: { price: "asc" },
+    });
+
+    return tiers.map((t) => ({
+      tier: t.tier as unknown as BoostTierEnum,
+      name: t.name,
+      durationHours: t.durationHours,
+      price: t.price,
+      multiplier: Number(t.multiplier),
+      description: t.description ?? "",
     }));
+  }
+
+  /**
+   * Get boost pricing for a specific tier
+   */
+  private async getBoostPricingByTier(tier: BoostTierEnum) {
+    return this.prisma.boostPricingTier.findFirst({
+      where: { tier: tier as unknown as BoostTier, isActive: true },
+    });
   }
 
   /**
@@ -1096,11 +1160,11 @@ export class CompanionsService {
 
     const remainingHours = activeBoost.expiresAt
       ? Math.max(
-          0,
-          Math.ceil(
-            (activeBoost.expiresAt.getTime() - Date.now()) / (1000 * 60 * 60),
-          ),
-        )
+        0,
+        Math.ceil(
+          (activeBoost.expiresAt.getTime() - Date.now()) / (1000 * 60 * 60),
+        ),
+      )
       : null;
 
     return {
@@ -1147,8 +1211,8 @@ export class CompanionsService {
   }
 
   /**
-   * Purchase a profile boost using wallet balance
-   * Deducts from wallet and activates boost immediately
+   * Purchase a profile boost via QR payment
+   * Creates a PENDING boost and payment request, returns QR payment data
    */
   async purchaseBoost(
     userId: string,
@@ -1180,52 +1244,85 @@ export class CompanionsService {
       });
     }
 
-    const pricing = BOOST_PRICING[dto.tier];
+    // Check if there's already a pending boost with active payment request
+    const pendingBoost = await this.prisma.profileBoost.findFirst({
+      where: {
+        companionId: profile.id,
+        status: BoostStatus.PENDING,
+        paymentRequests: {
+          some: {
+            status: 'PENDING',
+            expiresAt: { gt: new Date() },
+          },
+        },
+      },
+      include: {
+        paymentRequests: {
+          where: { status: 'PENDING', expiresAt: { gt: new Date() } },
+          take: 1,
+        },
+      },
+    });
+
+    if (pendingBoost) {
+      // Reuse existing pending boost — createBoostPaymentRequest is idempotent
+      const paymentData = await this.walletService.createBoostPaymentRequest(
+        userId,
+        pendingBoost.id,
+        pendingBoost.price,
+      );
+      return {
+        boostId: pendingBoost.id,
+        tier: pendingBoost.tier as unknown as BoostTierEnum,
+        price: pendingBoost.price,
+        message: `You have a pending payment. Please complete it to activate your boost.`,
+        paymentRequestId: paymentData.id,
+        code: paymentData.code,
+        qrUrl: paymentData.qrUrl,
+        deeplinks: paymentData.deeplinks,
+        accountInfo: paymentData.accountInfo,
+        expiresAt: paymentData.expiresAt,
+      };
+    }
+
+    const pricing = await this.getBoostPricingByTier(dto.tier);
     if (!pricing) {
       throw new BadRequestException("Invalid boost tier");
     }
 
-    // Check wallet balance
-    const canPay = await this.walletService.canPayFromWallet(userId, pricing.price);
-    if (!canPay) {
-      throw new BadRequestException({
-        message: "Insufficient wallet balance. Please top up your wallet first.",
-        error: "INSUFFICIENT_BALANCE",
-        requiredAmount: pricing.price,
-      });
-    }
-
-    // Create boost with ACTIVE status and deduct from wallet in a transaction
-    const now = new Date();
-    const expiresAt = new Date(now.getTime() + pricing.durationHours * 60 * 60 * 1000);
-
+    // Create boost with PENDING status (activated by webhook on payment)
     const boost = await this.prisma.profileBoost.create({
       data: {
         companionId: profile.id,
         tier: dto.tier as unknown as BoostTier,
-        status: BoostStatus.ACTIVE,
+        status: BoostStatus.PENDING,
         multiplier: pricing.multiplier,
         price: pricing.price,
-        startedAt: now,
-        expiresAt,
       },
     });
 
-    // Deduct from wallet (creates payment record for tracking)
-    await this.walletService.deductFromWallet(userId, pricing.price, {
-      boostId: boost.id,
-      description: `${pricing.name} purchase`,
-    });
+    // Create SePay payment request
+    const paymentData = await this.walletService.createBoostPaymentRequest(
+      userId,
+      boost.id,
+      pricing.price,
+    );
 
     this.logger.log(
-      `Profile boost activated for companion ${profile.id}: ${dto.tier} tier, expires at ${expiresAt.toISOString()}`,
+      `Pending boost created for companion ${profile.id}: ${dto.tier} tier, boost ID ${boost.id}`,
     );
 
     return {
       boostId: boost.id,
       tier: dto.tier,
       price: pricing.price,
-      message: `Your ${pricing.name} is now active! Your profile will appear higher in search results for ${pricing.durationHours} hours.`,
+      message: `Please complete payment to activate your ${pricing.name}`,
+      paymentRequestId: paymentData.id,
+      code: paymentData.code,
+      qrUrl: paymentData.qrUrl,
+      deeplinks: paymentData.deeplinks,
+      accountInfo: paymentData.accountInfo,
+      expiresAt: paymentData.expiresAt,
     };
   }
 
@@ -1250,7 +1347,7 @@ export class CompanionsService {
       return;
     }
 
-    const pricing = BOOST_PRICING[boost.tier as unknown as BoostTierEnum];
+    const pricing = await this.getBoostPricingByTier(boost.tier as unknown as BoostTierEnum);
     if (!pricing) {
       this.logger.error(
         `Invalid boost tier for boost ${boostId}: ${boost.tier}`,
@@ -1263,14 +1360,23 @@ export class CompanionsService {
       now.getTime() + pricing.durationHours * 60 * 60 * 1000,
     );
 
-    await this.prisma.profileBoost.update({
-      where: { id: boostId },
+    // Optimistic concurrency: only activate if still PENDING (prevents double-activation)
+    const updated = await this.prisma.profileBoost.updateMany({
+      where: {
+        id: boostId,
+        status: BoostStatus.PENDING,
+      },
       data: {
         status: BoostStatus.ACTIVE,
         startedAt: now,
         expiresAt,
       },
     });
+
+    if (updated.count === 0) {
+      this.logger.warn(`Boost ${boostId} already activated by concurrent request`);
+      return;
+    }
 
     this.logger.log(
       `Profile boost ${boostId} activated, expires ${expiresAt.toISOString()}`,
@@ -1403,5 +1509,90 @@ export class CompanionsService {
     );
 
     return new Map(cached || []);
+  }
+
+  // ============================================
+  // Photo Verification
+  // ============================================
+
+  async submitPhotoVerification(
+    userId: string,
+    dto: SubmitPhotoVerificationDto,
+  ): Promise<PhotoVerificationResponse> {
+    const profile = await this.prisma.companionProfile.findFirst({
+      where: { userId },
+    });
+
+    if (!profile) {
+      throw new NotFoundException("Companion profile not found");
+    }
+
+    // Block if there's already a pending/under-review verification
+    const existing = await this.prisma.photoVerification.findFirst({
+      where: {
+        userId,
+        status: { in: [VerificationStatus.PENDING, VerificationStatus.UNDER_REVIEW] },
+      },
+    });
+
+    if (existing) {
+      throw new BadRequestException(
+        "You already have a verification request pending review",
+      );
+    }
+
+    const verification = await this.prisma.photoVerification.create({
+      data: {
+        userId,
+        photoUrl: dto.idFrontUrl,
+        idBackUrl: dto.idBackUrl,
+        selfieUrl: dto.selfieUrl,
+        status: VerificationStatus.PENDING,
+      },
+    });
+
+    // Update companion profile status
+    await this.prisma.companionProfile.update({
+      where: { id: profile.id },
+      data: { verificationStatus: VerificationStatus.UNDER_REVIEW },
+    });
+
+    // Invalidate profile cache
+    this.prisma.invalidateModelCache("companionProfile");
+
+    return {
+      id: verification.id,
+      status: verification.status,
+      idFrontUrl: verification.photoUrl,
+      idBackUrl: verification.idBackUrl ?? "",
+      selfieUrl: verification.selfieUrl,
+      failureReason: verification.failureReason ?? undefined,
+      createdAt: verification.createdAt,
+      reviewedAt: verification.reviewedAt ?? undefined,
+    };
+  }
+
+  async getMyPhotoVerification(
+    userId: string,
+  ): Promise<PhotoVerificationResponse | null> {
+    const verification = await this.prisma.photoVerification.findFirst({
+      where: { userId },
+      orderBy: { createdAt: "desc" },
+    });
+
+    if (!verification) {
+      return null;
+    }
+
+    return {
+      id: verification.id,
+      status: verification.status,
+      idFrontUrl: verification.photoUrl,
+      idBackUrl: verification.idBackUrl ?? "",
+      selfieUrl: verification.selfieUrl,
+      failureReason: verification.failureReason ?? undefined,
+      createdAt: verification.createdAt,
+      reviewedAt: verification.reviewedAt ?? undefined,
+    };
   }
 }

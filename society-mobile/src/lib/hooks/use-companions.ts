@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type {
   CompanionFilters,
   CompanionServiceInput,
+  SubmitPhotoVerificationInput,
   UpdateAvailabilityInput,
   UpdateCompanionProfileData,
 } from '../api/services/companions.service';
@@ -210,11 +211,9 @@ export function usePurchaseBoost() {
   return useMutation({
     mutationFn: ({
       tier,
-      returnUrl,
     }: {
       tier: Parameters<typeof companionsService.purchaseBoost>[0];
-      returnUrl?: string;
-    }) => companionsService.purchaseBoost(tier, returnUrl),
+    }) => companionsService.purchaseBoost(tier),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ['companions', 'me', 'boost'],
@@ -255,6 +254,21 @@ export function useAddCompanionPhoto() {
 }
 
 /**
+ * React Query mutation hook to set a photo as primary
+ */
+export function useSetPrimaryPhoto() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (photoId: string) =>
+      companionsService.setPrimaryPhoto(photoId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['companion', 'me'] });
+    },
+  });
+}
+
+/**
  * React Query mutation hook to remove a photo
  */
 export function useRemoveCompanionPhoto() {
@@ -264,6 +278,35 @@ export function useRemoveCompanionPhoto() {
     mutationFn: (photoId: string) =>
       companionsService.removePhoto(photoId),
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['companion', 'me'] });
+    },
+  });
+}
+
+/**
+ * React Query hook to fetch photo verification status
+ */
+export function usePhotoVerificationStatus() {
+  const { isSignedIn } = useAuth();
+
+  return useQuery({
+    queryKey: ['companion', 'verification'],
+    queryFn: () => companionsService.getPhotoVerificationStatus(),
+    enabled: isSignedIn,
+  });
+}
+
+/**
+ * React Query mutation hook to submit photo verification
+ */
+export function useSubmitPhotoVerification() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (input: SubmitPhotoVerificationInput) =>
+      companionsService.submitPhotoVerification(input),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['companion', 'verification'] });
       queryClient.invalidateQueries({ queryKey: ['companion', 'me'] });
     },
   });

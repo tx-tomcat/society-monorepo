@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import * as crypto from 'crypto';
 
 // Bank info with logos from VietQR API
 const BANK_INFO: Record<string, { name: string; logo: string }> = {
@@ -146,7 +147,16 @@ export class SepayService {
   verifyWebhook(authHeader: string | undefined): boolean {
     if (!authHeader) return false;
     const expected = `Apikey ${this.apiKey}`;
-    return authHeader === expected;
+    // Use timing-safe comparison to prevent timing attacks
+    if (authHeader.length !== expected.length) return false;
+    try {
+      return crypto.timingSafeEqual(
+        Buffer.from(authHeader),
+        Buffer.from(expected),
+      );
+    } catch {
+      return false;
+    }
   }
 
   /**

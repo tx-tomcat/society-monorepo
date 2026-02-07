@@ -30,6 +30,8 @@ export default function HirerLayout() {
       <Stack.Screen name="settings/language" />
       <Stack.Screen name="settings/notifications" />
       <Stack.Screen name="settings/privacy" />
+      <Stack.Screen name="membership/index" />
+      <Stack.Screen name="membership/payment" />
     </Stack>
   );
 }

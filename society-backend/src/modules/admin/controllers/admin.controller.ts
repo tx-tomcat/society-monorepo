@@ -88,6 +88,21 @@ export class AdminController {
     return this.adminService.approveVerification(req.user.id, id, dto);
   }
 
+  // Photo Verifications (CCCD)
+  @Get('photo-verifications/pending')
+  async getPendingPhotoVerifications() {
+    return this.adminService.getPendingPhotoVerifications();
+  }
+
+  @Post('photo-verifications/:id/review')
+  async reviewPhotoVerification(
+    @Request() req: AuthenticatedRequest,
+    @Param('id') id: string,
+    @Body() dto: VerificationApprovalDto,
+  ) {
+    return this.adminService.reviewPhotoVerification(req.user.id, id, dto);
+  }
+
   // Withdrawals
   @Get('withdrawals/pending')
   async getPendingWithdrawals() {

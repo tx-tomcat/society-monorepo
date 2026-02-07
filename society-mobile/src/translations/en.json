@@ -209,6 +209,7 @@
     "coming_soon": "Coming Soon",
     "confirm": "Confirm",
     "continue": "Continue",
+    "delete": "Delete",
     "yes": "Yes",
     "no": "No",
     "days": {
@@ -323,6 +324,10 @@
       "no_keep_it": "No, Keep It",
       "occasion": "Occasion",
       "opening_maps": "Opening maps app...",
+      "payment_received": "Payment Received",
+      "payment_received_desc": "The client has completed payment. You can proceed with the booking.",
+      "awaiting_payment": "Awaiting Payment",
+      "awaiting_payment_desc": "The client has not yet completed payment for this booking.",
       "payment_release_notice": "Earnings will be available immediately after booking completion",
       "platform_fee": "Platform Fee (18%)",
       "safety_reminder": "Safety Reminder",
@@ -432,6 +437,8 @@
         "this_week": "This Week"
       },
       "todays_bookings": "Today's Bookings",
+      "upcoming_bookings": "Upcoming Bookings",
+      "no_upcoming_bookings": "No Upcoming Bookings",
       "total_earnings": "Total Earnings"
     },
     "earnings": {
@@ -497,7 +504,10 @@
         "tips_title": "Photo Tips",
         "tip_1": "Place your ID on a flat, dark surface",
         "tip_2": "Ensure all text and photo are clearly visible",
-        "tip_3": "Avoid glare and shadows on the card"
+        "tip_3": "Avoid glare and shadows on the card",
+        "selfie_title": "Selfie with CCCD",
+        "selfie_description": "Take a selfie holding your CCCD next to your face",
+        "uploading_photos": "Uploading verification photos..."
       },
       "create_profile": {
         "about_placeholder": "Tell clients about yourself, your personality, and what makes you a great companion...",
@@ -720,6 +730,7 @@
       "availability": "Availability",
       "bank_account": "Bank Account",
       "bank_accounts": "Bank Accounts",
+      "withdrawal_history": "Withdrawal History",
       "bookings": "Bookings",
       "companion": "Companion",
       "earnings_history": "Earnings History",
@@ -758,7 +769,8 @@
       "upload_failed": "Failed to upload photo. Please try again.",
       "delete_title": "Delete Photo",
       "delete_message": "Are you sure you want to delete this photo?",
-      "delete_failed": "Failed to delete photo. Please try again."
+      "delete_failed": "Failed to delete photo. Please try again.",
+      "set_primary": "Set as Main"
     },
     "availability": {
       "header": "Availability",
@@ -809,27 +821,39 @@
         "pending": "Verification Pending",
         "pending_desc": "Your verification is being reviewed. This usually takes 1-2 business days.",
         "rejected": "Verification Rejected",
-        "rejected_desc": "Your verification was not approved. Please contact support for assistance.",
+        "rejected_desc": "Your verification was not approved. You can resubmit with clearer photos.",
         "not_started": "Not Verified",
         "not_started_desc": "Complete verification to unlock all features and build trust with clients."
       },
-      "steps_completed": "steps completed",
       "benefits_title": "Why Get Verified?",
       "benefit_1": "Appear higher in search results",
       "benefit_2": "Build trust with potential clients",
       "benefit_3": "Access to premium features",
-      "steps_title": "Verification Steps",
-      "steps": {
-        "identity": "Identity Verification",
-        "identity_desc": "Upload your government-issued ID (CCCD)",
-        "selfie": "Selfie Verification",
-        "selfie_desc": "Take a selfie to match with your ID",
-        "background": "Background Check",
-        "background_desc": "Quick background verification (1-2 days)"
-      },
+      "upload_id_front": "Upload ID Front",
+      "upload_id_back": "Upload ID Back",
+      "upload_selfie": "Upload Selfie",
+      "id_front_desc": "Take a clear photo of the front of your CCCD",
+      "id_back_desc": "Take a clear photo of the back of your CCCD",
+      "selfie_desc": "Take a selfie holding your CCCD next to your face",
+      "step_progress": "Step {{current}} of {{total}}",
+      "retake_photo": "Retake",
+      "submit_verification": "Submit for Review",
+      "submitting": "Submitting...",
+      "upload_failed": "Upload failed. Please try again.",
+      "choose_source": "Choose Photo Source",
+      "take_photo": "Take Photo",
+      "from_library": "Choose from Library",
+      "resubmit": "Resubmit Verification",
+      "rejection_reason": "Rejection Reason",
+      "review_in_progress": "Your verification is being reviewed. This usually takes 1-2 business days.",
+      "submitted_photos": "Submitted Photos",
+      "review_estimate": "Estimated review time: 1-2 business days",
+      "camera_permission": "Camera Permission Required",
+      "camera_permission_desc": "Please allow camera access to take verification photos.",
+      "library_permission": "Photo Library Permission Required",
+      "library_permission_desc": "Please allow photo library access to select verification photos.",
       "privacy_title": "Your Privacy is Protected",
-      "privacy_message": "We use secure encryption for all documents. Your personal information is never shared without your consent.",
-      "contact_support": "Contact Support"
+      "privacy_message": "We use secure encryption for all documents. Your personal information is never shared without your consent."
     },
     "withdraw": {
       "add_bank": "+ Add New Bank Account",
@@ -867,6 +891,44 @@
       "you_receive": "You will receive",
       "you_will_receive": "You will receive"
     },
+    "withdrawals": {
+      "header": "Withdrawal History",
+      "total_withdrawn": "Total Withdrawn",
+      "pending_amount": "Pending",
+      "recent": "Recent Withdrawals",
+      "empty_title": "No Withdrawals Yet",
+      "empty_description": "Your withdrawal history will appear here",
+      "status": {
+        "pending": "Pending",
+        "processing": "Processing",
+        "completed": "Completed",
+        "failed": "Failed"
+      },
+      "detail": {
+        "header": "Withdrawal Details",
+        "not_found": "Withdrawal not found",
+        "pending_subtitle": "Your withdrawal is being reviewed",
+        "processing_subtitle": "Your withdrawal is being processed",
+        "completed_subtitle": "Your withdrawal has been completed",
+        "failed_subtitle": "This withdrawal could not be processed",
+        "step_requested": "Requested",
+        "step_processing": "Processing",
+        "step_completed": "Completed",
+        "step_failed": "Failed",
+        "breakdown": "Amount Breakdown",
+        "amount": "Withdrawal Amount",
+        "fee": "Processing Fee (1%)",
+        "net_amount": "You Receive",
+        "bank_info": "Bank Account",
+        "bank_name": "Bank",
+        "account_number": "Account Number",
+        "account_holder": "Account Holder",
+        "requested_date": "Requested",
+        "completed_date": "Completed",
+        "processing_info": "Withdrawals are typically processed within 1-2 business days.",
+        "try_again": "Request New Withdrawal"
+      }
+    },
     "boost": {
       "header": "Boost Profile",
       "why_boost": "Why Boost Your Profile?",
@@ -885,13 +947,50 @@
       "purchase_success": "Boost activated! Your profile is now boosted.",
       "purchase_failed": "Failed to purchase boost. Please try again.",
       "insufficient_balance": "Insufficient wallet balance. Please top up your wallet first.",
+      "insufficient_balance_title": "Insufficient Balance",
+      "insufficient_balance_message": "You don't have enough balance in your wallet. Would you like to top up now?",
+      "go_to_wallet": "Top Up Wallet",
       "status": {
         "active": "Active",
         "pending": "Pending",
         "expired": "Expired",
         "cancelled": "Cancelled"
-      }
+      },
+      "complete_payment": "Complete Payment",
+      "purchase_label": "Profile Boost Purchase",
+      "payment_success": "Boost Activated!",
+      "payment_success_description": "Your profile boost is now active",
+      "already_active_error": "You already have an active boost",
+      "auto_activate_title": "Automatic Activation",
+      "auto_activate_description": "Your boost will be activated automatically when payment is confirmed (usually within 1 minute)"
     }
+  },
+  "payment": {
+    "expires_in": "Payment expires in",
+    "scan_qr": "Scan QR Code to Pay",
+    "amount_label": "Amount",
+    "payment_code": "Payment Code",
+    "code_instruction": "Include this code in your bank transfer note",
+    "code_copied": "Payment code copied",
+    "amount_copied": "Amount copied",
+    "bank_transfer_info": "Bank Transfer Information",
+    "bank_name": "Bank",
+    "account_number": "Account Number",
+    "account_name": "Account Name",
+    "open_bank_app": "Quick Transfer via Banking App",
+    "bank_app_not_installed": "Banking app not installed",
+    "bank_open_failed": "Failed to open banking app",
+    "download_qr": "Save QR Code",
+    "qr_share_message": "Payment QR Code -",
+    "qr_download_failed": "Failed to save QR code",
+    "auto_confirm_title": "Automatic Confirmation",
+    "auto_confirm_description": "Payment will be confirmed automatically once the transfer is received (usually within 1 minute)",
+    "cancel_title": "Cancel Payment?",
+    "cancel_message": "Are you sure you want to cancel this payment?",
+    "expired_title": "Payment Expired",
+    "expired_message": "The payment window has expired. Please try again.",
+    "failed_title": "Payment Failed",
+    "failed_message": "Payment could not be processed. Please try again."
   },
   "hirer": {
     "companion": {
@@ -943,7 +1042,12 @@
         "browse": "Browse",
         "bookings": "Bookings",
         "favorites": "Favorites"
-      }
+      },
+      "upgrade_vip": "Upgrade to VIP",
+      "unlock_features": "Unlock exclusive features",
+      "manage_membership": "Manage Membership",
+      "member": "Member",
+      "view": "View"
     },
     "booking_detail": {
       "booked_on": "Booked on",
@@ -1253,7 +1357,8 @@
       "bookings": "bookings",
       "member_since": "Member since",
       "unnamed_user": "User",
-      "verified": "Verified"
+      "verified": "Verified",
+      "vip_membership": "VIP Membership"
     },
     "edit_profile": {
       "header": "Edit Profile",
@@ -1352,7 +1457,7 @@
       "data_protection_message": "We use industry-standard encryption to protect your personal information. Your data is never sold or shared without your consent."
     },
     "wallet": {
-      "title": "Luxe Wallet",
+      "title": "Hireme Wallet",
       "balance": "Available Balance",
       "pending": "Pending Topups",
       "topup": "Top Up",
@@ -1414,7 +1519,7 @@
       "payment_method": "Payment Method",
       "default": "Default",
       "recommended": "Recommended",
-      "luxe_wallet": "Luxe Wallet",
+      "hireme_wallet": "Hireme Wallet",
       "wallet_balance": "Balance:",
       "insufficient_balance": "Insufficient",
       "add_new_method": "Add New Payment Method",
@@ -1427,6 +1532,48 @@
       "total_to_pay": "Total to pay",
       "processing": "Processing...",
       "confirm_pay": "Confirm & Pay"
+    },
+    "membership": {
+      "title": "VIP Membership",
+      "subtitle": "Unlock exclusive features",
+      "current_plan": "Current Plan",
+      "free_plan": "Free",
+      "expires_in": "Expires in",
+      "days_remaining": "days remaining",
+      "silver": "Silver",
+      "gold": "Gold",
+      "platinum": "Platinum",
+      "per_month": "/month",
+      "select_plan": "Select Plan",
+      "upgrade_to": "Upgrade to",
+      "confirm_title": "Confirm Purchase",
+      "confirm_message": "Confirm membership purchase?",
+      "purchase_success": "Membership activated!",
+      "already_active": "You already have an active membership of the same or higher tier",
+      "purchase_failed": "Failed to purchase membership. Please try again.",
+      "for_you_images": "\"For You\" Recommendations",
+      "nearby_companions": "Find Nearby Companions",
+      "priority_booking": "Priority Booking",
+      "max_bookings": "Max Pending Bookings",
+      "free_cancellation": "Free Cancellation",
+      "early_access": "Early Access to New Companions",
+      "dedicated_support": "Dedicated Support",
+      "benefits": "Benefits",
+      "history_title": "History",
+      "no_history": "No membership history",
+      "renew": "Renew",
+      "upgrade": "Upgrade",
+      "badge_silver": "Silver",
+      "badge_gold": "Gold",
+      "badge_platinum": "Platinum",
+      "vip_hirer": "VIP",
+      "popular": "Popular",
+      "images": "images",
+      "hours": "hours",
+      "payment_header": "Membership Payment",
+      "auto_activate": "Your membership will be activated automatically when payment is confirmed",
+      "payment_success": "Membership Activated!",
+      "payment_success_description": "Your VIP membership is now active"
     }
   },
   "support": {
@@ -1458,7 +1605,22 @@
     "hours_value": "24/7"
   },
   "onboarding": {
-    "message": "Welcome to obytes app site"
+    "message": "Welcome to obytes app site",
+    "phone": {
+      "header": "Verify Phone Number",
+      "title": "What's your phone number?",
+      "subtitle": "We'll send a verification code via Zalo",
+      "phone_placeholder": "Enter your phone number",
+      "send_code": "Send Verification Code",
+      "verify_code": "Verify Code",
+      "code_sent": "Code sent to {{phone}}",
+      "enter_code": "Enter the 6-digit code",
+      "resend_code": "Resend Code",
+      "resend_in": "Resend in {{seconds}}s",
+      "invalid_phone": "Please enter a valid Vietnam phone number",
+      "verification_failed": "Verification failed. Please try again.",
+      "verified": "Phone verified successfully!"
+    }
   },
   "phone_verification": {
     "title": "Verify Phone",

@@ -37,6 +37,8 @@ export type CompanionProfileAvgAggregateOutputType = {
   completedBookings: number | null
   responseRate: number | null
   acceptanceRate: number | null
+  locationLat: runtime.Decimal | null
+  locationLng: runtime.Decimal | null
 }
 
 export type CompanionProfileSumAggregateOutputType = {
@@ -50,6 +52,8 @@ export type CompanionProfileSumAggregateOutputType = {
   completedBookings: number | null
   responseRate: number | null
   acceptanceRate: number | null
+  locationLat: runtime.Decimal | null
+  locationLng: runtime.Decimal | null
 }
 
 export type CompanionProfileMinAggregateOutputType = {
@@ -73,6 +77,9 @@ export type CompanionProfileMinAggregateOutputType = {
   isHidden: boolean | null
   responseRate: number | null
   acceptanceRate: number | null
+  locationLat: runtime.Decimal | null
+  locationLng: runtime.Decimal | null
+  locationUpdatedAt: Date | null
   deletedAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -99,6 +106,9 @@ export type CompanionProfileMaxAggregateOutputType = {
   isHidden: boolean | null
   responseRate: number | null
   acceptanceRate: number | null
+  locationLat: runtime.Decimal | null
+  locationLng: runtime.Decimal | null
+  locationUpdatedAt: Date | null
   deletedAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -126,6 +136,9 @@ export type CompanionProfileCountAggregateOutputType = {
   isHidden: number
   responseRate: number
   acceptanceRate: number
+  locationLat: number
+  locationLng: number
+  locationUpdatedAt: number
   deletedAt: number
   createdAt: number
   updatedAt: number
@@ -144,6 +157,8 @@ export type CompanionProfileAvgAggregateInputType = {
   completedBookings?: true
   responseRate?: true
   acceptanceRate?: true
+  locationLat?: true
+  locationLng?: true
 }
 
 export type CompanionProfileSumAggregateInputType = {
@@ -157,6 +172,8 @@ export type CompanionProfileSumAggregateInputType = {
   completedBookings?: true
   responseRate?: true
   acceptanceRate?: true
+  locationLat?: true
+  locationLng?: true
 }
 
 export type CompanionProfileMinAggregateInputType = {
@@ -180,6 +197,9 @@ export type CompanionProfileMinAggregateInputType = {
   isHidden?: true
   responseRate?: true
   acceptanceRate?: true
+  locationLat?: true
+  locationLng?: true
+  locationUpdatedAt?: true
   deletedAt?: true
   createdAt?: true
   updatedAt?: true
@@ -206,6 +226,9 @@ export type CompanionProfileMaxAggregateInputType = {
   isHidden?: true
   responseRate?: true
   acceptanceRate?: true
+  locationLat?: true
+  locationLng?: true
+  locationUpdatedAt?: true
   deletedAt?: true
   createdAt?: true
   updatedAt?: true
@@ -233,6 +256,9 @@ export type CompanionProfileCountAggregateInputType = {
   isHidden?: true
   responseRate?: true
   acceptanceRate?: true
+  locationLat?: true
+  locationLng?: true
+  locationUpdatedAt?: true
   deletedAt?: true
   createdAt?: true
   updatedAt?: true
@@ -341,12 +367,15 @@ export type CompanionProfileGroupByOutputType = {
   ratingCount: number
   totalBookings: number
   completedBookings: number
-  verificationStatus: $Enums.VerificationStatus
+  verificationStatus: $Enums.VerificationStatus | null
   isFeatured: boolean
   isActive: boolean
   isHidden: boolean
   responseRate: number
   acceptanceRate: number
+  locationLat: runtime.Decimal | null
+  locationLng: runtime.Decimal | null
+  locationUpdatedAt: Date | null
   deletedAt: Date | null
   createdAt: Date
   updatedAt: Date
@@ -391,12 +420,15 @@ export type CompanionProfileWhereInput = {
   ratingCount?: Prisma.IntFilter<"CompanionProfile"> | number
   totalBookings?: Prisma.IntFilter<"CompanionProfile"> | number
   completedBookings?: Prisma.IntFilter<"CompanionProfile"> | number
-  verificationStatus?: Prisma.EnumVerificationStatusFilter<"CompanionProfile"> | $Enums.VerificationStatus
+  verificationStatus?: Prisma.EnumVerificationStatusNullableFilter<"CompanionProfile"> | $Enums.VerificationStatus | null
   isFeatured?: Prisma.BoolFilter<"CompanionProfile"> | boolean
   isActive?: Prisma.BoolFilter<"CompanionProfile"> | boolean
   isHidden?: Prisma.BoolFilter<"CompanionProfile"> | boolean
   responseRate?: Prisma.IntFilter<"CompanionProfile"> | number
   acceptanceRate?: Prisma.IntFilter<"CompanionProfile"> | number
+  locationLat?: Prisma.DecimalNullableFilter<"CompanionProfile"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  locationLng?: Prisma.DecimalNullableFilter<"CompanionProfile"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  locationUpdatedAt?: Prisma.DateTimeNullableFilter<"CompanionProfile"> | Date | string | null
   deletedAt?: Prisma.DateTimeNullableFilter<"CompanionProfile"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"CompanionProfile"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"CompanionProfile"> | Date | string
@@ -426,12 +458,15 @@ export type CompanionProfileOrderByWithRelationInput = {
   ratingCount?: Prisma.SortOrder
   totalBookings?: Prisma.SortOrder
   completedBookings?: Prisma.SortOrder
-  verificationStatus?: Prisma.SortOrder
+  verificationStatus?: Prisma.SortOrderInput | Prisma.SortOrder
   isFeatured?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
   isHidden?: Prisma.SortOrder
   responseRate?: Prisma.SortOrder
   acceptanceRate?: Prisma.SortOrder
+  locationLat?: Prisma.SortOrderInput | Prisma.SortOrder
+  locationLng?: Prisma.SortOrderInput | Prisma.SortOrder
+  locationUpdatedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -464,12 +499,15 @@ export type CompanionProfileWhereUniqueInput = Prisma.AtLeast<{
   ratingCount?: Prisma.IntFilter<"CompanionProfile"> | number
   totalBookings?: Prisma.IntFilter<"CompanionProfile"> | number
   completedBookings?: Prisma.IntFilter<"CompanionProfile"> | number
-  verificationStatus?: Prisma.EnumVerificationStatusFilter<"CompanionProfile"> | $Enums.VerificationStatus
+  verificationStatus?: Prisma.EnumVerificationStatusNullableFilter<"CompanionProfile"> | $Enums.VerificationStatus | null
   isFeatured?: Prisma.BoolFilter<"CompanionProfile"> | boolean
   isActive?: Prisma.BoolFilter<"CompanionProfile"> | boolean
   isHidden?: Prisma.BoolFilter<"CompanionProfile"> | boolean
   responseRate?: Prisma.IntFilter<"CompanionProfile"> | number
   acceptanceRate?: Prisma.IntFilter<"CompanionProfile"> | number
+  locationLat?: Prisma.DecimalNullableFilter<"CompanionProfile"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  locationLng?: Prisma.DecimalNullableFilter<"CompanionProfile"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  locationUpdatedAt?: Prisma.DateTimeNullableFilter<"CompanionProfile"> | Date | string | null
   deletedAt?: Prisma.DateTimeNullableFilter<"CompanionProfile"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"CompanionProfile"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"CompanionProfile"> | Date | string
@@ -499,12 +537,15 @@ export type CompanionProfileOrderByWithAggregationInput = {
   ratingCount?: Prisma.SortOrder
   totalBookings?: Prisma.SortOrder
   completedBookings?: Prisma.SortOrder
-  verificationStatus?: Prisma.SortOrder
+  verificationStatus?: Prisma.SortOrderInput | Prisma.SortOrder
   isFeatured?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
   isHidden?: Prisma.SortOrder
   responseRate?: Prisma.SortOrder
   acceptanceRate?: Prisma.SortOrder
+  locationLat?: Prisma.SortOrderInput | Prisma.SortOrder
+  locationLng?: Prisma.SortOrderInput | Prisma.SortOrder
+  locationUpdatedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -534,12 +575,15 @@ export type CompanionProfileScalarWhereWithAggregatesInput = {
   ratingCount?: Prisma.IntWithAggregatesFilter<"CompanionProfile"> | number
   totalBookings?: Prisma.IntWithAggregatesFilter<"CompanionProfile"> | number
   completedBookings?: Prisma.IntWithAggregatesFilter<"CompanionProfile"> | number
-  verificationStatus?: Prisma.EnumVerificationStatusWithAggregatesFilter<"CompanionProfile"> | $Enums.VerificationStatus
+  verificationStatus?: Prisma.EnumVerificationStatusNullableWithAggregatesFilter<"CompanionProfile"> | $Enums.VerificationStatus | null
   isFeatured?: Prisma.BoolWithAggregatesFilter<"CompanionProfile"> | boolean
   isActive?: Prisma.BoolWithAggregatesFilter<"CompanionProfile"> | boolean
   isHidden?: Prisma.BoolWithAggregatesFilter<"CompanionProfile"> | boolean
   responseRate?: Prisma.IntWithAggregatesFilter<"CompanionProfile"> | number
   acceptanceRate?: Prisma.IntWithAggregatesFilter<"CompanionProfile"> | number
+  locationLat?: Prisma.DecimalNullableWithAggregatesFilter<"CompanionProfile"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  locationLng?: Prisma.DecimalNullableWithAggregatesFilter<"CompanionProfile"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  locationUpdatedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"CompanionProfile"> | Date | string | null
   deletedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"CompanionProfile"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"CompanionProfile"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"CompanionProfile"> | Date | string
@@ -560,12 +604,15 @@ export type CompanionProfileCreateInput = {
   ratingCount?: number
   totalBookings?: number
   completedBookings?: number
-  verificationStatus?: $Enums.VerificationStatus
+  verificationStatus?: $Enums.VerificationStatus | null
   isFeatured?: boolean
   isActive?: boolean
   isHidden?: boolean
   responseRate?: number
   acceptanceRate?: number
+  locationLat?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  locationLng?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  locationUpdatedAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -595,12 +642,15 @@ export type CompanionProfileUncheckedCreateInput = {
   ratingCount?: number
   totalBookings?: number
   completedBookings?: number
-  verificationStatus?: $Enums.VerificationStatus
+  verificationStatus?: $Enums.VerificationStatus | null
   isFeatured?: boolean
   isActive?: boolean
   isHidden?: boolean
   responseRate?: number
   acceptanceRate?: number
+  locationLat?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  locationLng?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  locationUpdatedAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -628,12 +678,15 @@ export type CompanionProfileUpdateInput = {
   ratingCount?: Prisma.IntFieldUpdateOperationsInput | number
   totalBookings?: Prisma.IntFieldUpdateOperationsInput | number
   completedBookings?: Prisma.IntFieldUpdateOperationsInput | number
-  verificationStatus?: Prisma.EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
+  verificationStatus?: Prisma.NullableEnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus | null
   isFeatured?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isHidden?: Prisma.BoolFieldUpdateOperationsInput | boolean
   responseRate?: Prisma.IntFieldUpdateOperationsInput | number
   acceptanceRate?: Prisma.IntFieldUpdateOperationsInput | number
+  locationLat?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  locationLng?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  locationUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -663,12 +716,15 @@ export type CompanionProfileUncheckedUpdateInput = {
   ratingCount?: Prisma.IntFieldUpdateOperationsInput | number
   totalBookings?: Prisma.IntFieldUpdateOperationsInput | number
   completedBookings?: Prisma.IntFieldUpdateOperationsInput | number
-  verificationStatus?: Prisma.EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
+  verificationStatus?: Prisma.NullableEnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus | null
   isFeatured?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isHidden?: Prisma.BoolFieldUpdateOperationsInput | boolean
   responseRate?: Prisma.IntFieldUpdateOperationsInput | number
   acceptanceRate?: Prisma.IntFieldUpdateOperationsInput | number
+  locationLat?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  locationLng?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  locationUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -697,12 +753,15 @@ export type CompanionProfileCreateManyInput = {
   ratingCount?: number
   totalBookings?: number
   completedBookings?: number
-  verificationStatus?: $Enums.VerificationStatus
+  verificationStatus?: $Enums.VerificationStatus | null
   isFeatured?: boolean
   isActive?: boolean
   isHidden?: boolean
   responseRate?: number
   acceptanceRate?: number
+  locationLat?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  locationLng?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  locationUpdatedAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -723,12 +782,15 @@ export type CompanionProfileUpdateManyMutationInput = {
   ratingCount?: Prisma.IntFieldUpdateOperationsInput | number
   totalBookings?: Prisma.IntFieldUpdateOperationsInput | number
   completedBookings?: Prisma.IntFieldUpdateOperationsInput | number
-  verificationStatus?: Prisma.EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
+  verificationStatus?: Prisma.NullableEnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus | null
   isFeatured?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isHidden?: Prisma.BoolFieldUpdateOperationsInput | boolean
   responseRate?: Prisma.IntFieldUpdateOperationsInput | number
   acceptanceRate?: Prisma.IntFieldUpdateOperationsInput | number
+  locationLat?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  locationLng?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  locationUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -750,12 +812,15 @@ export type CompanionProfileUncheckedUpdateManyInput = {
   ratingCount?: Prisma.IntFieldUpdateOperationsInput | number
   totalBookings?: Prisma.IntFieldUpdateOperationsInput | number
   completedBookings?: Prisma.IntFieldUpdateOperationsInput | number
-  verificationStatus?: Prisma.EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
+  verificationStatus?: Prisma.NullableEnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus | null
   isFeatured?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isHidden?: Prisma.BoolFieldUpdateOperationsInput | boolean
   responseRate?: Prisma.IntFieldUpdateOperationsInput | number
   acceptanceRate?: Prisma.IntFieldUpdateOperationsInput | number
+  locationLat?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  locationLng?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  locationUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -796,6 +861,9 @@ export type CompanionProfileCountOrderByAggregateInput = {
   isHidden?: Prisma.SortOrder
   responseRate?: Prisma.SortOrder
   acceptanceRate?: Prisma.SortOrder
+  locationLat?: Prisma.SortOrder
+  locationLng?: Prisma.SortOrder
+  locationUpdatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -812,6 +880,8 @@ export type CompanionProfileAvgOrderByAggregateInput = {
   completedBookings?: Prisma.SortOrder
   responseRate?: Prisma.SortOrder
   acceptanceRate?: Prisma.SortOrder
+  locationLat?: Prisma.SortOrder
+  locationLng?: Prisma.SortOrder
 }
 
 export type CompanionProfileMaxOrderByAggregateInput = {
@@ -835,6 +905,9 @@ export type CompanionProfileMaxOrderByAggregateInput = {
   isHidden?: Prisma.SortOrder
   responseRate?: Prisma.SortOrder
   acceptanceRate?: Prisma.SortOrder
+  locationLat?: Prisma.SortOrder
+  locationLng?: Prisma.SortOrder
+  locationUpdatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -861,6 +934,9 @@ export type CompanionProfileMinOrderByAggregateInput = {
   isHidden?: Prisma.SortOrder
   responseRate?: Prisma.SortOrder
   acceptanceRate?: Prisma.SortOrder
+  locationLat?: Prisma.SortOrder
+  locationLng?: Prisma.SortOrder
+  locationUpdatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -877,6 +953,8 @@ export type CompanionProfileSumOrderByAggregateInput = {
   completedBookings?: Prisma.SortOrder
   responseRate?: Prisma.SortOrder
   acceptanceRate?: Prisma.SortOrder
+  locationLat?: Prisma.SortOrder
+  locationLng?: Prisma.SortOrder
 }
 
 export type CompanionProfileScalarRelationFilter = {
@@ -941,8 +1019,16 @@ export type DecimalFieldUpdateOperationsInput = {
   divide?: runtime.Decimal | runtime.DecimalJsLike | number | string
 }
 
-export type EnumVerificationStatusFieldUpdateOperationsInput = {
-  set?: $Enums.VerificationStatus
+export type NullableEnumVerificationStatusFieldUpdateOperationsInput = {
+  set?: $Enums.VerificationStatus | null
+}
+
+export type NullableDecimalFieldUpdateOperationsInput = {
+  set?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  increment?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  decrement?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  multiply?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  divide?: runtime.Decimal | runtime.DecimalJsLike | number | string
 }
 
 export type CompanionProfileCreateNestedOneWithoutPhotosInput = {
@@ -1058,12 +1144,15 @@ export type CompanionProfileCreateWithoutUserInput = {
   ratingCount?: number
   totalBookings?: number
   completedBookings?: number
-  verificationStatus?: $Enums.VerificationStatus
+  verificationStatus?: $Enums.VerificationStatus | null
   isFeatured?: boolean
   isActive?: boolean
   isHidden?: boolean
   responseRate?: number
   acceptanceRate?: number
+  locationLat?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  locationLng?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  locationUpdatedAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1091,12 +1180,15 @@ export type CompanionProfileUncheckedCreateWithoutUserInput = {
   ratingCount?: number
   totalBookings?: number
   completedBookings?: number
-  verificationStatus?: $Enums.VerificationStatus
+  verificationStatus?: $Enums.VerificationStatus | null
   isFeatured?: boolean
   isActive?: boolean
   isHidden?: boolean
   responseRate?: number
   acceptanceRate?: number
+  locationLat?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  locationLng?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  locationUpdatedAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1140,12 +1232,15 @@ export type CompanionProfileUpdateWithoutUserInput = {
   ratingCount?: Prisma.IntFieldUpdateOperationsInput | number
   totalBookings?: Prisma.IntFieldUpdateOperationsInput | number
   completedBookings?: Prisma.IntFieldUpdateOperationsInput | number
-  verificationStatus?: Prisma.EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
+  verificationStatus?: Prisma.NullableEnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus | null
   isFeatured?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isHidden?: Prisma.BoolFieldUpdateOperationsInput | boolean
   responseRate?: Prisma.IntFieldUpdateOperationsInput | number
   acceptanceRate?: Prisma.IntFieldUpdateOperationsInput | number
+  locationLat?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  locationLng?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  locationUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1173,12 +1268,15 @@ export type CompanionProfileUncheckedUpdateWithoutUserInput = {
   ratingCount?: Prisma.IntFieldUpdateOperationsInput | number
   totalBookings?: Prisma.IntFieldUpdateOperationsInput | number
   completedBookings?: Prisma.IntFieldUpdateOperationsInput | number
-  verificationStatus?: Prisma.EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
+  verificationStatus?: Prisma.NullableEnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus | null
   isFeatured?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isHidden?: Prisma.BoolFieldUpdateOperationsInput | boolean
   responseRate?: Prisma.IntFieldUpdateOperationsInput | number
   acceptanceRate?: Prisma.IntFieldUpdateOperationsInput | number
+  locationLat?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  locationLng?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  locationUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1206,12 +1304,15 @@ export type CompanionProfileCreateWithoutPhotosInput = {
   ratingCount?: number
   totalBookings?: number
   completedBookings?: number
-  verificationStatus?: $Enums.VerificationStatus
+  verificationStatus?: $Enums.VerificationStatus | null
   isFeatured?: boolean
   isActive?: boolean
   isHidden?: boolean
   responseRate?: number
   acceptanceRate?: number
+  locationLat?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  locationLng?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  locationUpdatedAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1240,12 +1341,15 @@ export type CompanionProfileUncheckedCreateWithoutPhotosInput = {
   ratingCount?: number
   totalBookings?: number
   completedBookings?: number
-  verificationStatus?: $Enums.VerificationStatus
+  verificationStatus?: $Enums.VerificationStatus | null
   isFeatured?: boolean
   isActive?: boolean
   isHidden?: boolean
   responseRate?: number
   acceptanceRate?: number
+  locationLat?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  locationLng?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  locationUpdatedAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1288,12 +1392,15 @@ export type CompanionProfileUpdateWithoutPhotosInput = {
   ratingCount?: Prisma.IntFieldUpdateOperationsInput | number
   totalBookings?: Prisma.IntFieldUpdateOperationsInput | number
   completedBookings?: Prisma.IntFieldUpdateOperationsInput | number
-  verificationStatus?: Prisma.EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
+  verificationStatus?: Prisma.NullableEnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus | null
   isFeatured?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isHidden?: Prisma.BoolFieldUpdateOperationsInput | boolean
   responseRate?: Prisma.IntFieldUpdateOperationsInput | number
   acceptanceRate?: Prisma.IntFieldUpdateOperationsInput | number
+  locationLat?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  locationLng?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  locationUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1322,12 +1429,15 @@ export type CompanionProfileUncheckedUpdateWithoutPhotosInput = {
   ratingCount?: Prisma.IntFieldUpdateOperationsInput | number
   totalBookings?: Prisma.IntFieldUpdateOperationsInput | number
   completedBookings?: Prisma.IntFieldUpdateOperationsInput | number
-  verificationStatus?: Prisma.EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
+  verificationStatus?: Prisma.NullableEnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus | null
   isFeatured?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isHidden?: Prisma.BoolFieldUpdateOperationsInput | boolean
   responseRate?: Prisma.IntFieldUpdateOperationsInput | number
   acceptanceRate?: Prisma.IntFieldUpdateOperationsInput | number
+  locationLat?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  locationLng?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  locationUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1354,12 +1464,15 @@ export type CompanionProfileCreateWithoutServicesInput = {
   ratingCount?: number
   totalBookings?: number
   completedBookings?: number
-  verificationStatus?: $Enums.VerificationStatus
+  verificationStatus?: $Enums.VerificationStatus | null
   isFeatured?: boolean
   isActive?: boolean
   isHidden?: boolean
   responseRate?: number
   acceptanceRate?: number
+  locationLat?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  locationLng?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  locationUpdatedAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1388,12 +1501,15 @@ export type CompanionProfileUncheckedCreateWithoutServicesInput = {
   ratingCount?: number
   totalBookings?: number
   completedBookings?: number
-  verificationStatus?: $Enums.VerificationStatus
+  verificationStatus?: $Enums.VerificationStatus | null
   isFeatured?: boolean
   isActive?: boolean
   isHidden?: boolean
   responseRate?: number
   acceptanceRate?: number
+  locationLat?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  locationLng?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  locationUpdatedAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1436,12 +1552,15 @@ export type CompanionProfileUpdateWithoutServicesInput = {
   ratingCount?: Prisma.IntFieldUpdateOperationsInput | number
   totalBookings?: Prisma.IntFieldUpdateOperationsInput | number
   completedBookings?: Prisma.IntFieldUpdateOperationsInput | number
-  verificationStatus?: Prisma.EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
+  verificationStatus?: Prisma.NullableEnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus | null
   isFeatured?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isHidden?: Prisma.BoolFieldUpdateOperationsInput | boolean
   responseRate?: Prisma.IntFieldUpdateOperationsInput | number
   acceptanceRate?: Prisma.IntFieldUpdateOperationsInput | number
+  locationLat?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  locationLng?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  locationUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1470,12 +1589,15 @@ export type CompanionProfileUncheckedUpdateWithoutServicesInput = {
   ratingCount?: Prisma.IntFieldUpdateOperationsInput | number
   totalBookings?: Prisma.IntFieldUpdateOperationsInput | number
   completedBookings?: Prisma.IntFieldUpdateOperationsInput | number
-  verificationStatus?: Prisma.EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
+  verificationStatus?: Prisma.NullableEnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus | null
   isFeatured?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isHidden?: Prisma.BoolFieldUpdateOperationsInput | boolean
   responseRate?: Prisma.IntFieldUpdateOperationsInput | number
   acceptanceRate?: Prisma.IntFieldUpdateOperationsInput | number
+  locationLat?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  locationLng?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  locationUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1502,12 +1624,15 @@ export type CompanionProfileCreateWithoutAvailabilityInput = {
   ratingCount?: number
   totalBookings?: number
   completedBookings?: number
-  verificationStatus?: $Enums.VerificationStatus
+  verificationStatus?: $Enums.VerificationStatus | null
   isFeatured?: boolean
   isActive?: boolean
   isHidden?: boolean
   responseRate?: number
   acceptanceRate?: number
+  locationLat?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  locationLng?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  locationUpdatedAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1536,12 +1661,15 @@ export type CompanionProfileUncheckedCreateWithoutAvailabilityInput = {
   ratingCount?: number
   totalBookings?: number
   completedBookings?: number
-  verificationStatus?: $Enums.VerificationStatus
+  verificationStatus?: $Enums.VerificationStatus | null
   isFeatured?: boolean
   isActive?: boolean
   isHidden?: boolean
   responseRate?: number
   acceptanceRate?: number
+  locationLat?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  locationLng?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  locationUpdatedAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1584,12 +1712,15 @@ export type CompanionProfileUpdateWithoutAvailabilityInput = {
   ratingCount?: Prisma.IntFieldUpdateOperationsInput | number
   totalBookings?: Prisma.IntFieldUpdateOperationsInput | number
   completedBookings?: Prisma.IntFieldUpdateOperationsInput | number
-  verificationStatus?: Prisma.EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
+  verificationStatus?: Prisma.NullableEnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus | null
   isFeatured?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isHidden?: Prisma.BoolFieldUpdateOperationsInput | boolean
   responseRate?: Prisma.IntFieldUpdateOperationsInput | number
   acceptanceRate?: Prisma.IntFieldUpdateOperationsInput | number
+  locationLat?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  locationLng?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  locationUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1618,12 +1749,15 @@ export type CompanionProfileUncheckedUpdateWithoutAvailabilityInput = {
   ratingCount?: Prisma.IntFieldUpdateOperationsInput | number
   totalBookings?: Prisma.IntFieldUpdateOperationsInput | number
   completedBookings?: Prisma.IntFieldUpdateOperationsInput | number
-  verificationStatus?: Prisma.EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
+  verificationStatus?: Prisma.NullableEnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus | null
   isFeatured?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isHidden?: Prisma.BoolFieldUpdateOperationsInput | boolean
   responseRate?: Prisma.IntFieldUpdateOperationsInput | number
   acceptanceRate?: Prisma.IntFieldUpdateOperationsInput | number
+  locationLat?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  locationLng?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  locationUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1650,12 +1784,15 @@ export type CompanionProfileCreateWithoutEarningsInput = {
   ratingCount?: number
   totalBookings?: number
   completedBookings?: number
-  verificationStatus?: $Enums.VerificationStatus
+  verificationStatus?: $Enums.VerificationStatus | null
   isFeatured?: boolean
   isActive?: boolean
   isHidden?: boolean
   responseRate?: number
   acceptanceRate?: number
+  locationLat?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  locationLng?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  locationUpdatedAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1684,12 +1821,15 @@ export type CompanionProfileUncheckedCreateWithoutEarningsInput = {
   ratingCount?: number
   totalBookings?: number
   completedBookings?: number
-  verificationStatus?: $Enums.VerificationStatus
+  verificationStatus?: $Enums.VerificationStatus | null
   isFeatured?: boolean
   isActive?: boolean
   isHidden?: boolean
   responseRate?: number
   acceptanceRate?: number
+  locationLat?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  locationLng?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  locationUpdatedAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1732,12 +1872,15 @@ export type CompanionProfileUpdateWithoutEarningsInput = {
   ratingCount?: Prisma.IntFieldUpdateOperationsInput | number
   totalBookings?: Prisma.IntFieldUpdateOperationsInput | number
   completedBookings?: Prisma.IntFieldUpdateOperationsInput | number
-  verificationStatus?: Prisma.EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
+  verificationStatus?: Prisma.NullableEnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus | null
   isFeatured?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isHidden?: Prisma.BoolFieldUpdateOperationsInput | boolean
   responseRate?: Prisma.IntFieldUpdateOperationsInput | number
   acceptanceRate?: Prisma.IntFieldUpdateOperationsInput | number
+  locationLat?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  locationLng?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  locationUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1766,12 +1909,15 @@ export type CompanionProfileUncheckedUpdateWithoutEarningsInput = {
   ratingCount?: Prisma.IntFieldUpdateOperationsInput | number
   totalBookings?: Prisma.IntFieldUpdateOperationsInput | number
   completedBookings?: Prisma.IntFieldUpdateOperationsInput | number
-  verificationStatus?: Prisma.EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
+  verificationStatus?: Prisma.NullableEnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus | null
   isFeatured?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isHidden?: Prisma.BoolFieldUpdateOperationsInput | boolean
   responseRate?: Prisma.IntFieldUpdateOperationsInput | number
   acceptanceRate?: Prisma.IntFieldUpdateOperationsInput | number
+  locationLat?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  locationLng?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  locationUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1798,12 +1944,15 @@ export type CompanionProfileCreateWithoutBankAccountsInput = {
   ratingCount?: number
   totalBookings?: number
   completedBookings?: number
-  verificationStatus?: $Enums.VerificationStatus
+  verificationStatus?: $Enums.VerificationStatus | null
   isFeatured?: boolean
   isActive?: boolean
   isHidden?: boolean
   responseRate?: number
   acceptanceRate?: number
+  locationLat?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  locationLng?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  locationUpdatedAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1832,12 +1981,15 @@ export type CompanionProfileUncheckedCreateWithoutBankAccountsInput = {
   ratingCount?: number
   totalBookings?: number
   completedBookings?: number
-  verificationStatus?: $Enums.VerificationStatus
+  verificationStatus?: $Enums.VerificationStatus | null
   isFeatured?: boolean
   isActive?: boolean
   isHidden?: boolean
   responseRate?: number
   acceptanceRate?: number
+  locationLat?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  locationLng?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  locationUpdatedAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1880,12 +2032,15 @@ export type CompanionProfileUpdateWithoutBankAccountsInput = {
   ratingCount?: Prisma.IntFieldUpdateOperationsInput | number
   totalBookings?: Prisma.IntFieldUpdateOperationsInput | number
   completedBookings?: Prisma.IntFieldUpdateOperationsInput | number
-  verificationStatus?: Prisma.EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
+  verificationStatus?: Prisma.NullableEnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus | null
   isFeatured?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isHidden?: Prisma.BoolFieldUpdateOperationsInput | boolean
   responseRate?: Prisma.IntFieldUpdateOperationsInput | number
   acceptanceRate?: Prisma.IntFieldUpdateOperationsInput | number
+  locationLat?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  locationLng?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  locationUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1914,12 +2069,15 @@ export type CompanionProfileUncheckedUpdateWithoutBankAccountsInput = {
   ratingCount?: Prisma.IntFieldUpdateOperationsInput | number
   totalBookings?: Prisma.IntFieldUpdateOperationsInput | number
   completedBookings?: Prisma.IntFieldUpdateOperationsInput | number
-  verificationStatus?: Prisma.EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
+  verificationStatus?: Prisma.NullableEnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus | null
   isFeatured?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isHidden?: Prisma.BoolFieldUpdateOperationsInput | boolean
   responseRate?: Prisma.IntFieldUpdateOperationsInput | number
   acceptanceRate?: Prisma.IntFieldUpdateOperationsInput | number
+  locationLat?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  locationLng?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  locationUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1946,12 +2104,15 @@ export type CompanionProfileCreateWithoutWithdrawalsInput = {
   ratingCount?: number
   totalBookings?: number
   completedBookings?: number
-  verificationStatus?: $Enums.VerificationStatus
+  verificationStatus?: $Enums.VerificationStatus | null
   isFeatured?: boolean
   isActive?: boolean
   isHidden?: boolean
   responseRate?: number
   acceptanceRate?: number
+  locationLat?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  locationLng?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  locationUpdatedAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1980,12 +2141,15 @@ export type CompanionProfileUncheckedCreateWithoutWithdrawalsInput = {
   ratingCount?: number
   totalBookings?: number
   completedBookings?: number
-  verificationStatus?: $Enums.VerificationStatus
+  verificationStatus?: $Enums.VerificationStatus | null
   isFeatured?: boolean
   isActive?: boolean
   isHidden?: boolean
   responseRate?: number
   acceptanceRate?: number
+  locationLat?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  locationLng?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  locationUpdatedAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -2028,12 +2192,15 @@ export type CompanionProfileUpdateWithoutWithdrawalsInput = {
   ratingCount?: Prisma.IntFieldUpdateOperationsInput | number
   totalBookings?: Prisma.IntFieldUpdateOperationsInput | number
   completedBookings?: Prisma.IntFieldUpdateOperationsInput | number
-  verificationStatus?: Prisma.EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
+  verificationStatus?: Prisma.NullableEnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus | null
   isFeatured?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isHidden?: Prisma.BoolFieldUpdateOperationsInput | boolean
   responseRate?: Prisma.IntFieldUpdateOperationsInput | number
   acceptanceRate?: Prisma.IntFieldUpdateOperationsInput | number
+  locationLat?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  locationLng?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  locationUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2062,12 +2229,15 @@ export type CompanionProfileUncheckedUpdateWithoutWithdrawalsInput = {
   ratingCount?: Prisma.IntFieldUpdateOperationsInput | number
   totalBookings?: Prisma.IntFieldUpdateOperationsInput | number
   completedBookings?: Prisma.IntFieldUpdateOperationsInput | number
-  verificationStatus?: Prisma.EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
+  verificationStatus?: Prisma.NullableEnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus | null
   isFeatured?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isHidden?: Prisma.BoolFieldUpdateOperationsInput | boolean
   responseRate?: Prisma.IntFieldUpdateOperationsInput | number
   acceptanceRate?: Prisma.IntFieldUpdateOperationsInput | number
+  locationLat?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  locationLng?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  locationUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2094,12 +2264,15 @@ export type CompanionProfileCreateWithoutBoostsInput = {
   ratingCount?: number
   totalBookings?: number
   completedBookings?: number
-  verificationStatus?: $Enums.VerificationStatus
+  verificationStatus?: $Enums.VerificationStatus | null
   isFeatured?: boolean
   isActive?: boolean
   isHidden?: boolean
   responseRate?: number
   acceptanceRate?: number
+  locationLat?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  locationLng?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  locationUpdatedAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -2128,12 +2301,15 @@ export type CompanionProfileUncheckedCreateWithoutBoostsInput = {
   ratingCount?: number
   totalBookings?: number
   completedBookings?: number
-  verificationStatus?: $Enums.VerificationStatus
+  verificationStatus?: $Enums.VerificationStatus | null
   isFeatured?: boolean
   isActive?: boolean
   isHidden?: boolean
   responseRate?: number
   acceptanceRate?: number
+  locationLat?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  locationLng?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  locationUpdatedAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -2176,12 +2352,15 @@ export type CompanionProfileUpdateWithoutBoostsInput = {
   ratingCount?: Prisma.IntFieldUpdateOperationsInput | number
   totalBookings?: Prisma.IntFieldUpdateOperationsInput | number
   completedBookings?: Prisma.IntFieldUpdateOperationsInput | number
-  verificationStatus?: Prisma.EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
+  verificationStatus?: Prisma.NullableEnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus | null
   isFeatured?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isHidden?: Prisma.BoolFieldUpdateOperationsInput | boolean
   responseRate?: Prisma.IntFieldUpdateOperationsInput | number
   acceptanceRate?: Prisma.IntFieldUpdateOperationsInput | number
+  locationLat?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  locationLng?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  locationUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2210,12 +2389,15 @@ export type CompanionProfileUncheckedUpdateWithoutBoostsInput = {
   ratingCount?: Prisma.IntFieldUpdateOperationsInput | number
   totalBookings?: Prisma.IntFieldUpdateOperationsInput | number
   completedBookings?: Prisma.IntFieldUpdateOperationsInput | number
-  verificationStatus?: Prisma.EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
+  verificationStatus?: Prisma.NullableEnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus | null
   isFeatured?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isHidden?: Prisma.BoolFieldUpdateOperationsInput | boolean
   responseRate?: Prisma.IntFieldUpdateOperationsInput | number
   acceptanceRate?: Prisma.IntFieldUpdateOperationsInput | number
+  locationLat?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  locationLng?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  locationUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2334,6 +2516,9 @@ export type CompanionProfileSelect<ExtArgs extends runtime.Types.Extensions.Inte
   isHidden?: boolean
   responseRate?: boolean
   acceptanceRate?: boolean
+  locationLat?: boolean
+  locationLng?: boolean
+  locationUpdatedAt?: boolean
   deletedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -2370,6 +2555,9 @@ export type CompanionProfileSelectCreateManyAndReturn<ExtArgs extends runtime.Ty
   isHidden?: boolean
   responseRate?: boolean
   acceptanceRate?: boolean
+  locationLat?: boolean
+  locationLng?: boolean
+  locationUpdatedAt?: boolean
   deletedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -2398,6 +2586,9 @@ export type CompanionProfileSelectUpdateManyAndReturn<ExtArgs extends runtime.Ty
   isHidden?: boolean
   responseRate?: boolean
   acceptanceRate?: boolean
+  locationLat?: boolean
+  locationLng?: boolean
+  locationUpdatedAt?: boolean
   deletedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -2426,12 +2617,15 @@ export type CompanionProfileSelectScalar = {
   isHidden?: boolean
   responseRate?: boolean
   acceptanceRate?: boolean
+  locationLat?: boolean
+  locationLng?: boolean
+  locationUpdatedAt?: boolean
   deletedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type CompanionProfileOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "displayName" | "bio" | "heightCm" | "languages" | "province" | "district" | "hourlyRate" | "halfDayRate" | "fullDayRate" | "ratingAvg" | "ratingCount" | "totalBookings" | "completedBookings" | "verificationStatus" | "isFeatured" | "isActive" | "isHidden" | "responseRate" | "acceptanceRate" | "deletedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["companionProfile"]>
+export type CompanionProfileOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "displayName" | "bio" | "heightCm" | "languages" | "province" | "district" | "hourlyRate" | "halfDayRate" | "fullDayRate" | "ratingAvg" | "ratingCount" | "totalBookings" | "completedBookings" | "verificationStatus" | "isFeatured" | "isActive" | "isHidden" | "responseRate" | "acceptanceRate" | "locationLat" | "locationLng" | "locationUpdatedAt" | "deletedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["companionProfile"]>
 export type CompanionProfileInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   photos?: boolean | Prisma.CompanionProfile$photosArgs<ExtArgs>
@@ -2478,12 +2672,15 @@ export type $CompanionProfilePayload<ExtArgs extends runtime.Types.Extensions.In
     ratingCount: number
     totalBookings: number
     completedBookings: number
-    verificationStatus: $Enums.VerificationStatus
+    verificationStatus: $Enums.VerificationStatus | null
     isFeatured: boolean
     isActive: boolean
     isHidden: boolean
     responseRate: number
     acceptanceRate: number
+    locationLat: runtime.Decimal | null
+    locationLng: runtime.Decimal | null
+    locationUpdatedAt: Date | null
     deletedAt: Date | null
     createdAt: Date
     updatedAt: Date
@@ -2939,6 +3136,9 @@ export interface CompanionProfileFieldRefs {
   readonly isHidden: Prisma.FieldRef<"CompanionProfile", 'Boolean'>
   readonly responseRate: Prisma.FieldRef<"CompanionProfile", 'Int'>
   readonly acceptanceRate: Prisma.FieldRef<"CompanionProfile", 'Int'>
+  readonly locationLat: Prisma.FieldRef<"CompanionProfile", 'Decimal'>
+  readonly locationLng: Prisma.FieldRef<"CompanionProfile", 'Decimal'>
+  readonly locationUpdatedAt: Prisma.FieldRef<"CompanionProfile", 'DateTime'>
   readonly deletedAt: Prisma.FieldRef<"CompanionProfile", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"CompanionProfile", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"CompanionProfile", 'DateTime'>

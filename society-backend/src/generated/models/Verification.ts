@@ -463,6 +463,10 @@ export type VerificationUncheckedUpdateManyWithoutUserNestedInput = {
   deleteMany?: Prisma.VerificationScalarWhereInput | Prisma.VerificationScalarWhereInput[]
 }
 
+export type EnumVerificationStatusFieldUpdateOperationsInput = {
+  set?: $Enums.VerificationStatus
+}
+
 export type VerificationCreateWithoutUserInput = {
   id?: string
   type: string

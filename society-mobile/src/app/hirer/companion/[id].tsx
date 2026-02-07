@@ -247,7 +247,7 @@ export default function CompanionProfileScreen() {
       reviewCount: c.reviewCount ?? 0,
       hourlyRate: c.hourlyRate ?? 0,
       location: c.languages?.join(', ') || '',
-      isVerified: c.isVerified ?? c.verificationStatus === 'verified',
+      isVerified: c.isVerified ?? c.verificationStatus === 'VERIFIED',
       isOnline: c.isActive ?? false,
       bio: c.bio || '',
       responseTime: '< 30 min',

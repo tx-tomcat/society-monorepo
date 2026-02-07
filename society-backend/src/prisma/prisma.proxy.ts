@@ -252,7 +252,7 @@ export class PrismaCacheProxy {
         cachedResult = await this.cacheManager.get(cacheKey);
         if (cachedResult !== undefined && cachedResult !== null) {
           this.logger.debug(`Cache hit for ${modelName}.${methodName}`);
-          return cachedResult;
+          return this.rehydrateDates(cachedResult);
         }
       } catch (error) {
         this.logger.warn(
@@ -429,6 +429,26 @@ export class PrismaCacheProxy {
   }
 
   /**
+   * Invalidate a specific cached query by its exact model, method, and args.
+   * Generates the same cache key as the original query and deletes it directly.
+   */
+  async invalidateExactQuery(
+    model: string,
+    method: string,
+    args: CacheEntryArgs,
+  ): Promise<void> {
+    const cacheKey = this.generateCacheKey(model, method, args);
+    try {
+      await this.cacheManager.del(cacheKey);
+      this.cacheKeysRegistry.delete(cacheKey);
+      this.markRegistryDirty();
+      this.logger.debug(`Invalidated exact query cache: ${model}.${method}`);
+    } catch (error) {
+      this.logger.error(`Failed to invalidate exact query cache: ${model}.${method}`, error);
+    }
+  }
+
+  /**
    * Invalidate findMany cache for a model (public API - unchanged)
    */
   async invalidateFindManyCache(model: string): Promise<void> {
@@ -476,6 +496,38 @@ export class PrismaCacheProxy {
     mutationArgs: CacheEntryArgs,
   ): boolean {
     return this.invalidationChain.shouldInvalidate(cachedArgs, mutationArgs);
+  }
+
+  /**
+   * Recursively rehydrate ISO 8601 date strings back to Date objects.
+   * Redis JSON serialization converts Date objects to strings — this restores them.
+   */
+  private rehydrateDates(data: unknown): unknown {
+    if (data === null || data === undefined) return data;
+
+    if (typeof data === 'string') {
+      if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(data)) {
+        const date = new Date(data);
+        if (!isNaN(date.getTime())) {
+          return date;
+        }
+      }
+      return data;
+    }
+
+    if (Array.isArray(data)) {
+      return data.map((item) => this.rehydrateDates(item));
+    }
+
+    if (typeof data === 'object') {
+      const result: Record<string, unknown> = {};
+      for (const [key, value] of Object.entries(data)) {
+        result[key] = this.rehydrateDates(value);
+      }
+      return result;
+    }
+
+    return data;
   }
 
   /**

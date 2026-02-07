@@ -22,3 +22,4 @@ export * from './use-recommendations';
 export * from './use-occasions';
 export * from './use-wallet';
 export * from './use-platform-config';
+export * from './use-membership';

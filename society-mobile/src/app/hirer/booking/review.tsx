@@ -72,7 +72,7 @@ export default function BookingReviewScreen() {
       rating: c.rating ?? 0,
       reviewCount: c.reviewCount ?? 0,
       hourlyRate: c.hourlyRate || 0,
-      isVerified: c.isVerified ?? c.verificationStatus === 'verified',
+      isVerified: c.isVerified ?? c.verificationStatus === 'VERIFIED',
     };
   }, [companionData]);
 

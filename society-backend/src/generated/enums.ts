@@ -284,7 +284,8 @@ export type InteractionEventType = (typeof InteractionEventType)[keyof typeof In
 export const PaymentRequestType = {
   TOPUP: 'TOPUP',
   BOOKING: 'BOOKING',
-  BOOST: 'BOOST'
+  BOOST: 'BOOST',
+  MEMBERSHIP: 'MEMBERSHIP'
 } as const
 
 export type PaymentRequestType = (typeof PaymentRequestType)[keyof typeof PaymentRequestType]
@@ -298,3 +299,22 @@ export const PaymentRequestStatus = {
 } as const
 
 export type PaymentRequestStatus = (typeof PaymentRequestStatus)[keyof typeof PaymentRequestStatus]
+
+
+export const MembershipTier = {
+  SILVER: 'SILVER',
+  GOLD: 'GOLD',
+  PLATINUM: 'PLATINUM'
+} as const
+
+export type MembershipTier = (typeof MembershipTier)[keyof typeof MembershipTier]
+
+
+export const MembershipStatus = {
+  PENDING: 'PENDING',
+  ACTIVE: 'ACTIVE',
+  EXPIRED: 'EXPIRED',
+  CANCELLED: 'CANCELLED'
+} as const
+
+export type MembershipStatus = (typeof MembershipStatus)[keyof typeof MembershipStatus]

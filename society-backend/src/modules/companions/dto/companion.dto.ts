@@ -13,7 +13,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { Gender, BoostStatus } from '@generated/client';
+import { Gender, BoostStatus, VerificationStatus } from '@generated/client';
 
 // ============================================
 // Query DTOs
@@ -342,10 +342,6 @@ export enum BoostTierEnum {
 export class PurchaseBoostDto {
   @IsEnum(BoostTierEnum)
   tier: BoostTierEnum;
-
-  @IsOptional()
-  @IsString()
-  returnUrl?: string;
 }
 
 export interface BoostPricing {
@@ -381,6 +377,46 @@ export interface BoostPurchaseResult {
   boostId: string;
   tier: BoostTierEnum;
   price: number;
-  paymentUrl?: string;
   message: string;
+  paymentRequestId: string;
+  code: string;
+  qrUrl: string;
+  deeplinks: {
+    appId: string;
+    name: string;
+    logo: string;
+    deeplink: string;
+  }[];
+  accountInfo: {
+    bankCode: string;
+    accountNumber: string;
+    accountName: string;
+  };
+  expiresAt: string;
+}
+
+// ============================================
+// Photo Verification DTOs
+// ============================================
+
+export class SubmitPhotoVerificationDto {
+  @IsString()
+  idFrontUrl: string;
+
+  @IsString()
+  idBackUrl: string;
+
+  @IsString()
+  selfieUrl: string;
+}
+
+export interface PhotoVerificationResponse {
+  id: string;
+  status: VerificationStatus;
+  idFrontUrl: string;
+  idBackUrl: string;
+  selfieUrl: string;
+  failureReason?: string;
+  createdAt: Date;
+  reviewedAt?: Date;
 }

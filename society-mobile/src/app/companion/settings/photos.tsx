@@ -3,7 +3,17 @@ import * as ImagePicker from 'expo-image-picker';
 import { MotiView } from 'moti';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Alert, Pressable, ScrollView } from 'react-native';
+import {
+  ActivityIndicator,
+  Alert,
+  Dimensions,
+  FlatList,
+  Modal,
+  type NativeScrollEvent,
+  type NativeSyntheticEvent,
+  Pressable,
+  ScrollView,
+} from 'react-native';
 
 import {
   colors,
@@ -13,7 +23,7 @@ import {
   Text,
   View,
 } from '@/components/ui';
-import { Plus, Trash2 } from '@/components/ui/icons';
+import { Plus, Star, Trash2, X } from '@/components/ui/icons';
 import {
   type CompanionPhoto,
   getPhotoUrl,
@@ -24,6 +34,7 @@ import {
   useMyCompanionProfile,
   useRemoveCompanionPhoto,
   useSafeBack,
+  useSetPrimaryPhoto,
   useUploadFile,
 } from '@/lib/hooks';
 
@@ -35,12 +46,16 @@ export default function CompanionPhotosScreen() {
   const goBack = useSafeBack('/companion/(app)/account');
   const [deletingPhotoId, setDeletingPhotoId] = React.useState<string | null>(null);
   const [isUploading, setIsUploading] = React.useState(false);
+  const [viewerIndex, setViewerIndex] = React.useState<number | null>(null);
+  const flatListRef = React.useRef<FlatList>(null);
+  const screenWidth = Dimensions.get('window').width;
 
   // React Query hooks
   const { data: profile, isLoading, refetch } = useMyCompanionProfile();
   const uploadFile = useUploadFile();
   const addPhoto = useAddCompanionPhoto();
   const removePhoto = useRemoveCompanionPhoto();
+  const setPrimary = useSetPrimaryPhoto();
 
   const photos = profile?.photos || [];
 
@@ -59,24 +74,36 @@ export default function CompanionPhotosScreen() {
       return;
     }
 
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
-      allowsEditing: true,
-      aspect: [3, 4],
-      quality: 0.8,
-    });
+    const isPrimary = photos.length === 0;
+    const remaining = MAX_PHOTOS - photos.length;
 
-    if (result.canceled || !result.assets[0]) return;
+    // Primary photo: single select with crop; additional photos: multi-select
+    const result = isPrimary
+      ? await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        allowsEditing: true,
+        aspect: [3, 4],
+        quality: 0.8,
+      })
+      : await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        allowsMultipleSelection: true,
+        selectionLimit: remaining,
+        quality: 0.8,
+      });
+
+    if (result.canceled || result.assets.length === 0) return;
 
     setIsUploading(true);
     try {
-      const asset = result.assets[0];
-      const uploadResult = await uploadFile.mutateAsync({
-        uri: asset.uri,
-        category: 'profile_photo',
-      });
-      const isPrimary = photos.length === 0;
-      await addPhoto.mutateAsync({ url: uploadResult.url, isPrimary });
+      for (const asset of result.assets) {
+        const uploadResult = await uploadFile.mutateAsync({
+          uri: asset.uri,
+          category: 'profile_photo',
+        });
+        const isFirst = isPrimary && asset === result.assets[0];
+        await addPhoto.mutateAsync({ url: uploadResult.url, isPrimary: isFirst });
+      }
       refetch();
     } catch (error) {
       console.error('Failed to upload photo:', error);
@@ -115,8 +142,9 @@ export default function CompanionPhotosScreen() {
             onPress: async () => {
               setDeletingPhotoId(photoId);
               try {
-                await removePhoto.mutateAsync(photoId);
-                refetch();
+                removePhoto.mutateAsync(photoId).then(() => {
+                  refetch();
+                });
               } catch (error) {
                 console.error('Failed to delete photo:', error);
                 Alert.alert(t('common.error'), t('companion.photos.delete_failed'));
@@ -136,14 +164,14 @@ export default function CompanionPhotosScreen() {
       if (!isCompanionPhoto(photo) || photo.isPrimary) return;
 
       try {
-        await addPhoto.mutateAsync({ url: photo.url, isPrimary: true });
+        await setPrimary.mutateAsync(photo.id);
         refetch();
       } catch (error) {
         console.error('Failed to set primary photo:', error);
         Alert.alert(t('common.error'), t('errors.try_again'));
       }
     },
-    [t, addPhoto, refetch]
+    [t, setPrimary, refetch]
   );
 
   if (isLoading) {
@@ -205,8 +233,7 @@ export default function CompanionPhotosScreen() {
                 style={{ aspectRatio: 3 / 4 }}
               >
                 <Pressable
-                  onPress={() => handleSetPrimary(photo)}
-                  onLongPress={() => handleDeletePhoto(photo)}
+                  onPress={() => setViewerIndex(index)}
                   disabled={isDeleting}
                 >
                   <Image
@@ -244,8 +271,7 @@ export default function CompanionPhotosScreen() {
             <Pressable
               onPress={handleAddPhoto}
               disabled={isUploading}
-              className="w-[31%] items-center justify-center rounded-xl border-2 border-dashed border-lavender-900 bg-lavender-50/50"
-              style={{ aspectRatio: 3 / 4 }}
+              className="w-[31%] h-[170px] items-center justify-center rounded-xl border-2 border-dashed border-lavender-900 bg-lavender-50/50"
             >
               {isUploading ? (
                 <ActivityIndicator color={colors.lavender[400]} />
@@ -284,6 +310,119 @@ export default function CompanionPhotosScreen() {
           </View>
         </MotiView>
       </ScrollView>
+
+      {/* Photo Viewer Modal */}
+      {viewerIndex !== null && photos[viewerIndex] && (
+        <Modal
+          visible
+          transparent
+          animationType="fade"
+          statusBarTranslucent
+          onRequestClose={() => setViewerIndex(null)}
+        >
+          <View className="flex-1 bg-black">
+            {/* Header */}
+            <View className="flex-row items-center justify-between px-4 pb-2 pt-14">
+              <Pressable
+                onPress={() => setViewerIndex(null)}
+                hitSlop={12}
+                className="size-10 items-center justify-center rounded-full bg-white/10"
+              >
+                <X color="white" size={20} />
+              </Pressable>
+              <Text className="font-urbanist-semibold text-base text-white">
+                {viewerIndex + 1} / {photos.length}
+              </Text>
+              <View className="size-10" />
+            </View>
+
+            {/* Swipeable Photos */}
+            <View className="flex-1 justify-center">
+              <FlatList
+                ref={flatListRef}
+                data={photos}
+                horizontal
+                pagingEnabled
+                showsHorizontalScrollIndicator={false}
+                initialScrollIndex={viewerIndex}
+                getItemLayout={(_, index) => ({
+                  length: screenWidth,
+                  offset: screenWidth * index,
+                  index,
+                })}
+                onMomentumScrollEnd={(e: NativeSyntheticEvent<NativeScrollEvent>) => {
+                  const newIndex = Math.round(
+                    e.nativeEvent.contentOffset.x / screenWidth
+                  );
+                  if (newIndex >= 0 && newIndex < photos.length) {
+                    setViewerIndex(newIndex);
+                  }
+                }}
+                keyExtractor={(item, i) =>
+                  isCompanionPhoto(item) ? item.id : `photo-${i}`
+                }
+                renderItem={({ item }) => (
+                  <View
+                    style={{ width: screenWidth }}
+                    className="items-center justify-center px-4"
+                  >
+                    <Image
+                      source={{ uri: getPhotoUrl(item) }}
+                      style={{
+                        width: screenWidth - 32,
+                        height: screenWidth * (4 / 3),
+                      }}
+                      contentFit="contain"
+                    />
+                    {isCompanionPhoto(item) && item.isPrimary && (
+                      <View className="absolute bottom-4 left-8 rounded-lg bg-lavender-900 px-3 py-1">
+                        <Text className="text-sm font-semibold text-white">
+                          {t('companion.photos.main')}
+                        </Text>
+                      </View>
+                    )}
+                  </View>
+                )}
+              />
+            </View>
+
+            {/* Actions */}
+            <View className="flex-row items-center justify-center gap-6 pb-12 pt-4">
+              {isCompanionPhoto(photos[viewerIndex]) &&
+                !photos[viewerIndex].isPrimary && (
+                  <Pressable
+                    onPress={() => {
+                      handleSetPrimary(photos[viewerIndex]);
+                      setViewerIndex(null);
+                    }}
+                    className="items-center gap-1"
+                  >
+                    <View className="size-12 items-center justify-center rounded-full bg-white/10">
+                      <Star color={colors.lavender[400]} width={22} height={22} />
+                    </View>
+                    <Text className="text-xs text-white">
+                      {t('companion.photos.set_primary')}
+                    </Text>
+                  </Pressable>
+                )}
+              <Pressable
+                onPress={() => {
+                  handleDeletePhoto(photos[viewerIndex]);
+                  setViewerIndex(null);
+                }}
+                className="items-center gap-1"
+              >
+                <View className="size-12 items-center justify-center rounded-full bg-white/10">
+                  <Trash2 color="#ef4444" width={22} height={22} />
+                </View>
+                <Text className="text-xs text-white">
+                  {t('common.delete')}
+                </Text>
+              </Pressable>
+            </View>
+          </View>
+        </Modal>
+      )}
     </View>
   );
 }

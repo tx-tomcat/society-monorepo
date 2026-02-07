@@ -1,25 +1,35 @@
 import * as React from 'react';
-import { StyleSheet } from 'react-native';
-import type { SvgProps } from 'react-native-svg';
+import type { StyleProp, ViewStyle } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
-import { isRTL } from '@/lib';
+import colors from '@/components/ui/colors';
 
-export const ArrowRight = ({ color = '#CCC', style, ...props }: SvgProps) => (
-  <Svg
-    width={7}
-    height={14}
-    viewBox="0 0 7 14"
-    fill="none"
-    {...props}
-    style={StyleSheet.flatten([
-      style,
-      { transform: [{ scaleX: isRTL ? -1 : 1 }] },
-    ])}
-  >
-    <Path
-      d="M.872 13.101a.874.874 0 0 0 .621-.253l5.252-5.253a.875.875 0 0 0 0-1.234L1.493 1.11A.875.875 0 0 0 .26 2.343l4.63 4.63-4.63 4.632A.876.876 0 0 0 .872 13.1Z"
-      fill={color}
-    />
-  </Svg>
-);
+type Props = {
+  color?: string;
+  size?: number;
+  width?: number;
+  height?: number;
+  style?: StyleProp<ViewStyle>;
+};
+
+export const ArrowRight = ({
+  color = colors.charcoal[900],
+  size = 28,
+  width,
+  height,
+  style,
+}: Props) => {
+  const w = width ?? size;
+  const h = height ?? size;
+  return (
+    <Svg width={w} height={h} viewBox="0 0 28 28" fill="none" style={style}>
+      <Path
+        d="M17.5 7L24 14L17.5 21"
+        stroke={color}
+        strokeWidth={1.5}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </Svg>
+  );
+};

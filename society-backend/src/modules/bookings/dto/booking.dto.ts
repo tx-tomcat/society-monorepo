@@ -249,6 +249,7 @@ export interface BookingListItem {
     displayName: string;
     avatar: string | null;
     rating: number;
+    membershipTier?: string | null;
   };
 }
 
@@ -335,8 +336,12 @@ export interface ScheduleBooking {
   bookingNumber: string;
   startTime: string;
   endTime: string;
+  startDatetime: string;
+  endDatetime: string;
+  durationHours: number;
   occasion: OccasionInfo | null;
   status: BookingStatus;
+  paymentStatus: PaymentStatus;
   hirer: {
     displayName: string;
     avatar: string | null;

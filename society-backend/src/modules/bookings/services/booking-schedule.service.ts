@@ -56,7 +56,9 @@ export class BookingScheduleService {
     const scheduleMap = new Map<string, ScheduleDay>();
 
     for (const booking of bookings) {
-      const dateStr = booking.startDatetime.toISOString().split('T')[0];
+      const startDt = new Date(booking.startDatetime);
+      const endDt = new Date(booking.endDatetime);
+      const dateStr = startDt.toISOString().split('T')[0];
 
       if (!scheduleMap.has(dateStr)) {
         scheduleMap.set(dateStr, { date: dateStr, bookings: [] });
@@ -65,10 +67,14 @@ export class BookingScheduleService {
       scheduleMap.get(dateStr)!.bookings.push({
         id: booking.id,
         bookingNumber: booking.bookingNumber,
-        startTime: booking.startDatetime.toISOString().substring(11, 16),
-        endTime: booking.endDatetime.toISOString().substring(11, 16),
+        startTime: startDt.toISOString().substring(11, 16),
+        endTime: endDt.toISOString().substring(11, 16),
+        startDatetime: startDt.toISOString(),
+        endDatetime: endDt.toISOString(),
+        durationHours: Number(booking.durationHours),
         occasion: BookingUtils.mapOccasion(booking.occasion),
         status: booking.status,
+        paymentStatus: booking.paymentStatus,
         hirer: {
           displayName: booking.hirer.fullName,
           avatar: booking.hirer.avatarUrl,

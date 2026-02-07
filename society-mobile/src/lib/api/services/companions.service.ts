@@ -1,6 +1,28 @@
 import { apiClient } from '../client';
 
-export type VerificationStatus = 'pending' | 'verified' | 'rejected';
+export type VerificationStatus =
+  | 'PENDING'
+  | 'UNDER_REVIEW'
+  | 'VERIFIED'
+  | 'FAILED'
+  | 'EXPIRED';
+
+export interface PhotoVerificationStatus {
+  id: string;
+  status: VerificationStatus;
+  idFrontUrl: string;
+  idBackUrl: string;
+  selfieUrl: string;
+  failureReason?: string;
+  createdAt: string;
+  reviewedAt?: string;
+}
+
+export interface SubmitPhotoVerificationInput {
+  idFrontUrl: string;
+  idBackUrl: string;
+  selfieUrl: string;
+}
 
 export interface OccasionInfo {
   id: string;
@@ -126,12 +148,17 @@ export function isCompanionPhoto(photo: CompanionPhoto | string): photo is Compa
   return typeof photo !== 'string' && 'url' in photo;
 }
 
+const R2_DEV_URL_RE = /^https:\/\/pub-[a-z0-9]+\.r2\.dev\//;
+const R2_CUSTOM_DOMAIN = 'https://static.hireme.vn/';
+
 /**
  * Get the URL from a photo entry (handles both string and object formats)
+ * Rewrites legacy R2 dev URLs to the custom domain
  */
 export function getPhotoUrl(photo: CompanionPhoto | string | undefined): string | undefined {
   if (!photo) return undefined;
-  return typeof photo === 'string' ? photo : photo.url;
+  const url = typeof photo === 'string' ? photo : photo.url;
+  return url.replace(R2_DEV_URL_RE, R2_CUSTOM_DOMAIN);
 }
 
 /**
@@ -251,8 +278,22 @@ export interface BoostPurchaseResult {
   boostId: string;
   tier: BoostTier;
   price: number;
-  paymentUrl?: string;
   message: string;
+  paymentRequestId: string;
+  code: string;
+  qrUrl: string;
+  deeplinks: {
+    appId: string;
+    name: string;
+    logo: string;
+    deeplink: string;
+  }[];
+  accountInfo: {
+    bankCode: string;
+    accountNumber: string;
+    accountName: string;
+  };
+  expiresAt: string;
 }
 
 /**
@@ -397,6 +438,13 @@ export const companionsService = {
   },
 
   /**
+   * Set a photo as primary (authenticated)
+   */
+  async setPrimaryPhoto(photoId: string): Promise<{ success: boolean }> {
+    return apiClient.patch(`/companions/me/photos/${photoId}/primary`);
+  },
+
+  /**
    * Remove photo from profile (authenticated)
    */
   async removePhoto(photoId: string): Promise<{ success: boolean }> {
@@ -437,9 +485,8 @@ export const companionsService = {
    */
   async purchaseBoost(
     tier: BoostTier,
-    returnUrl?: string
   ): Promise<BoostPurchaseResult> {
-    return apiClient.post('/companions/me/boost', { tier, returnUrl });
+    return apiClient.post('/companions/me/boost', { tier });
   },
 
   /**
@@ -447,5 +494,21 @@ export const companionsService = {
    */
   async cancelBoost(boostId: string): Promise<{ success: boolean }> {
     return apiClient.delete(`/companions/me/boost/${boostId}`);
+  },
+
+  /**
+   * Get photo verification status (authenticated)
+   */
+  async getPhotoVerificationStatus(): Promise<PhotoVerificationStatus | null> {
+    return apiClient.get('/companions/me/verification');
+  },
+
+  /**
+   * Submit photo verification (authenticated)
+   */
+  async submitPhotoVerification(
+    input: SubmitPhotoVerificationInput,
+  ): Promise<PhotoVerificationStatus> {
+    return apiClient.post('/companions/me/verification', input);
   },
 };

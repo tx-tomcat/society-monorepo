@@ -147,7 +147,7 @@ export default function BookingDetail() {
         reviewCount: b.companion?.reviewCount ?? 0,
         isVerified:
           b.companion?.isVerified ??
-          b.companion?.verificationStatus === 'verified',
+          b.companion?.verificationStatus === 'VERIFIED',
       },
       occasion: b.occasion?.name || 'Meeting',
       occasionEmoji: b.occasion?.emoji || '📅',

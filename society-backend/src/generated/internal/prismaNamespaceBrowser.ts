@@ -95,6 +95,7 @@ export const ModelName = {
   EmergencyEvent: 'EmergencyEvent',
   FavoriteCompanion: 'FavoriteCompanion',
   ProfileBoost: 'ProfileBoost',
+  BoostPricingTier: 'BoostPricingTier',
   Referral: 'Referral',
   Occasion: 'Occasion',
   Holiday: 'Holiday',
@@ -103,7 +104,9 @@ export const ModelName = {
   RecommendationCache: 'RecommendationCache',
   PaymentRequest: 'PaymentRequest',
   WebhookLog: 'WebhookLog',
-  IdempotencyKey: 'IdempotencyKey'
+  IdempotencyKey: 'IdempotencyKey',
+  MembershipPricingTier: 'MembershipPricingTier',
+  HirerMembership: 'HirerMembership'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -212,6 +215,9 @@ export const CompanionProfileScalarFieldEnum = {
   isHidden: 'isHidden',
   responseRate: 'responseRate',
   acceptanceRate: 'acceptanceRate',
+  locationLat: 'locationLat',
+  locationLng: 'locationLng',
+  locationUpdatedAt: 'locationUpdatedAt',
   deletedAt: 'deletedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -298,11 +304,14 @@ export const PhotoVerificationScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
   photoUrl: 'photoUrl',
+  idBackUrl: 'idBackUrl',
   selfieUrl: 'selfieUrl',
   livenessScore: 'livenessScore',
   faceMatchScore: 'faceMatchScore',
   status: 'status',
   failureReason: 'failureReason',
+  reviewedBy: 'reviewedBy',
+  reviewedAt: 'reviewedAt',
   createdAt: 'createdAt'
 } as const
 
@@ -822,6 +831,22 @@ export const ProfileBoostScalarFieldEnum = {
 export type ProfileBoostScalarFieldEnum = (typeof ProfileBoostScalarFieldEnum)[keyof typeof ProfileBoostScalarFieldEnum]
 
 
+export const BoostPricingTierScalarFieldEnum = {
+  id: 'id',
+  tier: 'tier',
+  name: 'name',
+  durationHours: 'durationHours',
+  price: 'price',
+  multiplier: 'multiplier',
+  description: 'description',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type BoostPricingTierScalarFieldEnum = (typeof BoostPricingTierScalarFieldEnum)[keyof typeof BoostPricingTierScalarFieldEnum]
+
+
 export const ReferralScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
@@ -922,6 +947,7 @@ export const PaymentRequestScalarFieldEnum = {
   status: 'status',
   bookingId: 'bookingId',
   boostId: 'boostId',
+  membershipId: 'membershipId',
   sepayId: 'sepayId',
   gateway: 'gateway',
   referenceCode: 'referenceCode',
@@ -962,6 +988,41 @@ export const IdempotencyKeyScalarFieldEnum = {
 } as const
 
 export type IdempotencyKeyScalarFieldEnum = (typeof IdempotencyKeyScalarFieldEnum)[keyof typeof IdempotencyKeyScalarFieldEnum]
+
+
+export const MembershipPricingTierScalarFieldEnum = {
+  tier: 'tier',
+  name: 'name',
+  durationDays: 'durationDays',
+  price: 'price',
+  forYouLimit: 'forYouLimit',
+  maxPendingBookings: 'maxPendingBookings',
+  freeCancellationHours: 'freeCancellationHours',
+  priorityBooking: 'priorityBooking',
+  nearbySearch: 'nearbySearch',
+  earlyAccess: 'earlyAccess',
+  dedicatedSupport: 'dedicatedSupport',
+  description: 'description',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type MembershipPricingTierScalarFieldEnum = (typeof MembershipPricingTierScalarFieldEnum)[keyof typeof MembershipPricingTierScalarFieldEnum]
+
+
+export const HirerMembershipScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  tier: 'tier',
+  status: 'status',
+  price: 'price',
+  startedAt: 'startedAt',
+  expiresAt: 'expiresAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type HirerMembershipScalarFieldEnum = (typeof HirerMembershipScalarFieldEnum)[keyof typeof HirerMembershipScalarFieldEnum]
 
 
 export const SortOrder = {

@@ -1,24 +1,24 @@
+import { WITHDRAWAL_LIMITS } from '@/common/constants/business.constants';
+import { StringUtils } from '@/common/utils/string.utils';
+import { PrismaService } from '@/prisma/prisma.service';
+import { EarningsStatus, VerificationStatus, WithdrawalStatus } from '@generated/client';
 import {
+  BadRequestException,
+  ForbiddenException,
   Injectable,
   Logger,
   NotFoundException,
-  BadRequestException,
-  ForbiddenException,
 } from '@nestjs/common';
-import { BookingStatus, EarningsStatus, WithdrawalStatus, VerificationStatus } from '@generated/client';
-import { PrismaService } from '@/prisma/prisma.service';
-import {
-  CreateBankAccountDto,
-  WithdrawFundsDto,
-  GetTransactionsQueryDto,
-  TransactionItem,
-  BankAccountItem,
-  WithdrawalResponse,
-  PeriodData,
-} from '../dto/earnings.dto';
-import { WITHDRAWAL_LIMITS } from '@/common/constants/business.constants';
-import { StringUtils } from '@/common/utils/string.utils';
 import { VerificationService } from '../../verification/services/verification.service';
+import {
+  BankAccountItem,
+  CreateBankAccountDto,
+  GetTransactionsQueryDto,
+  PeriodData,
+  TransactionItem,
+  WithdrawalResponse,
+  WithdrawFundsDto,
+} from '../dto/earnings.dto';
 
 @Injectable()
 export class EarningsService {
@@ -27,7 +27,7 @@ export class EarningsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly verificationService: VerificationService,
-  ) {}
+  ) { }
 
   /**
    * Get earnings overview
@@ -432,17 +432,24 @@ export class EarningsService {
 
     if (isFirstWithdrawal) {
       // Verify KYC (identity verification) is completed
-      const verificationStatus = await this.verificationService.getStatus(userId);
-      const identityVerification = verificationStatus.identity;
+      // Check CompanionProfile.verificationStatus (set by photo verification flow)
+      // or fall back to legacy Verification table
+      const isVerifiedViaProfile = companion.verificationStatus === VerificationStatus.VERIFIED;
 
-      if (!identityVerification || identityVerification.status !== VerificationStatus.VERIFIED) {
-        this.logger.warn(`First withdrawal blocked for user ${userId} - KYC not completed`);
-        throw new ForbiddenException({
-          message: 'Identity verification (KYC) is required before your first withdrawal',
-          error: 'KYC_REQUIRED',
-          kycRequired: true,
-          kycStatus: identityVerification?.status || 'NOT_STARTED',
-        });
+      if (!isVerifiedViaProfile) {
+        // Fall back to legacy verification table
+        const verificationStatus = await this.verificationService.getStatus(userId);
+        const identityVerification = verificationStatus.identity;
+
+        if (!identityVerification || identityVerification.status !== VerificationStatus.VERIFIED) {
+          this.logger.warn(`First withdrawal blocked for user ${userId} - KYC not completed`);
+          throw new ForbiddenException({
+            message: 'Identity verification (KYC) is required before your first withdrawal',
+            error: 'KYC_REQUIRED',
+            kycRequired: true,
+            kycStatus: companion.verificationStatus || identityVerification?.status || 'NOT_STARTED',
+          });
+        }
       }
     }
 
@@ -567,6 +574,48 @@ export class EarningsService {
       },
       estimatedArrival: estimatedArrival.toISOString().split('T')[0],
       status: 'pending',
+    };
+  }
+
+  /**
+   * Get withdrawal history for a companion
+   */
+  async getWithdrawalHistory(userId: string) {
+    const companion = await this.prisma.companionProfile.findUnique({
+      where: { userId },
+    });
+
+    if (!companion) {
+      throw new NotFoundException('Companion profile not found');
+    }
+
+    const withdrawals = await this.prisma.withdrawal.findMany({
+      where: { companionId: companion.id },
+      include: {
+        bankAccount: {
+          select: {
+            bankName: true,
+            accountNumber: true,
+            accountHolder: true,
+          },
+        },
+      },
+      orderBy: { requestedAt: 'desc' },
+    });
+
+    return {
+      withdrawals: withdrawals.map((w) => ({
+        id: w.id,
+        amount: w.amount,
+        status: w.status.toLowerCase(),
+        bankAccount: {
+          bankName: w.bankAccount.bankName,
+          accountNumber: StringUtils.maskSensitiveData(w.bankAccount.accountNumber, 4),
+          accountHolder: w.bankAccount.accountHolder,
+        },
+        requestedAt: w.requestedAt.toISOString(),
+        completedAt: w.completedAt?.toISOString() ?? null,
+      })),
     };
   }
 }

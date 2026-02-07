@@ -1,10 +1,12 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { ConfigService } from '@nestjs/config';
-import { BadRequestException, NotFoundException } from '@nestjs/common';
-import { WalletService } from './wallet.service';
-import { PrismaService } from '@/prisma/prisma.service';
 import { SepayService } from '@/modules/payments/services/sepay.service';
+import { PrismaService } from '@/prisma/prisma.service';
 import { PaymentRequestStatus, PaymentRequestType } from '@generated/client';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { Test, TestingModule } from '@nestjs/testing';
+import { WALLET_EVENTS } from './events/wallet.events';
+import { WalletService } from './wallet.service';
 
 describe('WalletService', () => {
   let service: WalletService;
@@ -30,6 +32,8 @@ describe('WalletService', () => {
       findUnique: jest.fn(),
       update: jest.fn(),
     },
+    $transaction: jest.fn((fn) => fn(mockPrismaService)),
+    invalidateCache: jest.fn(),
   };
 
   const mockSepayService = {
@@ -42,7 +46,7 @@ describe('WalletService', () => {
     getAccountInfo: jest.fn().mockReturnValue({
       bankCode: 'TPB',
       accountNumber: '1234567890',
-      accountName: 'LUXE VN',
+      accountName: 'hireme VN',
     }),
     extractCode: jest.fn(),
     verifyWebhook: jest.fn(),
@@ -55,6 +59,10 @@ describe('WalletService', () => {
     }),
   };
 
+  const mockEventEmitter = {
+    emit: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -62,6 +70,7 @@ describe('WalletService', () => {
         { provide: PrismaService, useValue: mockPrismaService },
         { provide: SepayService, useValue: mockSepayService },
         { provide: ConfigService, useValue: mockConfigService },
+        { provide: EventEmitter2, useValue: mockEventEmitter },
       ],
     }).compile();
 
@@ -103,7 +112,7 @@ describe('WalletService', () => {
         accountInfo: {
           bankCode: 'TPB',
           accountNumber: '1234567890',
-          accountName: 'LUXE VN',
+          accountName: 'hireme VN',
         },
         expiresAt: mockExpiresAt.toISOString(),
       });
@@ -274,7 +283,7 @@ describe('WalletService', () => {
       expect(mockPrismaService.paymentRequest.aggregate).toHaveBeenNthCalledWith(2, {
         where: {
           userId: mockUserId,
-          type: PaymentRequestType.BOOKING,
+          type: { in: [PaymentRequestType.BOOKING, PaymentRequestType.BOOST] },
           status: PaymentRequestStatus.COMPLETED,
         },
         _sum: { amount: true },
@@ -408,12 +417,15 @@ describe('WalletService', () => {
 
     it('should process webhook and complete payment request', async () => {
       mockPrismaService.paymentRequest.findUnique.mockResolvedValue(mockRequest);
-      mockPrismaService.paymentRequest.update.mockResolvedValue({});
+      mockPrismaService.paymentRequest.updateMany.mockResolvedValue({ count: 1 });
 
       await service.processWebhook(mockWebhookPayload);
 
-      expect(mockPrismaService.paymentRequest.update).toHaveBeenCalledWith({
-        where: { id: mockRequest.id },
+      expect(mockPrismaService.paymentRequest.updateMany).toHaveBeenCalledWith({
+        where: {
+          id: mockRequest.id,
+          status: PaymentRequestStatus.PENDING,
+        },
         data: {
           status: PaymentRequestStatus.COMPLETED,
           completedAt: expect.any(Date),
@@ -492,7 +504,7 @@ describe('WalletService', () => {
         bookingId: 'booking-123',
       };
       mockPrismaService.paymentRequest.findUnique.mockResolvedValue(bookingRequest);
-      mockPrismaService.paymentRequest.update.mockResolvedValue({});
+      mockPrismaService.paymentRequest.updateMany.mockResolvedValue({ count: 1 });
       mockPrismaService.booking.update.mockResolvedValue({});
 
       await service.processWebhook(mockWebhookPayload);
@@ -501,6 +513,23 @@ describe('WalletService', () => {
         where: { id: 'booking-123' },
         data: { paymentStatus: 'PAID' },
       });
+    });
+
+    it('should emit boost payment completed event for boost payments', async () => {
+      const boostRequest = {
+        ...mockRequest,
+        type: PaymentRequestType.BOOST,
+        boostId: 'boost-123',
+      };
+      mockPrismaService.paymentRequest.findUnique.mockResolvedValue(boostRequest);
+      mockPrismaService.paymentRequest.updateMany.mockResolvedValue({ count: 1 });
+
+      await service.processWebhook(mockWebhookPayload);
+
+      expect(mockEventEmitter.emit).toHaveBeenCalledWith(
+        WALLET_EVENTS.BOOST_PAYMENT_COMPLETED,
+        expect.objectContaining({ boostId: 'boost-123' }),
+      );
     });
   });
 

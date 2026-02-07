@@ -62,20 +62,20 @@ const TransactionItem = React.memo(function TransactionItem({
     const displayAmount = isPositive ? transaction.amount : -transaction.amount;
 
     return (
-        <View className="mx-4 mb-3 flex-row items-center gap-4 rounded-xl bg-white p-4">
+        <View className="mx-4 mb-3 flex-row items-center gap-4 rounded-2xl bg-white p-4">
             <View
                 className={`size-12 items-center justify-center rounded-full ${iconData.bg}`}
             >
-                <iconData.icon color={iconData.color} width={24} height={24} />
+                <iconData.icon color={iconData.color} width={22} height={22} />
             </View>
             <View className="flex-1">
-                <Text className="font-medium text-midnight" numberOfLines={1}>
+                <Text className="font-semibold text-midnight" numberOfLines={1}>
                     {transaction.description}
                 </Text>
-                <Text className="text-xs text-text-tertiary">{dateStr}</Text>
+                <Text className="mt-0.5 text-xs text-text-tertiary">{dateStr}</Text>
             </View>
             <Text
-                className={`font-semibold ${isPositive ? 'text-teal-400' : 'text-rose-400'}`}
+                className={`font-urbanist-bold text-base ${isPositive ? 'text-teal-400' : 'text-rose-400'}`}
             >
                 {isPositive ? '+' : '-'}
                 {formatVND(Math.abs(displayAmount), {
@@ -99,7 +99,6 @@ export default function EarningsOverview() {
         isRefetching: isRefetchingOverview,
     } = useEarningsOverview();
 
-    console.log('overview', overview);
 
     const {
         data: transactionsData,
@@ -111,7 +110,6 @@ export default function EarningsOverview() {
         isFetchingNextPage,
     } = useInfiniteTransactionHistory(20, selectedPeriod);
 
-    console.log('transactionsData', transactionsData?.pages[0].transactions);
 
     const isLoading = isOverviewLoading || isTransactionsLoading;
     const isRefreshing = isRefetchingOverview || isRefetchingTransactions;
@@ -172,14 +170,14 @@ export default function EarningsOverview() {
                     from={{ opacity: 0, translateY: 20 }}
                     animate={{ opacity: 1, translateY: 0 }}
                     transition={{ type: 'timing', duration: 500 }}
-                    className="m-4 rounded-3xl bg-lavender-900 p-6"
+                    className="m-4 rounded-2xl bg-lavender-900 p-6"
                 >
-                    <View className="flex-row items-center gap-3">
-                        <View className="size-12 items-center justify-center rounded-full bg-white/20">
-                            <Wallet color="#FFFFFF" width={24} height={24} />
+                    <View className="flex-row items-center gap-4">
+                        <View className="size-14 items-center justify-center rounded-full bg-white/20">
+                            <Wallet color="#FFFFFF" width={28} height={28} />
                         </View>
                         <View className="flex-1">
-                            <Text className="text-sm text-white/80">
+                            <Text className="text-sm font-medium text-white/70">
                                 {t('companion.earnings.available_balance')}
                             </Text>
                             <Text className="font-urbanist-bold text-3xl text-white">
@@ -194,9 +192,9 @@ export default function EarningsOverview() {
                         onPress={handleWithdraw}
                         testID="withdraw-button"
                         disabled={overview?.availableBalance === 0}
-                        className="mt-6 flex-row items-center justify-center gap-2 rounded-xl bg-white py-4"
+                        className="mt-5 flex-row items-center justify-center gap-2 rounded-xl bg-white py-4"
                     >
-                        <Withdraw color={colors.lavender[400]} width={20} height={20} />
+                        <Withdraw color={colors.lavender[900]} width={20} height={20} />
                         <Text className="font-semibold text-lavender-900">
                             {t('companion.earnings.withdraw_funds')}
                         </Text>
@@ -235,10 +233,10 @@ export default function EarningsOverview() {
                     from={{ opacity: 0, translateY: 20 }}
                     animate={{ opacity: 1, translateY: 0 }}
                     transition={{ type: 'timing', duration: 500, delay: 200 }}
-                    className="m-4 rounded-2xl bg-white p-4"
+                    className="m-4 rounded-2xl bg-white p-5"
                 >
                     <View className="flex-row items-center justify-between">
-                        <Text className="text-sm text-text-tertiary">
+                        <Text className="text-sm font-medium text-text-tertiary">
                             {t(`companion.earnings.periods.this_${selectedPeriod}`)}
                         </Text>
                         {periodEarnings.change !== 0 && (
@@ -267,12 +265,16 @@ export default function EarningsOverview() {
                     <Text className="font-urbanist-bold mt-2 text-3xl text-midnight">
                         {formatVND(periodEarnings.amount || 0, { symbolPosition: 'suffix' })}
                     </Text>
-                    <Text className="mt-1 text-sm text-text-secondary">
-                        {t('companion.earnings.total_earnings')}:{' '}
-                        {formatVND(overview?.totalEarnings || 0, {
-                            symbolPosition: 'suffix',
-                        })}
-                    </Text>
+                    <View className="mt-3 border-t border-border-light pt-3">
+                        <Text className="text-sm text-text-tertiary">
+                            {t('companion.earnings.total_earnings')}
+                        </Text>
+                        <Text className="font-urbanist-bold mt-1 text-lg text-midnight">
+                            {formatVND(overview?.totalEarnings || 0, {
+                                symbolPosition: 'suffix',
+                            })}
+                        </Text>
+                    </View>
                 </MotiView>
 
                 {/* Transaction History Header */}

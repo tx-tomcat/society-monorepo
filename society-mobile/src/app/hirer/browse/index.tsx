@@ -32,6 +32,7 @@ import { getPhotoUrl } from '@/lib/api/services/companions.service';
 import {
   useCompanions,
   useFavorites,
+  useMembershipBenefits,
   useRecommendationsTeaser,
   useToggleFavorite,
   useTrackInteraction,
@@ -88,7 +89,7 @@ export default function BrowseCompanions() {
       reviewCount: c.reviewCount || 0,
       location: c.languages?.join(', ') || t('hirer.home.default_location'),
       pricePerHour: c.hourlyRate || 0,
-      isVerified: c.isVerified ?? c.verificationStatus === 'verified',
+      isVerified: c.isVerified ?? c.verificationStatus === 'VERIFIED',
       isOnline: c.isActive ?? false,
       isPremium: c.isFeatured,
       specialties: c.services?.map((s) => s.occasion?.name || s.occasionId) || [],
@@ -361,7 +362,9 @@ function ForYouTeaser({
   onSeeAll: () => void;
 }) {
   const { t } = useTranslation();
-  const { data, isLoading } = useRecommendationsTeaser(5);
+  const { data: benefits } = useMembershipBenefits();
+  const teaserLimit = benefits?.forYouLimit ?? 1;
+  const { data, isLoading } = useRecommendationsTeaser(teaserLimit);
   const trackInteraction = useTrackInteraction();
 
   const handlePress = React.useCallback(

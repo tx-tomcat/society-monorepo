@@ -61,7 +61,7 @@ export default function BookingConfirmationScreen() {
       userId: c.userId,
       name: c.displayName || '',
       image: c.avatar || getPhotoUrl(c.photos?.[0]) || '',
-      isVerified: c.isVerified ?? c.verificationStatus === 'verified',
+      isVerified: c.isVerified ?? c.verificationStatus === 'VERIFIED',
     };
   }, [companionData]);
 

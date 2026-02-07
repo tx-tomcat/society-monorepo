@@ -15,7 +15,7 @@ const DEFAULT_CONFIG: PlatformConfig = {
   maxAdvanceBookingDays: 30,
   cancellationFeePercent: 0.5,
   freeCancellationHours: 24,
-  supportEmail: 'support@luxe.vn',
+  supportEmail: 'support@hireme.vn',
   supportPhone: '+84 28 1234 5678',
   minAppVersion: '1.0.0',
   currentAppVersion: '1.0.0',

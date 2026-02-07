@@ -136,20 +136,38 @@ function RequestCard({
                             request.hirer?.avatar ||
                             'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120',
                     }}
-                    className="size-12 rounded-full"
+                    className="size-14 rounded-full"
                     contentFit="cover"
                 />
                 <View className="flex-1">
-                    <Text className="font-semibold text-midnight">
-                        {request.hirer?.displayName || t('common.anonymous')}
-                    </Text>
-                    <Text className="text-xs text-text-tertiary">
+                    <View className="flex-row items-center gap-1.5">
+                        <Text className="font-urbanist-bold text-base text-midnight">
+                            {request.hirer?.displayName || t('common.anonymous')}
+                        </Text>
+                        {request.hirer?.membershipTier && (
+                            <View className={`rounded-full px-1.5 py-0.5 ${
+                                request.hirer.membershipTier === 'PLATINUM' ? 'bg-rose-100' :
+                                request.hirer.membershipTier === 'GOLD' ? 'bg-amber-100' :
+                                'bg-slate-100'
+                            }`}>
+                                <Text className={`text-[10px] font-bold ${
+                                    request.hirer.membershipTier === 'PLATINUM' ? 'text-rose-500' :
+                                    request.hirer.membershipTier === 'GOLD' ? 'text-amber-600' :
+                                    'text-slate-500'
+                                }`}>
+                                    {request.hirer.membershipTier === 'PLATINUM' ? '\u{1F451}' :
+                                     request.hirer.membershipTier === 'GOLD' ? '\u2B50' : '\u26A1'} VIP
+                                </Text>
+                            </View>
+                        )}
+                    </View>
+                    <Text className="mt-0.5 text-xs text-text-tertiary">
                         ⭐ {request.hirer?.rating?.toFixed(1) || '5.0'} •{' '}
                         {getTimeAgo(request.createdAt, t)}
                     </Text>
                 </View>
                 {request.status === BookingStatus.PENDING && (
-                    <Badge label={t('common.new')} variant="default" size="sm" />
+                    <Badge label={t('common.new')} variant="rose" size="sm" />
                 )}
                 {request.status !== BookingStatus.PENDING && (
                     <Badge
@@ -161,13 +179,13 @@ function RequestCard({
             </View>
 
             {/* Booking Details */}
-            <View className="mt-4 rounded-xl bg-softpink p-3">
-                <Text className="font-semibold text-rose-400">
+            <View className="mt-4 rounded-xl bg-softpink p-4">
+                <Text className="font-urbanist-bold text-base text-rose-400">
                     {request.occasion
                         ? `${request.occasion.emoji} ${request.occasion.name}`
                         : t('common.occasion')}
                 </Text>
-                <View className="mt-2 gap-2">
+                <View className="mt-3 gap-2">
                     <View className="flex-row items-center gap-2">
                         <Calendar color={colors.text.tertiary} width={14} height={14} />
                         <Text className="text-sm text-text-secondary">{dateStr}</Text>
@@ -189,7 +207,7 @@ function RequestCard({
 
             {/* Message */}
             {request.specialRequests && (
-                <View className="mt-3 rounded-lg bg-lavender-900/10 p-3">
+                <View className="mt-3 rounded-xl bg-lavender-900/10 p-3">
                     <Text className="text-sm italic text-text-secondary">
                         &ldquo;{request.specialRequests}&rdquo;
                     </Text>
@@ -197,8 +215,8 @@ function RequestCard({
             )}
 
             {/* Earnings */}
-            <View className="mt-4 flex-row items-center justify-between">
-                <Text className="text-sm text-text-tertiary">
+            <View className="mt-4 flex-row items-center justify-between rounded-xl bg-teal-400/10 p-3">
+                <Text className="text-sm font-medium text-text-secondary">
                     {request.status === BookingStatus.COMPLETED
                         ? t('companion.requests.earned')
                         : t('companion.requests.your_earnings')}

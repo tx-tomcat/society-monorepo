@@ -40,11 +40,14 @@ export type PhotoVerificationMinAggregateOutputType = {
   id: string | null
   userId: string | null
   photoUrl: string | null
+  idBackUrl: string | null
   selfieUrl: string | null
   livenessScore: runtime.Decimal | null
   faceMatchScore: runtime.Decimal | null
-  status: string | null
+  status: $Enums.VerificationStatus | null
   failureReason: string | null
+  reviewedBy: string | null
+  reviewedAt: Date | null
   createdAt: Date | null
 }
 
@@ -52,11 +55,14 @@ export type PhotoVerificationMaxAggregateOutputType = {
   id: string | null
   userId: string | null
   photoUrl: string | null
+  idBackUrl: string | null
   selfieUrl: string | null
   livenessScore: runtime.Decimal | null
   faceMatchScore: runtime.Decimal | null
-  status: string | null
+  status: $Enums.VerificationStatus | null
   failureReason: string | null
+  reviewedBy: string | null
+  reviewedAt: Date | null
   createdAt: Date | null
 }
 
@@ -64,11 +70,14 @@ export type PhotoVerificationCountAggregateOutputType = {
   id: number
   userId: number
   photoUrl: number
+  idBackUrl: number
   selfieUrl: number
   livenessScore: number
   faceMatchScore: number
   status: number
   failureReason: number
+  reviewedBy: number
+  reviewedAt: number
   createdAt: number
   _all: number
 }
@@ -88,11 +97,14 @@ export type PhotoVerificationMinAggregateInputType = {
   id?: true
   userId?: true
   photoUrl?: true
+  idBackUrl?: true
   selfieUrl?: true
   livenessScore?: true
   faceMatchScore?: true
   status?: true
   failureReason?: true
+  reviewedBy?: true
+  reviewedAt?: true
   createdAt?: true
 }
 
@@ -100,11 +112,14 @@ export type PhotoVerificationMaxAggregateInputType = {
   id?: true
   userId?: true
   photoUrl?: true
+  idBackUrl?: true
   selfieUrl?: true
   livenessScore?: true
   faceMatchScore?: true
   status?: true
   failureReason?: true
+  reviewedBy?: true
+  reviewedAt?: true
   createdAt?: true
 }
 
@@ -112,11 +127,14 @@ export type PhotoVerificationCountAggregateInputType = {
   id?: true
   userId?: true
   photoUrl?: true
+  idBackUrl?: true
   selfieUrl?: true
   livenessScore?: true
   faceMatchScore?: true
   status?: true
   failureReason?: true
+  reviewedBy?: true
+  reviewedAt?: true
   createdAt?: true
   _all?: true
 }
@@ -211,11 +229,14 @@ export type PhotoVerificationGroupByOutputType = {
   id: string
   userId: string
   photoUrl: string
+  idBackUrl: string | null
   selfieUrl: string
   livenessScore: runtime.Decimal | null
   faceMatchScore: runtime.Decimal | null
-  status: string
+  status: $Enums.VerificationStatus
   failureReason: string | null
+  reviewedBy: string | null
+  reviewedAt: Date | null
   createdAt: Date
   _count: PhotoVerificationCountAggregateOutputType | null
   _avg: PhotoVerificationAvgAggregateOutputType | null
@@ -246,11 +267,14 @@ export type PhotoVerificationWhereInput = {
   id?: Prisma.UuidFilter<"PhotoVerification"> | string
   userId?: Prisma.UuidFilter<"PhotoVerification"> | string
   photoUrl?: Prisma.StringFilter<"PhotoVerification"> | string
+  idBackUrl?: Prisma.StringNullableFilter<"PhotoVerification"> | string | null
   selfieUrl?: Prisma.StringFilter<"PhotoVerification"> | string
   livenessScore?: Prisma.DecimalNullableFilter<"PhotoVerification"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   faceMatchScore?: Prisma.DecimalNullableFilter<"PhotoVerification"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  status?: Prisma.StringFilter<"PhotoVerification"> | string
+  status?: Prisma.EnumVerificationStatusFilter<"PhotoVerification"> | $Enums.VerificationStatus
   failureReason?: Prisma.StringNullableFilter<"PhotoVerification"> | string | null
+  reviewedBy?: Prisma.UuidNullableFilter<"PhotoVerification"> | string | null
+  reviewedAt?: Prisma.DateTimeNullableFilter<"PhotoVerification"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"PhotoVerification"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }
@@ -259,11 +283,14 @@ export type PhotoVerificationOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   photoUrl?: Prisma.SortOrder
+  idBackUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   selfieUrl?: Prisma.SortOrder
   livenessScore?: Prisma.SortOrderInput | Prisma.SortOrder
   faceMatchScore?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   failureReason?: Prisma.SortOrderInput | Prisma.SortOrder
+  reviewedBy?: Prisma.SortOrderInput | Prisma.SortOrder
+  reviewedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
 }
@@ -275,11 +302,14 @@ export type PhotoVerificationWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.PhotoVerificationWhereInput | Prisma.PhotoVerificationWhereInput[]
   userId?: Prisma.UuidFilter<"PhotoVerification"> | string
   photoUrl?: Prisma.StringFilter<"PhotoVerification"> | string
+  idBackUrl?: Prisma.StringNullableFilter<"PhotoVerification"> | string | null
   selfieUrl?: Prisma.StringFilter<"PhotoVerification"> | string
   livenessScore?: Prisma.DecimalNullableFilter<"PhotoVerification"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   faceMatchScore?: Prisma.DecimalNullableFilter<"PhotoVerification"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  status?: Prisma.StringFilter<"PhotoVerification"> | string
+  status?: Prisma.EnumVerificationStatusFilter<"PhotoVerification"> | $Enums.VerificationStatus
   failureReason?: Prisma.StringNullableFilter<"PhotoVerification"> | string | null
+  reviewedBy?: Prisma.UuidNullableFilter<"PhotoVerification"> | string | null
+  reviewedAt?: Prisma.DateTimeNullableFilter<"PhotoVerification"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"PhotoVerification"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }, "id">
@@ -288,11 +318,14 @@ export type PhotoVerificationOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   photoUrl?: Prisma.SortOrder
+  idBackUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   selfieUrl?: Prisma.SortOrder
   livenessScore?: Prisma.SortOrderInput | Prisma.SortOrder
   faceMatchScore?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   failureReason?: Prisma.SortOrderInput | Prisma.SortOrder
+  reviewedBy?: Prisma.SortOrderInput | Prisma.SortOrder
+  reviewedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   _count?: Prisma.PhotoVerificationCountOrderByAggregateInput
   _avg?: Prisma.PhotoVerificationAvgOrderByAggregateInput
@@ -308,22 +341,28 @@ export type PhotoVerificationScalarWhereWithAggregatesInput = {
   id?: Prisma.UuidWithAggregatesFilter<"PhotoVerification"> | string
   userId?: Prisma.UuidWithAggregatesFilter<"PhotoVerification"> | string
   photoUrl?: Prisma.StringWithAggregatesFilter<"PhotoVerification"> | string
+  idBackUrl?: Prisma.StringNullableWithAggregatesFilter<"PhotoVerification"> | string | null
   selfieUrl?: Prisma.StringWithAggregatesFilter<"PhotoVerification"> | string
   livenessScore?: Prisma.DecimalNullableWithAggregatesFilter<"PhotoVerification"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   faceMatchScore?: Prisma.DecimalNullableWithAggregatesFilter<"PhotoVerification"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  status?: Prisma.StringWithAggregatesFilter<"PhotoVerification"> | string
+  status?: Prisma.EnumVerificationStatusWithAggregatesFilter<"PhotoVerification"> | $Enums.VerificationStatus
   failureReason?: Prisma.StringNullableWithAggregatesFilter<"PhotoVerification"> | string | null
+  reviewedBy?: Prisma.UuidNullableWithAggregatesFilter<"PhotoVerification"> | string | null
+  reviewedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"PhotoVerification"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"PhotoVerification"> | Date | string
 }
 
 export type PhotoVerificationCreateInput = {
   id?: string
   photoUrl: string
+  idBackUrl?: string | null
   selfieUrl: string
   livenessScore?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   faceMatchScore?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  status?: string
+  status?: $Enums.VerificationStatus
   failureReason?: string | null
+  reviewedBy?: string | null
+  reviewedAt?: Date | string | null
   createdAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutPhotoVerificationsInput
 }
@@ -332,22 +371,28 @@ export type PhotoVerificationUncheckedCreateInput = {
   id?: string
   userId: string
   photoUrl: string
+  idBackUrl?: string | null
   selfieUrl: string
   livenessScore?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   faceMatchScore?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  status?: string
+  status?: $Enums.VerificationStatus
   failureReason?: string | null
+  reviewedBy?: string | null
+  reviewedAt?: Date | string | null
   createdAt?: Date | string
 }
 
 export type PhotoVerificationUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   photoUrl?: Prisma.StringFieldUpdateOperationsInput | string
+  idBackUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   selfieUrl?: Prisma.StringFieldUpdateOperationsInput | string
   livenessScore?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   faceMatchScore?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  status?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
   failureReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutPhotoVerificationsNestedInput
 }
@@ -356,11 +401,14 @@ export type PhotoVerificationUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   photoUrl?: Prisma.StringFieldUpdateOperationsInput | string
+  idBackUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   selfieUrl?: Prisma.StringFieldUpdateOperationsInput | string
   livenessScore?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   faceMatchScore?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  status?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
   failureReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -368,22 +416,28 @@ export type PhotoVerificationCreateManyInput = {
   id?: string
   userId: string
   photoUrl: string
+  idBackUrl?: string | null
   selfieUrl: string
   livenessScore?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   faceMatchScore?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  status?: string
+  status?: $Enums.VerificationStatus
   failureReason?: string | null
+  reviewedBy?: string | null
+  reviewedAt?: Date | string | null
   createdAt?: Date | string
 }
 
 export type PhotoVerificationUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   photoUrl?: Prisma.StringFieldUpdateOperationsInput | string
+  idBackUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   selfieUrl?: Prisma.StringFieldUpdateOperationsInput | string
   livenessScore?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   faceMatchScore?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  status?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
   failureReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -391,11 +445,14 @@ export type PhotoVerificationUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   photoUrl?: Prisma.StringFieldUpdateOperationsInput | string
+  idBackUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   selfieUrl?: Prisma.StringFieldUpdateOperationsInput | string
   livenessScore?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   faceMatchScore?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  status?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
   failureReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -413,11 +470,14 @@ export type PhotoVerificationCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   photoUrl?: Prisma.SortOrder
+  idBackUrl?: Prisma.SortOrder
   selfieUrl?: Prisma.SortOrder
   livenessScore?: Prisma.SortOrder
   faceMatchScore?: Prisma.SortOrder
   status?: Prisma.SortOrder
   failureReason?: Prisma.SortOrder
+  reviewedBy?: Prisma.SortOrder
+  reviewedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -430,11 +490,14 @@ export type PhotoVerificationMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   photoUrl?: Prisma.SortOrder
+  idBackUrl?: Prisma.SortOrder
   selfieUrl?: Prisma.SortOrder
   livenessScore?: Prisma.SortOrder
   faceMatchScore?: Prisma.SortOrder
   status?: Prisma.SortOrder
   failureReason?: Prisma.SortOrder
+  reviewedBy?: Prisma.SortOrder
+  reviewedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -442,11 +505,14 @@ export type PhotoVerificationMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   photoUrl?: Prisma.SortOrder
+  idBackUrl?: Prisma.SortOrder
   selfieUrl?: Prisma.SortOrder
   livenessScore?: Prisma.SortOrder
   faceMatchScore?: Prisma.SortOrder
   status?: Prisma.SortOrder
   failureReason?: Prisma.SortOrder
+  reviewedBy?: Prisma.SortOrder
+  reviewedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -497,33 +563,31 @@ export type PhotoVerificationUncheckedUpdateManyWithoutUserNestedInput = {
   deleteMany?: Prisma.PhotoVerificationScalarWhereInput | Prisma.PhotoVerificationScalarWhereInput[]
 }
 
-export type NullableDecimalFieldUpdateOperationsInput = {
-  set?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  increment?: runtime.Decimal | runtime.DecimalJsLike | number | string
-  decrement?: runtime.Decimal | runtime.DecimalJsLike | number | string
-  multiply?: runtime.Decimal | runtime.DecimalJsLike | number | string
-  divide?: runtime.Decimal | runtime.DecimalJsLike | number | string
-}
-
 export type PhotoVerificationCreateWithoutUserInput = {
   id?: string
   photoUrl: string
+  idBackUrl?: string | null
   selfieUrl: string
   livenessScore?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   faceMatchScore?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  status?: string
+  status?: $Enums.VerificationStatus
   failureReason?: string | null
+  reviewedBy?: string | null
+  reviewedAt?: Date | string | null
   createdAt?: Date | string
 }
 
 export type PhotoVerificationUncheckedCreateWithoutUserInput = {
   id?: string
   photoUrl: string
+  idBackUrl?: string | null
   selfieUrl: string
   livenessScore?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   faceMatchScore?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  status?: string
+  status?: $Enums.VerificationStatus
   failureReason?: string | null
+  reviewedBy?: string | null
+  reviewedAt?: Date | string | null
   createdAt?: Date | string
 }
 
@@ -560,55 +624,70 @@ export type PhotoVerificationScalarWhereInput = {
   id?: Prisma.UuidFilter<"PhotoVerification"> | string
   userId?: Prisma.UuidFilter<"PhotoVerification"> | string
   photoUrl?: Prisma.StringFilter<"PhotoVerification"> | string
+  idBackUrl?: Prisma.StringNullableFilter<"PhotoVerification"> | string | null
   selfieUrl?: Prisma.StringFilter<"PhotoVerification"> | string
   livenessScore?: Prisma.DecimalNullableFilter<"PhotoVerification"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   faceMatchScore?: Prisma.DecimalNullableFilter<"PhotoVerification"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  status?: Prisma.StringFilter<"PhotoVerification"> | string
+  status?: Prisma.EnumVerificationStatusFilter<"PhotoVerification"> | $Enums.VerificationStatus
   failureReason?: Prisma.StringNullableFilter<"PhotoVerification"> | string | null
+  reviewedBy?: Prisma.UuidNullableFilter<"PhotoVerification"> | string | null
+  reviewedAt?: Prisma.DateTimeNullableFilter<"PhotoVerification"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"PhotoVerification"> | Date | string
 }
 
 export type PhotoVerificationCreateManyUserInput = {
   id?: string
   photoUrl: string
+  idBackUrl?: string | null
   selfieUrl: string
   livenessScore?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   faceMatchScore?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  status?: string
+  status?: $Enums.VerificationStatus
   failureReason?: string | null
+  reviewedBy?: string | null
+  reviewedAt?: Date | string | null
   createdAt?: Date | string
 }
 
 export type PhotoVerificationUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   photoUrl?: Prisma.StringFieldUpdateOperationsInput | string
+  idBackUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   selfieUrl?: Prisma.StringFieldUpdateOperationsInput | string
   livenessScore?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   faceMatchScore?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  status?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
   failureReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type PhotoVerificationUncheckedUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   photoUrl?: Prisma.StringFieldUpdateOperationsInput | string
+  idBackUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   selfieUrl?: Prisma.StringFieldUpdateOperationsInput | string
   livenessScore?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   faceMatchScore?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  status?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
   failureReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type PhotoVerificationUncheckedUpdateManyWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   photoUrl?: Prisma.StringFieldUpdateOperationsInput | string
+  idBackUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   selfieUrl?: Prisma.StringFieldUpdateOperationsInput | string
   livenessScore?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   faceMatchScore?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  status?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
   failureReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -618,11 +697,14 @@ export type PhotoVerificationSelect<ExtArgs extends runtime.Types.Extensions.Int
   id?: boolean
   userId?: boolean
   photoUrl?: boolean
+  idBackUrl?: boolean
   selfieUrl?: boolean
   livenessScore?: boolean
   faceMatchScore?: boolean
   status?: boolean
   failureReason?: boolean
+  reviewedBy?: boolean
+  reviewedAt?: boolean
   createdAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["photoVerification"]>
@@ -631,11 +713,14 @@ export type PhotoVerificationSelectCreateManyAndReturn<ExtArgs extends runtime.T
   id?: boolean
   userId?: boolean
   photoUrl?: boolean
+  idBackUrl?: boolean
   selfieUrl?: boolean
   livenessScore?: boolean
   faceMatchScore?: boolean
   status?: boolean
   failureReason?: boolean
+  reviewedBy?: boolean
+  reviewedAt?: boolean
   createdAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["photoVerification"]>
@@ -644,11 +729,14 @@ export type PhotoVerificationSelectUpdateManyAndReturn<ExtArgs extends runtime.T
   id?: boolean
   userId?: boolean
   photoUrl?: boolean
+  idBackUrl?: boolean
   selfieUrl?: boolean
   livenessScore?: boolean
   faceMatchScore?: boolean
   status?: boolean
   failureReason?: boolean
+  reviewedBy?: boolean
+  reviewedAt?: boolean
   createdAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["photoVerification"]>
@@ -657,15 +745,18 @@ export type PhotoVerificationSelectScalar = {
   id?: boolean
   userId?: boolean
   photoUrl?: boolean
+  idBackUrl?: boolean
   selfieUrl?: boolean
   livenessScore?: boolean
   faceMatchScore?: boolean
   status?: boolean
   failureReason?: boolean
+  reviewedBy?: boolean
+  reviewedAt?: boolean
   createdAt?: boolean
 }
 
-export type PhotoVerificationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "photoUrl" | "selfieUrl" | "livenessScore" | "faceMatchScore" | "status" | "failureReason" | "createdAt", ExtArgs["result"]["photoVerification"]>
+export type PhotoVerificationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "photoUrl" | "idBackUrl" | "selfieUrl" | "livenessScore" | "faceMatchScore" | "status" | "failureReason" | "reviewedBy" | "reviewedAt" | "createdAt", ExtArgs["result"]["photoVerification"]>
 export type PhotoVerificationInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
@@ -685,11 +776,14 @@ export type $PhotoVerificationPayload<ExtArgs extends runtime.Types.Extensions.I
     id: string
     userId: string
     photoUrl: string
+    idBackUrl: string | null
     selfieUrl: string
     livenessScore: runtime.Decimal | null
     faceMatchScore: runtime.Decimal | null
-    status: string
+    status: $Enums.VerificationStatus
     failureReason: string | null
+    reviewedBy: string | null
+    reviewedAt: Date | null
     createdAt: Date
   }, ExtArgs["result"]["photoVerification"]>
   composites: {}
@@ -1118,11 +1212,14 @@ export interface PhotoVerificationFieldRefs {
   readonly id: Prisma.FieldRef<"PhotoVerification", 'String'>
   readonly userId: Prisma.FieldRef<"PhotoVerification", 'String'>
   readonly photoUrl: Prisma.FieldRef<"PhotoVerification", 'String'>
+  readonly idBackUrl: Prisma.FieldRef<"PhotoVerification", 'String'>
   readonly selfieUrl: Prisma.FieldRef<"PhotoVerification", 'String'>
   readonly livenessScore: Prisma.FieldRef<"PhotoVerification", 'Decimal'>
   readonly faceMatchScore: Prisma.FieldRef<"PhotoVerification", 'Decimal'>
-  readonly status: Prisma.FieldRef<"PhotoVerification", 'String'>
+  readonly status: Prisma.FieldRef<"PhotoVerification", 'VerificationStatus'>
   readonly failureReason: Prisma.FieldRef<"PhotoVerification", 'String'>
+  readonly reviewedBy: Prisma.FieldRef<"PhotoVerification", 'String'>
+  readonly reviewedAt: Prisma.FieldRef<"PhotoVerification", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"PhotoVerification", 'DateTime'>
 }
     

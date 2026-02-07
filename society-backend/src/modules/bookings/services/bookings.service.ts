@@ -756,12 +756,28 @@ export class BookingsService {
               hirerProfile: {
                 select: { ratingAvg: true },
               },
+              memberships: {
+                where: { status: 'ACTIVE', expiresAt: { gt: new Date() } },
+                take: 1,
+                select: { tier: true },
+              },
             },
           },
         },
       }),
       this.prisma.booking.count({ where }),
     ]);
+
+    // Priority sort: Gold/Platinum hirers' pending requests appear first
+    if (!status || status.length === 0 || status.includes('PENDING' as any)) {
+      bookings.sort((a, b) => {
+        const tierOrder = { PLATINUM: 2, GOLD: 1 } as Record<string, number>;
+        const aPriority = tierOrder[a.hirer?.memberships?.[0]?.tier as string] || 0;
+        const bPriority = tierOrder[b.hirer?.memberships?.[0]?.tier as string] || 0;
+        if (aPriority !== bPriority) return bPriority - aPriority;
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      });
+    }
 
     const bookingList: BookingListItem[] = bookings.map((b) => ({
       id: b.id,
@@ -783,6 +799,7 @@ export class BookingsService {
           rating: b.hirer.hirerProfile
             ? Number(b.hirer.hirerProfile.ratingAvg)
             : 5,
+          membershipTier: b.hirer.memberships?.[0]?.tier || null,
         }
         : undefined,
     }));
@@ -1278,7 +1295,9 @@ export class BookingsService {
     const scheduleMap = new Map<string, ScheduleDay>();
 
     for (const booking of bookings) {
-      const dateStr = booking.startDatetime.toISOString().split("T")[0];
+      const startDt = new Date(booking.startDatetime);
+      const endDt = new Date(booking.endDatetime);
+      const dateStr = startDt.toISOString().split("T")[0];
 
       if (!scheduleMap.has(dateStr)) {
         scheduleMap.set(dateStr, { date: dateStr, bookings: [] });
@@ -1287,10 +1306,14 @@ export class BookingsService {
       scheduleMap.get(dateStr)!.bookings.push({
         id: booking.id,
         bookingNumber: booking.bookingNumber,
-        startTime: booking.startDatetime.toISOString().substring(11, 16),
-        endTime: booking.endDatetime.toISOString().substring(11, 16),
+        startTime: startDt.toISOString().substring(11, 16),
+        endTime: endDt.toISOString().substring(11, 16),
+        startDatetime: startDt.toISOString(),
+        endDatetime: endDt.toISOString(),
+        durationHours: Number(booking.durationHours),
         occasion: BookingUtils.mapOccasion(booking.occasion),
         status: booking.status,
+        paymentStatus: booking.paymentStatus,
         hirer: {
           displayName: booking.hirer.fullName,
           avatar: booking.hirer.avatarUrl,

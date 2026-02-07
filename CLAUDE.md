@@ -4,9 +4,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Society (Luxe)** is Vietnam's first ultra-premium verified professional networking platform connecting high-income professionals (800M+ VND annually) with elite university students from top institutions.
+**Hireme.vn** is Vietnam's first ultra-premium verified professional networking platform connecting high-income professionals (800M+ VND annually) with elite university students from top institutions.
 
 This is a **split monorepo** structure with two independent Git repositories in a parent folder:
+
 - `society-mobile/` - React Native mobile app (standalone repo)
 - `society-backend/` - pnpm workspace monorepo containing server and client apps
 
@@ -52,6 +53,7 @@ society-monorepo/
 ## Package Manager
 
 **Critical**: Both projects use **pnpm** exclusively.
+
 - `society-mobile/` enforces pnpm via preinstall hook
 - `society-backend/` uses pnpm workspaces
 
@@ -120,6 +122,7 @@ pnpm test               # Jest tests
 ## Tech Stack
 
 ### Mobile (society-mobile/)
+
 - React Native 0.79 + Expo SDK 53
 - Expo Router v5 (file-based navigation)
 - NativeWind (Tailwind CSS)
@@ -129,6 +132,7 @@ pnpm test               # Jest tests
 - Supabase client
 
 ### Backend (society-backend/)
+
 - NestJS 11 + Fastify
 - Prisma 7 (PostgreSQL)
 - Supabase (auth, database, realtime)
@@ -141,22 +145,26 @@ pnpm test               # Jest tests
 ### Mobile App
 
 **Environment System**: Three environments (development, staging, production)
+
 - Use `APP_ENV` to switch: `APP_ENV=staging pnpm start`
 - Custom env loading via `@env` alias (not Expo's `.env`)
 
 **Auth**: Custom JWT-based auth with Zustand (despite Clerk being installed)
+
 - `hydrateAuth()` loads tokens at startup
 - Tokens persisted in MMKV storage
 
 **API Calls**: Use react-query-kit factory pattern
+
 ```typescript
 export const usePosts = createQuery<Response, Variables, AxiosError>({
-  queryKey: ['posts'],
-  fetcher: (variables) => client.get('posts').then(res => res.data.posts),
+  queryKey: ["posts"],
+  fetcher: (variables) => client.get("posts").then((res) => res.data.posts),
 });
 ```
 
 **Components**: Functional only, NativeWind styling, tailwind-variants
+
 ```typescript
 type Props = { title: string };
 export function Card({ title }: Props) {
@@ -167,31 +175,37 @@ export function Card({ title }: Props) {
 ### Backend
 
 **Module Organization**: Feature-based NestJS modules
+
 - Each module: controller, service, DTOs, entities
 - Shared Prisma client via `PrismaService`
 
 **Authentication**: JWT with Passport
+
 - Supabase for user management
 - Custom guards for role-based access
 
 **Database**: Prisma with PostgreSQL adapter
+
 - Generated types in `src/generated/`
 - Migrations via Prisma
 
 ## Code Conventions
 
 ### TypeScript
+
 - Use `type` over `interface`
 - Use `const` with `as const` instead of enums
 - Explicit return types for all functions
 - Absolute imports: `@/` for mobile, standard paths for backend
 
 ### Naming
+
 - Files: `kebab-case` (e.g., `login-form.tsx`)
 - Components: `PascalCase`
 - Test files: `*.test.tsx` co-located with implementation
 
 ### Git Commits (Conventional Commits)
+
 ```
 feat: add user authentication
 fix: resolve login redirect issue
@@ -202,6 +216,7 @@ chore: update dependencies
 ```
 
 ### Package Installation
+
 - Mobile: Use `npx expo install <package>` for RN packages
 - Backend: Use `pnpm add <package>` normally
 
@@ -225,6 +240,7 @@ chore: update dependencies
 ## Sub-project Documentation
 
 Detailed documentation exists in each sub-project:
+
 - `society-mobile/CLAUDE.md` - Comprehensive mobile app guide
 - `society-backend/CLAUDE.md` - Project context and business overview
 - `society-backend/apps/client/CLAUDE.md` - Web client (mirrors mobile patterns)

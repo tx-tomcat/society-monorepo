@@ -23,16 +23,19 @@ import {
   View,
 } from '@/components/ui';
 import {
+  Calendar,
+  CheckCircle,
+  Clock,
+  MapPin,
+  Money,
+  ShieldCheck,
+  Warning,
+} from '@/components/ui/icons';
+import {
   showErrorMessage,
   showInfoMessage,
   showSuccessMessage,
 } from '@/components/ui/utils';
-import {
-  Calendar,
-  Clock,
-  MapPin,
-  ShieldCheck,
-} from '@/components/ui/icons';
 import { BookingStatus, PaymentStatus } from '@/lib/api/enums';
 import {
   useBooking,
@@ -367,6 +370,61 @@ export default function CompanionBookingDetail() {
             </View>
           )}
         </MotiView>
+
+        {/* Payment Status Banner */}
+        {booking.status === BookingStatus.CONFIRMED && (
+          <MotiView
+            from={{ opacity: 0, translateY: 20 }}
+            animate={{ opacity: 1, translateY: 0 }}
+            transition={{ type: 'timing', duration: 500, delay: 150 }}
+            className={`mx-4 mb-4 flex-row items-center gap-3 rounded-2xl p-4 ${
+              booking.paymentStatus === PaymentStatus.PAID
+                ? 'bg-teal-50'
+                : 'bg-yellow-50'
+            }`}
+          >
+            <View
+              className={`size-10 items-center justify-center rounded-full ${
+                booking.paymentStatus === PaymentStatus.PAID
+                  ? 'bg-teal-100'
+                  : 'bg-yellow-100'
+              }`}
+            >
+              {booking.paymentStatus === PaymentStatus.PAID ? (
+                <CheckCircle color={colors.teal[400]} width={20} height={20} />
+              ) : (
+                <Warning color={colors.yellow[500]} width={20} height={20} />
+              )}
+            </View>
+            <View className="flex-1">
+              <Text
+                className={`font-urbanist-semibold text-base ${
+                  booking.paymentStatus === PaymentStatus.PAID
+                    ? 'text-teal-700'
+                    : 'text-yellow-700'
+                }`}
+              >
+                {booking.paymentStatus === PaymentStatus.PAID
+                  ? t('companion.booking_detail.payment_received')
+                  : t('companion.booking_detail.awaiting_payment')}
+              </Text>
+              <Text className="mt-0.5 text-xs text-text-secondary">
+                {booking.paymentStatus === PaymentStatus.PAID
+                  ? t('companion.booking_detail.payment_received_desc')
+                  : t('companion.booking_detail.awaiting_payment_desc')}
+              </Text>
+            </View>
+            <Money
+              color={
+                booking.paymentStatus === PaymentStatus.PAID
+                  ? colors.teal[400]
+                  : colors.yellow[500]
+              }
+              width={20}
+              height={20}
+            />
+          </MotiView>
+        )}
 
         {/* Earnings Summary */}
         <MotiView

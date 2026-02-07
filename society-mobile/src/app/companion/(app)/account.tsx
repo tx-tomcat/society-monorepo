@@ -24,7 +24,8 @@ import {
     Logout,
     Star,
     User,
-    VerifiedBadge
+    VerifiedBadge,
+    Withdraw
 } from '@/components/ui/icons';
 import { getPrimaryPhotoUrl } from '@/lib/api/services/companions.service';
 import { useAuth, useMyCompanionProfile } from '@/lib/hooks';
@@ -74,6 +75,13 @@ const MENU_ITEMS: MenuItem[] = [
         iconColor: colors.yellow[500],
         labelKey: 'companion.settings.bank_account',
         route: '/companion/settings/bank-accounts',
+    },
+    {
+        id: 'withdrawals',
+        icon: Withdraw,
+        iconColor: colors.rose[400],
+        labelKey: 'companion.settings.withdrawal_history',
+        route: '/companion/earnings/withdrawals',
     },
     {
         id: 'verification',
@@ -153,7 +161,7 @@ export default function CompanionAccountScreen() {
         );
     }
 
-    const isVerified = profile?.verificationStatus === 'verified';
+    const isVerified = profile?.verificationStatus === 'VERIFIED';
 
     return (
         <View className="flex-1 bg-warmwhite">

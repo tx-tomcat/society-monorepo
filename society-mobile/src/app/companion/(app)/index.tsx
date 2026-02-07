@@ -13,10 +13,11 @@ import {
 
 import {
   Badge,
+  BookingCard,
   colors,
   FocusAwareStatusBar,
-  Image,
   SafeAreaView,
+  StatCard,
   Text,
   View,
 } from '@/components/ui';
@@ -24,9 +25,7 @@ import {
   Bell,
   Calendar,
   Chart,
-  Clock,
   HiremeLogo,
-  MapPin,
   Star,
   Wallet,
 } from '@/components/ui/icons';
@@ -40,8 +39,8 @@ import {
 } from '@/lib/hooks';
 import { formatVND } from '@/lib/utils';
 
-type TodayBooking = Booking & {
-  displayStatus: 'upcoming' | 'active' | 'completed';
+type DashboardBooking = Booking & {
+  displayStatus: 'upcoming' | 'active';
 };
 
 export default function CompanionDashboard() {
@@ -58,7 +57,7 @@ export default function CompanionDashboard() {
     isLoading: isBookingsLoading,
     refetch: refetchBookings,
     isRefetching: isRefetchingBookings,
-  } = useCompanionBookings(BookingStatus.CONFIRMED, 1, 10);
+  } = useCompanionBookings(`${BookingStatus.CONFIRMED},${BookingStatus.ACTIVE}`, 1, 10);
   const {
     data: requestsData,
     isLoading: isRequestsLoading,
@@ -75,33 +74,31 @@ export default function CompanionDashboard() {
 
   const pendingRequestsCount = requestsData?.requests?.length ?? 0;
 
-  // Filter today's bookings
-  const todayBookings = React.useMemo((): TodayBooking[] => {
+  console.log(bookingsData?.bookings);
+
+  // Active + upcoming bookings — backend only returns CONFIRMED & ACTIVE
+  const upcomingBookings = React.useMemo((): DashboardBooking[] => {
     if (!bookingsData?.bookings) return [];
 
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const todayEnd = new Date(today);
-    todayEnd.setHours(23, 59, 59, 999);
+    const now = new Date();
 
     return bookingsData.bookings
-      .filter((booking) => {
-        const startDate = new Date(booking.startDatetime);
-        return startDate >= today && startDate <= todayEnd;
-      })
       .map((booking) => {
-        const now = new Date();
         const startDate = new Date(booking.startDatetime);
         const endDate = new Date(booking.endDatetime);
 
-        let displayStatus: 'upcoming' | 'active' | 'completed' = 'upcoming';
-        if (now >= startDate && now <= endDate) {
-          displayStatus = 'active';
-        } else if (now > endDate) {
-          displayStatus = 'completed';
-        }
+        const displayStatus: DashboardBooking['displayStatus'] =
+          booking.status === 'ACTIVE' || (now >= startDate && now <= endDate)
+            ? 'active'
+            : 'upcoming';
 
         return { ...booking, displayStatus };
+      })
+      .sort((a, b) => {
+        // Active bookings first, then by nearest start time
+        if (a.displayStatus === 'active' && b.displayStatus !== 'active') return -1;
+        if (a.displayStatus !== 'active' && b.displayStatus === 'active') return 1;
+        return new Date(a.startDatetime).getTime() - new Date(b.startDatetime).getTime();
       });
   }, [bookingsData]);
 
@@ -115,14 +112,14 @@ export default function CompanionDashboard() {
   }, [router]);
 
   const handleBookingPress = React.useCallback(
-    (booking: TodayBooking) => {
+    (booking: DashboardBooking) => {
       router.push(`/companion/bookings/${booking.id}` as Href);
     },
     [router]
   );
 
   const handleViewAllBookings = React.useCallback(() => {
-    router.push('/companion/bookings/schedule' as Href);
+    router.push('/companion/schedule' as Href);
   }, [router]);
 
   const handleViewEarnings = React.useCallback(() => {
@@ -215,29 +212,20 @@ export default function CompanionDashboard() {
         >
           <View className="flex-row gap-3">
             {stats.map((stat) => (
-              <Pressable
+              <StatCard
                 key={stat.labelKey}
+                label={t(stat.labelKey)}
+                value={stat.value}
+                icon={stat.icon}
+                iconColor={stat.color}
+                iconBgColor={`${stat.color}20`}
                 onPress={
                   stat.labelKey === 'companion.dashboard.stats.this_week'
                     ? handleViewEarnings
                     : undefined
                 }
                 testID={`stat-card-${stat.labelKey.split('.').pop()}`}
-                className="flex-1 rounded-2xl bg-white p-4"
-              >
-                <View
-                  className="mb-2 size-10 items-center justify-center rounded-full"
-                  style={{ backgroundColor: `${stat.color}20` }}
-                >
-                  <stat.icon color={stat.color} width={20} height={20} />
-                </View>
-                <Text className="font-urbanist-bold text-xl text-midnight">
-                  {stat.value}
-                </Text>
-                <Text className="text-xs text-text-tertiary">
-                  {t(stat.labelKey)}
-                </Text>
-              </Pressable>
+              />
             ))}
           </View>
         </MotiView>
@@ -252,30 +240,32 @@ export default function CompanionDashboard() {
           <Pressable
             onPress={handleViewEarnings}
             testID="earnings-card"
-            className="flex-row items-center justify-between rounded-2xl bg-lavender-900 p-4"
+            className="rounded-2xl bg-lavender-900 p-5"
           >
-            <View className="flex-row items-center gap-3">
-              <View className="size-12 items-center justify-center rounded-full bg-white/20">
-                <Chart color="#FFFFFF" width={24} height={24} />
-              </View>
-              <View>
-                <Text className="text-sm text-white/80">
-                  {t('companion.dashboard.total_earnings')}
-                </Text>
-                <Text className="font-urbanist-bold text-2xl text-white">
-                  {formatVND(earnings?.totalEarnings ?? 0)}
-                </Text>
-              </View>
-            </View>
-            {earnings?.monthlyChange !== undefined &&
-              earnings.monthlyChange !== 0 && (
-                <View className="rounded-full bg-white/20 px-3 py-1">
-                  <Text className="text-sm font-semibold text-white">
-                    {earnings.monthlyChange > 0 ? '+' : ''}
-                    {earnings.monthlyChange.toFixed(0)}%
+            <View className="flex-row items-center justify-between">
+              <View className="flex-row items-center gap-3">
+                <View className="size-12 items-center justify-center rounded-full bg-white/20">
+                  <Chart color="#FFFFFF" width={24} height={24} />
+                </View>
+                <View>
+                  <Text className="text-sm font-medium text-white/70">
+                    {t('companion.dashboard.total_earnings')}
+                  </Text>
+                  <Text className="font-urbanist-bold text-2xl text-white">
+                    {formatVND(earnings?.totalEarnings ?? 0)}
                   </Text>
                 </View>
-              )}
+              </View>
+              {earnings?.monthlyChange !== undefined &&
+                earnings.monthlyChange !== 0 && (
+                  <View className="rounded-full bg-white/20 px-3 py-1.5">
+                    <Text className="text-sm font-semibold text-white">
+                      {earnings.monthlyChange > 0 ? '+' : ''}
+                      {earnings.monthlyChange.toFixed(0)}%
+                    </Text>
+                  </View>
+                )}
+            </View>
           </Pressable>
         </MotiView>
 
@@ -288,7 +278,7 @@ export default function CompanionDashboard() {
         >
           <View className="mb-3 flex-row items-center justify-between">
             <Text className="font-urbanist-bold text-lg text-midnight">
-              {t('companion.dashboard.todays_bookings')}
+              {t('companion.dashboard.upcoming_bookings')}
             </Text>
             <Pressable
               onPress={handleViewAllBookings}
@@ -300,9 +290,9 @@ export default function CompanionDashboard() {
             </Pressable>
           </View>
 
-          {todayBookings.length > 0 ? (
+          {upcomingBookings.length > 0 ? (
             <View className="gap-3">
-              {todayBookings.map((booking, index) => {
+              {upcomingBookings.map((booking, index) => {
                 const startTime = new Date(booking.startDatetime);
                 const endTime = new Date(booking.endDatetime);
                 const timeString = `${startTime.toLocaleTimeString('en-US', {
@@ -312,6 +302,14 @@ export default function CompanionDashboard() {
                   hour: 'numeric',
                   minute: '2-digit',
                 })}`;
+
+                const statusLabel =
+                  booking.displayStatus === 'active'
+                    ? t('common.status.active')
+                    : t('common.status.upcoming');
+
+                const statusVariant =
+                  booking.displayStatus === 'active' ? 'teal' : 'lavender';
 
                 return (
                   <MotiView
@@ -324,75 +322,21 @@ export default function CompanionDashboard() {
                       delay: 300 + index * 100,
                     }}
                   >
-                    <Pressable
+                    <BookingCard
+                      avatarUrl={
+                        booking.hirer?.avatar ||
+                        'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120'
+                      }
+                      displayName={booking.hirer?.displayName || 'Anonymous'}
+                      occasionEmoji={booking.occasion?.emoji}
+                      occasionName={booking.occasion?.name || t('common.occasion')}
+                      timeString={timeString}
+                      locationAddress={booking.locationAddress}
+                      statusLabel={statusLabel}
+                      statusVariant={statusVariant}
                       onPress={() => handleBookingPress(booking)}
                       testID={`booking-card-${booking.id}`}
-                      className="flex-row gap-4 rounded-2xl bg-white p-4"
-                    >
-                      <Image
-                        source={{
-                          uri:
-                            booking.hirer?.avatar ||
-                            'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120',
-                        }}
-                        className="size-14 rounded-full"
-                        contentFit="cover"
-                      />
-                      <View className="flex-1">
-                        <View className="flex-row items-center justify-between">
-                          <Text className="font-semibold text-midnight">
-                            {booking.hirer?.displayName || 'Anonymous'}
-                          </Text>
-                          <Badge
-                            label={
-                              booking.displayStatus === 'upcoming'
-                                ? t('common.status.upcoming')
-                                : booking.displayStatus === 'active'
-                                  ? t('common.status.active')
-                                  : t('common.status.completed')
-                            }
-                            variant={
-                              booking.displayStatus === 'upcoming'
-                                ? 'lavender'
-                                : booking.displayStatus === 'active'
-                                  ? 'teal'
-                                  : 'default'
-                            }
-                            size="sm"
-                          />
-                        </View>
-                        <Text className="mt-1 text-sm text-rose-400">
-                          {booking.occasion
-                            ? `${booking.occasion.emoji} ${booking.occasion.name}`
-                            : t('common.occasion')}
-                        </Text>
-                        <View className="mt-2 flex-row items-center gap-4">
-                          <View className="flex-row items-center gap-1">
-                            <Clock
-                              color={colors.text.tertiary}
-                              width={14}
-                              height={14}
-                            />
-                            <Text className="text-xs text-text-tertiary">
-                              {timeString}
-                            </Text>
-                          </View>
-                          <View className="flex-row items-center gap-1">
-                            <MapPin
-                              color={colors.text.tertiary}
-                              width={14}
-                              height={14}
-                            />
-                            <Text
-                              className="text-xs text-text-tertiary"
-                              numberOfLines={1}
-                            >
-                              {booking.locationAddress}
-                            </Text>
-                          </View>
-                        </View>
-                      </View>
-                    </Pressable>
+                    />
                   </MotiView>
                 );
               })}
@@ -401,7 +345,7 @@ export default function CompanionDashboard() {
             <View className="items-center rounded-2xl bg-white py-12">
               <Calendar color={colors.lavender[400]} width={48} height={48} />
               <Text className="mt-3 text-lg font-semibold text-midnight">
-                {t('companion.dashboard.no_bookings_today')}
+                {t('companion.dashboard.no_upcoming_bookings')}
               </Text>
               <Text className="mt-1 text-sm text-text-tertiary">
                 {t('companion.dashboard.enjoy_day_off')}
@@ -417,7 +361,7 @@ export default function CompanionDashboard() {
           transition={{ type: 'timing', duration: 500, delay: 400 }}
           className="px-4 py-6"
         >
-          <Text className="mb-3 font-urbanist-bold text-lg text-midnight">
+          <Text className="mb-4 font-urbanist-bold text-lg text-midnight">
             {t('companion.dashboard.quick_actions')}
           </Text>
           <View className="flex-row gap-3">
@@ -428,31 +372,33 @@ export default function CompanionDashboard() {
               testID="quick-action-requests"
               className="flex-1 items-center rounded-2xl bg-white p-4"
             >
-              <View className="mb-2 size-12 items-center justify-center rounded-full bg-rose-400/10">
+              <View className="mb-3 size-12 items-center justify-center rounded-full bg-rose-400/10">
                 <Bell color={colors.rose[400]} width={24} height={24} />
               </View>
-              <Text className="text-sm font-medium text-midnight">
+              <Text className="text-center text-sm font-medium text-midnight">
                 {t('companion.dashboard.actions.requests')}
               </Text>
               {pendingRequestsCount > 0 && (
-                <Badge
-                  label={`${pendingRequestsCount} ${t('companion.dashboard.actions.new_count')}`}
-                  variant="default"
-                  size="sm"
-                />
+                <View className="mt-2">
+                  <Badge
+                    label={`${pendingRequestsCount} ${t('companion.dashboard.actions.new_count')}`}
+                    variant="rose"
+                    size="sm"
+                  />
+                </View>
               )}
             </Pressable>
             <Pressable
               onPress={() =>
-                router.push('/companion/bookings/schedule' as Href)
+                router.push('/companion/schedule' as Href)
               }
               testID="quick-action-schedule"
               className="flex-1 items-center rounded-2xl bg-white p-4"
             >
-              <View className="mb-2 size-12 items-center justify-center rounded-full bg-lavender-900/10">
+              <View className="mb-3 size-12 items-center justify-center rounded-full bg-lavender-900/10">
                 <Calendar color={colors.lavender[400]} width={24} height={24} />
               </View>
-              <Text className="text-sm font-medium text-midnight">
+              <Text className="text-center text-sm font-medium text-midnight">
                 {t('companion.dashboard.actions.schedule')}
               </Text>
             </Pressable>
@@ -463,10 +409,10 @@ export default function CompanionDashboard() {
               testID="quick-action-withdraw"
               className="flex-1 items-center rounded-2xl bg-white p-4"
             >
-              <View className="mb-2 size-12 items-center justify-center rounded-full bg-teal-400/10">
+              <View className="mb-3 size-12 items-center justify-center rounded-full bg-teal-400/10">
                 <Wallet color={colors.teal[400]} width={24} height={24} />
               </View>
-              <Text className="text-sm font-medium text-midnight">
+              <Text className="text-center text-sm font-medium text-midnight">
                 {t('companion.dashboard.actions.withdraw')}
               </Text>
             </Pressable>

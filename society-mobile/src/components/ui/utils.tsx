@@ -12,52 +12,67 @@ export const HEIGHT = height;
 export const showError = (error: AxiosError) => {
   const description = extractError(error?.response?.data).trimEnd();
 
-  showMessage({
-    message: 'Error',
-    description,
-    type: 'danger',
-    duration: 4000,
-    autoHide: true,
-  });
+  setTimeout(() => {
+    showMessage({
+      message: 'Error',
+      description,
+      type: 'danger',
+      animated: false,
+      autoHide: true,
+      duration: 3000,
+    });
+  }, 0);
 };
 
 export const showErrorMessage = (message: string = 'Something went wrong') => {
-  showMessage({
-    message,
-    type: 'danger',
-    duration: 4000,
-    autoHide: true,
-  });
+  setTimeout(() => {
+    showMessage({
+      message,
+      type: 'danger',
+      animated: false,
+      autoHide: true,
+      duration: 3000,
+    });
+  }, 0);
 };
 
 export const showSuccessMessage = (message: string, description?: string) => {
-  showMessage({
-    message,
-    description,
-    type: 'success',
-    duration: 3000,
-    autoHide: true,
-  });
+  setTimeout(() => {
+    showMessage({
+      message,
+      description,
+      type: 'success',
+      animated: false,
+      autoHide: true,
+      duration: 3000,
+    });
+  }, 0);
 };
 
 export const showInfoMessage = (message: string, description?: string) => {
-  showMessage({
-    message,
-    description,
-    type: 'info',
-    duration: 3000,
-    autoHide: true,
-  });
+  setTimeout(() => {
+    showMessage({
+      message,
+      description,
+      type: 'info',
+      animated: false,
+      autoHide: true,
+      duration: 3000,
+    });
+  }, 0);
 };
 
 export const showWarningMessage = (message: string, description?: string) => {
-  showMessage({
-    message,
-    description,
-    type: 'warning',
-    duration: 4000,
-    autoHide: true,
-  });
+  setTimeout(() => {
+    showMessage({
+      message,
+      description,
+      type: 'warning',
+      animated: false,
+      autoHide: true,
+      duration: 3000,
+    });
+  }, 0);
 };
 
 export const extractError = (data: unknown): string => {

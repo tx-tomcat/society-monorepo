@@ -467,7 +467,7 @@ export default function MyBookings() {
                         b.companion?.avatar || getPhotoUrl(b.companion?.photos?.[0]) || '',
                     isVerified:
                         b.companion?.isVerified ??
-                        b.companion?.verificationStatus === 'verified',
+                        b.companion?.verificationStatus === 'VERIFIED',
                     rating: b.companion?.rating ?? 0,
                 },
                 occasion: b.occasion?.name || 'Meeting',

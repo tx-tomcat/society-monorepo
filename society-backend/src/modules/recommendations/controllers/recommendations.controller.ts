@@ -1,5 +1,6 @@
 import { JwtAuthGuard } from '@/auth/guards/jwt.guard';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
+import { MembershipService } from '@/modules/membership/membership.service';
 import {
   Body,
   Controller,
@@ -21,7 +22,10 @@ import { RecommendationsResult, RecommendationsService } from '../services/recom
 export class RecommendationsController {
   private readonly logger = new Logger(RecommendationsController.name);
 
-  constructor(private recommendationsService: RecommendationsService) { }
+  constructor(
+    private recommendationsService: RecommendationsService,
+    private membershipService: MembershipService,
+  ) { }
 
   @Get('for-you')
   async getForYou(
@@ -40,9 +44,11 @@ export class RecommendationsController {
     @CurrentUser('id') userId: string,
     @Query() query: GetTeaserDto,
   ) {
+    const benefits = await this.membershipService.getUserBenefits(userId);
+    const limit = query.limit ?? benefits.forYouLimit;
     const companions = await this.recommendationsService.getTeaser(
       userId,
-      query.limit,
+      limit,
     );
     return { companions };
   }

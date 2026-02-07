@@ -222,6 +222,7 @@
     "collapse": "Thu gọn",
     "confirm": "Xác nhận",
     "continue": "Tiếp tục",
+    "delete": "Xóa",
     "yes": "Có",
     "no": "Không",
     "loading": "Đang xử lý...",
@@ -335,6 +336,10 @@
       "no_keep_it": "Không, giữ lại",
       "occasion": "Dịp",
       "opening_maps": "Đang mở ứng dụng bản đồ...",
+      "payment_received": "Đã nhận thanh toán",
+      "payment_received_desc": "Khách hàng đã thanh toán. Bạn có thể tiến hành yêu cầu.",
+      "awaiting_payment": "Chờ thanh toán",
+      "awaiting_payment_desc": "Khách hàng chưa thanh toán cho yêu cầu này.",
       "payment_release_notice": "Thu nhập sẽ khả dụng ngay sau khi hoàn thành yêu cầu",
       "platform_fee": "Phí nền tảng (18%)",
       "safety_reminder": "Nhắc nhở an toàn",
@@ -451,6 +456,8 @@
         "this_week": "Tuần này"
       },
       "todays_bookings": "Yêu cầu hôm nay",
+      "upcoming_bookings": "Lịch hẹn sắp tới",
+      "no_upcoming_bookings": "Chưa có lịch hẹn sắp tới",
       "total_earnings": "Tổng thu nhập"
     },
     "earnings": {
@@ -516,7 +523,10 @@
         "tips_title": "Mẹo chụp ảnh",
         "tip_1": "Đặt CCCD trên bề mặt phẳng, tối màu",
         "tip_2": "Đảm bảo tất cả chữ và ảnh đều rõ ràng",
-        "tip_3": "Tránh ánh sáng chói và bóng đổ trên thẻ"
+        "tip_3": "Tránh ánh sáng chói và bóng đổ trên thẻ",
+        "selfie_title": "Selfie cùng CCCD",
+        "selfie_description": "Chụp ảnh selfie cầm CCCD cạnh khuôn mặt",
+        "uploading_photos": "Đang tải ảnh xác minh..."
       },
       "create_profile": {
         "about_placeholder": "Kể cho khách hàng về bản thân bạn, tính cách và điều gì khiến bạn trở thành partner tuyệt vời...",
@@ -734,6 +744,7 @@
       "availability": "Lịch trống",
       "bank_account": "Tài khoản ngân hàng",
       "bank_accounts": "Tài khoản ngân hàng",
+      "withdrawal_history": "Lịch sử rút tiền",
       "bookings": "Yêu cầu",
       "companion": "Partner",
       "earnings_history": "Lịch sử thu nhập",
@@ -772,7 +783,8 @@
       "upload_failed": "Không thể tải ảnh lên. Vui lòng thử lại.",
       "delete_title": "Xóa ảnh",
       "delete_message": "Bạn có chắc muốn xóa ảnh này?",
-      "delete_failed": "Không thể xóa ảnh. Vui lòng thử lại."
+      "delete_failed": "Không thể xóa ảnh. Vui lòng thử lại.",
+      "set_primary": "Đặt làm chính"
     },
     "availability": {
       "header": "Lịch trống",
@@ -823,27 +835,39 @@
         "pending": "Đang chờ xác minh",
         "pending_desc": "Xác minh của bạn đang được xem xét. Thường mất 1-2 ngày làm việc.",
         "rejected": "Xác minh bị từ chối",
-        "rejected_desc": "Xác minh của bạn không được phê duyệt. Vui lòng liên hệ hỗ trợ để được giúp đỡ.",
+        "rejected_desc": "Xác minh của bạn không được phê duyệt. Bạn có thể gửi lại với ảnh rõ hơn.",
         "not_started": "Chưa xác minh",
         "not_started_desc": "Hoàn thành xác minh để mở khóa tất cả tính năng và xây dựng niềm tin với khách hàng."
       },
-      "steps_completed": "bước hoàn thành",
       "benefits_title": "Tại sao cần xác minh?",
       "benefit_1": "Xuất hiện cao hơn trong kết quả tìm kiếm",
       "benefit_2": "Xây dựng niềm tin với khách hàng tiềm năng",
       "benefit_3": "Truy cập các tính năng cao cấp",
-      "steps_title": "Các bước xác minh",
-      "steps": {
-        "identity": "Xác minh danh tính",
-        "identity_desc": "Tải lên CMND/CCCD của bạn",
-        "selfie": "Xác minh selfie",
-        "selfie_desc": "Chụp ảnh selfie để đối chiếu với CMND",
-        "background": "Kiểm tra lý lịch",
-        "background_desc": "Xác minh lý lịch nhanh (1-2 ngày)"
-      },
+      "upload_id_front": "Tải lên mặt trước CCCD",
+      "upload_id_back": "Tải lên mặt sau CCCD",
+      "upload_selfie": "Chụp ảnh selfie",
+      "id_front_desc": "Chụp ảnh rõ ràng mặt trước CCCD",
+      "id_back_desc": "Chụp ảnh rõ ràng mặt sau CCCD",
+      "selfie_desc": "Chụp ảnh selfie cầm CCCD cạnh khuôn mặt",
+      "step_progress": "Bước {{current}} / {{total}}",
+      "retake_photo": "Chụp lại",
+      "submit_verification": "Gửi xác minh",
+      "submitting": "Đang gửi...",
+      "upload_failed": "Tải lên thất bại. Vui lòng thử lại.",
+      "choose_source": "Chọn nguồn ảnh",
+      "take_photo": "Chụp ảnh",
+      "from_library": "Chọn từ thư viện",
+      "resubmit": "Gửi lại xác minh",
+      "rejection_reason": "Lý do từ chối",
+      "review_in_progress": "Yêu cầu xác minh đang được xem xét. Thường mất 1-2 ngày làm việc.",
+      "submitted_photos": "Ảnh đã gửi",
+      "review_estimate": "Thời gian xem xét dự kiến: 1-2 ngày làm việc",
+      "camera_permission": "Cần quyền truy cập camera",
+      "camera_permission_desc": "Vui lòng cho phép truy cập camera để chụp ảnh xác minh.",
+      "library_permission": "Cần quyền truy cập thư viện ảnh",
+      "library_permission_desc": "Vui lòng cho phép truy cập thư viện ảnh để chọn ảnh xác minh.",
       "privacy_title": "Quyền riêng tư được bảo vệ",
-      "privacy_message": "Mình sử dụng mã hóa an toàn cho tất cả tài liệu. Thông tin cá nhân của bạn không bao giờ được chia sẻ mà không có sự đồng ý.",
-      "contact_support": "Liên hệ hỗ trợ"
+      "privacy_message": "Mình sử dụng mã hóa an toàn cho tất cả tài liệu. Thông tin cá nhân của bạn không bao giờ được chia sẻ mà không có sự đồng ý."
     },
     "withdraw": {
       "add_bank": "+ Thêm tài khoản ngân hàng",
@@ -881,6 +905,44 @@
       "you_receive": "Bạn sẽ nhận",
       "you_will_receive": "Bạn sẽ nhận"
     },
+    "withdrawals": {
+      "header": "Lịch sử rút tiền",
+      "total_withdrawn": "Đã rút",
+      "pending_amount": "Đang chờ",
+      "recent": "Giao dịch gần đây",
+      "empty_title": "Chưa có giao dịch rút tiền",
+      "empty_description": "Lịch sử rút tiền sẽ hiển thị tại đây",
+      "status": {
+        "pending": "Chờ xử lý",
+        "processing": "Đang xử lý",
+        "completed": "Hoàn thành",
+        "failed": "Thất bại"
+      },
+      "detail": {
+        "header": "Chi tiết rút tiền",
+        "not_found": "Không tìm thấy giao dịch",
+        "pending_subtitle": "Yêu cầu rút tiền đang được xem xét",
+        "processing_subtitle": "Yêu cầu rút tiền đang được xử lý",
+        "completed_subtitle": "Rút tiền đã hoàn thành",
+        "failed_subtitle": "Không thể xử lý yêu cầu rút tiền",
+        "step_requested": "Đã yêu cầu",
+        "step_processing": "Đang xử lý",
+        "step_completed": "Hoàn thành",
+        "step_failed": "Thất bại",
+        "breakdown": "Chi tiết số tiền",
+        "amount": "Số tiền rút",
+        "fee": "Phí xử lý (1%)",
+        "net_amount": "Bạn nhận được",
+        "bank_info": "Tài khoản ngân hàng",
+        "bank_name": "Ngân hàng",
+        "account_number": "Số tài khoản",
+        "account_holder": "Chủ tài khoản",
+        "requested_date": "Ngày yêu cầu",
+        "completed_date": "Ngày hoàn thành",
+        "processing_info": "Rút tiền thường được xử lý trong 1-2 ngày làm việc.",
+        "try_again": "Yêu cầu rút tiền mới"
+      }
+    },
     "boost": {
       "header": "Đẩy hồ sơ",
       "why_boost": "Tại sao nên đẩy hồ sơ?",
@@ -899,13 +961,50 @@
       "purchase_success": "Đã kích hoạt! Hồ sơ của bạn đang được đẩy.",
       "purchase_failed": "Không thể mua gói đẩy. Vui lòng thử lại.",
       "insufficient_balance": "Số dư ví không đủ. Vui lòng nạp tiền vào ví.",
+      "insufficient_balance_title": "Số dư không đủ",
+      "insufficient_balance_message": "Bạn không có đủ số dư trong ví. Bạn có muốn nạp tiền ngay bây giờ không?",
+      "go_to_wallet": "Nạp tiền vào ví",
       "status": {
         "active": "Đang hoạt động",
         "pending": "Đang chờ",
         "expired": "Đã hết hạn",
         "cancelled": "Đã hủy"
-      }
+      },
+      "complete_payment": "Thanh toán",
+      "purchase_label": "Mua gói đẩy hồ sơ",
+      "payment_success": "Đã kích hoạt Boost!",
+      "payment_success_description": "Hồ sơ của bạn đang được đẩy",
+      "already_active_error": "Bạn đã có gói đẩy đang hoạt động",
+      "auto_activate_title": "Kích hoạt tự động",
+      "auto_activate_description": "Gói đẩy sẽ được kích hoạt tự động khi thanh toán được xác nhận (thường trong 1 phút)"
     }
+  },
+  "payment": {
+    "expires_in": "Thanh toán hết hạn sau",
+    "scan_qr": "Quét mã QR để thanh toán",
+    "amount_label": "Số tiền",
+    "payment_code": "Mã thanh toán",
+    "code_instruction": "Ghi mã này vào nội dung chuyển khoản",
+    "code_copied": "Đã sao chép mã thanh toán",
+    "amount_copied": "Đã sao chép số tiền",
+    "bank_transfer_info": "Thông tin chuyển khoản",
+    "bank_name": "Ngân hàng",
+    "account_number": "Số tài khoản",
+    "account_name": "Tên tài khoản",
+    "open_bank_app": "Chuyển khoản nhanh qua ứng dụng",
+    "bank_app_not_installed": "Ứng dụng ngân hàng chưa được cài đặt",
+    "bank_open_failed": "Không thể mở ứng dụng ngân hàng",
+    "download_qr": "Lưu mã QR",
+    "qr_share_message": "Mã QR thanh toán -",
+    "qr_download_failed": "Không thể lưu mã QR",
+    "auto_confirm_title": "Xác nhận tự động",
+    "auto_confirm_description": "Thanh toán sẽ được xác nhận tự động khi nhận được chuyển khoản (thường trong 1 phút)",
+    "cancel_title": "Hủy thanh toán?",
+    "cancel_message": "Bạn có chắc muốn hủy thanh toán này?",
+    "expired_title": "Thanh toán hết hạn",
+    "expired_message": "Thời gian thanh toán đã hết. Vui lòng thử lại.",
+    "failed_title": "Thanh toán thất bại",
+    "failed_message": "Không thể xử lý thanh toán. Vui lòng thử lại."
   },
   "hirer": {
     "companion": {
@@ -957,7 +1056,12 @@
         "browse": "Tìm kiếm",
         "bookings": "Yêu cầu",
         "favorites": "Yêu thích"
-      }
+      },
+      "upgrade_vip": "Nâng cấp VIP",
+      "unlock_features": "Mở khóa tính năng độc quyền",
+      "manage_membership": "Quản lý thành viên",
+      "member": "Thành viên",
+      "view": "Xem"
     },
     "booking_detail": {
       "booked_on": "Đặt vào",
@@ -1267,7 +1371,8 @@
       "bookings": "yêu cầu",
       "member_since": "Thành viên từ",
       "unnamed_user": "Người dùng",
-      "verified": "Đã xác minh"
+      "verified": "Đã xác minh",
+      "vip_membership": "Thành viên VIP"
     },
     "edit_profile": {
       "header": "Chỉnh sửa hồ sơ",
@@ -1366,7 +1471,7 @@
       "data_protection_message": "Mình sử dụng mã hóa tiêu chuẩn công nghiệp để bảo vệ thông tin cá nhân của bạn. Dữ liệu của bạn không bao giờ được bán hoặc chia sẻ mà không có sự đồng ý."
     },
     "wallet": {
-      "title": "Ví Luxe",
+      "title": "Ví Hireme",
       "balance": "Số dư khả dụng",
       "pending": "Nạp tiền đang chờ",
       "topup": "Nạp tiền",
@@ -1428,7 +1533,7 @@
       "payment_method": "Phương thức thanh toán",
       "default": "Mặc định",
       "recommended": "Khuyên dùng",
-      "luxe_wallet": "Ví Luxe",
+      "hireme_wallet": "Ví Hireme",
       "wallet_balance": "Số dư:",
       "insufficient_balance": "Không đủ",
       "add_new_method": "Thêm phương thức thanh toán",
@@ -1441,6 +1546,48 @@
       "total_to_pay": "Tổng thanh toán",
       "processing": "Đang xử lý...",
       "confirm_pay": "Xác nhận & thanh toán"
+    },
+    "membership": {
+      "title": "Hội viên VIP",
+      "subtitle": "Mở khóa tính năng đặc quyền",
+      "current_plan": "Gói hiện tại",
+      "free_plan": "Miễn phí",
+      "expires_in": "Hết hạn sau",
+      "days_remaining": "ngày còn lại",
+      "silver": "Bạc",
+      "gold": "Vàng",
+      "platinum": "Bạch kim",
+      "per_month": "/tháng",
+      "select_plan": "Chọn gói",
+      "upgrade_to": "Nâng cấp lên",
+      "confirm_title": "Xác nhận mua",
+      "confirm_message": "Xác nhận mua gói hội viên?",
+      "purchase_success": "Đã kích hoạt hội viên!",
+      "already_active": "Bạn đã có gói hội viên cùng hoặc cao hơn đang hoạt động",
+      "purchase_failed": "Không thể mua gói hội viên. Vui lòng thử lại.",
+      "for_you_images": "Gợi ý \"Dành cho bạn\"",
+      "nearby_companions": "Tìm partner gần bạn",
+      "priority_booking": "Ưu tiên đặt lịch",
+      "max_bookings": "Tối đa yêu cầu chờ",
+      "free_cancellation": "Hủy miễn phí",
+      "early_access": "Truy cập sớm partner mới",
+      "dedicated_support": "Hỗ trợ riêng",
+      "benefits": "Quyền lợi",
+      "history_title": "Lịch sử",
+      "no_history": "Chưa có lịch sử hội viên",
+      "renew": "Gia hạn",
+      "upgrade": "Nâng cấp",
+      "badge_silver": "Bạc",
+      "badge_gold": "Vàng",
+      "badge_platinum": "Bạch kim",
+      "vip_hirer": "VIP",
+      "popular": "Phổ biến",
+      "images": "hình ảnh",
+      "hours": "giờ",
+      "payment_header": "Thanh toán hội viên",
+      "auto_activate": "Gói hội viên sẽ được kích hoạt tự động khi thanh toán được xác nhận",
+      "payment_success": "Đã kích hoạt hội viên!",
+      "payment_success_description": "Gói VIP của bạn đang hoạt động"
     }
   },
   "support": {
@@ -1472,7 +1619,22 @@
     "hours_value": "24/7"
   },
   "onboarding": {
-    "message": "Chào mừng đến với ứng dụng obytes"
+    "message": "Chào mừng đến với ứng dụng obytes",
+    "phone": {
+      "header": "Xác minh số điện thoại",
+      "title": "Số điện thoại của bạn?",
+      "subtitle": "Chúng tôi sẽ gửi mã xác minh qua Zalo",
+      "phone_placeholder": "Nhập số điện thoại",
+      "send_code": "Gửi mã xác minh",
+      "verify_code": "Xác minh",
+      "code_sent": "Mã đã gửi đến {{phone}}",
+      "enter_code": "Nhập mã 6 chữ số",
+      "resend_code": "Gửi lại mã",
+      "resend_in": "Gửi lại sau {{seconds}}s",
+      "invalid_phone": "Vui lòng nhập số điện thoại Việt Nam hợp lệ",
+      "verification_failed": "Xác minh thất bại. Vui lòng thử lại.",
+      "verified": "Xác minh số điện thoại thành công!"
+    }
   },
   "settings": {
     "about": "Giới thiệu",

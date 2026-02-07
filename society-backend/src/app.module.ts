@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 import { ScheduleModule } from '@nestjs/schedule';
 import { AppController } from './app.controller';
 import { AuthModule } from './auth/auth.module';
@@ -34,6 +35,7 @@ import { FavoritesModule } from './modules/favorites/favorites.module';
 import { OccasionsModule } from './modules/occasions/occasions.module';
 import { RecommendationsModule } from './modules/recommendations/recommendations.module';
 import { SafetyModule } from './modules/safety/safety.module';
+import { MembershipModule } from './modules/membership/membership.module';
 import { WalletModule } from './modules/wallet/wallet.module';
 import { QueueModule } from './modules/queue/queue.module';
 import { PlatformConfigModule } from './modules/config/config.module';
@@ -111,6 +113,7 @@ import { PlatformConfigModule } from './modules/config/config.module';
     // Core Infrastructure
     PrismaModule,
     ScheduleModule.forRoot(),
+    EventEmitterModule.forRoot(),
     CacheModule,
     QueueModule,
     SmsModule,
@@ -139,6 +142,7 @@ import { PlatformConfigModule } from './modules/config/config.module';
     DashboardModule,
     EarningsModule,
     FavoritesModule,
+    MembershipModule,
     OccasionsModule,
     RecommendationsModule,
     SafetyModule,

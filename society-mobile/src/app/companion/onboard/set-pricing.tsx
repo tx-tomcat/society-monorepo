@@ -94,7 +94,7 @@ export default function SetPricing() {
         onBack={handleBack}
         rightElement={
           <Text className="text-sm text-text-tertiary">
-            {`${t('companion.onboard.step')} 2/3`}
+            {`${t('companion.onboard.step')} 3/4`}
           </Text>
         }
       />

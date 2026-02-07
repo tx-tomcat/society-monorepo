@@ -258,6 +258,11 @@ export type FavoriteCompanion = Prisma.FavoriteCompanionModel
  */
 export type ProfileBoost = Prisma.ProfileBoostModel
 /**
+ * Model BoostPricingTier
+ * 
+ */
+export type BoostPricingTier = Prisma.BoostPricingTierModel
+/**
  * Model Referral
  * 
  */
@@ -302,3 +307,13 @@ export type WebhookLog = Prisma.WebhookLogModel
  * 
  */
 export type IdempotencyKey = Prisma.IdempotencyKeyModel
+/**
+ * Model MembershipPricingTier
+ * 
+ */
+export type MembershipPricingTier = Prisma.MembershipPricingTierModel
+/**
+ * Model HirerMembership
+ * 
+ */
+export type HirerMembership = Prisma.HirerMembershipModel
