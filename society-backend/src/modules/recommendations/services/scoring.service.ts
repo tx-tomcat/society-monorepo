@@ -1,25 +1,33 @@
 import { PrismaService } from '@/prisma/prisma.service';
 import { Injectable, Logger } from '@nestjs/common';
 
-// Event weights for scoring (companion booking platform - no swipe gestures)
+// Event weights for scoring
 const EVENT_WEIGHTS: Record<string, number> = {
-  VIEW: 0.1, // Profile appeared in feed
-  PROFILE_OPEN: 0.3, // User tapped to view details
-  BOOKMARK: 0.7, // Saved for later (strong interest signal)
-  UNBOOKMARK: -0.3, // Removed from saved
-  MESSAGE_SENT: 0.8, // Initiated contact
-  BOOKING_STARTED: 0.9, // Entered booking flow
-  BOOKING_COMPLETED: 1.0, // Strongest positive signal
-  BOOKING_CANCELLED: -0.5, // Negative signal
+  VIEW: 0.1,
+  PROFILE_OPEN: 0.3,
+  BOOKMARK: 0.7,
+  UNBOOKMARK: -0.3,
+  MESSAGE_SENT: 0.8,
+  BOOKING_STARTED: 0.9,
+  BOOKING_COMPLETED: 1.0,
+  BOOKING_CANCELLED: -0.5,
+  // Feed-specific signals
+  SKIP: -0.2,
+  DWELL_VIEW: 0.3, // Average of 0.2-0.5 range; actual value scaled by dwellTimeMs
+  DWELL_PAUSE: 0.4,
+  PHOTO_BROWSE: 0.3,
+  REVISIT: 0.6,
+  NOT_INTERESTED: -0.8,
+  SHARE: 0.5,
 };
 
 // Scoring weights for different factors
 const SCORING_WEIGHTS = {
-  preferenceMatch: 0.35,
-  profileQuality: 0.2,
-  availability: 0.15,
+  preferenceMatch: 0.25, // was 0.35
+  profileQuality: 0.20,
+  availability: 0.10, // was 0.15
   popularity: 0.15,
-  behavioralAffinity: 0.15,
+  behavioralAffinity: 0.30, // was 0.15
 };
 
 export interface CompanionData {

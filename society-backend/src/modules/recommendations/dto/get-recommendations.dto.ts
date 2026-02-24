@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer';
-import { IsInt, IsOptional, Max, Min } from 'class-validator';
+import { IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
 
 export class GetRecommendationsDto {
   @IsOptional()
@@ -23,4 +23,21 @@ export class GetTeaserDto {
   @Min(1)
   @Max(10)
   limit?: number = 5;
+}
+
+export class GetFeedDto {
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(20)
+  limit?: number = 10;
+
+  @IsOptional()
+  @IsString()
+  sessionId?: string;
+
+  @IsOptional()
+  @IsString()
+  excludeIds?: string; // comma-separated companion IDs
 }
