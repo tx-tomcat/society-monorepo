@@ -8,12 +8,13 @@ import { ActivityIndicator, Pressable, View as RNView } from 'react-native';
 import PagerView from 'react-native-pager-view';
 import Animated, { FadeIn } from 'react-native-reanimated';
 
+import { Image as ExpoImage } from 'expo-image';
+
 import { FeedCard } from '@/components/feed/feed-card';
 import { useInteractionTracker } from '@/components/feed/use-interaction-tracker';
 import {
   colors,
   FocusAwareStatusBar,
-  Image,
   Text,
   View,
 } from '@/components/ui';
@@ -53,8 +54,8 @@ export default function ForYouTab() {
   const { data: favoritesData } = useFavorites();
   const toggleFavorite = useToggleFavorite();
   const favoriteIds = useMemo(() => {
-    if (!favoritesData?.data) return new Set<string>();
-    return new Set(favoritesData.data.map((f: { companionId: string }) => f.companionId));
+    if (!favoritesData?.favorites) return new Set<string>();
+    return new Set(favoritesData.favorites.map((f) => f.companionId));
   }, [favoritesData]);
 
   // Flatten pages into single array
@@ -110,7 +111,7 @@ export default function ForYouTab() {
             : companion?.avatar
               ? [companion.avatar]
               : [];
-          photos.forEach((url) => Image.prefetch(url));
+          photos.forEach((url) => ExpoImage.prefetch(url));
         }
       }
 
