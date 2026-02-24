@@ -1394,6 +1394,14 @@ enum InteractionEventType {
   BOOKING_STARTED // Entered booking flow
   BOOKING_COMPLETED // Completed booking
   BOOKING_CANCELLED // Cancelled booking
+  // Feed-specific signals
+  SKIP // Swiped away in < 2 seconds
+  DWELL_VIEW // Stayed on companion 2-10 seconds
+  DWELL_PAUSE // Tapped to pause photo auto-advance
+  PHOTO_BROWSE // Manually browsed through 2+ photos
+  REVISIT // Swiped back to previous companion
+  NOT_INTERESTED // Long-press "Not interested"
+  SHARE // Shared companion profile
 }
 
 model UserInteraction {
