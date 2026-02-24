@@ -8,7 +8,14 @@ export type InteractionEventType =
   | 'MESSAGE_SENT'
   | 'BOOKING_STARTED'
   | 'BOOKING_COMPLETED'
-  | 'BOOKING_CANCELLED';
+  | 'BOOKING_CANCELLED'
+  | 'SKIP'
+  | 'DWELL_VIEW'
+  | 'DWELL_PAUSE'
+  | 'PHOTO_BROWSE'
+  | 'REVISIT'
+  | 'NOT_INTERESTED'
+  | 'SHARE';
 
 export interface EmbeddedCompanionData {
   id: string;
@@ -61,6 +68,11 @@ export interface TrackInteractionInput {
   sessionId?: string;
 }
 
+export interface BatchTrackInteractionInput {
+  sessionId?: string;
+  events: TrackInteractionInput[];
+}
+
 export const recommendationsService = {
   /**
    * Get full paginated recommendations for "For You" tab
@@ -91,6 +103,33 @@ export const recommendationsService = {
     data: TrackInteractionInput
   ): Promise<{ success: boolean }> {
     return apiClient.post('/recommendations/interactions', data);
+  },
+
+  /**
+   * Get feed recommendations (TikTok-style pager)
+   */
+  async getFeed(params?: {
+    limit?: number;
+    sessionId?: string;
+    excludeIds?: string[];
+  }): Promise<RecommendationsResponse> {
+    const queryParams = new URLSearchParams();
+    if (params?.limit) queryParams.append('limit', String(params.limit));
+    if (params?.sessionId) queryParams.append('sessionId', params.sessionId);
+    if (params?.excludeIds?.length) {
+      queryParams.append('excludeIds', params.excludeIds.join(','));
+    }
+    const query = queryParams.toString();
+    return apiClient.get(`/recommendations/feed${query ? `?${query}` : ''}`);
+  },
+
+  /**
+   * Track batch of interactions (fire-and-forget)
+   */
+  async trackBatchInteractions(
+    data: BatchTrackInteractionInput,
+  ): Promise<{ success: boolean }> {
+    return apiClient.post('/recommendations/interactions/batch', data);
   },
 
   /**

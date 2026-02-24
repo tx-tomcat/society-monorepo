@@ -4,6 +4,8 @@ import {
   useQuery,
   useQueryClient,
 } from '@tanstack/react-query';
+import * as Crypto from 'expo-crypto';
+import { useCallback, useMemo, useState } from 'react';
 
 import type {
   RecommendationsResponse,
@@ -14,6 +16,7 @@ import { recommendationsService } from '../api/services/recommendations.service'
 
 const STALE_TIME = 5 * 60 * 1000; // 5 minutes
 const PAGE_SIZE = 20;
+const FEED_PAGE_SIZE = 10;
 
 /**
  * Hook for fetching paginated recommendations with infinite scroll
@@ -64,6 +67,45 @@ export function useRecommendationsTeaser(limit: number = 5) {
     queryFn: () => recommendationsService.getTeaser(limit),
     staleTime: STALE_TIME,
   });
+}
+
+/**
+ * Hook for TikTok-style feed with session tracking and infinite loading
+ */
+export function useFeedRecommendations() {
+  const sessionId = useMemo(() => Crypto.randomUUID(), []);
+  const [seenIds, setSeenIds] = useState<string[]>([]);
+
+  const query = useInfiniteQuery<RecommendationsResponse>({
+    queryKey: ['recommendations', 'feed', sessionId],
+    queryFn: async ({ pageParam = [] }) => {
+      return recommendationsService.getFeed({
+        limit: FEED_PAGE_SIZE,
+        sessionId,
+        excludeIds: pageParam as string[],
+      });
+    },
+    getNextPageParam: (lastPage) => {
+      if (!lastPage.hasMore) return undefined;
+      return seenIds;
+    },
+    initialPageParam: [] as string[],
+    staleTime: Infinity, // Feed doesn't go stale within a session
+  });
+
+  const markSeen = useCallback((companionId: string) => {
+    setSeenIds((prev) => {
+      if (prev.includes(companionId)) return prev;
+      return [...prev, companionId];
+    });
+  }, []);
+
+  const resetSession = useCallback(() => {
+    setSeenIds([]);
+    query.refetch();
+  }, [query]);
+
+  return { ...query, sessionId, seenIds, markSeen, resetSession };
 }
 
 /**
