@@ -11,10 +11,11 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import {
+  GetFeedDto,
   GetRecommendationsDto,
   GetTeaserDto,
 } from '../dto/get-recommendations.dto';
-import { TrackInteractionDto } from '../dto/track-interaction.dto';
+import { BatchTrackInteractionDto, TrackInteractionDto } from '../dto/track-interaction.dto';
 import { RecommendationsResult, RecommendationsService } from '../services/recommendations.service';
 
 @Controller('recommendations')
@@ -26,6 +27,52 @@ export class RecommendationsController {
     private recommendationsService: RecommendationsService,
     private membershipService: MembershipService,
   ) { }
+
+  @Get('feed')
+  async getFeed(
+    @CurrentUser('id') userId: string,
+    @Query() query: GetFeedDto,
+  ): Promise<RecommendationsResult> {
+    const benefits = await this.membershipService.getUserBenefits(userId);
+    const photoLimit = benefits.forYouLimit;
+
+    const excludeIds = query.excludeIds
+      ? query.excludeIds.split(',').filter(Boolean)
+      : [];
+
+    const result = await this.recommendationsService.getFeed(
+      userId,
+      query.limit,
+      excludeIds,
+    );
+
+    return {
+      ...result,
+      companions: result.companions.map((c) => ({
+        ...c,
+        companion: {
+          ...c.companion,
+          photos: c.companion.photos?.slice(0, photoLimit) ?? [],
+        },
+      })),
+    };
+  }
+
+  @Post('interactions/batch')
+  trackBatchInteractions(
+    @CurrentUser('id') userId: string,
+    @Body() dto: BatchTrackInteractionDto,
+  ) {
+    this.recommendationsService
+      .trackBatch(userId, dto.sessionId, dto.events)
+      .catch((error) => {
+        this.logger.warn(
+          `Failed to track batch interaction: userId=${userId}`,
+          error.stack,
+        );
+      });
+    return { success: true };
+  }
 
   @Get('for-you')
   async getForYou(

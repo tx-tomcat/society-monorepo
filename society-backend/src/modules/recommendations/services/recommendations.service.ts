@@ -186,6 +186,138 @@ export class RecommendationsService {
   }
 
   /**
+   * Get feed recommendations with explore/exploit balance
+   * Used by the TikTok-style vertical pager
+   */
+  async getFeed(
+    userId: string,
+    limit: number = 10,
+    excludeIds: string[] = [],
+  ): Promise<RecommendationsResult> {
+    // Determine strategy
+    const interactionCount = await this.prisma.userInteraction.count({
+      where: { userId },
+    });
+    const strategy: 'cold_start' | 'hybrid' =
+      interactionCount < COLD_START_THRESHOLD ? 'cold_start' : 'hybrid';
+
+    // Get candidates excluding already-seen IDs
+    const [allCandidates, boostMultipliers] = await Promise.all([
+      this.getCandidateCompanions(userId),
+      this.getActiveBoostMultipliers(),
+    ]);
+
+    // Filter out excluded (already-seen) IDs
+    const excludeSet = new Set(excludeIds);
+    const candidates = allCandidates.filter((id) => !excludeSet.has(id));
+
+    if (candidates.length === 0) {
+      return { companions: [], hasMore: false, total: 0, strategy };
+    }
+
+    // Score all candidates
+    let scored: ScoredCompanion[];
+    if (strategy === 'cold_start') {
+      scored = await this.getColdStartRecommendations(candidates, boostMultipliers);
+    } else {
+      scored = await this.scoringService.calculateScores(
+        userId,
+        candidates,
+        boostMultipliers,
+      );
+    }
+
+    // Apply freshness penalty — companions seen by user in last 24h score 0.8x
+    const recentlyViewed = await this.prisma.userInteraction.findMany({
+      where: {
+        userId,
+        createdAt: { gt: new Date(Date.now() - 24 * 60 * 60 * 1000) },
+      },
+      select: { companionId: true },
+      distinct: ['companionId'],
+    });
+    const recentSet = new Set(recentlyViewed.map((r) => r.companionId));
+
+    scored = scored.map((s) => {
+      // Check by both companionId and companion.userId since recentSet has userIds
+      if (recentSet.has(s.companion.userId) || recentSet.has(s.companionId)) {
+        return { ...s, score: s.score * 0.8 };
+      }
+      return s;
+    });
+
+    // Separate boosted from regular
+    const boosted = scored.filter((s) => boostMultipliers.has(s.companionId));
+    const regular = scored.filter((s) => !boostMultipliers.has(s.companionId));
+
+    // Sort each group by score
+    boosted.sort((a, b) => b.score - a.score);
+    regular.sort((a, b) => b.score - a.score);
+
+    // Explore/exploit split on regular pool
+    const exploitCount = Math.max(1, Math.floor(limit * 0.7));
+    const exploreCount = limit - exploitCount;
+
+    const exploit = regular.slice(0, exploitCount);
+
+    // Explore: random sample from remaining candidates
+    const remaining = regular.slice(exploitCount);
+    const explore: ScoredCompanion[] = [];
+    const remainingCopy = [...remaining];
+    for (let i = 0; i < Math.min(exploreCount, remainingCopy.length); i++) {
+      const randomIdx = Math.floor(Math.random() * remainingCopy.length);
+      explore.push(remainingCopy.splice(randomIdx, 1)[0]);
+    }
+
+    // Interleave: boosted first, then exploit with explore mixed in at every 4th position
+    const merged: ScoredCompanion[] = [...boosted.slice(0, 2)]; // max 2 boosted per batch
+    const exploitAndExplore = [...exploit];
+
+    // Insert explore items at positions 3, 7 (relative to exploit list)
+    let exploreIdx = 0;
+    for (let i = 0; i < exploitAndExplore.length; i++) {
+      merged.push(exploitAndExplore[i]);
+      if ((merged.length) % 4 === 0 && exploreIdx < explore.length) {
+        merged.push(explore[exploreIdx++]);
+      }
+    }
+    // Append any remaining explore items
+    while (exploreIdx < explore.length) {
+      merged.push(explore[exploreIdx++]);
+    }
+
+    // Apply diversity: avoid 3+ consecutive same gender
+    const diversified = this.applyDiversity(merged);
+
+    const result = diversified.slice(0, limit);
+
+    return {
+      companions: result,
+      hasMore: candidates.length > excludeIds.length + result.length,
+      total: candidates.length - excludeIds.length,
+      strategy,
+    };
+  }
+
+  /**
+   * Track a batch of interactions
+   */
+  async trackBatch(
+    userId: string,
+    sessionId: string | undefined,
+    events: { companionId: string; eventType: string; dwellTimeMs?: number }[],
+  ): Promise<void> {
+    for (const event of events) {
+      await this.trackInteraction(userId, {
+        companionId: event.companionId,
+        eventType: event.eventType as any,
+        dwellTimeMs: event.dwellTimeMs,
+        sessionId,
+      });
+    }
+  }
+
+  /**
    * Force refresh recommendations
    */
   async refresh(userId: string): Promise<void> {
@@ -198,6 +330,42 @@ export class RecommendationsService {
   private async invalidateCache(userId: string): Promise<void> {
     const cacheKey = `${CACHE_PREFIX}${userId}`;
     await this.cacheService.del(cacheKey);
+  }
+
+  /**
+   * Apply diversity: avoid 3+ consecutive companions with same gender
+   */
+  private applyDiversity(companions: ScoredCompanion[]): ScoredCompanion[] {
+    if (companions.length <= 2) return companions;
+
+    const result: ScoredCompanion[] = [companions[0]];
+    const remaining = companions.slice(1);
+
+    for (let i = 0; i < remaining.length; i++) {
+      const candidate = remaining[i];
+      const last2 = result.slice(-2);
+
+      // Check if adding this would create 3 consecutive same gender
+      if (
+        last2.length === 2 &&
+        last2[0].companion.gender === last2[1].companion.gender &&
+        last2[1].companion.gender === candidate.companion.gender
+      ) {
+        // Find the next companion with a different gender and swap
+        const swapIdx = remaining.slice(i + 1).findIndex(
+          (c) => c.companion.gender !== candidate.companion.gender,
+        );
+        if (swapIdx !== -1) {
+          const actualIdx = i + 1 + swapIdx;
+          result.push(remaining[actualIdx]);
+          remaining[actualIdx] = candidate;
+          continue;
+        }
+      }
+      result.push(candidate);
+    }
+
+    return result;
   }
 
   /**
