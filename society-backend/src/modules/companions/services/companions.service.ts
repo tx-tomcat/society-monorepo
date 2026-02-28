@@ -84,6 +84,9 @@ export class CompanionsService {
       rating,
       verified,
       province,
+      gender,
+      minAge,
+      maxAge,
       // Lat/lng params are accepted for future GPS-based filtering
       latitude,
       longitude,
@@ -112,14 +115,34 @@ export class CompanionsService {
       blockedUserIds = Array.from(blockedSet);
     }
 
+    // Build user relation filter
+    const userWhere: Prisma.UserWhereInput = {
+      status: "ACTIVE",
+      ...(blockedUserIds.length > 0 && { id: { notIn: blockedUserIds } }),
+    };
+
+    // Gender filter (gender is on User model)
+    if (gender) {
+      userWhere.gender = gender;
+    }
+
+    // Age filter (dateOfBirth is on User model)
+    if (minAge !== undefined || maxAge !== undefined) {
+      const now = new Date();
+      const dateOfBirthFilter: Prisma.DateTimeNullableFilter<'User'> = {};
+      if (maxAge !== undefined) {
+        dateOfBirthFilter.gte = new Date(now.getFullYear() - maxAge - 1, now.getMonth(), now.getDate());
+      }
+      if (minAge !== undefined) {
+        dateOfBirthFilter.lte = new Date(now.getFullYear() - minAge, now.getMonth(), now.getDate());
+      }
+      userWhere.dateOfBirth = dateOfBirthFilter;
+    }
+
     const where: Prisma.CompanionProfileWhereInput = {
       isActive: true,
       isHidden: false,
-      user: {
-        status: "ACTIVE",
-        // Exclude blocked users from results
-        ...(blockedUserIds.length > 0 && { id: { notIn: blockedUserIds } }),
-      },
+      user: userWhere,
     };
 
     if (occasionId) {

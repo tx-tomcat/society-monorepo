@@ -31,6 +31,7 @@ import {
 import { BookingStatus, PaymentStatus } from '@/lib/api/enums';
 import { getPhotoUrl } from '@/lib/api/services/companions.service';
 import { useBooking, useCancelBooking } from '@/lib/hooks';
+import { useTierTheme } from '@/lib/theme';
 
 type DisplayBookingStatus =
   | 'pending'
@@ -89,6 +90,7 @@ export default function BookingDetail() {
   // API hooks
   const { data: bookingData, isLoading } = useBooking(id || '');
   const cancelBookingMutation = useCancelBooking();
+  const theme = useTierTheme();
 
   // Transform booking data
   const booking = React.useMemo(() => {
@@ -262,7 +264,7 @@ export default function BookingDetail() {
   if (isLoading) {
     return (
       <View className="flex-1 items-center justify-center bg-warmwhite">
-        <ActivityIndicator size="large" color={colors.rose[400]} />
+        <ActivityIndicator size="large" color={theme.primary} />
       </View>
     );
   }
@@ -393,8 +395,8 @@ export default function BookingDetail() {
                   onPress={handleCallCompanion}
                   className="flex-1 flex-row items-center justify-center gap-2 rounded-xl bg-softpink py-3"
                 >
-                  <Phone color={colors.rose[400]} width={20} height={20} />
-                  <Text className="font-semibold text-rose-400">
+                  <Phone color={theme.primary} width={20} height={20} />
+                  <Text className="font-semibold" style={{ color: theme.primary }}>
                     {t('hirer.booking_detail.call')}
                   </Text>
                 </Pressable>
@@ -403,11 +405,11 @@ export default function BookingDetail() {
                   className="flex-1 flex-row items-center justify-center gap-2 rounded-xl bg-softpink py-3"
                 >
                   <MessageCircle
-                    color={colors.rose[400]}
+                    color={theme.primary}
                     width={20}
                     height={20}
                   />
-                  <Text className="font-semibold text-rose-400">
+                  <Text className="font-semibold" style={{ color: theme.primary }}>
                     {t('hirer.booking_detail.message')}
                   </Text>
                 </Pressable>
@@ -429,8 +431,8 @@ export default function BookingDetail() {
           <View className="gap-4">
             {/* Occasion */}
             <View className="flex-row items-start gap-3">
-              <View className="size-10 items-center justify-center rounded-lg bg-rose-400/10">
-                <Calendar color={colors.rose[400]} width={20} height={20} />
+              <View className="size-10 items-center justify-center rounded-lg" style={{ backgroundColor: theme.primary + '1A' }}>
+                <Calendar color={theme.primary} width={20} height={20} />
               </View>
               <View className="flex-1">
                 <Text className="text-sm text-text-tertiary">
@@ -479,7 +481,7 @@ export default function BookingDetail() {
           {/* Special Requests */}
           {booking.specialRequests && (
             <View className="mt-4 rounded-xl bg-softpink p-3">
-              <Text className="text-sm font-medium text-rose-400">
+              <Text className="text-sm font-medium" style={{ color: theme.primary }}>
                 {t('hirer.booking_detail.special_requests')}
               </Text>
               <Text className="mt-1 text-sm text-text-secondary">
@@ -504,8 +506,8 @@ export default function BookingDetail() {
               onPress={handleViewReceipt}
               className="flex-row items-center gap-1"
             >
-              <Receipt color={colors.rose[400]} width={16} height={16} />
-              <Text className="text-sm font-medium text-rose-400">
+              <Receipt color={theme.primary} width={16} height={16} />
+              <Text className="text-sm font-medium" style={{ color: theme.primary }}>
                 {t('hirer.booking_detail.view_receipt')}
               </Text>
             </Pressable>
@@ -517,7 +519,7 @@ export default function BookingDetail() {
                 {booking.pricing.hourlyRate.toLocaleString('vi-VN')}đ x{' '}
                 {booking.pricing.hours} hours
               </Text>
-              <Text className="text-lg font-bold text-rose-400">
+              <Text className="text-lg font-bold" style={{ color: theme.primary }}>
                 {booking.pricing.total.toLocaleString('vi-VN')}đ
               </Text>
             </View>
@@ -566,7 +568,8 @@ export default function BookingDetail() {
                 onPress={handleMakePayment}
                 variant="default"
                 size="lg"
-                className="flex-1 bg-rose-400"
+                className="flex-1"
+                style={{ backgroundColor: theme.primary }}
                 icon={CreditCard}
               />
             )}

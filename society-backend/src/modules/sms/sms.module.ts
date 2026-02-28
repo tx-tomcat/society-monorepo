@@ -5,8 +5,9 @@ import { SMS_PROVIDER, SmsProvider } from './sms-provider.interface';
 import { ZnsProvider } from './providers/zns.provider';
 import { SpeedSmsProvider } from './providers/speedsms.provider';
 import { EsmsProvider } from './providers/esms.provider';
+import { AbenlaProvider } from './providers/abenla.provider';
 
-type SmsProviderType = 'zns' | 'speedsms' | 'esms' | 'auto';
+type SmsProviderType = 'zns' | 'speedsms' | 'esms' | 'abenla' | 'auto';
 
 /**
  * SMS Module
@@ -17,9 +18,10 @@ type SmsProviderType = 'zns' | 'speedsms' | 'esms' | 'auto';
  * - SMS_PROVIDER=zns       → Use Zalo ZNS only (direct API)
  * - SMS_PROVIDER=speedsms  → Use SpeedSMS only
  * - SMS_PROVIDER=esms      → Use eSMS Zalo ZNS
+ * - SMS_PROVIDER=abenla    → Use Abenla (Zalo/Voice/SMS fallback)
  * - SMS_PROVIDER=auto      → Auto-select first configured provider (default)
  *
- * Provider priority in auto mode: esms → zns → speedsms
+ * Provider priority in auto mode: esms → abenla → zns → speedsms
  */
 @Global()
 @Module({
@@ -27,6 +29,7 @@ type SmsProviderType = 'zns' | 'speedsms' | 'esms' | 'auto';
     ZnsProvider,
     SpeedSmsProvider,
     EsmsProvider,
+    AbenlaProvider,
     {
       provide: SMS_PROVIDER,
       useFactory: (
@@ -34,6 +37,7 @@ type SmsProviderType = 'zns' | 'speedsms' | 'esms' | 'auto';
         znsProvider: ZnsProvider,
         speedSmsProvider: SpeedSmsProvider,
         esmsProvider: EsmsProvider,
+        abenlaProvider: AbenlaProvider,
       ): SmsProvider => {
         const logger = new Logger('SmsModule');
         const providerType = (configService.get<string>('SMS_PROVIDER') || 'auto') as SmsProviderType;
@@ -63,10 +67,23 @@ type SmsProviderType = 'zns' | 'speedsms' | 'esms' | 'auto';
           return esmsProvider;
         }
 
-        // Auto-select first configured provider (priority: esms → zns → speedsms)
+        if (providerType === 'abenla') {
+          if (!abenlaProvider.isConfigured()) {
+            logger.warn('Abenla provider selected but not configured');
+          }
+          logger.log('Using Abenla as SMS provider');
+          return abenlaProvider;
+        }
+
+        // Auto-select first configured provider (priority: esms → abenla → zns → speedsms)
         if (esmsProvider.isConfigured()) {
           logger.log('Auto-selected eSMS Zalo ZNS as SMS provider');
           return esmsProvider;
+        }
+
+        if (abenlaProvider.isConfigured()) {
+          logger.log('Auto-selected Abenla as SMS provider');
+          return abenlaProvider;
         }
 
         if (znsProvider.isConfigured()) {
@@ -83,9 +100,9 @@ type SmsProviderType = 'zns' | 'speedsms' | 'esms' | 'auto';
         logger.warn('No SMS provider configured, defaulting to eSMS');
         return esmsProvider;
       },
-      inject: [ConfigService, ZnsProvider, SpeedSmsProvider, EsmsProvider],
+      inject: [ConfigService, ZnsProvider, SpeedSmsProvider, EsmsProvider, AbenlaProvider],
     },
   ],
-  exports: [SMS_PROVIDER, ZnsProvider, SpeedSmsProvider, EsmsProvider],
+  exports: [SMS_PROVIDER, ZnsProvider, SpeedSmsProvider, EsmsProvider, AbenlaProvider],
 })
 export class SmsModule {}

@@ -32,11 +32,27 @@ export class RecommendationsController {
     @CurrentUser('id') userId: string,
     @Query() query: GetRecommendationsDto,
   ): Promise<RecommendationsResult> {
-    return this.recommendationsService.getForYou(
+    const benefits = await this.membershipService.getUserBenefits(userId);
+    const photoLimit = benefits.forYouLimit;
+    this.logger.log('Photo limit:', photoLimit);
+
+    const result = await this.recommendationsService.getForYou(
       userId,
       query.limit,
       query.offset,
     );
+
+    // Limit photos per companion based on membership tier
+    return {
+      ...result,
+      companions: result.companions.map((c) => ({
+        ...c,
+        companion: {
+          ...c.companion,
+          photos: c.companion.photos?.slice(0, photoLimit) ?? [],
+        },
+      })),
+    };
   }
 
   @Get('for-you/teaser')
@@ -45,12 +61,22 @@ export class RecommendationsController {
     @Query() query: GetTeaserDto,
   ) {
     const benefits = await this.membershipService.getUserBenefits(userId);
-    const limit = query.limit ?? benefits.forYouLimit;
+    const photoLimit = benefits.forYouLimit;
     const companions = await this.recommendationsService.getTeaser(
       userId,
-      limit,
+      query.limit ?? 5,
     );
-    return { companions };
+
+    // Limit photos per companion based on membership tier
+    return {
+      companions: companions.map((c) => ({
+        ...c,
+        companion: {
+          ...c.companion,
+          photos: c.companion.photos?.slice(0, photoLimit) ?? [],
+        },
+      })),
+    };
   }
 
   @Post('interactions')

@@ -78,6 +78,25 @@ export class BrowseCompanionsQueryDto {
   @Max(100) // Max 100km radius
   radiusKm?: number = 25; // Default 25km radius
 
+  // Demographic filtering
+  @IsOptional()
+  @IsEnum(Gender)
+  gender?: Gender;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(18)
+  @Max(100)
+  minAge?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(18)
+  @Max(100)
+  maxAge?: number;
+
   @IsOptional()
   @Type(() => Number)
   @IsInt()

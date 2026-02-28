@@ -27,10 +27,12 @@ import {
   useRefreshRecommendations,
   useTrackInteraction,
 } from '@/lib/hooks';
+import { useTierTheme } from '@/lib/theme';
 
 export default function ForYouTab() {
   const router = useRouter();
   const { t } = useTranslation();
+  const theme = useTierTheme();
   const trackInteraction = useTrackInteraction();
   const refreshRecommendations = useRefreshRecommendations();
 
@@ -112,7 +114,7 @@ export default function ForYouTab() {
       >
         <View className="items-center">
           <LinearGradient
-            colors={[colors.rose[400], colors.coral[400]]}
+            colors={theme.gradient}
             style={{
               width: 88,
               height: 88,
@@ -141,7 +143,7 @@ export default function ForYouTab() {
 
           <Pressable onPress={handleRefresh} className="overflow-hidden rounded-2xl">
             <LinearGradient
-              colors={[colors.rose[400], colors.coral[400]]}
+              colors={theme.gradient}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
               style={{
@@ -168,7 +170,7 @@ export default function ForYouTab() {
     () =>
       isFetchingNextPage ? (
         <View className="py-6">
-          <ActivityIndicator color={colors.rose[400]} />
+          <ActivityIndicator color={theme.primary} />
         </View>
       ) : null,
     [isFetchingNextPage]
@@ -186,7 +188,7 @@ export default function ForYouTab() {
         >
           <View className="flex-row items-center gap-2">
             <LinearGradient
-              colors={[colors.rose[400], colors.coral[400]]}
+              colors={theme.gradient}
               style={{
                 width: 36,
                 height: 36,
@@ -210,12 +212,12 @@ export default function ForYouTab() {
             disabled={isRefetching || refreshRecommendations.isPending}
             className={`size-11 items-center justify-center rounded-full ${isRefetching || refreshRecommendations.isPending ? 'opacity-50' : ''
               }`}
-            style={{ backgroundColor: 'rgba(255,107,138,0.12)' }}
+            style={{ backgroundColor: theme.primary + '1F' }}
           >
             {isRefetching || refreshRecommendations.isPending ? (
-              <ActivityIndicator size="small" color={colors.rose[400]} />
+              <ActivityIndicator size="small" color={theme.primary} />
             ) : (
-              <RefreshCw color={colors.rose[400]} width={20} height={20} />
+              <RefreshCw color={theme.primary} width={20} height={20} />
             )}
           </Pressable>
         </Animated.View>
@@ -228,7 +230,7 @@ export default function ForYouTab() {
           className="flex-1 items-center justify-center"
         >
           <View className="items-center">
-            <ActivityIndicator size="large" color={colors.rose[400]} />
+            <ActivityIndicator size="large" color={theme.primary} />
             <Text
               className="mt-4 font-urbanist-medium text-base"
               style={{ color: colors.charcoal[500] }}

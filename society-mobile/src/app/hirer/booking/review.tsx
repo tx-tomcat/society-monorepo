@@ -32,6 +32,7 @@ import {
 } from '@/components/ui/icons';
 import { getPhotoUrl } from '@/lib/api/services/companions.service';
 import { useCompanion, useCreateBooking } from '@/lib/hooks';
+import { useTierTheme } from '@/lib/theme';
 import { formatVND } from '@/lib/utils';
 
 export default function BookingReviewScreen() {
@@ -49,6 +50,7 @@ export default function BookingReviewScreen() {
     notes: string;
   }>();
   const { t } = useTranslation();
+  const theme = useTierTheme();
 
   // API hooks
   const { data: companionData, isLoading: isLoadingCompanion } = useCompanion(
@@ -161,7 +163,7 @@ export default function BookingReviewScreen() {
     return (
       <View className="flex-1 items-center justify-center bg-warmwhite">
         <FocusAwareStatusBar />
-        <ActivityIndicator color={colors.rose[400]} size="large" />
+        <ActivityIndicator color={theme.primary} size="large" />
         <Text className="mt-4 text-text-secondary">{t('common.loading')}</Text>
       </View>
     );
@@ -259,8 +261,8 @@ export default function BookingReviewScreen() {
           <View className="gap-4">
             {/* Date */}
             <View className="flex-row items-center gap-4">
-              <View className="size-12 items-center justify-center rounded-xl bg-rose-400/10">
-                <Calendar color={colors.rose[400]} width={22} height={22} />
+              <View className="size-12 items-center justify-center rounded-xl" style={{ backgroundColor: theme.primary + '1A' }}>
+                <Calendar color={theme.primary} width={22} height={22} />
               </View>
               <View className="flex-1">
                 <Text className="text-xs uppercase tracking-wide text-text-tertiary">
@@ -308,8 +310,8 @@ export default function BookingReviewScreen() {
             {/* Occasion */}
             {params.occasionName ? (
               <View className="flex-row items-center gap-4">
-                <View className="size-12 items-center justify-center rounded-xl bg-coral-400/10">
-                  <Occasions color={colors.coral[400]} width={22} height={22} />
+                <View className="size-12 items-center justify-center rounded-xl" style={{ backgroundColor: theme.secondary + '1A' }}>
+                  <Occasions color={theme.secondary} width={22} height={22} />
                 </View>
                 <View className="flex-1">
                   <Text className="text-xs uppercase tracking-wide text-text-tertiary">
@@ -352,7 +354,7 @@ export default function BookingReviewScreen() {
               <Text className="text-text-secondary">
                 {formatVND(companion.hourlyRate)} × {duration} {t('hirer.review.hours')}
               </Text>
-              <Text className="font-urbanist-bold text-2xl text-rose-400">
+              <Text className="font-urbanist-bold text-2xl" style={{ color: theme.primary }}>
                 {formatVND(total)}
               </Text>
             </View>
@@ -445,9 +447,10 @@ export default function BookingReviewScreen() {
           >
             <View
               className={`mt-1 size-5 items-center justify-center rounded border-2 ${agreedToTerms
-                ? 'border-rose-400 bg-rose-400'
+                ? ''
                 : 'border-border bg-white'
                 }`}
+              style={agreedToTerms ? { borderColor: theme.primary, backgroundColor: theme.primary } : undefined}
             >
               {agreedToTerms && (
                 <CheckCircle color="#FFFFFF" width={12} height={12} />

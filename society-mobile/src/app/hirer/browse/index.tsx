@@ -1,7 +1,7 @@
 /* eslint-disable max-lines-per-function */
 import { FlashList } from '@shopify/flash-list';
 import type { Href } from 'expo-router';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -39,6 +39,7 @@ import {
 } from '@/lib/hooks';
 import { useCompanion } from '@/lib/hooks/use-companions';
 import { useOccasionsStore } from '@/lib/stores';
+import { useTierTheme } from '@/lib/theme';
 import { formatVND } from '@/lib/utils';
 
 export default function BrowseCompanions() {
@@ -46,9 +47,35 @@ export default function BrowseCompanions() {
   const { t } = useTranslation();
   const [selectedOccasionId, setSelectedOccasionId] = React.useState<string | undefined>(undefined);
   const [searchQuery, setSearchQuery] = React.useState('');
+  const theme = useTierTheme();
+
+  // Parse filter params from filter screen
+  const params = useLocalSearchParams<{
+    minPrice?: string;
+    maxPrice?: string;
+    rating?: string;
+    province?: string;
+    gender?: string;
+    minAge?: string;
+    maxAge?: string;
+  }>();
 
   // Get occasions from store
   const occasions = useOccasionsStore.use.occasions();
+
+  // Build filters from route params + local state
+  const filters = React.useMemo(() => ({
+    occasionId: selectedOccasionId,
+    verified: true,
+    sort: 'rating' as const,
+    ...(params.minPrice && { minPrice: Number(params.minPrice) }),
+    ...(params.maxPrice && { maxPrice: Number(params.maxPrice) }),
+    ...(params.rating && { rating: Number(params.rating) }),
+    ...(params.province && { province: params.province }),
+    ...(params.gender && { gender: params.gender }),
+    ...(params.minAge && { minAge: Number(params.minAge) }),
+    ...(params.maxAge && { maxAge: Number(params.maxAge) }),
+  }), [selectedOccasionId, params.minPrice, params.maxPrice, params.rating, params.province, params.gender, params.minAge, params.maxAge]);
 
   // API hooks
   const {
@@ -56,11 +83,7 @@ export default function BrowseCompanions() {
     isLoading,
     refetch,
     isRefetching,
-  } = useCompanions({
-    occasionId: selectedOccasionId,
-    verified: true,
-    sort: 'rating',
-  });
+  } = useCompanions(filters);
 
   const { data: favoritesData } = useFavorites();
   const toggleFavorite = useToggleFavorite();
@@ -194,8 +217,9 @@ export default function BrowseCompanions() {
               <Pressable
                 onPress={() => setSelectedOccasionId(undefined)}
                 className={`rounded-full px-4 py-2 ${
-                  !selectedOccasionId ? 'bg-rose-400' : 'bg-softpink'
+                  selectedOccasionId ? 'bg-softpink' : ''
                 }`}
+                style={!selectedOccasionId ? { backgroundColor: theme.primary } : undefined}
               >
                 <Text
                   className={`text-xs ${
@@ -213,8 +237,9 @@ export default function BrowseCompanions() {
                   key={occasion.id}
                   onPress={() => setSelectedOccasionId(occasion.id)}
                   className={`rounded-full px-4 py-2 ${
-                    selectedOccasionId === occasion.id ? 'bg-rose-400' : 'bg-softpink'
+                    selectedOccasionId !== occasion.id ? 'bg-softpink' : ''
                   }`}
+                  style={selectedOccasionId === occasion.id ? { backgroundColor: theme.primary } : undefined}
                 >
                   <Text
                     className={`text-xs ${
@@ -251,7 +276,7 @@ export default function BrowseCompanions() {
       {!isLoading && filteredCompanions.length === 0 && (
         <View className="flex-1 items-center justify-center px-8">
           <View className="mb-4 size-20 items-center justify-center rounded-full bg-softpink">
-            <Search color={colors.rose[400]} width={32} height={32} />
+            <Search color={theme.primary} width={32} height={32} />
           </View>
           <Text className="text-center font-urbanist-bold text-lg text-midnight">
             {t('hirer.browse.no_results')}
@@ -366,6 +391,7 @@ function ForYouTeaser({
   const teaserLimit = benefits?.forYouLimit ?? 1;
   const { data, isLoading } = useRecommendationsTeaser(teaserLimit);
   const trackInteraction = useTrackInteraction();
+  const theme = useTierTheme();
 
   const handlePress = React.useCallback(
     (companion: CompanionData) => {
@@ -386,10 +412,10 @@ function ForYouTeaser({
       <View className="flex-row items-center justify-between px-4">
         <View className="flex-row items-center gap-1.5">
           <Heart
-            color={colors.rose[400]}
+            color={theme.primary}
             width={16}
             height={16}
-            fill={colors.rose[400]}
+            fill={theme.primary}
           />
           <Text className="font-urbanist-semibold text-base text-midnight">
             {t('hirer.browse.for_you_section')}

@@ -1,9 +1,10 @@
 /* eslint-disable max-lines-per-function */
+import type { Href } from 'expo-router';
 import { useRouter } from 'expo-router';
 import { MotiView } from 'moti';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, ScrollView } from 'react-native';
+import { Alert, Pressable, ScrollView, TextInput } from 'react-native';
 
 import {
   Badge,
@@ -16,33 +17,47 @@ import {
 } from '@/components/ui';
 import {
   ArrowLeft,
-  Briefcase,
   Calendar,
-  Coffee,
-  Confetti,
-  Family,
-  MaiFlower,
+  Lock,
   MapPin,
   PriceTag,
   Star,
-  WeddingRings,
-  X,
+  Users,
 } from '@/components/ui/icons';
+import { useMembershipBenefits } from '@/lib/hooks/use-membership';
+import { useTierTheme } from '@/lib/theme';
 
-type OccasionType = {
-  id: string;
-  labelKey: string;
-  icon: React.ComponentType<{ color: string; width: number; height: number }>;
+// ============================================================
+// Tier Gating
+// ============================================================
+
+const TIER_ORDER: Record<string, number> = {
+  SILVER: 1,
+  GOLD: 2,
+  PLATINUM: 3,
 };
 
-const OCCASIONS: OccasionType[] = [
-  { id: 'wedding', labelKey: 'occasions.wedding', icon: WeddingRings },
-  { id: 'family', labelKey: 'occasions.family', icon: Family },
-  { id: 'business', labelKey: 'occasions.business', icon: Briefcase },
-  { id: 'tet', labelKey: 'occasions.tet', icon: MaiFlower },
-  { id: 'casual', labelKey: 'occasions.casual', icon: Coffee },
-  { id: 'party', labelKey: 'occasions.party', icon: Confetti },
-];
+const FILTER_REQUIRED_TIER: Record<string, string | null> = {
+  price: null,
+  rating: 'SILVER',
+  location: 'GOLD',
+  gender: 'PLATINUM',
+  age: 'PLATINUM',
+};
+
+function hasFilterAccess(
+  userTier: string | null,
+  filterKey: string
+): boolean {
+  const required = FILTER_REQUIRED_TIER[filterKey];
+  if (required === null) return true;
+  if (userTier === null) return false;
+  return (TIER_ORDER[userTier] ?? 0) >= (TIER_ORDER[required] ?? 0);
+}
+
+// ============================================================
+// Filter Constants
+// ============================================================
 
 const PRICE_RANGES = [
   { id: 'any', label: 'Any', min: 0, max: 0 },
@@ -64,50 +79,151 @@ const LOCATIONS = [
   'District 2',
   'District 3',
   'District 7',
-  'Bình Thạnh',
-  'Phú Nhuận',
-  'Tân Bình',
-  'Gò Vấp',
+  'Binh Thanh',
+  'Phu Nhuan',
+  'Tan Binh',
+  'Go Vap',
 ];
+
+const GENDERS = [
+  { id: 'any', labelKey: 'hirer.filter.gender_any' },
+  { id: 'MALE', labelKey: 'hirer.filter.gender_male' },
+  { id: 'FEMALE', labelKey: 'hirer.filter.gender_female' },
+];
+
+// ============================================================
+// Locked Overlay Component
+// ============================================================
+
+function LockedOverlay({
+  tier,
+  onUpgrade,
+}: {
+  tier: string;
+  onUpgrade: () => void;
+}) {
+  return (
+    <Pressable
+      onPress={onUpgrade}
+      className="absolute inset-0 z-10 items-center justify-center rounded-2xl"
+    >
+      <View className="flex-row items-center gap-1.5 rounded-full bg-lavender-900 px-3 py-1.5">
+        <Lock color="#FFFFFF" size={14} />
+        <Text className="text-xs font-semibold text-white">{tier}</Text>
+      </View>
+    </Pressable>
+  );
+}
+
+// ============================================================
+// Main Filter Screen
+// ============================================================
 
 export default function FilterScreen() {
   const router = useRouter();
   const { t } = useTranslation();
 
-  const [selectedOccasions, setSelectedOccasions] = React.useState<string[]>(
-    []
-  );
+  // Membership tier for filter gating
+  const { data: benefits } = useMembershipBenefits();
+  const userTier = benefits?.tier ?? null;
+  const theme = useTierTheme();
+
+  // Filter state
   const [selectedPrice, setSelectedPrice] = React.useState('any');
   const [selectedRating, setSelectedRating] = React.useState('any');
   const [selectedLocations, setSelectedLocations] = React.useState<string[]>(
     []
   );
-  const [verifiedOnly, setVerifiedOnly] = React.useState(false);
-  const [onlineOnly, setOnlineOnly] = React.useState(false);
+  const [selectedGender, setSelectedGender] = React.useState('any');
+  const [minAge, setMinAge] = React.useState('');
+  const [maxAge, setMaxAge] = React.useState('');
 
   const handleBack = React.useCallback(() => {
     router.back();
   }, [router]);
 
   const handleReset = React.useCallback(() => {
-    setSelectedOccasions([]);
     setSelectedPrice('any');
     setSelectedRating('any');
     setSelectedLocations([]);
-    setVerifiedOnly(false);
-    setOnlineOnly(false);
+    setSelectedGender('any');
+    setMinAge('');
+    setMaxAge('');
   }, []);
+
+  const handleUpgrade = React.useCallback(
+    (requiredTier: string) => {
+      Alert.alert(
+        t('hirer.filter.locked_title'),
+        `${t('hirer.filter.locked_message')} ${requiredTier}`,
+        [
+          { text: t('common.cancel'), style: 'cancel' },
+          {
+            text: t('hirer.filter.upgrade_cta'),
+            onPress: () =>
+              router.push('/hirer/membership' as Href),
+          },
+        ]
+      );
+    },
+    [t, router]
+  );
 
   const handleApply = React.useCallback(() => {
-    // TODO: Apply filters and navigate back with params
-    router.back();
-  }, [router]);
+    const params: Record<string, string> = {};
 
-  const toggleOccasion = React.useCallback((id: string) => {
-    setSelectedOccasions((prev) =>
-      prev.includes(id) ? prev.filter((o) => o !== id) : [...prev, id]
+    // Price (always available)
+    const price = PRICE_RANGES.find((r) => r.id === selectedPrice);
+    if (price && price.id !== 'any') {
+      if (price.min > 0) params.minPrice = String(price.min);
+      if (price.max > 0) params.maxPrice = String(price.max);
+    }
+
+    // Rating (Silver+)
+    if (
+      selectedRating !== 'any' &&
+      hasFilterAccess(userTier, 'rating')
+    ) {
+      const r = RATINGS.find((x) => x.id === selectedRating);
+      if (r) params.rating = String(r.min);
+    }
+
+    // Location (Gold+)
+    if (
+      selectedLocations.length > 0 &&
+      hasFilterAccess(userTier, 'location')
+    ) {
+      params.province = 'HCM';
+    }
+
+    // Gender (Platinum)
+    if (
+      selectedGender !== 'any' &&
+      hasFilterAccess(userTier, 'gender')
+    ) {
+      params.gender = selectedGender;
+    }
+
+    // Age (Platinum)
+    if (hasFilterAccess(userTier, 'age')) {
+      if (minAge) params.minAge = minAge;
+      if (maxAge) params.maxAge = maxAge;
+    }
+
+    const qs = new URLSearchParams(params).toString();
+    router.replace(
+      (qs ? `/hirer/browse?${qs}` : '/hirer/browse') as Href
     );
-  }, []);
+  }, [
+    router,
+    selectedPrice,
+    selectedRating,
+    selectedLocations,
+    selectedGender,
+    minAge,
+    maxAge,
+    userTier,
+  ]);
 
   const toggleLocation = React.useCallback((location: string) => {
     setSelectedLocations((prev) =>
@@ -119,21 +235,13 @@ export default function FilterScreen() {
 
   const activeFilterCount = React.useMemo(() => {
     let count = 0;
-    if (selectedOccasions.length > 0) count++;
     if (selectedPrice !== 'any') count++;
     if (selectedRating !== 'any') count++;
     if (selectedLocations.length > 0) count++;
-    if (verifiedOnly) count++;
-    if (onlineOnly) count++;
+    if (selectedGender !== 'any') count++;
+    if (minAge || maxAge) count++;
     return count;
-  }, [
-    selectedOccasions,
-    selectedPrice,
-    selectedRating,
-    selectedLocations,
-    verifiedOnly,
-    onlineOnly,
-  ]);
+  }, [selectedPrice, selectedRating, selectedLocations, selectedGender, minAge, maxAge]);
 
   return (
     <View className="flex-1 bg-warmwhite">
@@ -152,7 +260,7 @@ export default function FilterScreen() {
             {t('hirer.filter.title')}
           </Text>
           <Pressable onPress={handleReset}>
-            <Text className="text-sm font-semibold text-rose-400">
+            <Text className="text-sm font-semibold" style={{ color: theme.primary }}>
               {t('hirer.filter.reset')}
             </Text>
           </Pressable>
@@ -160,7 +268,7 @@ export default function FilterScreen() {
       </SafeAreaView>
 
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
-        {/* Occasion Type */}
+        {/* Price Range - Free */}
         <MotiView
           from={{ opacity: 0, translateY: 10 }}
           animate={{ opacity: 1, translateY: 0 }}
@@ -168,47 +276,7 @@ export default function FilterScreen() {
           className="px-4 pt-6"
         >
           <View className="mb-3 flex-row items-center gap-2">
-            <Calendar color={colors.rose[400]} width={20} height={20} />
-            <Text className="font-urbanist-semibold text-base text-midnight">
-              {t('hirer.filter.occasion')}
-            </Text>
-          </View>
-          <View className="flex-row flex-wrap gap-2">
-            {OCCASIONS.map((occasion) => {
-              const isSelected = selectedOccasions.includes(occasion.id);
-              return (
-                <Pressable
-                  key={occasion.id}
-                  onPress={() => toggleOccasion(occasion.id)}
-                  className={`flex-row items-center gap-2 rounded-full px-4 py-2.5 ${isSelected ? 'bg-rose-400' : 'bg-white'
-                    }`}
-                >
-                  <occasion.icon
-                    color={isSelected ? '#FFFFFF' : colors.text.secondary}
-                    width={18}
-                    height={18}
-                  />
-                  <Text
-                    className={`text-sm font-medium ${isSelected ? 'text-white' : 'text-text-secondary'
-                      }`}
-                  >
-                    {t(occasion.labelKey)}
-                  </Text>
-                </Pressable>
-              );
-            })}
-          </View>
-        </MotiView>
-
-        {/* Price Range */}
-        <MotiView
-          from={{ opacity: 0, translateY: 10 }}
-          animate={{ opacity: 1, translateY: 0 }}
-          transition={{ type: 'timing', duration: 400, delay: 100 }}
-          className="px-4 pt-6"
-        >
-          <View className="mb-3 flex-row items-center gap-2">
-            <PriceTag color={colors.rose[400]} width={20} height={20} />
+            <PriceTag color={theme.primary} width={20} height={20} />
             <Text className="font-urbanist-semibold text-base text-midnight">
               {t('hirer.filter.price_range')}
             </Text>
@@ -220,12 +288,15 @@ export default function FilterScreen() {
                 <Pressable
                   key={range.id}
                   onPress={() => setSelectedPrice(range.id)}
-                  className={`rounded-full px-4 py-2.5 ${isSelected ? 'bg-rose-400' : 'bg-white'
-                    }`}
+                  className={`rounded-full px-4 py-2.5 ${
+                    !isSelected ? 'bg-white' : ''
+                  }`}
+                  style={isSelected ? { backgroundColor: theme.primary } : undefined}
                 >
                   <Text
-                    className={`text-sm font-medium ${isSelected ? 'text-white' : 'text-text-secondary'
-                      }`}
+                    className={`text-sm font-medium ${
+                      isSelected ? 'text-white' : 'text-text-secondary'
+                    }`}
                   >
                     {range.label}
                   </Text>
@@ -235,123 +306,234 @@ export default function FilterScreen() {
           </View>
         </MotiView>
 
-        {/* Rating */}
+        {/* Rating - Silver+ */}
+        <MotiView
+          from={{ opacity: 0, translateY: 10 }}
+          animate={{ opacity: 1, translateY: 0 }}
+          transition={{ type: 'timing', duration: 400, delay: 100 }}
+          className="relative px-4 pt-6"
+        >
+          <View className={!hasFilterAccess(userTier, 'rating') ? 'opacity-40' : ''}>
+            <View className="mb-3 flex-row items-center gap-2">
+              <Star color={colors.yellow[400]} width={20} height={20} />
+              <Text className="font-urbanist-semibold text-base text-midnight">
+                {t('hirer.filter.minimum_rating')}
+              </Text>
+              {!hasFilterAccess(userTier, 'rating') && (
+                <Badge label="SILVER" variant="lavender" size="sm" />
+              )}
+            </View>
+            <View className="flex-row flex-wrap gap-2">
+              {RATINGS.map((rating) => {
+                const isSelected = selectedRating === rating.id;
+                return (
+                  <Pressable
+                    key={rating.id}
+                    onPress={() => {
+                      if (!hasFilterAccess(userTier, 'rating')) return;
+                      setSelectedRating(rating.id);
+                    }}
+                    className={`flex-row items-center gap-1 rounded-full px-4 py-2.5 ${
+                      isSelected ? 'bg-yellow-400' : 'bg-white'
+                    }`}
+                  >
+                    {rating.id !== 'any' && (
+                      <Star
+                        color={
+                          isSelected
+                            ? colors.midnight.DEFAULT
+                            : colors.yellow[400]
+                        }
+                        width={14}
+                        height={14}
+                      />
+                    )}
+                    <Text
+                      className={`text-sm font-medium ${
+                        isSelected ? 'text-midnight' : 'text-text-secondary'
+                      }`}
+                    >
+                      {rating.label}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+          </View>
+          {!hasFilterAccess(userTier, 'rating') && (
+            <LockedOverlay
+              tier="SILVER"
+              onUpgrade={() => handleUpgrade('SILVER')}
+            />
+          )}
+        </MotiView>
+
+        {/* Location - Gold+ */}
         <MotiView
           from={{ opacity: 0, translateY: 10 }}
           animate={{ opacity: 1, translateY: 0 }}
           transition={{ type: 'timing', duration: 400, delay: 200 }}
-          className="px-4 pt-6"
+          className="relative px-4 pt-6"
         >
-          <View className="mb-3 flex-row items-center gap-2">
-            <Star color={colors.yellow[400]} width={20} height={20} />
-            <Text className="font-urbanist-semibold text-base text-midnight">
-              {t('hirer.filter.minimum_rating')}
-            </Text>
-          </View>
-          <View className="flex-row flex-wrap gap-2">
-            {RATINGS.map((rating) => {
-              const isSelected = selectedRating === rating.id;
-              return (
-                <Pressable
-                  key={rating.id}
-                  onPress={() => setSelectedRating(rating.id)}
-                  className={`flex-row items-center gap-1 rounded-full px-4 py-2.5 ${isSelected ? 'bg-yellow-400' : 'bg-white'
+          <View className={!hasFilterAccess(userTier, 'location') ? 'opacity-40' : ''}>
+            <View className="mb-3 flex-row items-center gap-2">
+              <MapPin color={theme.primary} width={20} height={20} />
+              <Text className="font-urbanist-semibold text-base text-midnight">
+                {t('hirer.filter.location')}
+              </Text>
+              {!hasFilterAccess(userTier, 'location') && (
+                <Badge label="GOLD" variant="lavender" size="sm" />
+              )}
+            </View>
+            <View className="flex-row flex-wrap gap-2">
+              {LOCATIONS.map((location) => {
+                const isSelected = selectedLocations.includes(location);
+                return (
+                  <Pressable
+                    key={location}
+                    onPress={() => {
+                      if (!hasFilterAccess(userTier, 'location')) return;
+                      toggleLocation(location);
+                    }}
+                    className={`rounded-full px-4 py-2.5 ${
+                      isSelected ? 'bg-lavender-900' : 'bg-white'
                     }`}
-                >
-                  {rating.id !== 'any' && (
-                    <Star
-                      color={
-                        isSelected
-                          ? colors.midnight.DEFAULT
-                          : colors.yellow[400]
-                      }
-                      width={14}
-                      height={14}
-                    />
-                  )}
-                  <Text
-                    className={`text-sm font-medium ${isSelected ? 'text-midnight' : 'text-text-secondary'
-                      }`}
                   >
-                    {rating.label}
-                  </Text>
-                </Pressable>
-              );
-            })}
+                    <Text
+                      className={`text-sm font-medium ${
+                        isSelected ? 'text-white' : 'text-text-secondary'
+                      }`}
+                    >
+                      {location}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
           </View>
+          {!hasFilterAccess(userTier, 'location') && (
+            <LockedOverlay
+              tier="GOLD"
+              onUpgrade={() => handleUpgrade('GOLD')}
+            />
+          )}
         </MotiView>
 
-        {/* Location */}
+        {/* Gender - Platinum */}
         <MotiView
           from={{ opacity: 0, translateY: 10 }}
           animate={{ opacity: 1, translateY: 0 }}
           transition={{ type: 'timing', duration: 400, delay: 300 }}
-          className="px-4 pt-6"
+          className="relative px-4 pt-6"
         >
-          <View className="mb-3 flex-row items-center gap-2">
-            <MapPin color={colors.rose[400]} width={20} height={20} />
-            <Text className="font-urbanist-semibold text-base text-midnight">
-              {t('hirer.filter.location')}
-            </Text>
-          </View>
-          <View className="flex-row flex-wrap gap-2">
-            {LOCATIONS.map((location) => {
-              const isSelected = selectedLocations.includes(location);
-              return (
-                <Pressable
-                  key={location}
-                  onPress={() => toggleLocation(location)}
-                  className={`rounded-full px-4 py-2.5 ${isSelected ? 'bg-lavender-900' : 'bg-white'
+          <View className={!hasFilterAccess(userTier, 'gender') ? 'opacity-40' : ''}>
+            <View className="mb-3 flex-row items-center gap-2">
+              <Users color={theme.primary} size={20} />
+              <Text className="font-urbanist-semibold text-base text-midnight">
+                {t('hirer.filter.gender')}
+              </Text>
+              {!hasFilterAccess(userTier, 'gender') && (
+                <Badge label="PLATINUM" variant="lavender" size="sm" />
+              )}
+            </View>
+            <View className="flex-row flex-wrap gap-2">
+              {GENDERS.map((g) => {
+                const isSelected = selectedGender === g.id;
+                return (
+                  <Pressable
+                    key={g.id}
+                    onPress={() => {
+                      if (!hasFilterAccess(userTier, 'gender')) return;
+                      setSelectedGender(g.id);
+                    }}
+                    className={`rounded-full px-4 py-2.5 ${
+                      !isSelected ? 'bg-white' : ''
                     }`}
-                >
-                  <Text
-                    className={`text-sm font-medium ${isSelected ? 'text-white' : 'text-text-secondary'
-                      }`}
+                    style={isSelected ? { backgroundColor: theme.primary } : undefined}
                   >
-                    {location}
-                  </Text>
-                </Pressable>
-              );
-            })}
+                    <Text
+                      className={`text-sm font-medium ${
+                        isSelected ? 'text-white' : 'text-text-secondary'
+                      }`}
+                    >
+                      {t(g.labelKey)}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
           </View>
+          {!hasFilterAccess(userTier, 'gender') && (
+            <LockedOverlay
+              tier="PLATINUM"
+              onUpgrade={() => handleUpgrade('PLATINUM')}
+            />
+          )}
         </MotiView>
 
-        {/* Toggle Options */}
+        {/* Age Range - Platinum */}
         <MotiView
           from={{ opacity: 0, translateY: 10 }}
           animate={{ opacity: 1, translateY: 0 }}
           transition={{ type: 'timing', duration: 400, delay: 400 }}
-          className="px-4 pt-6"
+          className="relative px-4 pt-6"
         >
-          <Pressable
-            onPress={() => setVerifiedOnly(!verifiedOnly)}
-            className="mb-3 flex-row items-center justify-between rounded-xl bg-white p-4"
-          >
-            <Text className="text-base text-midnight">
-              {t('hirer.filter.verified_only')}
-            </Text>
-            <View
-              className={`size-6 items-center justify-center rounded-full ${verifiedOnly ? 'bg-teal-400' : 'bg-border'
-                }`}
-            >
-              {verifiedOnly && <X color="#FFFFFF" width={14} height={14} />}
+          <View className={!hasFilterAccess(userTier, 'age') ? 'opacity-40' : ''}>
+            <View className="mb-3 flex-row items-center gap-2">
+              <Calendar color={theme.primary} width={20} height={20} />
+              <Text className="font-urbanist-semibold text-base text-midnight">
+                {t('hirer.filter.age_range')}
+              </Text>
+              {!hasFilterAccess(userTier, 'age') && (
+                <Badge label="PLATINUM" variant="lavender" size="sm" />
+              )}
             </View>
-          </Pressable>
-
-          <Pressable
-            onPress={() => setOnlineOnly(!onlineOnly)}
-            className="flex-row items-center justify-between rounded-xl bg-white p-4"
-          >
-            <Text className="text-base text-midnight">
-              {t('hirer.filter.online_only')}
-            </Text>
-            <View
-              className={`size-6 items-center justify-center rounded-full ${onlineOnly ? 'bg-teal-400' : 'bg-border'
-                }`}
-            >
-              {onlineOnly && <X color="#FFFFFF" width={14} height={14} />}
+            <View className="flex-row items-center gap-4">
+              <View className="flex-1">
+                <Text className="mb-2 text-xs text-text-secondary">
+                  {t('hirer.filter.age_min')}
+                </Text>
+                <TextInput
+                  value={minAge}
+                  onChangeText={(val) => {
+                    const cleaned = val.replace(/[^0-9]/g, '');
+                    setMinAge(cleaned);
+                  }}
+                  placeholder="18"
+                  placeholderTextColor={colors.text.tertiary}
+                  keyboardType="number-pad"
+                  editable={hasFilterAccess(userTier, 'age')}
+                  className="rounded-xl border border-border-light bg-white px-4 py-3 text-sm text-midnight"
+                  style={{ color: colors.midnight.DEFAULT }}
+                />
+              </View>
+              <Text className="mt-6 text-text-secondary">-</Text>
+              <View className="flex-1">
+                <Text className="mb-2 text-xs text-text-secondary">
+                  {t('hirer.filter.age_max')}
+                </Text>
+                <TextInput
+                  value={maxAge}
+                  onChangeText={(val) => {
+                    const cleaned = val.replace(/[^0-9]/g, '');
+                    setMaxAge(cleaned);
+                  }}
+                  placeholder="100"
+                  placeholderTextColor={colors.text.tertiary}
+                  keyboardType="number-pad"
+                  editable={hasFilterAccess(userTier, 'age')}
+                  className="rounded-xl border border-border-light bg-white px-4 py-3 text-sm text-midnight"
+                  style={{ color: colors.midnight.DEFAULT }}
+                />
+              </View>
             </View>
-          </Pressable>
+          </View>
+          {!hasFilterAccess(userTier, 'age') && (
+            <LockedOverlay
+              tier="PLATINUM"
+              onUpgrade={() => handleUpgrade('PLATINUM')}
+            />
+          )}
         </MotiView>
 
         <View className="h-32" />
@@ -382,4 +564,3 @@ export default function FilterScreen() {
     </View>
   );
 }
-

@@ -29,6 +29,7 @@ import {
 } from '@/components/ui/icons';
 import { getPhotoUrl } from '@/lib/api/services/companions.service';
 import { useCompanion, useOccasion } from '@/lib/hooks';
+import { useTierTheme } from '@/lib/theme';
 
 export default function BookingConfirmationScreen() {
   const router = useRouter();
@@ -46,6 +47,7 @@ export default function BookingConfirmationScreen() {
     notes: string;
   }>();
   const { t } = useTranslation();
+  const theme = useTierTheme();
 
   // Fetch companion data
   const { data: companionData, isLoading: isLoadingCompanion } = useCompanion(
@@ -109,7 +111,7 @@ export default function BookingConfirmationScreen() {
     return (
       <View className="flex-1 items-center justify-center bg-warmwhite">
         <FocusAwareStatusBar />
-        <ActivityIndicator color={colors.rose[400]} size="large" />
+        <ActivityIndicator color={theme.primary} size="large" />
       </View>
     );
   }
@@ -206,8 +208,8 @@ export default function BookingConfirmationScreen() {
           {/* Event Details */}
           <View className="gap-4">
             <View className="flex-row items-center gap-4">
-              <View className="size-11 items-center justify-center rounded-xl bg-rose-400/10">
-                <Calendar color={colors.rose[400]} width={22} height={22} />
+              <View className="size-11 items-center justify-center rounded-xl" style={{ backgroundColor: theme.primary + '1A' }}>
+                <Calendar color={theme.primary} width={22} height={22} />
               </View>
               <View className="flex-1">
                 <Text className="text-xs uppercase tracking-wide text-text-tertiary">
@@ -324,7 +326,8 @@ export default function BookingConfirmationScreen() {
           />
           <Pressable
             onPress={handleGoHome}
-            className="size-14 items-center justify-center rounded-xl bg-rose-400"
+            className="size-14 items-center justify-center rounded-xl"
+            style={{ backgroundColor: theme.primary }}
           >
             <Home color="#FFFFFF" width={24} height={24} />
           </Pressable>

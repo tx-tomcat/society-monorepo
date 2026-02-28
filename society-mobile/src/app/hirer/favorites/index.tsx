@@ -24,6 +24,7 @@ import {
   Trash2,
 } from '@/components/ui/icons';
 import { useFavorites, useRemoveFavorite } from '@/lib/hooks';
+import { useTierTheme } from '@/lib/theme';
 
 type FavoriteItem = {
   id: string;
@@ -50,6 +51,7 @@ const FavoriteCard = React.memo(function FavoriteCard({
   onRemove: () => void;
 }) {
   const { t } = useTranslation();
+  const theme = useTierTheme();
 
   return (
     <Pressable
@@ -94,7 +96,7 @@ const FavoriteCard = React.memo(function FavoriteCard({
           )}
         </View>
         <View className="flex-row items-center justify-between">
-          <Text className="text-sm font-bold text-rose-400">
+          <Text className="text-sm font-bold" style={{ color: theme.primary }}>
             {favorite.companion.hourlyRate.toLocaleString('vi-VN')}đ
             <Text className="font-normal text-text-tertiary">/hr</Text>
           </Text>
@@ -105,7 +107,7 @@ const FavoriteCard = React.memo(function FavoriteCard({
             }}
             className="rounded-lg bg-red-50 p-2"
           >
-            <Trash2 color={colors.rose[400]} width={18} height={18} />
+            <Trash2 color={theme.primary} width={18} height={18} />
           </Pressable>
         </View>
       </View>
@@ -116,6 +118,7 @@ const FavoriteCard = React.memo(function FavoriteCard({
 function EmptyState() {
   const { t } = useTranslation();
   const router = useRouter();
+  const theme = useTierTheme();
 
   return (
     <MotiView
@@ -125,7 +128,7 @@ function EmptyState() {
       className="flex-1 items-center justify-center p-8"
     >
       <View className="mb-4 size-20 items-center justify-center rounded-full bg-softpink">
-        <Heart color={colors.rose[400]} width={40} height={40} />
+        <Heart color={theme.primary} width={40} height={40} />
       </View>
       <Text className="mb-2 text-center font-urbanist-bold text-lg text-midnight">
         {t('hirer.favorites.empty_title')}
@@ -135,7 +138,8 @@ function EmptyState() {
       </Text>
       <Pressable
         onPress={() => router.push('/hirer/browse' as Href)}
-        className="rounded-xl bg-rose-400 px-6 py-3"
+        className="rounded-xl px-6 py-3"
+        style={{ backgroundColor: theme.primary }}
       >
         <Text className="font-semibold text-white">
           {t('hirer.favorites.browse_companions')}
@@ -150,6 +154,7 @@ export default function Favorites() {
   const { t } = useTranslation();
 
   // API hooks
+  const theme = useTierTheme();
   const {
     data: favoritesData,
     isLoading,
@@ -220,7 +225,7 @@ export default function Favorites() {
   if (isLoading) {
     return (
       <View className="flex-1 items-center justify-center bg-warmwhite">
-        <ActivityIndicator size="large" color={colors.rose[400]} />
+        <ActivityIndicator size="large" color={theme.primary} />
       </View>
     );
   }
@@ -258,7 +263,7 @@ export default function Favorites() {
             <RefreshControl
               refreshing={isRefetching}
               onRefresh={refetch}
-              tintColor={colors.rose[400]}
+              tintColor={theme.primary}
             />
           }
         />

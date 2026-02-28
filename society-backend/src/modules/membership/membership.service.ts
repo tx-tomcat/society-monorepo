@@ -22,7 +22,7 @@ const TIER_ORDER: Record<MembershipTier, number> = {
 const FREE_DEFAULTS: MembershipBenefitsResponse = {
   tier: null,
   forYouLimit: 1,
-  maxPendingBookings: 3,
+  maxPendingBookings: 1,
   freeCancellationHours: 24,
   priorityBooking: false,
   nearbySearch: false,

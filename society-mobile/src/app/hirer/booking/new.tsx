@@ -36,6 +36,7 @@ import {
 import { getPhotoUrl } from '@/lib/api/services/companions.service';
 import { useAllOccasions, useCompanion, useCompanionAvailability } from '@/lib/hooks';
 import { useOccasionsStore } from '@/lib/stores';
+import { useTierTheme } from '@/lib/theme';
 import { formatVND } from '@/lib/utils';
 
 const DURATIONS = [
@@ -64,6 +65,7 @@ export default function BookingFormScreen() {
   const router = useRouter();
   const { companionId } = useLocalSearchParams<{ companionId: string }>();
   const { t } = useTranslation();
+  const theme = useTierTheme();
 
   const [selectedOccasion, setSelectedOccasion] = React.useState<string | null>(
     null
@@ -218,7 +220,7 @@ export default function BookingFormScreen() {
     return (
       <View className="flex-1 items-center justify-center bg-warmwhite">
         <FocusAwareStatusBar />
-        <ActivityIndicator color={colors.rose[400]} size="large" />
+        <ActivityIndicator color={theme.primary} size="large" />
         <Text className="mt-4 text-text-secondary">{t('common.loading')}</Text>
       </View>
     );
@@ -307,7 +309,7 @@ export default function BookingFormScreen() {
               </View>
             </View>
             <View className="items-end">
-              <Text className="font-urbanist-bold text-lg text-rose-400">
+              <Text className="font-urbanist-bold text-lg" style={{ color: theme.primary }}>
                 {formatVND(companion.hourlyRate)}
               </Text>
               <Text className="text-xs text-text-tertiary">
@@ -340,7 +342,7 @@ export default function BookingFormScreen() {
             className="pt-6"
           >
             <View className="mb-3 flex-row items-center gap-2 px-4">
-              <Calendar color={colors.rose[400]} width={20} height={20} />
+              <Calendar color={theme.primary} width={20} height={20} />
               <Text className="font-urbanist-semibold text-base text-midnight">
                 {t('hirer.booking.select_date')} *
               </Text>
@@ -356,8 +358,9 @@ export default function BookingFormScreen() {
                   <Pressable
                     key={date.id}
                     onPress={() => setSelectedDate(date.id)}
-                    className={`mr-3 items-center rounded-xl px-5 py-3 ${isSelected ? 'bg-rose-400' : 'bg-white'
+                    className={`mr-3 items-center rounded-xl px-5 py-3 ${!isSelected ? 'bg-white' : ''
                       }`}
+                    style={isSelected ? { backgroundColor: theme.primary } : undefined}
                   >
                     <Text
                       className={`text-xs uppercase ${isSelected ? 'text-white/80' : 'text-text-tertiary'
@@ -389,7 +392,7 @@ export default function BookingFormScreen() {
             className="px-4 pt-6"
           >
             <View className="mb-3 flex-row items-center gap-2">
-              <Clock color={colors.rose[400]} width={20} height={20} />
+              <Clock color={theme.primary} width={20} height={20} />
               <Text className="font-urbanist-semibold text-base text-midnight">
                 {t('hirer.booking.select_time')} *
               </Text>
@@ -462,7 +465,7 @@ export default function BookingFormScreen() {
             className="px-4 pt-6"
           >
             <View className="mb-3 flex-row items-center gap-2">
-              <MapPin color={colors.rose[400]} width={20} height={20} />
+              <MapPin color={theme.primary} width={20} height={20} />
               <Text className="font-urbanist-semibold text-base text-midnight">
                 {t('hirer.booking.location')} *
               </Text>
@@ -535,7 +538,7 @@ export default function BookingFormScreen() {
                 <Text className="font-urbanist-semibold text-base text-midnight">
                   {t('hirer.booking.estimated_total')}
                 </Text>
-                <Text className="font-urbanist-bold text-xl text-rose-400">
+                <Text className="font-urbanist-bold text-xl" style={{ color: theme.primary }}>
                   {formatVND(totalAmount)}
                 </Text>
               </View>

@@ -4,13 +4,13 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { colors, Text, View } from '@/components/ui';
+import { Crown, Star, Zap } from '@/components/ui/icons';
 import type { PaymentData } from '@/components/ui/qr-payment-view';
 import {
   QRPaymentView,
   transformAccountInfo,
 } from '@/components/ui/qr-payment-view';
 import { showSuccessMessage } from '@/components/ui/utils';
-import { Crown, Star, Zap } from '@/components/ui/icons';
 import type { MembershipTier } from '@/lib/api/services/membership.service';
 import { formatVND } from '@/lib/utils';
 
@@ -108,7 +108,7 @@ export default function MembershipPaymentScreen() {
         </View>
         <View className="flex-1">
           <Text className="font-urbanist-bold text-lg text-midnight">
-            {tier} {t('hirer.membership.membership')}
+            {t('hirer.membership.membership', { tier: t(`hirer.membership.${tier.toLowerCase()}`) })}
           </Text>
           <Text className="text-sm text-text-secondary">
             {t('hirer.membership.purchasing')}

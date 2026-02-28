@@ -182,7 +182,10 @@ export interface CompanionFilters {
   rating?: number;
   languages?: string[];
   gender?: string;
+  minAge?: number;
+  maxAge?: number;
   verified?: boolean;
+  province?: string;
   page?: number;
   limit?: number;
   sort?: 'rating' | 'price_asc' | 'price_desc' | 'popular' | 'distance';

@@ -27,6 +27,7 @@ import {
   useMessages,
   useSendMessage,
 } from '@/lib/hooks';
+import { useTierTheme } from '@/lib/theme';
 
 type MessageItem = {
   id: string;
@@ -43,6 +44,7 @@ function MessageBubble({
   message: MessageItem;
   isOwnMessage: boolean;
 }) {
+  const theme = useTierTheme();
   const formatTime = React.useCallback((dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleTimeString('en-US', {
@@ -61,8 +63,9 @@ function MessageBubble({
     >
       <View
         className={`rounded-2xl px-4 py-3 ${
-          isOwnMessage ? 'rounded-br-sm bg-rose-400' : 'rounded-bl-sm bg-white'
+          isOwnMessage ? 'rounded-br-sm' : 'rounded-bl-sm bg-white'
         }`}
+        style={isOwnMessage ? { backgroundColor: theme.primary } : undefined}
       >
         <Text className={isOwnMessage ? 'text-white' : 'text-midnight'}>
           {message.content}
@@ -82,6 +85,7 @@ function MessageBubble({
 export default function ChatConversation() {
   const router = useRouter();
   const { t } = useTranslation();
+  const theme = useTierTheme();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { data: currentUser } = useCurrentUser();
   const userId = currentUser?.user?.id;
@@ -181,7 +185,7 @@ export default function ChatConversation() {
   if (isLoading) {
     return (
       <View className="flex-1 items-center justify-center bg-warmwhite">
-        <ActivityIndicator size="large" color={colors.rose[400]} />
+        <ActivityIndicator size="large" color={theme.primary} />
       </View>
     );
   }
@@ -251,7 +255,7 @@ export default function ChatConversation() {
           </View>
 
           <Pressable onPress={handleCall} className="p-2">
-            <Phone color={colors.rose[400]} width={22} height={22} />
+            <Phone color={theme.primary} width={22} height={22} />
           </Pressable>
           <Pressable onPress={handleMore} className="p-2">
             <MoreVertical
@@ -279,7 +283,7 @@ export default function ChatConversation() {
             isFetchingNextPage ? (
               <ActivityIndicator
                 size="small"
-                color={colors.rose[400]}
+                color={theme.primary}
                 style={{ marginVertical: 10 }}
               />
             ) : null
@@ -315,8 +319,9 @@ export default function ChatConversation() {
               onPress={handleSend}
               disabled={!messageText.trim() || sendMessage.isPending}
               className={`size-12 items-center justify-center rounded-full ${
-                messageText.trim() ? 'bg-rose-400' : 'bg-gray-200'
+                !messageText.trim() ? 'bg-gray-200' : ''
               }`}
+              style={messageText.trim() ? { backgroundColor: theme.primary } : undefined}
             >
               {sendMessage.isPending ? (
                 <ActivityIndicator size="small" color="#FFFFFF" />

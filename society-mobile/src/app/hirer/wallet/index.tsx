@@ -31,6 +31,7 @@ import {
   PaymentRequestType,
 } from '@/lib/api/enums';
 import { useWalletBalance, useWalletTransactions } from '@/lib/hooks';
+import { useTierTheme } from '@/lib/theme';
 import { formatVND } from '@/lib/utils';
 
 // Move outside component to avoid recreation on each render
@@ -77,6 +78,7 @@ const STATUS_COLORS: Record<PaymentRequestStatus, string> = {
 export default function WalletScreen() {
   const router = useRouter();
   const { t } = useTranslation();
+  const theme = useTierTheme();
   const [isRefreshing, setIsRefreshing] = React.useState(false);
 
   const {
@@ -196,7 +198,8 @@ export default function WalletScreen() {
           <Pressable
             onPress={handleTopup}
             testID="topup-button"
-            className="mt-6 flex-row items-center justify-center gap-2 rounded-xl bg-rose-400 py-4"
+            className="mt-6 flex-row items-center justify-center gap-2 rounded-xl py-4"
+            style={{ backgroundColor: theme.primary }}
           >
             <Plus color="#FFFFFF" width={20} height={20} />
             <Text className="font-semibold text-white">

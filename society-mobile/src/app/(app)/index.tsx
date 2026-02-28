@@ -33,6 +33,7 @@ import { getPrimaryPhotoUrl } from '@/lib/api/services/companions.service';
 import { favoritesService } from '@/lib/api/services/favorites.service';
 import { useCurrentUser } from '@/lib/hooks';
 import { useActiveMembership } from '@/lib/hooks/use-membership';
+import { useTierTheme } from '@/lib/theme';
 
 type UpcomingBooking = Booking & {
   displayStatus: 'upcoming' | 'active' | 'pending';
@@ -58,10 +59,10 @@ const BookingCard = React.memo(function BookingCard({
     const dateStr = isToday
       ? t('common.today')
       : startTime.toLocaleDateString('en-US', {
-          weekday: 'short',
-          month: 'short',
-          day: 'numeric',
-        });
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric',
+      });
 
     const timeStr = `${startTime.toLocaleTimeString('en-US', {
       hour: 'numeric',
@@ -140,6 +141,7 @@ const BookingCard = React.memo(function BookingCard({
 export default function HirerDashboard() {
   const router = useRouter();
   const { t } = useTranslation();
+  const theme = useTierTheme();
 
   const [isRefreshing, setIsRefreshing] = React.useState(false);
   const [upcomingBookings, setUpcomingBookings] = React.useState<
@@ -278,8 +280,8 @@ export default function HirerDashboard() {
         labelKey: 'hirer.dashboard.stats.upcoming',
         value: String(upcomingCount),
         icon: Calendar,
-        color: colors.rose[400],
-        bgColor: `${colors.rose[400]}20`,
+        color: theme.primary,
+        bgColor: `${theme.primary}20`,
       },
       {
         labelKey: 'hirer.dashboard.stats.favorites',
@@ -296,7 +298,7 @@ export default function HirerDashboard() {
         bgColor: `${colors.teal[400]}20`,
       },
     ],
-    [upcomingCount, favoritesCount, completedBookingsCount]
+    [upcomingCount, favoritesCount, completedBookingsCount, theme.primary]
   );
 
   return (
@@ -306,7 +308,7 @@ export default function HirerDashboard() {
       {/* Header */}
       <SafeAreaView edges={['top']}>
         <View className="flex-row items-center gap-4 px-4 py-3">
-          <HiremeLogo color={colors.rose[400]} width={32} height={32} />
+          <HiremeLogo color={theme.primary} width={32} height={32} />
           <View className="flex-1">
             <Text className="text-sm text-text-tertiary">
               {t('hirer.dashboard.greeting')}
@@ -380,7 +382,8 @@ export default function HirerDashboard() {
           <Pressable
             onPress={handleBrowseCompanions}
             testID="browse-card"
-            className="flex-row items-center justify-between rounded-2xl bg-rose-400 p-4"
+            className="flex-row items-center justify-between rounded-2xl p-4"
+            style={{ backgroundColor: theme.primary }}
           >
             <View className="flex-row items-center gap-3">
               <View className="size-12 items-center justify-center rounded-full bg-white/20">
@@ -413,12 +416,11 @@ export default function HirerDashboard() {
           <Pressable
             onPress={handleMembershipPress}
             testID="membership-banner"
-            className={`flex-row items-center justify-between rounded-2xl p-4 ${
-              activeMembership?.status === 'ACTIVE'
-                ? 'bg-amber-500'
-                : 'bg-gradient-to-r from-amber-400 to-yellow-500'
-            }`}
-            style={{ backgroundColor: activeMembership?.status === 'ACTIVE' ? colors.yellow[500] : '#F59E0B' }}
+            className={`flex-row items-center justify-between rounded-2xl p-4 ${activeMembership?.status === 'ACTIVE'
+              ? 'bg-amber-500'
+              : 'bg-gradient-to-r from-amber-400 to-yellow-500'
+              }`}
+            style={{ backgroundColor: activeMembership?.status === 'ACTIVE' ? colors.yellow[600] : '#F59E0B' }}
           >
             <View className="flex-row items-center gap-3">
               <View className="size-12 items-center justify-center rounded-full bg-white/20">
@@ -428,7 +430,7 @@ export default function HirerDashboard() {
                 {activeMembership?.status === 'ACTIVE' ? (
                   <>
                     <Text className="text-sm text-white/80">
-                      {activeMembership.tier} {t('hirer.dashboard.member')}
+                      {t('hirer.dashboard.member')} {activeMembership.tier}
                     </Text>
                     <Text className="font-urbanist-bold text-lg text-white">
                       {t('hirer.dashboard.manage_membership')}
@@ -474,7 +476,7 @@ export default function HirerDashboard() {
               onPress={handleViewAllBookings}
               testID="view-all-bookings"
             >
-              <Text className="text-sm font-semibold text-rose-400">
+              <Text className="text-sm font-semibold" style={{ color: theme.primary }}>
                 {t('common.view_all')}
               </Text>
             </Pressable>
@@ -493,7 +495,7 @@ export default function HirerDashboard() {
             </View>
           ) : (
             <View className="items-center rounded-2xl bg-white py-12">
-              <Calendar color={colors.rose[400]} width={48} height={48} />
+              <Calendar color={theme.primary} width={48} height={48} />
               <Text className="mt-3 text-lg font-semibold text-midnight">
                 {t('hirer.dashboard.no_upcoming_bookings')}
               </Text>
@@ -502,7 +504,8 @@ export default function HirerDashboard() {
               </Text>
               <Pressable
                 onPress={handleBrowseCompanions}
-                className="mt-4 rounded-full bg-rose-400 px-6 py-2"
+                className="mt-4 rounded-full px-6 py-2"
+                style={{ backgroundColor: theme.primary }}
               >
                 <Text className="font-semibold text-white">
                   {t('hirer.dashboard.browse_now')}
@@ -531,8 +534,8 @@ export default function HirerDashboard() {
               testID="quick-action-browse"
               className="flex-1 items-center rounded-2xl bg-white p-4"
             >
-              <View className="mb-2 size-12 items-center justify-center rounded-full bg-rose-400/10">
-                <Search color={colors.rose[400]} width={24} height={24} />
+              <View className="mb-2 size-12 items-center justify-center rounded-full" style={{ backgroundColor: theme.primary + '1A' }}>
+                <Search color={theme.primary} width={24} height={24} />
               </View>
               <Text className="text-sm font-medium text-midnight">
                 {t('hirer.dashboard.actions.browse')}

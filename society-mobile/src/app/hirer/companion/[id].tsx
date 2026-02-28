@@ -49,6 +49,7 @@ import {
   useIsFavorite,
   useToggleFavorite,
 } from '@/lib/hooks';
+import { useTierTheme } from '@/lib/theme';
 import { formatVND, getLanguageName } from '@/lib/utils';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -200,6 +201,7 @@ export default function CompanionProfileScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { t } = useTranslation();
 
+  const theme = useTierTheme();
   const [currentImageIndex, setCurrentImageIndex] = React.useState(0);
   const [selectedDate, setSelectedDate] = React.useState<string | null>(null);
 
@@ -347,7 +349,7 @@ export default function CompanionProfileScreen() {
     return (
       <View className="flex-1 items-center justify-center bg-warmwhite">
         <FocusAwareStatusBar style="dark" />
-        <ActivityIndicator color={colors.rose[400]} size="large" />
+        <ActivityIndicator color={theme.primary} size="large" />
         <Text className="mt-4 text-text-secondary">{t('common.loading')}</Text>
       </View>
     );
@@ -459,7 +461,7 @@ export default function CompanionProfileScreen() {
 
             {/* Price */}
             <View className="mt-4 flex-row items-baseline gap-1">
-              <Text className="font-urbanist-bold text-2xl text-rose-400">
+              <Text className="font-urbanist-bold text-2xl" style={{ color: theme.primary }}>
                 {formatVND(companion.hourlyRate)}
               </Text>
               <Text className="text-sm text-text-tertiary">
@@ -512,8 +514,8 @@ export default function CompanionProfileScreen() {
                     key={specialty}
                     className="flex-row items-center gap-2 rounded-full bg-softpink px-4 py-2"
                   >
-                    <Icon color={colors.rose[400]} width={16} height={16} />
-                    <Text className="text-sm font-medium capitalize text-rose-500">
+                    <Icon color={theme.primary} width={16} height={16} />
+                    <Text className="text-sm font-medium capitalize" style={{ color: theme.primary }}>
                       {t(`occasions.${specialty}`)}
                     </Text>
                   </View>
@@ -567,7 +569,7 @@ export default function CompanionProfileScreen() {
                 </Text>
               </View>
               <Pressable onPress={handleViewAllReviews}>
-                <Text className="text-sm font-semibold text-rose-400">
+                <Text className="text-sm font-semibold" style={{ color: theme.primary }}>
                   {t('hirer.companion.see_all')}
                 </Text>
               </Pressable>
@@ -622,10 +624,10 @@ export default function CompanionProfileScreen() {
               className="size-10 items-center justify-center rounded-full bg-black/30"
             >
               <Heart
-                color={isFavorite ? colors.rose[400] : '#FFFFFF'}
+                color={isFavorite ? theme.primary : '#FFFFFF'}
                 width={20}
                 height={20}
-                fill={isFavorite ? colors.rose[400] : 'none'}
+                fill={isFavorite ? theme.primary : 'none'}
               />
             </Pressable>
           </View>

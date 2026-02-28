@@ -24,6 +24,7 @@ import { colors, Image, Text } from '@/components/ui';
 import { Badge } from '@/components/ui/badge';
 import {
   Calendar,
+  Crown,
   Heart,
   MessageCircle,
   OnlineDot,
@@ -31,7 +32,11 @@ import {
   Star,
 } from '@/components/ui/icons';
 import type { ScoredCompanion } from '@/lib/api/services/recommendations.service';
+import { useMembershipBenefits } from '@/lib/hooks';
+import { useTierTheme } from '@/lib/theme';
 import { formatLanguages, formatVND, getOccasionName } from '@/lib/utils';
+
+const MAX_PHOTO_LIMIT = 6; // Platinum tier limit
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const CARD_WIDTH = SCREEN_WIDTH - 32;
@@ -73,16 +78,20 @@ export function CompanionCard({
   onCardPress?: (companionId: string) => void;
 }) {
 
-  console.log('recommendation', recommendation);
   const { t, i18n } = useTranslation();
   const router = useRouter();
+  const theme = useTierTheme();
+  const { data: benefits } = useMembershipBenefits();
+
+  const forYouLimit = benefits?.forYouLimit ?? 1;
+  const isPhotoLimited = forYouLimit < MAX_PHOTO_LIMIT;
 
   // Use embedded companion data from recommendation (no API call needed!)
   const companion = recommendation.companion;
 
   const [currentPhotoIndex, setCurrentPhotoIndex] = React.useState(0);
 
-  // Get photos array from embedded data
+  // Get photos array from embedded data (already trimmed by backend)
   const photos = React.useMemo(() => {
     if (!companion?.photos?.length) {
       return companion?.avatar
@@ -91,6 +100,8 @@ export function CompanionCard({
     }
     return companion.photos.map((p) => p.url);
   }, [companion]);
+
+  const isOnLastPhoto = currentPhotoIndex === photos.length - 1 && photos.length > 1;
 
   const handleViewProfile = React.useCallback(() => {
     if (onCardPress) {
@@ -105,6 +116,10 @@ export function CompanionCard({
       onBookPress(recommendation.companionId);
     }
   }, [onBookPress, recommendation.companionId]);
+
+  const handleUpgrade = React.useCallback(() => {
+    router.push('/hirer/membership' as Href);
+  }, [router]);
 
   // Handle photo tap to navigate between photos
   const handleLeftTap = React.useCallback(() => {
@@ -168,6 +183,25 @@ export function CompanionCard({
             <Pressable className="flex-1" onPress={handleRightTap} />
           </RNView>
 
+          {/* Photo upgrade overlay — shown on last photo when tier-limited */}
+          {isOnLastPhoto && isPhotoLimited && (
+            <Pressable
+              onPress={handleUpgrade}
+              className="absolute inset-0 items-center justify-center"
+              style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
+            >
+              <RNView className="items-center gap-3 rounded-2xl bg-black/60 px-6 py-5">
+                <Crown color="#FFD93D" width={32} height={32} />
+                <Text className="font-urbanist-bold text-base text-white">
+                  {t('hirer.companion_card.upgrade_photos')}
+                </Text>
+                <Text className="text-center text-sm text-white/70">
+                  {t('hirer.companion_card.upgrade_photos_subtitle')}
+                </Text>
+              </RNView>
+            </Pressable>
+          )}
+
           {/* Photo indicator */}
           <PhotoIndicator total={photos.length} current={currentPhotoIndex} />
 
@@ -199,10 +233,10 @@ export function CompanionCard({
             {/* Recommendation reason */}
             <RNView className="mb-3 flex-row items-center gap-1.5 self-start rounded-full bg-white/15 px-3 py-1.5">
               <Heart
-                color={colors.rose[400]}
+                color={theme.primary}
                 width={12}
                 height={12}
-                fill={colors.rose[400]}
+                fill={theme.primary}
               />
               <Text className="font-urbanist-medium text-xs text-white">
                 {recommendation.reason}
@@ -263,7 +297,7 @@ export function CompanionCard({
               <Text className="mb-0.5 font-urbanist text-xs text-white/70">
                 {t('hirer.companion_card.starting_from')}
               </Text>
-              <Text className="font-urbanist-bold text-2xl text-rose-300">
+              <Text className="font-urbanist-bold text-2xl" style={{ color: theme.secondary }}>
                 {formatVND(companion.hourlyRate)}
                 <Text className="font-urbanist-medium text-base text-white/70">
                   /hr
@@ -275,7 +309,7 @@ export function CompanionCard({
             <RNView className="flex-row items-center gap-3">
               <Pressable onPress={handleBookNow} className="flex-1 overflow-hidden rounded-2xl">
                 <LinearGradient
-                  colors={[colors.rose[400], colors.coral[400]]}
+                  colors={theme.gradient}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 0 }}
                   style={{
@@ -327,6 +361,11 @@ export function SwipeableCompanionCard({
 }) {
   const { t, i18n } = useTranslation();
   const router = useRouter();
+  const theme = useTierTheme();
+  const { data: benefits } = useMembershipBenefits();
+
+  const forYouLimit = benefits?.forYouLimit ?? 1;
+  const isPhotoLimited = forYouLimit < MAX_PHOTO_LIMIT;
 
   // Use embedded companion data from recommendation (no API call needed!)
   const companion = recommendation.companion;
@@ -339,7 +378,7 @@ export function SwipeableCompanionCard({
   const likeOpacity = useSharedValue(0);
   const nopeOpacity = useSharedValue(0);
 
-  // Get photos array from embedded data
+  // Get photos array from embedded data (already trimmed by backend)
   const photos = React.useMemo(() => {
     if (!companion?.photos?.length) {
       return companion?.avatar
@@ -348,6 +387,12 @@ export function SwipeableCompanionCard({
     }
     return companion.photos.map((p) => p.url);
   }, [companion]);
+
+  const isOnLastPhoto = currentPhotoIndex === photos.length - 1 && photos.length > 1;
+
+  const handleUpgrade = React.useCallback(() => {
+    router.push('/hirer/membership' as Href);
+  }, [router]);
 
   // Handle photo tap to navigate between photos
   const handlePhotoTap = React.useCallback(
@@ -511,6 +556,25 @@ export function SwipeableCompanionCard({
               <RNView className="flex-1" />
             </RNView>
 
+            {/* Photo upgrade overlay — shown on last photo when tier-limited */}
+            {isOnLastPhoto && isPhotoLimited && (
+              <Pressable
+                onPress={handleUpgrade}
+                className="absolute inset-0 items-center justify-center"
+                style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
+              >
+                <RNView className="items-center gap-3 rounded-2xl bg-black/60 px-6 py-5">
+                  <Crown color="#FFD93D" width={32} height={32} />
+                  <Text className="font-urbanist-bold text-base text-white">
+                    {t('hirer.companion_card.upgrade_photos')}
+                  </Text>
+                  <Text className="text-center text-sm text-white/70">
+                    {t('hirer.companion_card.upgrade_photos_subtitle')}
+                  </Text>
+                </RNView>
+              </Pressable>
+            )}
+
             {/* Photo indicator */}
             <PhotoIndicator total={photos.length} current={currentPhotoIndex} />
 
@@ -626,7 +690,7 @@ export function SwipeableCompanionCard({
                 <Text className="mb-0.5 font-urbanist text-xs text-white/70">
                   {t('hirer.companion_card.starting_from')}
                 </Text>
-                <Text className="font-urbanist-bold text-2xl text-rose-300">
+                <Text className="font-urbanist-bold text-2xl" style={{ color: theme.secondary }}>
                   {formatVND(companion.hourlyRate)}
                   <Text className="font-urbanist-medium text-base text-white/70">
                     /hr
@@ -638,7 +702,7 @@ export function SwipeableCompanionCard({
               <RNView className="flex-row items-center gap-3">
                 <Pressable onPress={handleBookNow} className="flex-1 overflow-hidden rounded-2xl">
                   <LinearGradient
-                    colors={[colors.rose[400], colors.coral[400]]}
+                    colors={theme.gradient}
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 0 }}
                     style={{

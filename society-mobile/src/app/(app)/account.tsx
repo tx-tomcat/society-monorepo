@@ -30,6 +30,7 @@ import {
     User
 } from '@/components/ui/icons';
 import { useAuth, useCurrentUser, useUnreadNotificationCount } from '@/lib/hooks';
+import { useTierTheme } from '@/lib/theme';
 
 type SettingsItem = {
     id: string;
@@ -37,6 +38,7 @@ type SettingsItem = {
     icon: React.ComponentType<{ color: string; width: number; height: number }>;
     iconBg: string;
     iconColor: string;
+    iconBgColor?: string;
     route?: string;
     action?: 'logout';
     badge?: string;
@@ -161,7 +163,8 @@ function SettingsMenuItem({
             className="mb-2 flex-row items-center gap-4 rounded-xl bg-white p-4"
         >
             <View
-                className={`size-11 items-center justify-center rounded-xl ${item.iconBg}`}
+                className={`size-11 items-center justify-center rounded-xl ${item.iconBgColor ? '' : item.iconBg}`}
+                style={item.iconBgColor ? { backgroundColor: item.iconBgColor } : undefined}
             >
                 <item.icon color={item.iconColor} width={22} height={22} />
             </View>
@@ -186,8 +189,28 @@ export default function HirerSettingsScreen() {
     const { signOut } = useAuth();
     const { data: userData } = useCurrentUser();
     const { data: unreadData } = useUnreadNotificationCount();
+    const theme = useTierTheme();
     const user = userData?.user;
     const unreadCount = unreadData?.count ?? 0;
+
+    // Theme rose-colored settings items dynamically
+    const themedSections = React.useMemo(() =>
+        SETTINGS_SECTIONS.map(section => ({
+            ...section,
+            items: section.items.map(item => {
+                if (item.iconColor === colors.rose[400]) {
+                    return {
+                        ...item,
+                        iconColor: theme.primary,
+                        iconBgColor: theme.primary + '1A',
+                        iconBg: '',
+                    };
+                }
+                return item;
+            }),
+        })),
+        [theme]
+    );
 
     const handleBack = React.useCallback(() => {
         router.back();
@@ -244,7 +267,7 @@ export default function HirerSettingsScreen() {
                 >
                     <Bell color={colors.midnight.DEFAULT} width={24} height={24} />
                     {unreadCount > 0 && (
-                        <View className="absolute -right-1 -top-1 min-w-[18px] items-center justify-center rounded-full bg-rose-400 px-1">
+                        <View className="absolute -right-1 -top-1 min-w-[18px] items-center justify-center rounded-full px-1" style={{ backgroundColor: theme.primary }}>
                             <Text className="text-[10px] font-bold text-white">
                                 {unreadCount > 99 ? '99+' : unreadCount}
                             </Text>
@@ -269,8 +292,8 @@ export default function HirerSettingsScreen() {
                                 contentFit="cover"
                             />
                         ) : (
-                            <View className="size-20 items-center justify-center rounded-full bg-rose-100">
-                                <User color={colors.rose[400]} width={32} height={32} />
+                            <View className="size-20 items-center justify-center rounded-full" style={{ backgroundColor: theme.primary + '1A' }}>
+                                <User color={theme.primary} width={32} height={32} />
                             </View>
                         )}
                         <View className="flex-1">
@@ -290,17 +313,18 @@ export default function HirerSettingsScreen() {
                     </View>
                     <Pressable
                         onPress={() => router.push('/hirer/profile/edit' as Href)}
-                        className="mt-4 flex-row items-center justify-center gap-2 rounded-xl bg-rose-400/10 py-3"
+                        className="mt-4 flex-row items-center justify-center gap-2 rounded-xl py-3"
+                        style={{ backgroundColor: theme.primary + '1A' }}
                     >
-                        <Edit color={colors.rose[400]} width={18} height={18} />
-                        <Text className="font-semibold text-rose-400">
+                        <Edit color={theme.primary} width={18} height={18} />
+                        <Text className="font-semibold" style={{ color: theme.primary }}>
                             {t('hirer.settings.view_profile')}
                         </Text>
                     </Pressable>
                 </MotiView>
 
                 {/* Settings Sections */}
-                {SETTINGS_SECTIONS.map((section, sectionIndex) => (
+                {themedSections.map((section, sectionIndex) => (
                     <MotiView
                         key={section.titleKey || `section-${sectionIndex}`}
                         from={{ opacity: 0, translateY: 10 }}

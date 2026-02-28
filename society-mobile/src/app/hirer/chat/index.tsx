@@ -17,6 +17,7 @@ import {
 } from '@/components/ui';
 import { ArrowLeft, MessageCircle, Search } from '@/components/ui/icons';
 import { useConversations } from '@/lib/hooks';
+import { useTierTheme } from '@/lib/theme';
 
 type ConversationItem = {
   id: string;
@@ -41,6 +42,7 @@ const ConversationCard = React.memo(function ConversationCard({
   onPress: () => void;
 }) {
   const { t } = useTranslation();
+  const theme = useTierTheme();
 
   const formatTime = React.useCallback(
     (dateString?: string) => {
@@ -116,7 +118,7 @@ const ConversationCard = React.memo(function ConversationCard({
             {conversation.lastMessage?.content || t('hirer.chat.no_messages')}
           </Text>
           {conversation.unreadCount > 0 && (
-            <View className="ml-2 size-5 items-center justify-center rounded-full bg-rose-400">
+            <View className="ml-2 size-5 items-center justify-center rounded-full" style={{ backgroundColor: theme.primary }}>
               <Text className="text-xs font-bold text-white">
                 {conversation.unreadCount > 9 ? '9+' : conversation.unreadCount}
               </Text>
@@ -130,6 +132,7 @@ const ConversationCard = React.memo(function ConversationCard({
 
 function EmptyState() {
   const { t } = useTranslation();
+  const theme = useTierTheme();
 
   return (
     <MotiView
@@ -139,7 +142,7 @@ function EmptyState() {
       className="flex-1 items-center justify-center p-8"
     >
       <View className="mb-4 size-20 items-center justify-center rounded-full bg-softpink">
-        <MessageCircle color={colors.rose[400]} width={40} height={40} />
+        <MessageCircle color={theme.primary} width={40} height={40} />
       </View>
       <Text className="mb-2 text-center font-urbanist-bold text-lg text-midnight">
         {t('hirer.chat.empty_title')}
@@ -154,6 +157,7 @@ function EmptyState() {
 export default function ChatList() {
   const router = useRouter();
   const { t } = useTranslation();
+  const theme = useTierTheme();
 
   // API hooks
   const {
@@ -203,7 +207,7 @@ export default function ChatList() {
   if (isLoading) {
     return (
       <View className="flex-1 items-center justify-center bg-warmwhite">
-        <ActivityIndicator size="large" color={colors.rose[400]} />
+        <ActivityIndicator size="large" color={theme.primary} />
       </View>
     );
   }
@@ -238,7 +242,7 @@ export default function ChatList() {
             <RefreshControl
               refreshing={isRefetching}
               onRefresh={refetch}
-              tintColor={colors.rose[400]}
+              tintColor={theme.primary}
             />
           }
           contentContainerStyle={{ flexGrow: 1 }}

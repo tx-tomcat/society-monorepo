@@ -7,6 +7,7 @@ import Svg, { Circle, Path, Rect } from 'react-native-svg';
 
 import { SafeAreaView, Text, View } from '@/components/ui';
 import colors from '@/components/ui/colors';
+import { useTierTheme } from '@/lib/theme';
 
 // Tab Icon Components
 
@@ -263,7 +264,8 @@ export function TabBar({
 
 // Pre-configured tab bars for each role (React Navigation style - legacy)
 export function HirerTabBar(props: BottomTabBarProps) {
-  return <TabBar {...props} accentColor={colors.rose[400]} />;
+  const theme = useTierTheme();
+  return <TabBar {...props} accentColor={theme.primary} />;
 }
 
 export function CompanionTabBar(props: BottomTabBarProps) {

@@ -349,7 +349,11 @@ export class RecommendationsService {
       };
     });
 
-    // Sort by score descending so boosted profiles appear first
-    return scored.sort((a, b) => b.score - a.score);
+    // Partition: boosted profiles always on top, then sort by score within each group
+    const boosted = scored.filter((s) => boostMultipliers.has(s.companionId));
+    const nonBoosted = scored.filter((s) => !boostMultipliers.has(s.companionId));
+    boosted.sort((a, b) => b.score - a.score);
+    nonBoosted.sort((a, b) => b.score - a.score);
+    return [...boosted, ...nonBoosted];
   }
 }

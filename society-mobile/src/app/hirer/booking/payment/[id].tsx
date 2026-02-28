@@ -18,11 +18,13 @@ import { QRPaymentView, transformAccountInfo } from '@/components/ui/qr-payment-
 import { showErrorMessage, showSuccessMessage } from '@/components/ui/utils';
 import { ArrowLeft, ShieldCheck } from '@/components/ui/icons';
 import { useBooking, useCreateBookingPaymentRequest } from '@/lib/hooks';
+import { useTierTheme } from '@/lib/theme';
 import { formatVND } from '@/lib/utils';
 
 export default function BookingPaymentScreen() {
   const router = useRouter();
   const { t } = useTranslation();
+  const theme = useTierTheme();
   const { id: bookingId } = useLocalSearchParams<{ id: string }>();
 
   const [paymentData, setPaymentData] = React.useState<PaymentData | null>(
@@ -88,7 +90,7 @@ export default function BookingPaymentScreen() {
   if (isInitializing || isBookingLoading) {
     return (
       <View className="flex-1 items-center justify-center bg-warmwhite">
-        <ActivityIndicator size="large" color={colors.rose[400]} />
+        <ActivityIndicator size="large" color={theme.primary} />
         <Text className="mt-4 text-text-secondary">
           {t('hirer.booking_payment.initializing')}
         </Text>
@@ -167,7 +169,7 @@ export default function BookingPaymentScreen() {
           <Text className="text-text-secondary">
             {t('hirer.booking_payment.total_amount')}
           </Text>
-          <Text className="font-urbanist-bold text-xl text-rose-400">
+          <Text className="font-urbanist-bold text-xl" style={{ color: theme.primary }}>
             {formatVND(bookingData.totalPrice, {
               symbolPosition: 'suffix',
             })}

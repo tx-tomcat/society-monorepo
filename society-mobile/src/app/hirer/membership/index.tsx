@@ -117,44 +117,44 @@ const TIER_ORDER: Record<MembershipTier, number> = {
 
 type BenefitItem = {
   key: string;
-  labelKey: string;
+  label: string;
   getValue: (pricing: MembershipPricing) => string | boolean;
 };
 
 const BENEFIT_ITEMS: BenefitItem[] = [
   {
     key: 'forYou',
-    labelKey: 'hirer.membership.benefit_for_you',
+    label: 'For You Images',
     getValue: (p) => `${p.forYouLimit} images`,
   },
   {
     key: 'nearby',
-    labelKey: 'hirer.membership.benefit_nearby',
+    label: 'Nearby Search',
     getValue: (p) => p.nearbySearch,
   },
   {
     key: 'priority',
-    labelKey: 'hirer.membership.benefit_priority',
+    label: 'Priority Booking',
     getValue: (p) => p.priorityBooking,
   },
   {
     key: 'pending',
-    labelKey: 'hirer.membership.benefit_pending',
+    label: 'Pending Bookings',
     getValue: (p) => `${p.maxPendingBookings} bookings`,
   },
   {
     key: 'cancellation',
-    labelKey: 'hirer.membership.benefit_cancellation',
+    label: 'Free Cancellation',
     getValue: (p) => `${p.freeCancellationHours}h`,
   },
   {
     key: 'earlyAccess',
-    labelKey: 'hirer.membership.benefit_early_access',
+    label: 'Early Access',
     getValue: (p) => p.earlyAccess,
   },
   {
     key: 'support',
-    labelKey: 'hirer.membership.benefit_support',
+    label: 'Dedicated Support',
     getValue: (p) => p.dedicatedSupport,
   },
 ];
@@ -220,11 +220,10 @@ const PricingCard = React.memo(function PricingCard({
       <Pressable
         onPress={handlePress}
         disabled={isDisabled}
-        className={`relative mb-3 rounded-2xl border-2 p-4 ${
-          isSelected
-            ? `${theme.selectedBorderColor} ${theme.selectedBgColor}`
-            : `${theme.borderColor} bg-white`
-        } ${isDisabled ? 'opacity-50' : ''}`}
+        className={`relative mb-3 rounded-2xl border-2 p-4 ${isSelected
+          ? `${theme.selectedBorderColor} ${theme.selectedBgColor}`
+          : `${theme.borderColor} bg-white`
+          } ${isDisabled ? 'opacity-50' : ''}`}
       >
         {/* Popular badge for Gold tier */}
         {theme.popular && !isDisabled && (
@@ -283,12 +282,10 @@ const PricingCard = React.memo(function PricingCard({
           </View>
         </View>
 
-        {/* Description if available */}
-        {item.description && (
-          <Text className="mt-3 text-sm text-text-secondary">
-            {item.description}
-          </Text>
-        )}
+        {/* Description */}
+        <Text className="mt-3 text-sm text-text-secondary">
+          {t(`hirer.membership.description_${item.tier.toLowerCase()}`)}
+        </Text>
       </Pressable>
     </MotiView>
   );
@@ -365,10 +362,7 @@ export default function MembershipScreen() {
 
     Alert.alert(
       t('hirer.membership.confirm_title'),
-      `${t('hirer.membership.confirm_message', {
-        tier: tierPricing.name,
-        price: formatVND(tierPricing.price),
-      })}`,
+      `${t('hirer.membership.confirm_message')} ${tierPricing.name} - ${formatVND(tierPricing.price)}?`,
       [
         {
           text: t('common.cancel'),
@@ -553,9 +547,7 @@ export default function MembershipScreen() {
             className="mx-4 mb-4"
           >
             <Text className="font-urbanist-bold mb-3 text-lg text-midnight">
-              {t('hirer.membership.benefits_title', {
-                tier: selectedPricing.name,
-              })}
+              {`${selectedPricing.name} - ${t('hirer.membership.benefits_title')}`}
             </Text>
             <View className="rounded-2xl bg-white p-4">
               {BENEFIT_ITEMS.map((benefit, index) => {
@@ -566,16 +558,14 @@ export default function MembershipScreen() {
                 return (
                   <View
                     key={benefit.key}
-                    className={`flex-row items-center gap-3 ${
-                      index < BENEFIT_ITEMS.length - 1
-                        ? 'mb-3 border-b border-border-light pb-3'
-                        : ''
-                    }`}
+                    className={`flex-row items-center gap-3 ${index < BENEFIT_ITEMS.length - 1
+                      ? 'mb-3 border-b border-border-light pb-3'
+                      : ''
+                      }`}
                   >
                     <View
-                      className={`size-8 items-center justify-center rounded-full ${
-                        isIncluded ? 'bg-teal-400/10' : 'bg-neutral-100'
-                      }`}
+                      className={`size-8 items-center justify-center rounded-full ${isIncluded ? 'bg-teal-400/10' : 'bg-neutral-100'
+                        }`}
                     >
                       {benefit.key === 'nearby' ? (
                         <MapPin
@@ -609,32 +599,29 @@ export default function MembershipScreen() {
                       )}
                     </View>
                     <Text
-                      className={`flex-1 text-sm ${
-                        isIncluded
-                          ? 'text-midnight'
-                          : 'text-text-tertiary'
-                      }`}
+                      className={`flex-1 text-sm ${isIncluded
+                        ? 'text-midnight'
+                        : 'text-text-tertiary'
+                        }`}
                     >
-                      {t(benefit.labelKey)}
+                      {benefit.label}
                     </Text>
                     {typeof value === 'string' && (
                       <Text
-                        className={`text-sm font-semibold ${
-                          isIncluded
-                            ? 'text-teal-500'
-                            : 'text-text-tertiary'
-                        }`}
+                        className={`text-sm font-semibold ${isIncluded
+                          ? 'text-teal-500'
+                          : 'text-text-tertiary'
+                          }`}
                       >
                         {value}
                       </Text>
                     )}
                     {typeof value === 'boolean' && (
                       <Text
-                        className={`text-sm font-semibold ${
-                          value
-                            ? 'text-teal-500'
-                            : 'text-text-tertiary'
-                        }`}
+                        className={`text-sm font-semibold ${value
+                          ? 'text-teal-500'
+                          : 'text-text-tertiary'
+                          }`}
                       >
                         {value
                           ? t('common.included')
@@ -665,19 +652,18 @@ export default function MembershipScreen() {
                 const TierIcon = theme.icon;
                 const dateStr = item.createdAt
                   ? new Date(item.createdAt).toLocaleDateString('vi-VN', {
-                      day: 'numeric',
-                      month: 'short',
-                    })
+                    day: 'numeric',
+                    month: 'short',
+                  })
                   : '';
 
                 return (
                   <View
                     key={item.id}
-                    className={`flex-row items-center gap-3 ${
-                      index < Math.min(history.length, 5) - 1
-                        ? 'mb-3 border-b border-border-light pb-3'
-                        : ''
-                    }`}
+                    className={`flex-row items-center gap-3 ${index < Math.min(history.length, 5) - 1
+                      ? 'mb-3 border-b border-border-light pb-3'
+                      : ''
+                      }`}
                   >
                     <View
                       className={`size-10 items-center justify-center rounded-full ${theme.bgColor}`}
@@ -697,26 +683,24 @@ export default function MembershipScreen() {
                       </Text>
                     </View>
                     <View
-                      className={`rounded-lg px-2 py-1 ${
-                        item.status === 'ACTIVE'
-                          ? 'bg-teal-400/10'
-                          : item.status === 'EXPIRED'
-                            ? 'bg-text-tertiary/10'
-                            : item.status === 'CANCELLED'
-                              ? 'bg-danger-400/10'
-                              : 'bg-yellow-400/10'
-                      }`}
+                      className={`rounded-lg px-2 py-1 ${item.status === 'ACTIVE'
+                        ? 'bg-teal-400/10'
+                        : item.status === 'EXPIRED'
+                          ? 'bg-text-tertiary/10'
+                          : item.status === 'CANCELLED'
+                            ? 'bg-danger-400/10'
+                            : 'bg-yellow-400/10'
+                        }`}
                     >
                       <Text
-                        className={`text-xs font-medium ${
-                          item.status === 'ACTIVE'
-                            ? 'text-teal-400'
-                            : item.status === 'EXPIRED'
-                              ? 'text-text-tertiary'
-                              : item.status === 'CANCELLED'
-                                ? 'text-danger-400'
-                                : 'text-yellow-500'
-                        }`}
+                        className={`text-xs font-medium ${item.status === 'ACTIVE'
+                          ? 'text-teal-400'
+                          : item.status === 'EXPIRED'
+                            ? 'text-text-tertiary'
+                            : item.status === 'CANCELLED'
+                              ? 'text-danger-400'
+                              : 'text-yellow-500'
+                          }`}
                       >
                         {t(
                           `hirer.membership.status.${item.status.toLowerCase()}`
@@ -743,9 +727,7 @@ export default function MembershipScreen() {
                 className={`w-full ${purchaseTheme.buttonBgColor}`}
               >
                 <Text className="font-bold text-white">
-                  {t('hirer.membership.upgrade_to', {
-                    tier: selectedTier,
-                  })}
+                  {`${t('hirer.membership.upgrade_to')} ${selectedTier}`}
                 </Text>
               </Button>
             </View>
